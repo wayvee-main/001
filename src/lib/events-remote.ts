@@ -2,6 +2,7 @@
 // The bundle is the offline/first-paint fallback; the backend, when reachable,
 // is the fresher source (see DATA.md). Rows are merged by id — bundled events
 // missing from the backend survive, so a partial table can never blank the app.
+import { activeCity, BUNDLE_CITY, cityCacheKey } from '@/lib/city';
 import { EVENTS, type EventCategory, type EventSource, type ScoperEvent } from '@/lib/events';
 import { getStoredItem, setStoredItem } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
@@ -60,17 +61,35 @@ function rowToEvent(row: EventRow): ScoperEvent {
   };
 }
 
-let hydrated = false;
+// Which city EVENTS currently describes. Null means nothing has loaded yet.
+let hydratedCity: string | null = null;
+
+// The shipped calendar, captured before anything mutates EVENTS. Kept so that
+// returning to Oakland restores the curated listings the bundle provides even
+// with no network.
+const BUNDLED_EVENTS: Record<string, ScoperEvent> = { ...EVENTS };
+
+/** Makes EVENTS describe one city and nothing else.
+ *
+ * EVENTS is the bundled Oakland calendar, and backend rows merge into it by
+ * id. That merge is right for Oakland and wrong everywhere else: a guest in
+ * San Jose would be shown Oakland's curated listings as though they were
+ * local. So a city that is not the bundle's gets the bundle removed first,
+ * leaving only what the backend actually has for it. */
+function resetEventsForCity(city: string): void {
+  for (const id of Object.keys(EVENTS)) delete EVENTS[id];
+  if (city === BUNDLE_CITY) Object.assign(EVENTS, BUNDLED_EVENTS);
+}
 
 // Last-known-good snapshot for offline cold launches — same fallback pattern
 // as places.ts/viator.ts. The static bundle in events.ts is already a
 // same-day-ish fallback, but a cached backend snapshot (fetched some earlier
 // session, before the device went offline) is typically fresher than it, so
 // it's still worth restoring over the bundle when the network is unreachable.
-const CACHE_KEY = 'wayvee.events.cache.v1';
+const CACHE_BASE = 'wayvee.events.cache.v1';
 
 async function loadEventsFromCache(): Promise<boolean> {
-  const raw = await getStoredItem(CACHE_KEY);
+  const raw = await getStoredItem(cityCacheKey(CACHE_BASE));
   if (!raw) return false;
   try {
     const rows = JSON.parse(raw) as unknown;
@@ -88,7 +107,7 @@ async function loadEventsFromCache(): Promise<boolean> {
 }
 
 function saveEventsToCache(): void {
-  void setStoredItem(CACHE_KEY, JSON.stringify(Object.values(EVENTS))).catch(() => {});
+  void setStoredItem(cityCacheKey(CACHE_BASE), JSON.stringify(Object.values(EVENTS))).catch(() => {});
 }
 
 /** Fetch backend events and merge them into the bundled EVENTS record. Returns
@@ -96,16 +115,19 @@ function saveEventsToCache(): void {
  * cached snapshot of a previous fetch — so callers know whether to re-render.
  * Pass force=true (pull-to-refresh) to bypass the one-shot cache and refetch. */
 export async function hydrateEventsFromBackend(force = false): Promise<boolean> {
+  const city = activeCity();
+  const hydrated = hydratedCity === city;
   if (hydrated && !force) return false;
+  if (hydratedCity !== city) resetEventsForCity(city);
   if (!supabase) return hydrated ? false : loadEventsFromCache();
   try {
-    const { data, error } = await supabase.from('events').select('*');
+    const { data, error } = await supabase.from('events').select('*').eq('city', city);
     if (error || !data?.length) return hydrated ? false : loadEventsFromCache();
     for (const row of data as unknown as EventRow[]) {
       if (!row?.id || !row.starts_at || !row.name || !row.image || !row.source_url) continue;
       EVENTS[row.id] = rowToEvent(row);
     }
-    hydrated = true;
+    hydratedCity = city;
     saveEventsToCache();
     return true;
   } catch {

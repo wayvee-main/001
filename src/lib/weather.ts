@@ -14,6 +14,7 @@
 // out.
 import { useSyncExternalStore } from 'react';
 
+import { activeCity, cityCacheKey } from '@/lib/city';
 import { getStoredItem, setStoredItem } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
 
@@ -155,13 +156,16 @@ export function useDaylightRemaining(now = new Date()) {
   return daylightRemaining(now, useWeatherHours());
 }
 
-let hydrated = false;
+// Which city the current contents describe. Null means nothing has loaded yet;
+// a different slug means the guest changed city and what is held belongs to the
+// city they left.
+let hydratedCity: string | null = null;
 
 // Last-known-good snapshot for offline cold launches, same pattern as
 // places.ts/events-remote.ts. Weather ages out faster than any other cached
 // content here, which is exactly why weatherAt() checks each period's own
 // window instead of trusting that a cache hit means current data.
-const CACHE_KEY = 'wayvee.weather.cache.v1';
+const CACHE_BASE = 'wayvee.weather.cache.v1';
 
 function isWeatherHour(value: unknown): value is WeatherHour {
   const v = value as Partial<WeatherHour> | null;
@@ -171,7 +175,7 @@ function isWeatherHour(value: unknown): value is WeatherHour {
 }
 
 async function loadWeatherFromCache(): Promise<boolean> {
-  const raw = await getStoredItem(CACHE_KEY);
+  const raw = await getStoredItem(cityCacheKey(CACHE_BASE));
   if (!raw) return false;
   try {
     const parsed: unknown = JSON.parse(raw);
@@ -188,7 +192,10 @@ async function loadWeatherFromCache(): Promise<boolean> {
 /** Fetch the stored forecast. Returns true when the snapshot changed.
  * Pass force=true (pull-to-refresh) to bypass the one-shot guard. */
 export async function hydrateWeatherFromBackend(force = false): Promise<boolean> {
+  const city = activeCity();
+  const hydrated = hydratedCity === city;
   if (hydrated && !force) return false;
+  if (hydratedCity !== null && !hydrated) publish([]);
   if (!supabase) return hydrated ? false : loadWeatherFromCache();
   try {
     // An hour of slack keeps the period covering "now" in the result right up
@@ -197,14 +204,15 @@ export async function hydrateWeatherFromBackend(force = false): Promise<boolean>
     const { data, error } = await supabase
       .from('weather_hourly')
       .select('*')
+      .eq('city', city)
       .gte('starts_at', since)
       .order('starts_at', { ascending: true })
       .limit(FETCH_LIMIT);
     if (error || !data?.length) return hydrated ? false : loadWeatherFromCache();
 
     publish((data as unknown as WeatherRow[]).map(rowToHour));
-    hydrated = true;
-    void setStoredItem(CACHE_KEY, JSON.stringify(snapshot)).catch(() => {});
+    hydratedCity = city;
+    void setStoredItem(cityCacheKey(CACHE_BASE), JSON.stringify(snapshot)).catch(() => {});
     return true;
   } catch {
     return hydrated ? false : loadWeatherFromCache();

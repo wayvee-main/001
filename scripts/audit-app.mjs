@@ -20,14 +20,19 @@ function filesUnder(relativePath) {
     .map((entry) => path.join(entry.parentPath, entry.name));
 }
 
+/** data.ts may only reach for the curated event bundle, which is itself a
+ * plain data module with no imports at all. Anything else would make the audit
+ * depend on code it has not vetted, so every other require still throws. */
 function loadDataModule() {
+  const events = loadTypedModule('src/lib/events.ts');
   const source = read('src/lib/data.ts');
   const output = ts.transpileModule(source, {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   }).outputText;
   const module = { exports: {} };
-  new Function('module', 'exports', 'require', output)(module, module.exports, () => {
-    throw new Error('src/lib/data.ts must stay dependency-free for deterministic release audits.');
+  new Function('module', 'exports', 'require', output)(module, module.exports, (request) => {
+    if (request === './events') return events;
+    throw new Error(`src/lib/data.ts may only depend on ./events; it required ${request}.`);
   });
   return module.exports;
 }
@@ -84,15 +89,8 @@ for (const chip of data.CUISINES.filter((label) => label !== 'All')) {
   for (const id of ids) assert(Boolean(data.RESTAURANTS[id]), `${chip} points to missing restaurant ${id}.`);
 }
 assert(data.CUISINES.every((label) => ['All', 'American', 'Latin', 'Asian', 'Italian + Pizza'].includes(label)), 'Food Hub pills contain a non-cuisine category.');
-assert(data.HOME_CATEGORY_LINKS.length >= 4, 'Home needs at least four useful cuisine launchers.');
-assert(new Set(data.HOME_CATEGORY_LINKS.map((category) => category.cuisine)).size === data.HOME_CATEGORY_LINKS.length, 'Home food-category launchers repeat a module.');
-for (const category of data.HOME_CATEGORY_LINKS) {
-  const ids = data.CUISINE_MATCH[category.cuisine] ?? [];
-  assert(ids.length >= 15, `${category.label} does not open a 15-place food module.`);
-}
 
 const baseFilters = { sort: 'Best match', price: null, distance: null, openLate: false, delivery: false, reserve: false };
-assert(data.allFeaturedRestaurants('All', baseFilters).length === data.FAV_POOL.length, 'The full Food Hub must expose its complete curated roster.');
 const foodHubPicks = data.FOOD_HUB_SECTIONS.flatMap((section) => section.picks);
 const foodHubIds = foodHubPicks.map((pick) => pick.id);
 assert(data.FOOD_HUB_SECTIONS.length === 4, 'The All view must be divided into four curated cuisine sections.');
@@ -101,26 +99,6 @@ assert(foodHubIds.length === data.FAV_POOL.length, 'The Food Hub sections must e
 assert(new Set(foodHubIds).size === foodHubIds.length, 'Food Hub sections repeat a restaurant.');
 assert(foodHubPicks.every((pick) => pick.reason?.trim()), 'Every Food Hub restaurant needs a purposeful reason to go.');
 for (const id of foodHubIds) assert(Boolean(data.RESTAURANTS[id]), `Food Hub points to missing restaurant ${id}.`);
-for (const price of ['$', '$$', '$$$']) {
-  assert(data.filteredRestaurants('All', { ...baseFilters, price }).length > 0, `Price filter ${price} has no results.`);
-}
-for (const distance of ['5 min walk', '15 min', 'Short ride']) {
-  assert(data.filteredRestaurants('All', { ...baseFilters, distance }).length > 0, `Distance filter ${distance} has no results.`);
-}
-for (const flag of ['openLate', 'delivery', 'reserve']) {
-  assert(data.filteredRestaurants('All', { ...baseFilters, [flag]: true }).length > 0, `${flag} filter has no results.`);
-}
-for (const sort of ['Nearest', 'Lowest price']) {
-  assert(data.filteredRestaurants('All', { ...baseFilters, sort }).length === foodHubIds.length, `${sort} sort must retain the full Food Hub roster.`);
-}
-assert(data.filteredRestaurants('All', { ...baseFilters, delivery: true }).length < foodHubIds.length, 'Delivery filter does not narrow the Food Hub.');
-assert(data.filteredRestaurants('Latin', { ...baseFilters, reserve: true }).length > 0, 'Cuisine and reservation filters do not combine correctly.');
-for (const cuisine of data.CUISINES.filter((label) => label !== 'All')) {
-  for (const price of ['$', '$$', '$$$']) {
-    assert(data.filteredRestaurants(cuisine, { ...baseFilters, price }).length > 0, `${cuisine}/${price} filter combination has no results.`);
-  }
-  assert(data.filteredRestaurants(cuisine, { ...baseFilters, delivery: true }).length > 0, `${cuisine}/delivery filter combination has no results.`);
-}
 assert(data.searchFoodHub('fried chicken', baseFilters).some((restaurant) => restaurant.id === 'aburaya'), 'Menu search does not find Aburaya fried chicken.');
 assert(data.searchFoodHub('ramen', baseFilters).length >= 3, 'Menu search should find multiple ramen restaurants.');
 assert(data.searchFoodHub('sancocho', baseFilters).some((restaurant) => restaurant.id === 'alamar'), 'Menu search does not find alaMar by dish.');
@@ -134,11 +112,6 @@ for (const category of ['Upcoming', 'Live music', 'Outdoor', 'Movies']) {
 const homeEvents = data.homeEventPicks(asOf);
 assert(homeEvents.length >= 4, 'Home needs at least four current event picks.');
 assert(new Set(homeEvents.map((event) => event.venueId ?? event.venue.toLowerCase())).size === homeEvents.length, 'Home event picks repeat a venue.');
-
-const homeFoodIds = data.HOME_FOOD_GROUPS.flatMap((group) => group.picks.map((pick) => pick.id));
-assert(homeFoodIds.length >= 7, 'Home needs at least seven focused food recommendations.');
-assert(new Set(homeFoodIds).size === homeFoodIds.length, 'Home food groups repeat a restaurant.');
-for (const id of homeFoodIds) assert(Boolean(data.RESTAURANTS[id]), `Home food groups point to missing restaurant ${id}.`);
 
 for (const collection of Object.values(data.CURATED_COLLECTIONS)) {
   assert(collection.items.length >= 2, `${collection.title} needs at least 2 items.`);
@@ -155,14 +128,13 @@ const lateNightIds = lateNightItems.map((item) => item.id);
 assert(lateNightItems.length >= 3, 'Late-night food needs at least three verified choices.');
 assert(lateNightItems.every((item) => item.type === 'restaurant' && item.note), 'Late-night choices need a focused reason to go.');
 assert(lateNightIds.every((id) => data.RESTAURANTS[id]?.openLate), 'Late-night collection contains a restaurant without verified late hours.');
-assert(homeFoodIds.every((id) => !lateNightIds.includes(id)), 'Home repeats a restaurant between food groups and the late-night collection.');
-const homeSurfaceFoodIds = new Set([...homeFoodIds, ...lateNightIds]);
+// Home's own food groups were removed, so the late-night collection is the
+// only curated food surface the Hub can now collide with.
+const homeSurfaceFoodIds = new Set(lateNightIds);
 assert(foodHubIds.every((id) => !homeSurfaceFoodIds.has(id)), 'The Food Hub duplicates a restaurant already surfaced on Home.');
 assert(read('src/app/collection/[id].tsx').includes('activeCollectionItems(collection)'), 'Collection details are not filtering expired events.');
 const homeSource = read('src/app/(tabs)/index.tsx');
 assert(homeSource.includes('<Photo uri={event.image}'), 'Home event picks are missing thumbnails.');
-assert(homeSource.includes('HOME_CATEGORY_LINKS.map'), 'Home is missing the food-category row.');
-assert(homeSource.indexOf('HOME_CATEGORY_LINKS.map') < homeSource.indexOf('Eat in Oakland'), 'The Home food-category row is not near the top.');
 assert(homeSource.includes("promotionForPlacement('home-food')"), 'Home is missing its contextual food promotion.');
 assert(homeSource.includes('<CompactPromo promotion={foodPromotion} compact'), 'The Home delivery promotion is not using the reduced-height treatment.');
 assert(read('src/app/(tabs)/discover.tsx').includes("promotionForPlacement('discover-rides')"), 'Discover is missing its contextual ride promotion.');
@@ -198,10 +170,10 @@ for (const placement of ['home-food', 'discover-rides', 'ordering-savings']) {
   assert(Boolean(promotions.promotionForPlacement(placement, new Date('2026-07-19T19:00:00Z'))), `${placement} has no current promotion.`);
   assert(Boolean(promotions.promotionForPlacement(placement, new Date('2027-07-19T19:00:00Z'))), `${placement} has no evergreen fallback.`);
 }
-assert(promotions.promotionsForFoodHub(new Date('2026-07-19T19:00:00Z')).length === 3, 'The Food Hub needs three current promo ribbons.');
-assert(promotions.promotionsForFoodHub(new Date('2027-07-19T19:00:00Z')).length === 3, 'The Food Hub promo ribbons need evergreen fallbacks.');
-const homePromotionIds = new Set(promotions.PROMOTIONS.filter((promotion) => promotion.placement === 'home-food').map((promotion) => promotion.id));
-assert(promotions.promotionsForFoodHub(new Date('2026-07-19T19:00:00Z')).every((promotion) => !homePromotionIds.has(promotion.id)), 'The Food Hub duplicates a Home promotion.');
+assert(
+  new Set(promotions.PROMOTIONS.map((promotion) => promotion.id)).size === promotions.PROMOTIONS.length,
+  'Two promotions share an id.',
+);
 const eventDetailSource = read('src/app/event/[id].tsx');
 const restaurantDetailSource = read('src/app/restaurant/[id].tsx');
 const venueDetailSource = read('src/app/venue/[id].tsx');

@@ -9,6 +9,8 @@ import { RaisedTouchable, RaisedView } from '@/components/raised-surface';
 import { ChevronRight, Icon } from '@/components/ui';
 import { APPEARANCE_OPTIONS, restoreAppearance, saveAppearance, type AppearancePreference } from '@/lib/appearance';
 import { initialsFor } from '@/lib/auth';
+import { switchCity } from '@/lib/bootstrap';
+import { useActiveCity, useCityOptions } from '@/lib/city';
 import { EVENTS, GUEST, isCurrentEvent } from '@/lib/data';
 import { ICON_PATHS } from '@/lib/icons';
 import { stayProgress } from '@/lib/stay';
@@ -32,6 +34,8 @@ export default function ProfileScreen() {
     stay,
   } = useScoper();
   const colors = useThemeColors();
+  const city = useActiveCity();
+  const cityOptions = useCityOptions();
   const [appearance, setAppearance] = useState<AppearancePreference>('system');
   const stayValue = stay
     ? (() => {
@@ -60,6 +64,10 @@ export default function ProfileScreen() {
   useEffect(() => {
     restoreAppearance().then(setAppearance).catch(() => undefined);
   }, []);
+
+  const chooseCity = (slug: string) => {
+    void switchCity(slug).catch(() => showToast('Could not switch city'));
+  };
 
   const chooseAppearance = (preference: AppearancePreference) => {
     setAppearance(preference);
@@ -209,6 +217,33 @@ export default function ProfileScreen() {
         {/* Settings — preferences first, trust + exit last */}
         <View className="gap-y-2.5">
           <Text className="font-fraunces text-[19px] text-ink">Settings</Text>
+
+          {/* Only worth showing once there is somewhere else to go. With one
+              launched city this is a control with a single option, which reads
+              as clutter rather than a choice. */}
+          {cityOptions.length > 1 ? (
+            <RaisedView className="rounded-card px-3.5 py-[15px]">
+              <Text className="font-dm text-[14.5px] text-fg">City</Text>
+              <View className="mt-2.5 flex-row flex-wrap gap-1.5 rounded-control bg-surface-sunk p-1">
+                {cityOptions.map((option) => {
+                  const selected = city === option.slug;
+                  return (
+                    <TouchableOpacity
+                      key={option.slug}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected }}
+                      activeOpacity={0.7}
+                      onPress={() => chooseCity(option.slug)}
+                      className={`items-center rounded-control px-3 py-2 ${selected ? 'bg-accent-fill' : ''}`}>
+                      <Text className={`font-dm-medium text-label ${selected ? 'text-on-accent' : 'text-fg-muted'}`}>
+                        {option.name}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </RaisedView>
+          ) : null}
 
           {/* Appearance sits above the row list because it's the one setting
               that changes the screen you're looking at while you look at it. */}

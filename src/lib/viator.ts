@@ -3,6 +3,7 @@
 // The client never talks to Viator directly; it just reads this table.
 import { useSyncExternalStore } from 'react';
 
+import { activeCity, cityCacheKey } from '@/lib/city';
 import { getStoredItem, setStoredItem } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
 
@@ -139,15 +140,18 @@ function popularityScore(pick: ViatorPick): number {
 
 export const VIATOR_PICKS: Record<string, ViatorPick> = {};
 
-let hydrated = false;
+// Which city the current contents describe. Null means nothing has loaded yet;
+// a different slug means the guest changed city and what is held belongs to the
+// city they left.
+let hydratedCity: string | null = null;
 
 // Last-known-good snapshot for offline cold launches — same fallback pattern
 // as places.ts. Never a substitute for a successful fetch, only a fallback
 // for when one hasn't happened yet.
-const CACHE_KEY = 'wayvee.viatorPicks.cache.v1';
+const CACHE_BASE = 'wayvee.viatorPicks.cache.v1';
 
 async function loadPicksFromCache(): Promise<void> {
-  const raw = await getStoredItem(CACHE_KEY);
+  const raw = await getStoredItem(cityCacheKey(CACHE_BASE));
   if (!raw) return;
   try {
     const rows = JSON.parse(raw) as unknown;
@@ -163,7 +167,7 @@ async function loadPicksFromCache(): Promise<void> {
 }
 
 function savePicksToCache(): void {
-  void setStoredItem(CACHE_KEY, JSON.stringify(Object.values(VIATOR_PICKS))).catch(() => {});
+  void setStoredItem(cityCacheKey(CACHE_BASE), JSON.stringify(Object.values(VIATOR_PICKS))).catch(() => {});
 }
 
 // Whichever screen happens to be mounted when the Supabase fetch below resolves
@@ -197,13 +201,18 @@ export function useViatorPicks(): ViatorPick[] {
 /** Fetch backend-synced Viator picks. Returns true when fresh rows landed.
  * Pass force=true (pull-to-refresh) to bypass the one-shot cache and refetch. */
 export async function hydrateViatorPicksFromBackend(force = false): Promise<boolean> {
+  const city = activeCity();
+  const hydrated = hydratedCity === city;
   if (hydrated && !force) return false;
+  if (hydratedCity !== null && !hydrated) {
+    for (const id of Object.keys(VIATOR_PICKS)) delete VIATOR_PICKS[id];
+  }
   if (!supabase) {
     if (!hydrated) await loadPicksFromCache();
     return false;
   }
   try {
-    const { data, error } = await supabase.from('viator_picks').select('*');
+    const { data, error } = await supabase.from('viator_picks').select('*').eq('city', city);
     if (error || !data?.length) {
       if (!hydrated) await loadPicksFromCache();
       return false;
@@ -212,7 +221,7 @@ export async function hydrateViatorPicksFromBackend(force = false): Promise<bool
       if (!row?.id || !row.title || !row.image || !row.booking_url) continue;
       VIATOR_PICKS[row.id] = rowToPick(row);
     }
-    hydrated = true;
+    hydratedCity = city;
     notify();
     savePicksToCache();
     return true;

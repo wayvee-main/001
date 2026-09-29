@@ -9,6 +9,7 @@
 // bug this session), so there's no reason to repeat it here.
 import { useCallback, useSyncExternalStore } from 'react';
 
+import { activeCity, cityCacheKey } from '@/lib/city';
 import type { GeoPoint } from '@/lib/geo';
 import { getStoredItem, setStoredItem } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
@@ -233,17 +234,20 @@ export function useCuratedHours(): (entry: { name: string; address?: string | nu
   return useCallback((entry: { name: string; address?: string | null }) => hoursForCurated(entry, places), [places]);
 }
 
-let hydrated = false;
+// Which city the current contents describe. Null means nothing has loaded yet;
+// a different slug means the guest changed city and what is held belongs to the
+// city they left.
+let hydratedCity: string | null = null;
 
 // Last-known-good snapshot for offline cold launches — the backend is always
 // the fresher source when reachable (see DATA.md); this only fills the gap
 // before a network fetch can land, or replaces it entirely when there's no
 // connection at all. Never a substitute for a successful fetch, only a
 // fallback for when one hasn't happened yet.
-const CACHE_KEY = 'wayvee.places.cache.v1';
+const CACHE_BASE = 'wayvee.places.cache.v1';
 
 async function loadPlacesFromCache(): Promise<void> {
-  const raw = await getStoredItem(CACHE_KEY);
+  const raw = await getStoredItem(cityCacheKey(CACHE_BASE));
   if (!raw) return;
   try {
     const rows = JSON.parse(raw) as unknown;
@@ -261,19 +265,27 @@ async function loadPlacesFromCache(): Promise<void> {
 }
 
 function savePlacesToCache(): void {
-  void setStoredItem(CACHE_KEY, JSON.stringify(Object.values(PLACES))).catch(() => {});
+  void setStoredItem(cityCacheKey(CACHE_BASE), JSON.stringify(Object.values(PLACES))).catch(() => {});
 }
 
 /** Fetch backend-synced places. Returns true when fresh rows landed.
  * Pass force=true (pull-to-refresh) to bypass the one-shot cache and refetch. */
 export async function hydratePlacesFromBackend(force = false): Promise<boolean> {
+  const city = activeCity();
+  const hydrated = hydratedCity === city;
   if (hydrated && !force) return false;
+  if (hydratedCity !== null && !hydrated) {
+    // Switched city: drop the previous one's rows before the new ones land,
+    // so the two are never on screen together.
+    for (const id of Object.keys(PLACES)) delete PLACES[id];
+    notify();
+  }
   if (!supabase) {
     if (!hydrated) await loadPlacesFromCache();
     return false;
   }
   try {
-    const { data, error } = await supabase.from('places').select('*');
+    const { data, error } = await supabase.from('places').select('*').eq('city', city);
     if (error || !data?.length) {
       if (!hydrated) await loadPlacesFromCache();
       return false;
@@ -282,7 +294,7 @@ export async function hydratePlacesFromBackend(force = false): Promise<boolean> 
       if (!row?.id || !row.name || row.lat == null || row.lon == null) continue;
       PLACES[row.id] = rowToPlace(row);
     }
-    hydrated = true;
+    hydratedCity = city;
     notify();
     savePlacesToCache();
     return true;
