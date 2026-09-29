@@ -1,0 +1,52 @@
+name: Eval concierge
+
+# Runs the 50-sentence parse evaluation against the deployed Edge Function and
+# fails if any gate is below target.
+#
+# This is the only thing that tells you the concierge actually works. Every
+# failure inside the function returns 204, which the app treats as "browse
+# instead" — so a missing key, a dead provider or a rate limit all look
+# exactly like a working concierge that never has an answer. The eval reads
+# the x-concierge-outcome header, which is where the real reason travels.
+#
+# Not on a schedule: it spends real model tokens. Run it after deploying the
+# function, after changing its prompt, or after changing provider.
+#
+# Requires: variable SUPABASE_URL, secret SUPABASE_PUBLISHABLE_KEY, and the
+# function's own CONCIERGE_API_KEY already set on the Supabase project (see
+# the `secrets` stage of provision-backend.yml).
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm ci
+
+      - name: Check configuration
+        env:
+          URL: ${{ vars.SUPABASE_URL }}
+          KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          missing=()
+          [ -n "$URL" ] || missing+=("variable SUPABASE_URL")
+          [ -n "$KEY" ] || missing+=("secret SUPABASE_PUBLISHABLE_KEY")
+          if [ ${#missing[@]} -gt 0 ]; then
+            printf 'Not configured yet:\n'
+            printf '  - %s\n' "${missing[@]}"
+            exit 1
+          fi
+          echo "Configuration present."
+
+      - run: npm run eval:concierge
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
