@@ -67,10 +67,17 @@ create index if not exists cities_launched_idx on public.cities (launched);
 -- queries Overture and Overpass by bbox, and a box drawn around a whole county
 -- pulls in thousands of rows nobody will ever be shown.
 --
--- `launched` gates both the syncs and the city picker, so a city here is
--- inert until it is flipped on. Oakland ships with a bundled catalog; San
--- Francisco is on so its first sync has something to fill. The rest are
--- staged — flip one on, let its syncs run, then let the picker offer it.
+-- `launched` gates the syncs, so a city here is inert until it is flipped on.
+--
+-- Only Oakland is launched, and that is a client limitation rather than a
+-- backend one. The app does not yet filter its catalog reads by city:
+-- src/lib/places.ts, events-remote.ts, viator.ts and weather.ts all select
+-- without a city predicate, and events merge by id into the bundled Oakland
+-- catalog. Launching a second city today would interleave two cities into one
+-- undifferentiated feed — and, for weather, two readings for the same hour.
+--
+-- Flip a city on once the client picks an active city and filters on it.
+-- Nothing else here needs to change: the syncs already run per launched city.
 --
 -- viator_destinations are Viator's own destination names, not free text. The
 -- two below are known-good; verify any you add against Viator's destination
@@ -83,7 +90,7 @@ insert into public.cities (
 ) values
   ('san-francisco', 'San Francisco', 'CA', 'America/Los_Angeles',
    37.7749, -122.4194, 37.700, -122.520, 37.840, -122.350,
-   array['San Francisco', 'Napa'], true),
+   array['San Francisco', 'Napa'], false),
 
   ('oakland', 'Oakland', 'CA', 'America/Los_Angeles',
    37.8032, -122.2716, 37.705, -122.335, 37.875, -122.110,
