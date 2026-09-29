@@ -2,6 +2,7 @@
   "expo": {
     "name": "Wayvee",
     "slug": "wayvee001",
+    "owner": "wayvee_main",
     "description": "Oakland, minus the guesswork. Eat well, catch what's on, and get there fast.",
     "version": "1.0.0",
     "orientation": "portrait",
