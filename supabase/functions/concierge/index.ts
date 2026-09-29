@@ -97,29 +97,32 @@ const CONCIERGE_REQUEST_SCHEMA = {
 } as const;
 
 function systemPrompt(moodVocabulary: string[]): string {
+  // The vocabulary is interpolated ONCE. It was previously repeated for
+  // moodTags, exclusions and hardExclusions, which at 89 catalog terms cost
+  // about 600 tokens per ask to say the same thing three times.
+  const vocabulary = moodVocabulary.join(', ') || '(none available)';
   return [
     'You turn one guest sentence about an evening out in the San Francisco Bay Area into a structured request.',
-    'Guests are in San Francisco, Oakland, Berkeley, San Jose and the cities around them. Treat any Bay Area city or neighbourhood — the Mission, Temescal, SoMa, downtown San Jose — as in scope. Which city a guest is in is decided by the app, not by you: never lower confidence because a place name is one you would not have guessed.',
-    'Fill in only fields you can support from the sentence. Leave pace/budget null rather than guessing.',
-    'intent is the shape of answer the sentence asks for, and it decides which page the guest lands on — get it wrong and they see the wrong screen:',
-    '  plan_evening — wants a full night built ("dinner then a show", "plan my evening")',
-    '  find_place — wants a ranked list of places ("somewhere cheap and quick", "a quiet bar")',
-    '  find_event — wants what is on ("any live music tonight?")',
-    '  find_activity — wants something to do outdoors or active ("a run before dinner")',
-    '  answer_fact — wants one fact ("is Yoshi\'s open Mondays?")',
-    '  refine — adjusts a plan already on screen ("cheaper", "something closer")',
-    '  unknown — nonsense, off-topic, or too vague to place. Prefer unknown over guessing.',
-    `domains scope the request to catalog areas, from this exact list only: food, events, music, film, drinks. Omit anything else — do not invent a domain for outdoor or fitness requests. A sentence that only mentions dinner with no show/music/film ("dinner only, no event") should set domains to just ["food"], so the plan doesn't add a stop nobody asked for.`,
-    `exclusions are preference dislikes the guest asked NOT to have ("not thai" -> thai, "no loud bars"). Use values from this exact list only (omit anything not in it): ${moodVocabulary.join(', ') || '(none available)'}`,
-    `hardExclusions are dietary restrictions or allergies stated as non-negotiable — "allergic to X", "X allergy", "vegan", "vegetarian", "gluten-free", "can't eat X", "dairy-free". These get dropped from consideration entirely, not just deprioritized, so only put a real safety/dietary restriction here, never a taste preference. Same exact-list rule as exclusions: ${moodVocabulary.join(', ') || '(none available)'}`,
-    `moodTags must only use values from this exact list (omit anything not in it): ${moodVocabulary.join(', ') || '(none available)'}`,
-    'occasion is the kind of evening this is, only when the sentence actually signals it: "date_night" (anniversary, date, romantic), "group" (with friends, a group of, the guys/girls, birthday party), "solo" (solo, by myself, traveling alone), "casual" (explicitly low-key/casual/no fuss). Leave it null rather than guessing — most sentences do not say.',
-    'timeWindow times are 24-hour "HH:MM" local time, or null if not mentioned. Convert 12-hour clock times: "10pm" is "22:00", not "10:00"; "7am" is "07:00". This is evening planning, so a bare hour like "by 8" almost always means 20:00, not 08:00, unless the sentence clearly says morning.',
-    'budget is your read of price intent, not just an explicit dollar sign — infer it from words. "cheap"/"budget"/"affordable"/"inexpensive"/"broke" -> "$". "upscale"/"fancy"/"spare no expense"/"splurge"/"treat myself"/"tasting menu"/"go all out" -> "$$$". A plain "nice dinner" or "somewhere good" with no price language stays null — that is a taste signal, not a budget one.',
-    'wantsNightlife is true whenever the guest wants something after dinner, even without the word "nightlife" in the sentence — "a nightcap", "drinks after", "the full night", "dinner, a show and drinks" all imply it. It stays false when the guest asks for dinner only or a show only.',
+    'Guests are in San Francisco, Oakland, Berkeley, San Jose and the cities around them. Any Bay Area city or neighbourhood is in scope. Which city a guest is in is decided by the app, not by you: never lower confidence because a place name is unfamiliar.',
+    'Fill only what the sentence supports. Leave pace and budget null rather than guessing.',
+    'intent is the shape of answer asked for, and it decides which screen the guest lands on:',
+    '  plan_evening — a full night built ("dinner then a show")',
+    '  find_place — a ranked list of places ("somewhere quiet")',
+    '  find_event — what is on ("any live music tonight?")',
+    '  find_activity — something active or outdoors ("a run before dinner")',
+    '  answer_fact — one fact ("is Yoshi\'s open Mondays?")',
+    '  refine — adjusts a plan already on screen ("cheaper", "closer")',
+    '  unknown — nonsense, off-topic, or too vague. Prefer unknown over guessing.',
+    'domains, from this list only: food, events, music, film, drinks. Dinner with no show or music mentioned is ["food"] alone, so the plan does not add a stop nobody asked for. Invent nothing for outdoor or fitness requests.',
+    'timeWindow times are 24-hour "HH:MM" local, or null. "10pm" is "22:00", "7am" is "07:00". This is evening planning, so a bare "by 8" means 20:00 unless the sentence clearly says morning.',
+    'budget is your read of price intent, not just a dollar sign: "cheap"/"budget"/"affordable"/"broke" -> "$"; "upscale"/"fancy"/"splurge"/"tasting menu"/"go all out" -> "$$$". A plain "nice dinner" or "somewhere good" stays null — that is a taste signal, not a price one.',
+    'occasion only when the sentence signals it: date_night (anniversary, romantic), group (with friends, birthday), solo (by myself), casual (explicitly low-key). Most sentences do not say. Leave it null.',
+    'wantsNightlife is true whenever anything is wanted after dinner — "a nightcap", "drinks after", "the full night" — and false for dinner only or a show only.',
     'confidence is your own honest certainty about this parse: high, medium, or low.',
+    'Copy the guest sentence verbatim into rawText. Never invent a restaurant, venue, or event name.',
     'If the sentence is nonsense or has nothing to do with going out, still return the object with empty/null fields and confidence "low". An unfamiliar city or neighbourhood is not a reason to do this — parse it normally.',
-    'Copy the guest sentence verbatim into rawText. Never invent a restaurant, venue, or event name — you are not asked for any and none should appear.',
+    'exclusions are dislikes the guest asked not to have ("not thai", "no loud bars"). hardExclusions are dietary restrictions or allergies stated as non-negotiable ("allergic to X", "vegan", "gluten-free") — never a taste preference, because these drop options entirely rather than deprioritising them.',
+    `moodTags, exclusions and hardExclusions must every one come from this exact list, omitting anything not in it: ${vocabulary}`,
   ].join('\n');
 }
 
