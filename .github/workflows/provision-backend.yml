@@ -103,24 +103,29 @@ jobs:
 
       - name: Report state
         run: |
-          echo "## Backend state" >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          # tee, not >>: the step summary renders nicely in the web UI but is
+          # not part of the job log, so anything that reads logs (including a
+          # person debugging from an API client) would see an empty report.
+          report() { tee -a "$GITHUB_STEP_SUMMARY"; }
 
-          echo "-- cities --" >> "$GITHUB_STEP_SUMMARY"
+          echo "## Backend state" | report
+          echo '```' | report
+
+          echo "-- cities --" | report
           supabase db query --linked \
             "select slug, launched from public.cities order by launched desc, slug" \
-            >> "$GITHUB_STEP_SUMMARY" 2>&1 || echo "(no cities table — schema not applied)" >> "$GITHUB_STEP_SUMMARY"
+             2>&1 | report || echo "(no cities table — schema not applied)" | report
 
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "-- row counts --" >> "$GITHUB_STEP_SUMMARY"
+          echo "" | report
+          echo "-- row counts --" | report
           supabase db query --linked \
             "select 'places' t, count(*) from public.places union all select 'events', count(*) from public.events union all select 'weather_hourly', count(*) from public.weather_hourly union all select 'viator_picks', count(*) from public.viator_picks order by 1" \
-            >> "$GITHUB_STEP_SUMMARY" 2>&1 || echo "(tables not readable)" >> "$GITHUB_STEP_SUMMARY"
+             2>&1 | report || echo "(tables not readable)" | report
 
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "-- last sync per job/city --" >> "$GITHUB_STEP_SUMMARY"
+          echo "" | report
+          echo "-- last sync per job/city --" | report
           supabase db query --linked \
             "select job, city, status, rows_written, finished_at from public.sync_status order by job, city" \
-            >> "$GITHUB_STEP_SUMMARY" 2>&1 || echo "(no sync has run yet)" >> "$GITHUB_STEP_SUMMARY"
+             2>&1 | report || echo "(no sync has run yet)" | report
 
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo '```' | report
