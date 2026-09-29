@@ -1,0 +1,126 @@
+name: Provision backend
+
+# One-shot setup: apply the schema to a fresh Supabase project, optionally set
+# the concierge's own secrets, and report what landed.
+#
+# This exists because the sequence in docs/provisioning.md needs network access
+# to Supabase, and the place that reliably has it is a runner. Credentials stay
+# in the repository's encrypted secret store and are never pasted anywhere they
+# would persist in plain text.
+#
+# Safe to re-run. The migration is idempotent — it re-applies without error and
+# the city seed is `on conflict do nothing`, so a second run is a no-op rather
+# than a duplicate.
+#
+# Required secrets:
+#   SUPABASE_ACCESS_TOKEN   supabase.com/dashboard/account/tokens
+#   SUPABASE_DB_PASSWORD    the project's database password
+# Required variable:
+#   SUPABASE_PROJECT_REF    the subdomain of the project URL
+# Only for the `secrets` stage:
+#   CONCIERGE_API_KEY       the model provider key the Edge Function uses
+
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: 'What to run'
+        required: true
+        default: 'schema'
+        type: choice
+        options:
+          - schema          # link + db push + verify
+          - secrets         # set the concierge function secrets
+          - verify          # read back the current state, change nothing
+      concierge_model:
+        description: 'CONCIERGE_MODEL (secrets stage only)'
+        required: false
+        default: 'gpt-4o-mini'
+        type: string
+      concierge_base_url:
+        description: 'CONCIERGE_BASE_URL (secrets stage only)'
+        required: false
+        default: 'https://api.openai.com/v1'
+        type: string
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # Fail on the missing input rather than on a confusing CLI error three
+      # steps later. The concierge deploy already failed once this way, with an
+      # empty token and a message about running `supabase login`.
+      - name: Check configuration
+        run: |
+          missing=()
+          [ -n "$SUPABASE_ACCESS_TOKEN" ] || missing+=("secret SUPABASE_ACCESS_TOKEN")
+          [ -n "$PROJECT_REF" ] || missing+=("variable SUPABASE_PROJECT_REF")
+          [ -n "$SUPABASE_DB_PASSWORD" ] || missing+=("secret SUPABASE_DB_PASSWORD")
+          if [ "${{ inputs.stage }}" = "secrets" ] && [ -z "${{ secrets.CONCIERGE_API_KEY }}" ]; then
+            missing+=("secret CONCIERGE_API_KEY")
+          fi
+          if [ ${#missing[@]} -gt 0 ]; then
+            printf 'Not configured yet:\n'
+            printf '  - %s\n' "${missing[@]}"
+            printf '\nRepo -> Settings -> Secrets and variables -> Actions.\n'
+            exit 1
+          fi
+          echo "Configuration present for stage: ${{ inputs.stage }}"
+
+      - name: Link project
+        run: supabase link --project-ref "$PROJECT_REF"
+
+      - name: Apply schema
+        if: inputs.stage == 'schema'
+        run: supabase db push
+
+      - name: Set concierge secrets
+        if: inputs.stage == 'secrets'
+        env:
+          CONCIERGE_API_KEY: ${{ secrets.CONCIERGE_API_KEY }}
+        run: |
+          # Passed via env rather than interpolated into the command line, so
+          # the key never appears in a process listing or the step's echoed
+          # command. SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are injected
+          # into functions by the platform and must not be set here.
+          supabase secrets set \
+            CONCIERGE_API_KEY="$CONCIERGE_API_KEY" \
+            CONCIERGE_MODEL="${{ inputs.concierge_model }}" \
+            CONCIERGE_BASE_URL="${{ inputs.concierge_base_url }}" \
+            --project-ref "$PROJECT_REF"
+          echo "Set. Names only, values are not printed:"
+          supabase secrets list --project-ref "$PROJECT_REF"
+
+      - name: Report state
+        run: |
+          echo "## Backend state" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+          echo "-- cities --" >> "$GITHUB_STEP_SUMMARY"
+          supabase db query --linked \
+            "select slug, launched from public.cities order by launched desc, slug" \
+            >> "$GITHUB_STEP_SUMMARY" 2>&1 || echo "(no cities table — schema not applied)" >> "$GITHUB_STEP_SUMMARY"
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "-- row counts --" >> "$GITHUB_STEP_SUMMARY"
+          supabase db query --linked \
+            "select 'places' t, count(*) from public.places union all select 'events', count(*) from public.events union all select 'weather_hourly', count(*) from public.weather_hourly union all select 'viator_picks', count(*) from public.viator_picks order by 1" \
+            >> "$GITHUB_STEP_SUMMARY" 2>&1 || echo "(tables not readable)" >> "$GITHUB_STEP_SUMMARY"
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "-- last sync per job/city --" >> "$GITHUB_STEP_SUMMARY"
+          supabase db query --linked \
+            "select job, city, status, rows_written, finished_at from public.sync_status order by job, city" \
+            >> "$GITHUB_STEP_SUMMARY" 2>&1 || echo "(no sync has run yet)" >> "$GITHUB_STEP_SUMMARY"
+
+          echo '```' >> "$GITHUB_STEP_SUMMARY"

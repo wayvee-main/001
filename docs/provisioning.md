@@ -32,6 +32,20 @@ git clone https://github.com/wayvee-main/001.git wayvee && cd wayvee
 npm ci
 ```
 
+## Running it from CI instead
+
+Steps 1, 2 and 4 are also available as the **Provision backend** workflow
+(`.github/workflows/provision-backend.yml`) and the existing sync workflows.
+That path keeps every credential in the repository's encrypted secret store
+rather than on a laptop or in a chat, and it is the only path that works from
+a sandboxed environment — those commonly deny outbound access to
+supabase.com, api.openai.com and the sync sources, which makes the CLI
+locally inert no matter how correct the credentials are.
+
+Set the secrets and variables in step 3 first, then run the workflow with
+stage `schema`, then `secrets`, then dispatch each sync. Everything below
+still applies if you would rather run it yourself.
+
 ## 1. Schema
 
 ```bash
