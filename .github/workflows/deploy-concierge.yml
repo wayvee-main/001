@@ -1,0 +1,46 @@
+name: Deploy concierge function
+
+# Deploys supabase/functions/concierge to the linked Supabase project, so the
+# function that ships is whatever is on main rather than whatever was last
+# pushed from someone's laptop.
+#
+# The function runs on Supabase's Deno infrastructure, not here — this
+# workflow only publishes it. Path-filtered because a deploy restarts the
+# isolate, and there is no reason to do that for an unrelated commit.
+#
+# Setup (one-time):
+#   1. supabase.com/dashboard/account/tokens -> generate a token
+#      -> add as repo secret SUPABASE_ACCESS_TOKEN
+#   2. Add the project ref (the subdomain of your project URL) as repo
+#      variable SUPABASE_PROJECT_REF
+#   3. Set the function's own secrets ONCE, from a machine with the CLI:
+#        supabase secrets set CONCIERGE_API_KEY=... --project-ref <ref>
+#      These live on the Supabase project, persist across deploys, and are
+#      deliberately NOT repo secrets: the model key must never be reachable
+#      from a workflow that builds the client bundle.
+#      SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are injected automatically
+#      by the platform — never set those by hand.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/functions/concierge/**'
+      - '.github/workflows/deploy-concierge.yml'
+  workflow_dispatch: {} # manual "Run workflow" button in the Actions tab
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Deploy concierge
+        run: supabase functions deploy concierge --project-ref "$SUPABASE_PROJECT_REF"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}

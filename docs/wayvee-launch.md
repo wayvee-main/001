@@ -42,7 +42,7 @@ These values are embedded during the static build. After changing them, trigger 
 Fastest one-time setup: open Supabase **SQL Editor**, paste the contents of:
 
 ```text
-supabase/migrations/20260716000000_citycue_user_backend.sql
+supabase/migrations/20260929000000_wayvee_initial.sql
 ```
 
 and run it.

@@ -38,7 +38,7 @@ function sleep(ms: number): Promise<void> {
  * EdgeRuntime.waitUntil keeps the write alive past the response being sent;
  * without it, Deno Deploy can freeze the isolate the instant the response
  * flushes and the insert would silently never land. See
- * supabase/migrations/20260801000000_citycue_concierge_runs.sql. */
+ * supabase/migrations/20260929000000_wayvee_initial.sql. */
 function logRun(payload: Record<string, unknown>): void {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) return;
   const task = fetch(`${SUPABASE_URL}/rest/v1/concierge_runs`, {
@@ -98,7 +98,8 @@ const CONCIERGE_REQUEST_SCHEMA = {
 
 function systemPrompt(moodVocabulary: string[]): string {
   return [
-    'You turn one guest sentence about Downtown Oakland into a structured request.',
+    'You turn one guest sentence about an evening out in the San Francisco Bay Area into a structured request.',
+    'Guests are in San Francisco, Oakland, Berkeley, San Jose and the cities around them. Treat any Bay Area city or neighbourhood — the Mission, Temescal, SoMa, downtown San Jose — as in scope. Which city a guest is in is decided by the app, not by you: never lower confidence because a place name is one you would not have guessed.',
     'Fill in only fields you can support from the sentence. Leave pace/budget null rather than guessing.',
     'intent is the shape of answer the sentence asks for, and it decides which page the guest lands on — get it wrong and they see the wrong screen:',
     '  plan_evening — wants a full night built ("dinner then a show", "plan my evening")',
@@ -117,7 +118,7 @@ function systemPrompt(moodVocabulary: string[]): string {
     'budget is your read of price intent, not just an explicit dollar sign — infer it from words. "cheap"/"budget"/"affordable"/"inexpensive"/"broke" -> "$". "upscale"/"fancy"/"spare no expense"/"splurge"/"treat myself"/"tasting menu"/"go all out" -> "$$$". A plain "nice dinner" or "somewhere good" with no price language stays null — that is a taste signal, not a budget one.',
     'wantsNightlife is true whenever the guest wants something after dinner, even without the word "nightlife" in the sentence — "a nightcap", "drinks after", "the full night", "dinner, a show and drinks" all imply it. It stays false when the guest asks for dinner only or a show only.',
     'confidence is your own honest certainty about this parse: high, medium, or low.',
-    'If the sentence is nonsense or unrelated to planning an Oakland evening, still return the object with empty/null fields and confidence "low".',
+    'If the sentence is nonsense or has nothing to do with going out, still return the object with empty/null fields and confidence "low". An unfamiliar city or neighbourhood is not a reason to do this — parse it normally.',
     'Copy the guest sentence verbatim into rawText. Never invent a restaurant, venue, or event name — you are not asked for any and none should appear.',
   ].join('\n');
 }

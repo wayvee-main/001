@@ -288,7 +288,7 @@ Concretely:
 
 This is the single most important guardrail in the whole system. A model that's allowed to return arbitrary text can invent a restaurant name. A model that's only allowed to fill in fields from a fixed, small set of options cannot — because everything after this step has to look the value up in the real catalog, and a made-up value simply won't be found.
 
-Note that the two enum types below (`PacePreference`, `BudgetPreference`) are not new — they already exist as real Postgres check constraints on the `user_preferences` table (migration `20260724010000_citycue_travel_preferences.sql`) and are exactly what `plan-engine.ts` already consumes. The new request type reuses them rather than inventing a parallel vocabulary:
+Note that the two enum types below (`PacePreference`, `BudgetPreference`) are not new — they already exist as real Postgres check constraints on the `user_preferences` table (migration `supabase/migrations/20260929000000_wayvee_initial.sql`) and are exactly what `plan-engine.ts` already consumes. The new request type reuses them rather than inventing a parallel vocabulary:
 
 ```ts
 interface ConciergeRequest {
@@ -747,20 +747,7 @@ All 14 Supabase migrations, in order, and the table(s) each one owns:
 
 | Migration | Table(s) / change |
 |---|---|
-| 20260716000000_citycue_user_backend | profiles, user_preferences, user_plans, venue_follows, saved_places |
-| 20260719000000_citycue_auth_hardening | Hardens the new-user trigger; revokes public RPC access |
-| 20260720120000_citycue_events | events table (curated calendar) |
-| 20260721000000_citycue_stay | user_preferences += stay_property_name/check_in/check_out |
-| 20260722000000_citycue_viator_picks | viator_picks table — Part 2.4 |
-| 20260722010000_citycue_viator_availability | viator_picks += cancellation/flags/inclusions/availability |
-| 20260722020000_citycue_places | places table (Overture + OSM bulk directory) |
-| 20260722030000_citycue_places_cuisine | places += cuisine |
-| 20260724000000_citycue_saved_places_kinds | saved_places kind check widened to include 'place','night' |
-| 20260724010000_citycue_travel_preferences | user_preferences += pace_preference, budget_preference |
-| 20260725000000_citycue_event_source | events += source ('curated' \| 'ticketmaster') |
-| 20260725010000_citycue_places_hours | places += opening_hours (raw OSM tag) |
-| 20260725020000_citycue_weather | weather_hourly table — Part 2.2 / 4.4 |
-| 20260725030000_citycue_sync_runs | sync_runs table + sync_status view — Part 2.5 |
+| 20260929000000_wayvee_initial | Every table, policy and grant, as one migration |
 
 Scheduled jobs (`.github/workflows/`) already running: sync-events (daily), sync-ticketmaster (daily), sync-viator (daily), sync-places (weekly), sync-weather (hourly).
 

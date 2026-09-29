@@ -11,7 +11,7 @@ export interface WayveeStay {
 
 /** Fixed option sets for the Create tab's "Plan my stay" pickers — the same
  * vocabulary the user_preferences.pace_preference/budget_preference check
- * constraints enforce (see supabase/migrations/20260724010000_citycue_travel_preferences.sql).
+ * constraints enforce (see supabase/migrations/20260929000000_wayvee_initial.sql).
  * Defined in concierge/enums.ts (import-free) so the concierge guardrail and
  * the Node eval can use them without pulling in this module's Supabase and
  * auth dependencies; re-exported here so existing call sites keep working. */

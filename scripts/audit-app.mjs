@@ -238,13 +238,14 @@ assert(authSource.includes('exchangeCodeForSession'), 'PKCE callback exchange is
 assert(read('src/app/_layout.tsx').includes('if (!session)'), 'The authenticated app wall is missing.');
 assert(read('package.json').includes('verify-web-build.mjs'), 'The production auth-bundle verification is not part of build:web.');
 
-const backendMigration = read('supabase/migrations/20260716000000_citycue_user_backend.sql');
+const schema = read('supabase/migrations/20260929000000_wayvee_initial.sql');
+const backendMigration = schema;
 for (const table of ['profiles', 'user_preferences', 'user_plans', 'venue_follows', 'saved_places']) {
   assert(backendMigration.includes(`create table if not exists public.${table}`), `Backend migration is missing ${table}.`);
   assert(backendMigration.includes(`alter table public.${table} enable row level security`), `${table} is missing row-level security.`);
   assert(backendMigration.includes(`revoke all on public.${table} from anon`), `${table} does not explicitly deny anonymous access.`);
 }
-const authHardening = read('supabase/migrations/20260719000000_citycue_auth_hardening.sql');
+const authHardening = schema;
 assert(authHardening.includes('left(') && authHardening.includes('80'), 'OAuth profile-name hardening is missing.');
 assert(authHardening.includes('revoke all on function public.handle_new_user()'), 'The auth trigger function remains RPC-executable.');
 

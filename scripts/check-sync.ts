@@ -1,7 +1,7 @@
 // Backend freshness check: is every scheduled sync still actually running?
 //
 // Reads public.sync_status (latest run per job — see
-// supabase/migrations/20260725030000_citycue_sync_runs.sql) and fails when a
+// supabase/migrations/20260929000000_wayvee_initial.sql) and fails when a
 // job's last run failed or is older than the cadence its workflow promises.
 // Exits non-zero so it can be wired to CI or run by hand before a release.
 //

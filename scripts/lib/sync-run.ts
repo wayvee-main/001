@@ -1,7 +1,7 @@
 // Shared run recorder for every backend-populating sync script.
 //
 // Each script wraps its main() in withSyncRun(), which writes one row to
-// public.sync_runs (see supabase/migrations/20260725030000_citycue_sync_runs.sql)
+// public.sync_runs (see supabase/migrations/20260929000000_wayvee_initial.sql)
 // describing what happened: rows written, rows pruned, how long it took, and
 // whether the run was clean, degraded, or dead. That row is what makes a silent
 // failure visible — a scheduled sync that stops working now shows up as a

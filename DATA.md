@@ -26,7 +26,7 @@ runtime. This file records the split and the daily workflow.
   it was checked. A runtime feed would lose that.
 
 **Backend population (live)**: the Supabase `events` table
-(`supabase/migrations/20260720120000_citycue_events.sql`) mirrors `events.ts`.
+(`supabase/migrations/20260929000000_wayvee_initial.sql`) mirrors `events.ts`.
 At launch the app overlays backend rows onto the bundled snapshot
 (`src/lib/events-remote.ts`) — the bundle is the offline/first-paint fallback,
 so a missing or partial table can never blank the app. After editing
@@ -68,7 +68,7 @@ bundled snapshot in `events.ts` stays the offline/first-paint fallback, so an
 empty or stale `ticketmaster` set just means fewer rows, never a blank screen.
 
 **Each sync script prunes only its own rows.** `source` (added in
-`20260725000000_citycue_event_source.sql`) is what makes that possible —
+`20260929000000_wayvee_initial.sql`) is what makes that possible —
 `sync-events.ts` deletes `source='curated'` only, `sync-ticketmaster.ts`
 deletes `source='ticketmaster'` only. An unscoped prune in either wipes the
 other's rows.

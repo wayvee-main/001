@@ -55,7 +55,7 @@ Checklist derived from `docs/build-book.md` (First Edition, Jul 2026). Split int
 ## Phase 2 — Build The Orchestrator (Part 3, 2-3 weeks)
 
 - [x] Create `supabase/functions/concierge/index.ts` — new Edge Function
-- [x] Store AI provider API key via `npx supabase secrets set` — live on Groq (`openai/gpt-oss-20b`, free tier) as a test provider. Real key is a paid OpenAI key (decided, not yet issued): set it as `CONCIERGE_API_KEY` (production name; `GROQ_API_KEY` is a fallback lookup only, see `index.ts:13-18`), set `CONCIERGE_MODEL` to an OpenAI model (e.g. `gpt-4o-mini`) and `CONCIERGE_BASE_URL` to `https://api.openai.com/v1`, then re-run `npm run eval:concierge` for a real baseline and `npm run functions:deploy`.
+- [x] Store AI provider API key via `npx supabase secrets set` — live on Groq (`openai/gpt-oss-20b`, free tier) as a test provider. Real key is a paid OpenAI key (decided, not yet issued): set it as `CONCIERGE_API_KEY` (the only name the function reads — there is no provider-specific fallback), set `CONCIERGE_MODEL` to an OpenAI model (e.g. `gpt-4o-mini`) and `CONCIERGE_BASE_URL` to `https://api.openai.com/v1`, then re-run `npm run eval:concierge` for a real baseline and `npm run functions:deploy`.
 - [x] Define `ConciergeRequest` type — enum-only fields (pace, budget, moodTags, timeWindow, wantsNightlife, confidence)
 - [x] Write adapter: ConciergeRequest → `solveNight()` inputs (reuse `RESTAURANTS`, `NIGHTLIFE_SPOTS`, `currentEventListings` from `data.ts`)
 - [x] Wire adapter to existing `rankRestaurants` / `rankEvents` / `solveNight` (plan-engine.ts widened, not rewritten — see adapter.ts conflict note)

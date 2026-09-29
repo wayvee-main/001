@@ -46,7 +46,7 @@ export function routeForRequest(request: ConciergeRequest): string {
 /** Why a declined intent declined — shown verbatim, so a guest is never left
  * guessing whether the app misunderstood them or simply can't do it yet. */
 export const DECLINE_REASONS: Record<string, string> = {
-  find_activity: 'Oakland trails, parks and studios aren’t in the catalog yet, so there is nothing real to rank.',
+  find_activity: 'Trails, parks and studios aren’t in the catalog yet, so there is nothing real to rank.',
   refine: 'Refining works on a plan that’s already open. Build one first, then ask for cheaper or closer.',
   unknown: 'Rather than guess and hand you something built on nothing, here’s what’s actually on.',
 };
