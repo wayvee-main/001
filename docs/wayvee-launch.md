@@ -1,5 +1,9 @@
 # Wayvee production setup
 
+For the ordered command sequence that takes an empty repo to a running app, see
+[provisioning.md](./provisioning.md). This file is the dashboard half: Auth URLs,
+Google OAuth and DNS.
+
 ## Web/PWA build
 
 ```bash
@@ -73,7 +77,9 @@ http://localhost:8082/**
 wayvee://**
 ```
 
-Keep email confirmation enabled for production and leave **Anonymous Sign-Ins** disabled. Wayvee requires an authenticated, non-anonymous Supabase account; there is no guest bypass.
+Keep email confirmation enabled for production and leave **Anonymous Sign-Ins** disabled. `restoreSession` signs out any session flagged `is_anonymous`, so enabling them would create accounts the app immediately discards.
+
+That is a separate thing from browsing without an account, which the app does support: a signed-out guest can browse and plan, and Profile says so ("Browsing as a guest"). An account is what makes saved places, plans and follows persist. There is deliberately no sign-in wall.
 
 Before public launch, configure custom SMTP in Supabase. The built-in email sender is intended only for testing and has strict limits.
 
