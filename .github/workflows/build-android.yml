@@ -53,10 +53,18 @@ jobs:
           fi
           owner=$(node -p "require('./app.json').expo.owner || ''")
           project=$(node -p "require('./app.json').expo.extra?.eas?.projectId || ''")
-          echo "Building as owner=$owner projectId=$project"
-          if [ "$owner" = "citycues-team" ]; then
-            echo "::error::app.json still names the previous Expo organisation (citycues-team)."
-            echo "Run 'eas init' against the Expo account you want to build under; it rewrites owner and projectId."
+          echo "Building as owner=${owner:-<logged-in account>} projectId=${project:-<none>}"
+          # A projectId that names a project the token cannot see fails deep in
+          # the build with a GraphQL error, which reads like an outage rather
+          # than a config problem. Checking here keeps the cause legible.
+          if [ -z "$project" ]; then
+            echo "::error::app.json has no extra.eas.projectId, so there is no EAS project to build."
+            echo "Run 'eas init' locally, then commit the app.json it writes."
+            exit 1
+          fi
+          if [ "$owner" = "citycues-team" ] || [ "$project" = "a2de9c0f-2166-4f64-b5ac-b1e69664d2ef" ]; then
+            echo "::error::app.json still points at the previous Expo project."
+            echo "Delete 'owner' and 'extra.eas.projectId', run 'eas init', and commit the result."
             exit 1
           fi
 
