@@ -12,7 +12,10 @@ name: Build Android APK
 # instead: it reaches an already-installed APK in under a minute.
 #
 # Required secret:
-#   EXPO_TOKEN   expo.dev -> Account Settings -> Access Tokens
+#   EXPO_TOKEN                 expo.dev -> Account Settings -> Access Tokens
+#   SUPABASE_PUBLISHABLE_KEY   the app's backend key, baked into the bundle
+# Required variable:
+#   SUPABASE_URL               https://<ref>.supabase.co
 #
 # app.json's `owner` and `extra.eas.projectId` must both point at an Expo
 # account you can build under. `eas init` writes them.
@@ -72,6 +75,38 @@ jobs:
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
+
+      # EXPO_PUBLIC_* values are read when the bundle is built, and that happens
+      # on EAS's builders rather than on this runner — so exporting them here
+      # would not reach the build. They have to live on the project itself.
+      # The first build proved the point: "No environment variables ... found
+      # for the preview environment on EAS", which produces an APK that
+      # installs, launches, and reaches no backend at all.
+      #
+      # env:set is create-or-update, so re-running this is a no-op.
+      - name: Sync public env to EAS
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          missing=()
+          [ -n "$SUPABASE_URL" ] || missing+=("variable SUPABASE_URL")
+          [ -n "$SUPABASE_PUBLISHABLE_KEY" ] || missing+=("secret SUPABASE_PUBLISHABLE_KEY")
+          if [ ${#missing[@]} -gt 0 ]; then
+            printf 'Not configured yet:\n'
+            printf '  - %s\n' "${missing[@]}"
+            exit 1
+          fi
+          # Passed via env rather than interpolated, so neither value appears in
+          # a process listing or the echoed command.
+          eas env:set --environment "${{ inputs.profile }}" \
+            --name EXPO_PUBLIC_SUPABASE_URL --value "$SUPABASE_URL" \
+            --visibility plaintext --scope project --non-interactive
+          # sensitive, not secret: secret variables are unreadable by builds,
+          # which is exactly the wrong thing for a value the bundle needs.
+          eas env:set --environment "${{ inputs.profile }}" \
+            --name EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY --value "$SUPABASE_PUBLISHABLE_KEY" \
+            --visibility sensitive --scope project --non-interactive
 
       # --wait so the run reflects the real outcome rather than "submitted".
       # --non-interactive because there is no one here to answer a prompt.
