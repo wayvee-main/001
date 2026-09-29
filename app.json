@@ -81,6 +81,9 @@
         "projectId": "a2de9c0f-2166-4f64-b5ac-b1e69664d2ef"
       }
     },
-    "owner": "citycues-team"
+    "owner": "citycues-team",
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    }
   }
 }

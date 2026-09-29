@@ -1,0 +1,79 @@
+name: Push Android update
+
+# Publishes a JavaScript-only update to an already-installed APK, over the air.
+# Under a minute, against roughly 10-20 for a native rebuild.
+#
+# This is how the app on a phone follows changes as they are made. The phone
+# picks the update up on next launch; there is nothing to reinstall.
+#
+# What it CANNOT deliver is native change: a new expo-* package, a config
+# plugin, a permission, an icon, anything in app.json. app.json sets
+# runtimeVersion to the fingerprint policy precisely so those cases are caught
+# rather than shipped — the fingerprint changes, the installed APK no longer
+# matches the update's runtime version, and the phone simply keeps what it has
+# instead of loading JavaScript that needs native code it does not have. If an
+# update never seems to arrive, that is the first thing to check: rebuild.
+#
+# Required secret: EXPO_TOKEN
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'EAS Update branch (match the build profile: preview builds read the preview branch)'
+        required: true
+        default: 'preview'
+        type: string
+      message:
+        description: 'What changed'
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm ci
+
+      - name: Check configuration
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "Not configured yet: secret EXPO_TOKEN"
+            exit 1
+          fi
+          url=$(node -p "require('./app.json').expo.updates?.url || ''")
+          if [ -z "$url" ]; then
+            echo "::error::app.json has no updates.url, so there is no endpoint to publish to."
+            echo "Run 'eas update:configure' once; it writes the URL for this project."
+            exit 1
+          fi
+          echo "Publishing to $url"
+
+      # The same checks a change would face before a deploy. An OTA update
+      # reaches phones directly, with no build step in between to catch a type
+      # error, so this is the only gate it gets.
+      - run: npx tsc --noEmit
+      - run: npx jest
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Publish update
+        run: |
+          message="${{ inputs.message }}"
+          [ -n "$message" ] || message="$(git log -1 --pretty=%s)"
+          eas update \
+            --branch "${{ inputs.branch }}" \
+            --message "$message" \
+            --non-interactive

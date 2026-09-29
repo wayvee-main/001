@@ -1,0 +1,82 @@
+name: Build Android APK
+
+# Builds an installable APK on EAS and prints the download link.
+#
+# The `preview` profile in eas.json is the one that produces an .apk with
+# internal distribution — `production` produces an .aab for the Play Store,
+# which a phone cannot install directly.
+#
+# This is the slow path: a native build takes roughly 10-20 minutes. Run it
+# when native code changes — a new expo-* package, a plugin, an icon, or
+# anything in app.json. For JavaScript changes, use "Push Android update"
+# instead: it reaches an already-installed APK in under a minute.
+#
+# Required secret:
+#   EXPO_TOKEN   expo.dev -> Account Settings -> Access Tokens
+#
+# app.json's `owner` and `extra.eas.projectId` must both point at an Expo
+# account you can build under. `eas init` writes them.
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: 'eas.json build profile'
+        required: true
+        default: 'preview'
+        type: choice
+        options:
+          - preview        # .apk, installable directly
+          - development    # .apk with the dev client, for debugging
+          - production     # .aab, Play Store only — not phone-installable
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm ci
+
+      - name: Check configuration
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "Not configured yet: secret EXPO_TOKEN"
+            echo "expo.dev -> Account Settings -> Access Tokens"
+            exit 1
+          fi
+          owner=$(node -p "require('./app.json').expo.owner || ''")
+          project=$(node -p "require('./app.json').expo.extra?.eas?.projectId || ''")
+          echo "Building as owner=$owner projectId=$project"
+          if [ "$owner" = "citycues-team" ]; then
+            echo "::error::app.json still names the previous Expo organisation (citycues-team)."
+            echo "Run 'eas init' against the Expo account you want to build under; it rewrites owner and projectId."
+            exit 1
+          fi
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      # --wait so the run reflects the real outcome rather than "submitted".
+      # --non-interactive because there is no one here to answer a prompt.
+      - name: Build
+        run: |
+          eas build \
+            --platform android \
+            --profile "${{ inputs.profile }}" \
+            --non-interactive \
+            --wait
+
+      - name: Link to the build
+        if: always()
+        run: |
+          echo "## Android build" >> "$GITHUB_STEP_SUMMARY"
+          eas build:list --platform android --limit 1 --non-interactive 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
