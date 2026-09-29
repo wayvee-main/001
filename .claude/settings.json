@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:developer.ticketmaster.com)",
+      "Bash(npx -y tsx scripts/gen-tokens.ts)",
+      "Bash(npx tsc *)",
+      "Bash(PLAYWRIGHT_BROWSERS_PATH=\"/c/Users/thinkpad/AppData/Local/ms-playwright\" node \"/c/Users/thinkpad/AppData/Local/Temp/claude/c--projects-final-Scope/e782a56a-99af-40c9-9f2b-0fb6b1f9920a/scratchpad/shot.mjs\" \"/c/Users/thinkpad/AppData/Local/Temp/claude/c--projects-final-Scope/e782a56a-99af-40c9-9f2b-0fb6b1f9920a/scratchpad\")",
+      "Bash(cp \"/c/Users/thinkpad/AppData/Local/Temp/claude/c--projects-final-Scope/e782a56a-99af-40c9-9f2b-0fb6b1f9920a/scratchpad/shot.mjs\" /c/projects/final_Scope/scratch-shot.mjs)",
+      "Bash(mkdir -p \"/c/Users/thinkpad/AppData/Local/Temp/claude/c--projects-final-Scope/e782a56a-99af-40c9-9f2b-0fb6b1f9920a/scratchpad/shots\")",
+      "Bash(PLAYWRIGHT_BROWSERS_PATH=\"/c/Users/thinkpad/AppData/Local/ms-playwright\" node scratch-shot.mjs \"/c/Users/thinkpad/AppData/Local/Temp/claude/c--projects-final-Scope/e782a56a-99af-40c9-9f2b-0fb6b1f9920a/scratchpad/shots\")"
+    ]
+  }
+}

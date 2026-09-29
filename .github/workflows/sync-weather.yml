@@ -1,0 +1,28 @@
+name: Sync weather
+
+# Pulls the hourly National Weather Service forecast for the Downtown Oakland
+# anchor into the weather_hourly table — see scripts/sync-weather.ts. No API
+# key: api.weather.gov is public domain and keyless, so this workflow needs
+# only the Supabase credentials every other sync already uses.
+
+on:
+  schedule:
+    - cron: '17 * * * *' # hourly, off the hour so it isn't racing everyone else's cron
+  workflow_dispatch: {} # manual "Run workflow" button in the Actions tab
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm ci
+
+      - run: npm run sync:weather
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

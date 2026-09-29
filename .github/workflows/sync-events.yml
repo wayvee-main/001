@@ -1,0 +1,39 @@
+name: Sync curated events
+
+# Pushes the hand-verified events bundle (src/lib/events.ts) to the events
+# table as source='curated', and prunes rows the bundle no longer contains.
+#
+# The daily refresh in DATA.md already runs this by hand after each edit; this
+# workflow is the safety net for the other half of the job — past listings are
+# deleted from the bundle as they expire, and without a scheduled run the
+# backend keeps serving them until someone remembers to sync. It always pushes
+# whatever is on main, so it can never introduce data no one has verified.
+
+on:
+  schedule:
+    - cron: '23 8 * * *' # daily, ahead of the Ticketmaster sync at 09:43
+  push:
+    branches: [main]
+    paths: ['src/lib/events.ts'] # a verified edit lands in the backend without waiting for the deploy
+  workflow_dispatch: {} # manual "Run workflow" button in the Actions tab
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm ci
+
+      # The bundle is the source of truth here, so it gets audited before it's
+      # pushed — the same gate DATA.md asks a human to run.
+      - run: npm run audit:data
+
+      - run: npm run sync:events
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

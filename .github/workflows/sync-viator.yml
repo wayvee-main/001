@@ -1,0 +1,31 @@
+name: Sync Viator picks
+
+# Pulls real Viator affiliate listings into the viator_picks table.
+# Runs on GitHub's runners (normal internet access) since scripts/sync-viator.ts
+# needs to reach api.viator.com and Supabase directly — see scripts/sync-viator.ts
+# for what it does and docs/how-we-make-money.md for the affiliate setup.
+
+on:
+  schedule:
+    - cron: '17 9 * * *' # ~daily, off the hour on purpose
+  workflow_dispatch: {} # manual "Run workflow" button in the Actions tab
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm ci
+
+      - run: npm run sync:viator
+        env:
+          VIATOR_API_KEY: ${{ secrets.VIATOR_API_KEY }}
+          VIATOR_PID: ${{ vars.VIATOR_PID }}
+          VIATOR_MCID: ${{ vars.VIATOR_MCID }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

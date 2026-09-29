@@ -1,0 +1,62 @@
+/* GENERATED FILE — edit src/lib/tokens.ts and run `npm run tokens`, do not hand-edit. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Wayvee theme tokens — "Vee Coral" palette, generated from src/lib/tokens.ts.
+   Light is the default (:root); dark overrides it under prefers-color-scheme,
+   which NativeWind resolves on native from the system scheme too (app.json's
+   userInterfaceStyle: "automatic"). RGB triples (no commas) for tokens that
+   go through Tailwind's <alpha-value> opacity modifier; full rgba() strings
+   for tokens with fixed baked-in opacity. */
+:root {
+  --color-bg: 255 253 250;
+  --color-surface: 240 235 227;
+  --color-surface-raised: 255 253 250;
+  --color-surface-soft: 251 248 244;
+  --color-surface-sunk: 231 224 214;
+  --color-fg: 42 27 51;
+  --color-fg-muted: 113 102 114;
+  --color-fg-accent: 161 67 37;
+  --color-accent: 228 85 38;
+  --color-accent-fill: 232 93 44;
+  --color-on-accent: 255 255 255;
+  --color-open: 56 113 79;
+  --color-warm: 255 199 87;
+  --color-warm-strong: 84 63 24;
+  --color-vee: 111 91 209;
+  --color-vee-strong: 93 75 170;
+  --color-accent-tint: 251 228 218;
+  --color-warm-tint: 255 243 216;
+  --color-vee-tint: 227 223 247;
+  --color-danger: 201 53 55;
+  --color-edge: rgba(42, 27, 51, 0.12);
+  --color-edge-soft: rgba(42, 27, 51, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+  --color-bg: 21 17 23;
+  --color-surface: 37 30 41;
+  --color-surface-raised: 27 22 30;
+  --color-surface-soft: 55 46 60;
+  --color-surface-sunk: 16 13 19;
+  --color-fg: 255 253 250;
+  --color-fg-muted: 184 170 181;
+  --color-fg-accent: 255 146 113;
+  --color-accent: 255 146 113;
+  --color-accent-fill: 232 93 44;
+  --color-on-accent: 255 255 255;
+  --color-open: 131 208 168;
+  --color-warm: 255 199 87;
+  --color-warm-strong: 61 45 16;
+  --color-vee: 168 150 255;
+  --color-vee-strong: 197 186 255;
+  --color-accent-tint: 74 42 37;
+  --color-warm-tint: 64 51 33;
+  --color-vee-tint: 53 44 77;
+  --color-danger: 255 107 109;
+  --color-edge: rgba(255, 253, 250, 0.12);
+  --color-edge-soft: rgba(255, 253, 250, 0.08);
+  }
+}

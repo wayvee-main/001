@@ -1,0 +1,27 @@
+name: Sync menu schema data
+
+# Reads schema.org/Menu structured data from each place's own official
+# website (see scripts/sync-menu-schema.ts). No schedule yet — manual
+# "Run workflow" only, deliberately, until real coverage from a first run is
+# known. Depends on public.places already being populated (run "Sync places"
+# first).
+
+on:
+  workflow_dispatch: {} # manual "Run workflow" button in the Actions tab
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm ci
+
+      - run: npm run sync:menus
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

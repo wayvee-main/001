@@ -1,0 +1,30 @@
+name: Sync Ticketmaster events
+
+# Pulls real Ticketmaster Discovery API listings into the events table
+# (source='ticketmaster'). Runs on GitHub's runners since
+# scripts/sync-ticketmaster.ts needs to reach app.ticketmaster.com and
+# Supabase directly — see scripts/sync-ticketmaster.ts for what it does
+# and DATA.md for the curation/dedupe rules.
+
+on:
+  schedule:
+    - cron: '43 9 * * *' # ~daily, off the hour on purpose
+  workflow_dispatch: {} # manual "Run workflow" button in the Actions tab
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm ci
+
+      - run: npm run sync:ticketmaster
+        env:
+          TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
