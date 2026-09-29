@@ -246,9 +246,12 @@ launched.
 
 ## 8. Not covered here
 
-- **Expo.** `app.json` still has `owner: "citycues-team"` and an `eas.projectId`
-  from the previous project. Both must change before an EAS build, and both
-  need an Expo organisation that exists.
+- **Expo.** `app.json` carries no `owner` and no `eas.projectId`; `eas init`
+  writes both, under whichever account is logged in. It links to an existing
+  project only when `slug` matches that project's slug, so the slug here
+  tracks the project on expo.dev rather than the app's name. Run `eas init`
+  once in a clone and commit the `app.json` it writes — the **Build Android
+  APK** workflow refuses to start until those fields exist.
 - **Key rotation.** `sb_secret_4MBx…` is in the previous repository's git
   history. It is not in this repo, but that only limits the exposure — rotating
   it in Supabase is the only thing that ends it.
