@@ -83,7 +83,7 @@ insert into public.cities (
 ) values
   ('san-francisco', 'San Francisco', 'CA', 'America/Los_Angeles',
    37.7749, -122.4194, 37.700, -122.520, 37.840, -122.350,
-   array['San Francisco', 'Napa', 'Sonoma'], true),
+   array['San Francisco', 'Napa'], true),
 
   ('oakland', 'Oakland', 'CA', 'America/Los_Angeles',
    37.8032, -122.2716, 37.705, -122.335, 37.875, -122.110,

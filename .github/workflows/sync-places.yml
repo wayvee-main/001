@@ -8,7 +8,12 @@ name: Sync places
 on:
   schedule:
     - cron: '43 10 * * 1' # weekly — this data doesn't change fast enough to justify daily
-  workflow_dispatch: {} # manual "Run workflow" button in the Actions tab
+  workflow_dispatch:
+    inputs:
+      city:
+        description: 'One city slug to sync (blank = every launched city)'
+        required: false
+        type: string
 
 jobs:
   sync:
@@ -24,5 +29,6 @@ jobs:
 
       - run: npm run sync:places
         env:
+          WAYVEE_CITY: ${{ inputs.city }}
           SUPABASE_URL: ${{ vars.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

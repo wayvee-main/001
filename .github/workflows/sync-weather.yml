@@ -8,7 +8,12 @@ name: Sync weather
 on:
   schedule:
     - cron: '17 * * * *' # hourly, off the hour so it isn't racing everyone else's cron
-  workflow_dispatch: {} # manual "Run workflow" button in the Actions tab
+  workflow_dispatch:
+    inputs:
+      city:
+        description: 'One city slug to sync (blank = every launched city)'
+        required: false
+        type: string
 
 jobs:
   sync:
@@ -24,5 +29,6 @@ jobs:
 
       - run: npm run sync:weather
         env:
+          WAYVEE_CITY: ${{ inputs.city }}
           SUPABASE_URL: ${{ vars.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

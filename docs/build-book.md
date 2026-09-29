@@ -98,7 +98,9 @@ This is a decision, not a build task, but it has to be made explicitly and in wr
 
 ## 1.3 Lock The Launch Zone
 
-**[ALREADY IMPLEMENTED]** This is already effectively locked. The entire catalog, every route, every piece of copy in this app is built around Downtown Oakland specifically — not "Oakland" broadly, not a generic multi-city app. There is no code path today that handles a second city. This document treats that as a decision already made, not one still open.
+**[SUPERSEDED]** This section described a single-city lock: no code path for a second city, and that treated as settled. The backend no longer works that way. `public.cities` is the source of truth for where Wayvee has a catalog, the catalog tables carry a `city` foreign key, and every sync runs once per launched city. Eight Bay Area cities are seeded, with San Francisco and Oakland launched.
+
+What has *not* changed is the curated content: the hand-written catalog and the copy are still Oakland's, and a second city's curation is real work, not a config flag. So the launch zone is still effectively Oakland — but by what has been curated, not by what the code can express.
 
 ## 1.4 Freeze Everything Else For 90 Days
 
@@ -598,7 +600,7 @@ Deliberately short. Everything in this Part is explicitly out of scope until Par
 
 ## 8.1 What Scale Doesn't Mean
 
-Scale does not mean "add a second city." Every part of this app — the catalog, the copy, the walkability assumptions — is built around Downtown Oakland specifically. Scale means turning everything Part 2 audited (the manual curation work, the verification workflow, the partner onboarding steps) into something faster and cheaper to repeat, one dense guest zone at a time.
+Scale does not mean "add a second city" in the sense of writing the code for one — that exists now (see 1.3). It means the part the code cannot do: the curation, the verification workflow, the partner onboarding. A city row plus a sync run gives you a directory; it does not give you the hand-picked catalog, the walkability assumptions, or the copy that make a place feel covered. Scale is turning everything Part 2 audited into something faster and cheaper to repeat, one dense guest zone at a time.
 
 ## 8.2 The Market Kit
 

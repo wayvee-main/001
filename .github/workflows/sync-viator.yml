@@ -8,7 +8,12 @@ name: Sync Viator picks
 on:
   schedule:
     - cron: '17 9 * * *' # ~daily, off the hour on purpose
-  workflow_dispatch: {} # manual "Run workflow" button in the Actions tab
+  workflow_dispatch:
+    inputs:
+      city:
+        description: 'One city slug to sync (blank = every launched city)'
+        required: false
+        type: string
 
 jobs:
   sync:
@@ -24,6 +29,7 @@ jobs:
 
       - run: npm run sync:viator
         env:
+          WAYVEE_CITY: ${{ inputs.city }}
           VIATOR_API_KEY: ${{ secrets.VIATOR_API_KEY }}
           VIATOR_PID: ${{ vars.VIATOR_PID }}
           VIATOR_MCID: ${{ vars.VIATOR_MCID }}

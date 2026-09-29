@@ -9,7 +9,12 @@ name: Sync Ticketmaster events
 on:
   schedule:
     - cron: '43 9 * * *' # ~daily, off the hour on purpose
-  workflow_dispatch: {} # manual "Run workflow" button in the Actions tab
+  workflow_dispatch:
+    inputs:
+      city:
+        description: 'One city slug to sync (blank = every launched city)'
+        required: false
+        type: string
 
 jobs:
   sync:
@@ -25,6 +30,7 @@ jobs:
 
       - run: npm run sync:ticketmaster
         env:
+          WAYVEE_CITY: ${{ inputs.city }}
           TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
           SUPABASE_URL: ${{ vars.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

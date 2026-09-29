@@ -12,6 +12,8 @@
 // way for the pipeline to break (CLAUDE.md #6).
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
+import { launchedCities, type City } from './cities';
+
 export type SyncJob = 'events' | 'ticketmaster' | 'viator' | 'places' | 'weather';
 export type SyncStatus = 'ok' | 'partial' | 'failed';
 
@@ -48,10 +50,12 @@ async function recordSyncRun(
   job: SyncJob,
   startedAt: Date,
   outcome: SyncOutcome,
+  city: string | null,
 ): Promise<void> {
   const finishedAt = new Date();
   const { error } = await client.from('sync_runs').insert({
     job,
+    city,
     status: outcome.status,
     rows_written: outcome.rowsWritten ?? 0,
     rows_pruned: outcome.rowsPruned ?? 0,
@@ -67,7 +71,9 @@ async function recordSyncRun(
   }
 
   const cutoff = new Date(finishedAt.getTime() - RETENTION_DAYS * 24 * 60 * 60 * 1000).toISOString();
-  const { error: pruneError } = await client.from('sync_runs').delete().eq('job', job).lt('finished_at', cutoff);
+  let retention = client.from('sync_runs').delete().eq('job', job).lt('finished_at', cutoff);
+  retention = city ? retention.eq('city', city) : retention.is('city', null);
+  const { error: pruneError } = await retention;
   if (pruneError) console.warn(`sync_runs retention prune skipped (${job}):`, pruneError.message);
 }
 
@@ -81,16 +87,61 @@ export async function withSyncRun(
   client: SupabaseClient,
   job: SyncJob,
   body: () => Promise<SyncOutcome>,
+  city: string | null = null,
 ): Promise<void> {
   const startedAt = new Date();
   try {
     const outcome = await body();
-    await recordSyncRun(client, job, startedAt, outcome);
+    await recordSyncRun(client, job, startedAt, outcome, city);
     if (outcome.status === 'failed') process.exit(1);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`${job} sync failed:`, message);
-    await recordSyncRun(client, job, startedAt, { status: 'failed', detail: message });
+    await recordSyncRun(client, job, startedAt, { status: 'failed', detail: message }, city);
+    process.exit(1);
+  }
+}
+
+/** Runs a sync once per launched city, recording a sync_runs row for each.
+ *
+ * One city failing does not stop the others: a Ticketmaster outage in San
+ * Francisco should not cost Oakland its nightly refresh. Every city is
+ * attempted, each result is recorded against that city so sync_status shows
+ * exactly which one is stale, and the process exits non-zero at the end if
+ * any of them failed. */
+export async function withCitySyncRuns(
+  client: SupabaseClient,
+  job: SyncJob,
+  body: (city: City) => Promise<SyncOutcome>,
+): Promise<void> {
+  let cities: City[];
+  try {
+    cities = await launchedCities(client);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`${job} sync failed:`, message);
+    await recordSyncRun(client, job, new Date(), { status: 'failed', detail: message }, null);
+    process.exit(1);
+  }
+
+  let failed = 0;
+  for (const city of cities) {
+    const startedAt = new Date();
+    console.log(`\n[${city.slug}] ${job}`);
+    try {
+      const outcome = await body(city);
+      await recordSyncRun(client, job, startedAt, outcome, city.slug);
+      if (outcome.status === 'failed') failed += 1;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`[${city.slug}] ${job} sync failed:`, message);
+      await recordSyncRun(client, job, startedAt, { status: 'failed', detail: message }, city.slug);
+      failed += 1;
+    }
+  }
+
+  if (failed) {
+    console.error(`${job}: ${failed} of ${cities.length} cities failed`);
     process.exit(1);
   }
 }

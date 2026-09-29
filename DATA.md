@@ -12,7 +12,7 @@ runtime. This file records the split and the daily workflow.
 | Events (curated) | `src/lib/events.ts` | **Daily** | Every hand-verified listing, each with `startsAt` (ISO, Oakland time), `sourceUrl`, and `verifiedLabel`. This is the only file the daily refresh touches. |
 | Events (Ticketmaster) | Supabase `events`, `source='ticketmaster'` | On demand | Pulled by `scripts/sync-ticketmaster.ts`. Backend-only — never in the bundle. |
 | Places (bulk) | Supabase `places` | Weekly | Overture Maps + OpenStreetMap, via `scripts/sync-places.ts`. Includes OSM's verbatim `opening_hours`. |
-| Weather | Supabase `weather_hourly` | Hourly | National Weather Service forecast for the downtown anchor, via `scripts/sync-weather.ts`. |
+| Weather | Supabase `weather_hourly` | Hourly | National Weather Service forecast for each launched city's anchor, via `scripts/sync-weather.ts`. |
 | Sync health | Supabase `sync_runs` (+ `sync_status` view) | Every run | One row per sync run: rows written/pruned, duration, ok/partial/failed. |
 | User data | Supabase | Runtime | Saves, follows, plans, taste preferences. Never in the repo. |
 
@@ -153,6 +153,8 @@ exactly like a quiet week in Oakland. Freshness is now recorded, not assumed.
 | `sync-places.yml` | Weekly, Mon 10:43 UTC | `places` |
 | `sync-viator.yml` | See workflow | `viator_picks` |
 | `sync-weather.yml` | Hourly at :17 | `weather_hourly` |
+
+Every sync runs once per row in `public.cities` where `launched` is true, writes that city's slug onto the rows it creates, and prunes only within that city. Set `WAYVEE_CITY` (or the workflow's **city** input) to a single slug to sync just one — how a newly launched city is backfilled without re-fetching the others.
 
 The curated-events workflow runs `npm run audit:data` before it syncs — the same
 gate the manual workflow above asks a human for — and always pushes whatever is

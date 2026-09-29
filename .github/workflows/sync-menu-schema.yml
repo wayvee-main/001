@@ -1,13 +1,19 @@
 name: Sync menu schema data
 
 # Reads schema.org/Menu structured data from each place's own official
-# website (see scripts/sync-menu-schema.ts). No schedule yet — manual
-# "Run workflow" only, deliberately, until real coverage from a first run is
-# known. Depends on public.places already being populated (run "Sync places"
-# first).
+# website. NOT YET BUILT: scripts/sync-menu-schema.ts and the sync:menus
+# script it needs do not exist, so running this fails with "Missing script".
+# The workflow is kept as the shape the job will take. Manual dispatch only,
+# and when it is built it will depend on public.places already being
+# populated (run "Sync places" first).
 
 on:
-  workflow_dispatch: {} # manual "Run workflow" button in the Actions tab
+  workflow_dispatch:
+    inputs:
+      city:
+        description: 'One city slug to sync (blank = every launched city)'
+        required: false
+        type: string
 
 jobs:
   sync:
@@ -23,5 +29,6 @@ jobs:
 
       - run: npm run sync:menus
         env:
+          WAYVEE_CITY: ${{ inputs.city }}
           SUPABASE_URL: ${{ vars.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

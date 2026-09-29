@@ -15,7 +15,12 @@ on:
   push:
     branches: [main]
     paths: ['src/lib/events.ts'] # a verified edit lands in the backend without waiting for the deploy
-  workflow_dispatch: {} # manual "Run workflow" button in the Actions tab
+  workflow_dispatch:
+    inputs:
+      city:
+        description: 'One city slug to sync (blank = every launched city)'
+        required: false
+        type: string
 
 jobs:
   sync:
@@ -35,5 +40,6 @@ jobs:
 
       - run: npm run sync:events
         env:
+          WAYVEE_CITY: ${{ inputs.city }}
           SUPABASE_URL: ${{ vars.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

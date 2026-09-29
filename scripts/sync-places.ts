@@ -22,14 +22,14 @@
 // sync-viator.ts's PICK_LIMIT_PER_DESTINATION comment.
 import { DuckDBInstance } from '@duckdb/node-api';
 
-import { withSyncRun, serviceClient, type SyncOutcome } from './lib/sync-run';
+import type { City, CityBbox } from './lib/cities';
+import { withCitySyncRuns, serviceClient, type SyncOutcome } from './lib/sync-run';
 
 const supabase = serviceClient('sync places');
 
 // Oakland + immediate East Bay (Berkeley, Emeryville, Alameda) — kept tight to
 // what's actually relevant to a Downtown Oakland guest, same framing as
 // DESTINATION_QUERIES in sync-viator.ts.
-const BBOX = { minLon: -122.335, minLat: 37.705, maxLon: -122.11, maxLat: 37.875 };
 
 const TOTAL_CAP = 500;
 
@@ -118,7 +118,7 @@ interface RawPlace {
 /** Best-effort — a schema mismatch here shouldn't take down the OSM half of
  * the sync. Logs the first raw row so a real run's Actions log makes it
  * obvious which field names need adjusting. */
-async function fetchOverturePlaces(): Promise<RawPlace[]> {
+async function fetchOverturePlaces(bbox: CityBbox): Promise<RawPlace[]> {
   try {
     const instance = await DuckDBInstance.create(':memory:');
     const connection = await instance.connect();
@@ -136,8 +136,8 @@ async function fetchOverturePlaces(): Promise<RawPlace[]> {
         websites[1] AS website,
         phones[1] AS phone
       FROM read_parquet('${OVERTURE_PLACES_PATH}', filename=true, hive_partitioning=1)
-      WHERE bbox.xmin BETWEEN ${BBOX.minLon} AND ${BBOX.maxLon}
-        AND bbox.ymin BETWEEN ${BBOX.minLat} AND ${BBOX.maxLat}
+      WHERE bbox.xmin BETWEEN ${bbox.minLon} AND ${bbox.maxLon}
+        AND bbox.ymin BETWEEN ${bbox.minLat} AND ${bbox.maxLat}
         AND (
           categories.primary ILIKE '%restaurant%' OR categories.primary ILIKE '%bar%'
           OR categories.primary ILIKE '%cafe%' OR categories.primary ILIKE '%coffee%'
@@ -195,13 +195,13 @@ interface OverpassElement {
   tags?: Record<string, string>;
 }
 
-async function fetchOsmPlaces(): Promise<RawPlace[]> {
+async function fetchOsmPlaces(bbox: CityBbox): Promise<RawPlace[]> {
   // Widened deliberately for cuisine diversity — amenity=restaurant/fast_food
   // already covers every cuisine (cuisine is a separate tag layered on top),
   // but ice_cream/food_court aren't tagged as either and were being dropped.
   const amenityValues = ['restaurant', 'bar', 'pub', 'cafe', 'nightclub', 'fast_food', 'biergarten', 'ice_cream', 'food_court'];
   const shopValues = ['wine', 'bakery', 'coffee', 'deli'];
-  const bboxStr = `${BBOX.minLat},${BBOX.minLon},${BBOX.maxLat},${BBOX.maxLon}`;
+  const bboxStr = `${bbox.minLat},${bbox.minLon},${bbox.maxLat},${bbox.maxLon}`;
   const query = `
     [out:json][timeout:90];
     (
@@ -443,9 +443,9 @@ function rankAndCap(places: ConflatedPlace[], cap: number): ConflatedPlace[] {
   return [...places].sort((a, b) => rank[a.confidence] - rank[b.confidence]).slice(0, cap);
 }
 
-void withSyncRun(supabase, 'places', async (): Promise<SyncOutcome> => {
+void withCitySyncRuns(supabase, 'places', async (city: City): Promise<SyncOutcome> => {
   const runStartedAt = new Date().toISOString();
-  const [overturePlaces, osmPlaces] = await Promise.all([fetchOverturePlaces(), fetchOsmPlaces()]);
+  const [overturePlaces, osmPlaces] = await Promise.all([fetchOverturePlaces(city.bbox), fetchOsmPlaces(city.bbox)]);
 
   if (!overturePlaces.length && !osmPlaces.length) {
     throw new Error('no places fetched from either source — nothing written');
@@ -477,6 +477,7 @@ void withSyncRun(supabase, 'places', async (): Promise<SyncOutcome> => {
     needs_review: place.needsReview,
     source_overture_id: place.sourceOvertureId,
     source_osm_id: place.sourceOsmId,
+    city: city.slug,
     synced_at: runStartedAt,
   }));
 
@@ -490,13 +491,18 @@ void withSyncRun(supabase, 'places', async (): Promise<SyncOutcome> => {
   // is stale (renamed/closed/dropped out of this run's top 500) — a straightforward
   // cutoff instead of a NOT IN (500 quoted ids) list, which hit a query-length limit
   // on a live run (confirmed: "prune warning: Bad Request").
+  //
+  // Scoped to this city: every other city's rows carry an older synced_at by
+  // definition, so an unscoped cutoff would delete the entire catalog except
+  // whichever city happened to sync last.
   const { error: pruneError, count } = await supabase
     .from('places')
     .delete({ count: 'exact' })
+    .eq('city', city.slug)
     .lt('synced_at', runStartedAt);
   if (pruneError) console.error('prune warning:', pruneError.message);
 
-  console.log(`synced ${rows.length} places to the backend (cap ${TOTAL_CAP})`);
+  console.log(`  synced ${rows.length} places to the backend (cap ${TOTAL_CAP})`);
 
   // One source going dark still produces a usable table, but it's a materially
   // thinner one (no cross-confirmation, and with OSM down, no hours at all) —

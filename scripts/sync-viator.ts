@@ -24,7 +24,8 @@
 // spot-checked against a real response the first time this runs —
 // PICK_LIMIT_PER_DESTINATION is intentionally small so that first run is
 // cheap to eyeball before trusting it.
-import { withSyncRun, serviceClient, type SyncOutcome } from './lib/sync-run';
+import type { City } from './lib/cities';
+import { withCitySyncRuns, serviceClient, type SyncOutcome } from './lib/sync-run';
 
 const API_KEY = process.env.VIATOR_API_KEY;
 const PID = process.env.VIATOR_PID || 'p00311090';
@@ -47,6 +48,7 @@ const DESTINATION_QUERIES: { label: string; candidates: string[]; alsoSearch?: s
   { label: 'Oakland & East Bay', candidates: ['Oakland'], alsoSearch: ['Berkeley'], count: 14 },
   { label: 'San Francisco', candidates: ['San Francisco'] },
   { label: 'Napa', candidates: ['Napa & Sonoma', 'Napa Valley', 'Napa'] },
+  { label: 'San Jose', candidates: ['San Jose'] },
   { label: 'Yosemite', candidates: ['Yosemite National Park', 'Yosemite'] },
 ];
 const PICKS_PER_DESTINATION = 6;
@@ -305,8 +307,25 @@ async function searchProducts(destinationId: number, count: number): Promise<Via
   return products ?? [];
 }
 
-void withSyncRun(supabase, 'viator', async (): Promise<SyncOutcome> => {
+void withCitySyncRuns(supabase, 'viator', async (city: City): Promise<SyncOutcome> => {
   const rows: Record<string, unknown>[] = [];
+
+  // cities.viator_destinations names which DESTINATION_QUERIES entries belong
+  // to this city, in the order its carousel should show them. The candidate
+  // lists and per-destination counts stay in code, where they are tuned; the
+  // per-city selection is data. A city with none configured has no Viator
+  // coverage yet, which is a clean no-op rather than a failure.
+  const queries = city.viatorDestinations
+    .map((label) => DESTINATION_QUERIES.find((q) => q.label === label))
+    .filter((q): q is (typeof DESTINATION_QUERIES)[number] => Boolean(q));
+
+  const unknown = city.viatorDestinations.filter((l) => !DESTINATION_QUERIES.some((q) => q.label === l));
+  if (unknown.length) console.warn(`  no DESTINATION_QUERIES entry for: ${unknown.join(', ')}`);
+
+  if (!queries.length) {
+    console.log('  no Viator destinations configured — skipping');
+    return { status: 'ok', rowsWritten: 0, detail: 'no Viator destinations configured for this city' };
+  }
 
   const allDestinations = await fetchAllDestinations().catch((error) => {
     console.error('could not fetch the Viator destination list:', error.message);
@@ -316,7 +335,7 @@ void withSyncRun(supabase, 'viator', async (): Promise<SyncOutcome> => {
 
   const seenProductCodes = new Set<string>();
 
-  for (const { label, candidates, alsoSearch, count } of DESTINATION_QUERIES) {
+  for (const { label, candidates, alsoSearch, count } of queries) {
     const primary = resolveDestinationId(allDestinations, candidates);
     if (!primary) {
       console.warn(`skipping "${label}" — no matching Viator destination among [${candidates.join(', ')}]`);
@@ -383,6 +402,7 @@ void withSyncRun(supabase, 'viator', async (): Promise<SyncOutcome> => {
       ]);
       rows.push({
         id: product.productCode,
+        city: city.slug,
         title: product.title,
         description: product.description,
         image,
@@ -417,10 +437,11 @@ void withSyncRun(supabase, 'viator', async (): Promise<SyncOutcome> => {
   const { error: pruneError, count } = await supabase
     .from('viator_picks')
     .delete({ count: 'exact' })
+    .eq('city', city.slug)
     .not('id', 'in', `(${ids.map((id) => `"${id}"`).join(',')})`);
   if (pruneError) console.error('prune warning:', pruneError.message);
 
-  console.log(`synced ${rows.length} Viator picks to the backend`);
+  console.log(`  synced ${rows.length} Viator picks to the backend`);
 
   return {
     status: pruneError ? 'partial' : 'ok',

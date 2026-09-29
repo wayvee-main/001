@@ -1,4 +1,4 @@
-// Hourly weather for the Downtown Oakland anchor, from the US National Weather
+// Hourly weather for each launched city's anchor, from the US National Weather
 // Service (api.weather.gov). Public domain, no API key, no paid tier — and,
 // unlike every commercial weather API, no terms that forbid storing the result.
 //
@@ -11,11 +11,8 @@
 // carried across as published. Fields NWS omits (a null probabilityOfPrecipitation,
 // for instance) stay null rather than being filled with a zero that would read
 // as a real forecast of "no rain".
-import { withSyncRun, serviceClient, type SyncOutcome } from './lib/sync-run';
-
-// 12th St / Broadway — the same downtown anchor scripts/sync-ticketmaster.ts
-// measures from, so "the weather" and "how far" describe one place.
-const ANCHOR = { latitude: 37.8032, longitude: -122.2716 };
+import type { City } from './lib/cities';
+import { withCitySyncRuns, serviceClient, type SyncOutcome } from './lib/sync-run';
 
 // NWS asks every caller to identify itself with a contact; an unidentified
 // request gets a 403. https://www.weather.gov/documentation/services-web-api
@@ -69,11 +66,11 @@ async function fetchJson<T>(url: string): Promise<T> {
 
 const client = serviceClient('sync weather');
 
-void withSyncRun(client, 'weather', async (): Promise<SyncOutcome> => {
+void withCitySyncRuns(client, 'weather', async (city: City): Promise<SyncOutcome> => {
   // The gridpoint a coordinate belongs to is stable, but resolving it each run
   // costs one cheap request and means a grid change never silently strands the
   // sync on a dead forecast URL.
-  const pointsUrl = `https://api.weather.gov/points/${ANCHOR.latitude},${ANCHOR.longitude}`;
+  const pointsUrl = `https://api.weather.gov/points/${city.anchor.latitude},${city.anchor.longitude}`;
   const points = await fetchJson<NwsPointsResponse>(pointsUrl);
   const forecastUrl = points.properties?.forecastHourly;
   if (!forecastUrl) throw new Error(`no forecastHourly URL in ${pointsUrl}`);
@@ -94,6 +91,7 @@ void withSyncRun(client, 'weather', async (): Promise<SyncOutcome> => {
         (period.temperatureUnit ?? 'F') === 'F',
     )
     .map((period) => ({
+      city: city.slug,
       starts_at: new Date(period.startTime).toISOString(),
       ends_at: new Date(period.endTime).toISOString(),
       temperature_f: Math.round(period.temperature),
@@ -119,11 +117,12 @@ void withSyncRun(client, 'weather', async (): Promise<SyncOutcome> => {
   const { error: pruneError, count } = await client
     .from('weather_hourly')
     .delete({ count: 'exact' })
+    .eq('city', city.slug)
     .lt('starts_at', cutoff);
   if (pruneError) console.warn('prune warning:', pruneError.message);
 
   const dropped = Math.min(periods.length, HOURS_AHEAD) - rows.length;
-  console.log(`synced ${rows.length} hourly periods (${dropped} dropped), pruned ${count ?? 0} elapsed`);
+  console.log(`  synced ${rows.length} hourly periods (${dropped} dropped), pruned ${count ?? 0} elapsed`);
 
   return {
     status: dropped > 0 ? 'partial' : 'ok',

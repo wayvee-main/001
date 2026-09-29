@@ -23,7 +23,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 import { EVENTS } from '../src/lib/events';
 import { formatMiles, milesBetween, type GeoPoint } from '../src/lib/geo';
-import { withSyncRun, serviceClient, type SyncOutcome } from './lib/sync-run';
+import type { City } from './lib/cities';
+import { withCitySyncRuns, withSyncRun, serviceClient, type SyncOutcome } from './lib/sync-run';
 
 const API_KEY = process.env.TICKETMASTER_API_KEY;
 const DRY_RUN = process.env.TICKETMASTER_DRY_RUN === '1';
@@ -31,7 +32,16 @@ const DRY_RUN = process.env.TICKETMASTER_DRY_RUN === '1';
 /** 12th St / Broadway (Oakland City Center BART) — the downtown anchor every
  * distance in this script is measured from. Discovery's radius search is
  * centred here too, so "close to the guest" is the query, not a post-filter. */
-const ANCHOR: GeoPoint = { latitude: 37.8032, longitude: -122.2716 };
+/** Only for TICKETMASTER_DRY_RUN, which runs without a database and so cannot
+ * read public.cities. Every real run uses the city row's own anchor. */
+const DRY_RUN_CITY: City = {
+  slug: 'oakland',
+  name: 'Oakland',
+  timezone: 'America/Los_Angeles',
+  anchor: { latitude: 37.8032, longitude: -122.2716 },
+  bbox: { minLat: 37.705, minLon: -122.335, maxLat: 37.875, maxLon: -122.11 },
+  viatorDestinations: [],
+};
 const RADIUS_MILES = 5;
 
 /** Discovery caps deep paging at size*page <= 1000; 200 is the max page size. */
@@ -66,7 +76,6 @@ const JUNK_SEGMENTS = new Set(['Miscellaneous', 'Undefined']);
 /** Anything else (cancelled, postponed, rescheduled) is not something to send a guest to. */
 const SHOWABLE_STATUS = new Set(['onsale', 'offsale']);
 
-const OAKLAND_TZ = 'America/Los_Angeles';
 
 interface TicketmasterImage {
   url: string;
@@ -115,6 +124,7 @@ interface DiscoveryResponse {
 
 interface EventRow {
   id: string;
+  city: string;
   starts_at: string;
   name: string;
   time_label: string;
@@ -142,10 +152,10 @@ interface EventRow {
 
 // ── Discovery API ──
 
-async function fetchPage(page: number, startISO: string, endISO: string): Promise<DiscoveryResponse> {
+async function fetchPage(page: number, startISO: string, endISO: string, city: City): Promise<DiscoveryResponse> {
   const params = new URLSearchParams({
     apikey: API_KEY as string,
-    latlong: `${ANCHOR.latitude},${ANCHOR.longitude}`,
+    latlong: `${city.anchor.latitude},${city.anchor.longitude}`,
     radius: String(RADIUS_MILES),
     unit: 'miles',
     startDateTime: startISO,
@@ -206,14 +216,14 @@ function venueCoords(venue: TicketmasterVenue): GeoPoint {
 
 /** Distance from the downtown anchor, computed from Ticketmaster's own venue
  * coordinates. Real measurement, not a guessed walk time. */
-function travelLabel(venue: TicketmasterVenue): string {
-  const miles = milesBetween(ANCHOR, venueCoords(venue));
+function travelLabel(venue: TicketmasterVenue, city: City): string {
+  const miles = milesBetween(city.anchor, venueCoords(venue));
   return miles < 0.1 ? 'Right here' : `${formatMiles(miles)} from Downtown`;
 }
 
-function categories(startsAt: Date, event: TicketmasterEvent, now: Date): string[] {
+function categories(startsAt: Date, event: TicketmasterEvent, now: Date, city: City): string[] {
   const cats: string[] = [];
-  const dayKey = (date: Date) => date.toLocaleDateString('en-CA', { timeZone: OAKLAND_TZ });
+  const dayKey = (date: Date) => date.toLocaleDateString('en-CA', { timeZone: city.timezone });
   cats.push(dayKey(startsAt) === dayKey(now) ? 'Tonight' : 'Upcoming');
 
   const segment = event.classifications?.[0]?.segment?.name ?? '';
@@ -246,17 +256,17 @@ function priceLabels(event: TicketmasterEvent): { label: string; from: string; a
   return { label: from, from, allIn };
 }
 
-function timeLabels(startsAt: Date): { time: string; date: string } {
-  const time = startsAt.toLocaleTimeString('en-US', { timeZone: OAKLAND_TZ, hour: 'numeric', minute: '2-digit' });
+function timeLabels(startsAt: Date, city: City): { time: string; date: string } {
+  const time = startsAt.toLocaleTimeString('en-US', { timeZone: city.timezone, hour: 'numeric', minute: '2-digit' });
   const trimmed = time.replace(':00', '');
-  const day = startsAt.toLocaleDateString('en-US', { timeZone: OAKLAND_TZ, weekday: 'short', month: 'short', day: 'numeric' });
+  const day = startsAt.toLocaleDateString('en-US', { timeZone: city.timezone, weekday: 'short', month: 'short', day: 'numeric' });
   return { time: trimmed, date: `${day} · ${trimmed}` };
 }
 
-function toRow(event: TicketmasterEvent, now: Date, pulledLabel: string): EventRow {
+function toRow(event: TicketmasterEvent, now: Date, pulledLabel: string, city: City): EventRow {
   const venue = event._embedded?.venues?.[0] as TicketmasterVenue;
   const startsAt = new Date(event.dates?.start?.dateTime as string);
-  const { time, date } = timeLabels(startsAt);
+  const { time, date } = timeLabels(startsAt, city);
   const price = priceLabels(event);
   const attractions = (event._embedded?.attractions ?? []).map((a) => a.name).filter(Boolean) as string[];
 
@@ -266,13 +276,13 @@ function toRow(event: TicketmasterEvent, now: Date, pulledLabel: string): EventR
     name: event.name,
     time_label: time,
     price_label: price.label,
-    travel: travelLabel(venue),
+    travel: travelLabel(venue, city),
     vibe_tags: vibeTags(event),
-    cats: categories(startsAt, event, now),
+    cats: categories(startsAt, event, now, city),
     date_label: date,
     venue: venue.name as string,
     venue_id: VENUE_IDS[venue.name as string] ?? null,
-    addr: `${venue.address?.line1} · ${travelLabel(venue)}`,
+    addr: `${venue.address?.line1} · ${travelLabel(venue, city)}`,
     lineup: attractions.length ? attractions.join(' · ') : 'Lineup is on the Ticketmaster listing',
     // Ticketmaster's own copy where it exists; otherwise a plain pointer rather
     // than invented description text (DATA.md honesty rules).
@@ -286,6 +296,7 @@ function toRow(event: TicketmasterEvent, now: Date, pulledLabel: string): EventR
     verified_label: pulledLabel,
     image: pickImage(event) as string,
     source: 'ticketmaster',
+    city: city.slug,
     updated_at: new Date().toISOString(),
   };
 }
@@ -319,16 +330,16 @@ function collidesWithCurated(row: EventRow): boolean {
 /** `client` is null only under TICKETMASTER_DRY_RUN=1, which stops before any
  * write. A missing key throws rather than exiting so the failure is recorded in
  * sync_runs on a real run (see scripts/lib/sync-run.ts). */
-async function main(client: SupabaseClient | null): Promise<SyncOutcome> {
+async function main(client: SupabaseClient | null, city: City): Promise<SyncOutcome> {
   if (!API_KEY) throw new Error('TICKETMASTER_API_KEY is not set');
 
   const now = new Date();
   const end = new Date(now.getTime() + DAYS_AHEAD * 24 * 60 * 60 * 1000);
-  const pulledLabel = `Listed on Ticketmaster — pulled ${now.toLocaleDateString('en-US', { timeZone: OAKLAND_TZ, month: 'short', day: 'numeric', year: 'numeric' })}`;
+  const pulledLabel = `Listed on Ticketmaster — pulled ${now.toLocaleDateString('en-US', { timeZone: city.timezone, month: 'short', day: 'numeric', year: 'numeric' })}`;
 
   const raw: TicketmasterEvent[] = [];
   for (let page = 0; page < MAX_PAGES; page += 1) {
-    const body = await fetchPage(page, discoveryTimestamp(now), discoveryTimestamp(end));
+    const body = await fetchPage(page, discoveryTimestamp(now), discoveryTimestamp(end), city);
     const events = body._embedded?.events ?? [];
     raw.push(...events);
     const totalPages = body.page?.totalPages ?? 1;
@@ -345,7 +356,7 @@ async function main(client: SupabaseClient | null): Promise<SyncOutcome> {
     if (seenTicketmasterIds.has(event.id)) continue;
     seenTicketmasterIds.add(event.id);
 
-    const row = toRow(event, now, pulledLabel);
+    const row = toRow(event, now, pulledLabel, city);
     if (collidesWithCurated(row)) {
       collisions += 1;
       continue;
@@ -373,16 +384,20 @@ async function main(client: SupabaseClient | null): Promise<SyncOutcome> {
   }
 
   // Prune is scoped to source='ticketmaster' so curated rows are never touched
-  // (sync-events.ts owns those). This clears listings that have passed, sold
-  // out of the window, or dropped out of the curation cut since the last run.
+  // (sync-events.ts owns those), and to this city so another city's listings
+  // are not swept up for the crime of not being in this run's id list.
   const ids = rows.map((row) => row.id);
-  const prune = client.from('events').delete({ count: 'exact' }).eq('source', 'ticketmaster');
+  const prune = client
+    .from('events')
+    .delete({ count: 'exact' })
+    .eq('source', 'ticketmaster')
+    .eq('city', city.slug);
   const { error: pruneError, count } = ids.length
     ? await prune.not('id', 'in', `(${ids.map((id) => `"${id}"`).join(',')})`)
     : await prune;
   if (pruneError) console.error('prune warning:', pruneError.message);
 
-  console.log(`synced ${rows.length} Ticketmaster events to the backend`);
+  console.log(`  synced ${rows.length} Ticketmaster events to the backend`);
 
   // Ticketmaster genuinely has quiet windows, so zero rows is not a failure —
   // but it is worth flagging, since it looks identical to a broken filter.
@@ -397,11 +412,11 @@ async function main(client: SupabaseClient | null): Promise<SyncOutcome> {
 }
 
 if (DRY_RUN) {
-  void main(null).catch((error: unknown) => {
+  void main(null, DRY_RUN_CITY).catch((error: unknown) => {
     console.error('ticketmaster dry run failed:', error instanceof Error ? error.message : String(error));
     process.exit(1);
   });
 } else {
   const client = serviceClient('sync Ticketmaster events (or set TICKETMASTER_DRY_RUN=1)');
-  void withSyncRun(client, 'ticketmaster', () => main(client));
+  void withCitySyncRuns(client, 'ticketmaster', (city) => main(client, city));
 }
