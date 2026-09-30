@@ -314,7 +314,6 @@ export default function CreateScreen() {
     deviceLocation,
     pacePreference,
     plans,
-    session,
     setBudgetPreference,
     setStartTimePreference,
     setWalkBudgetMinutes,
@@ -361,7 +360,6 @@ export default function CreateScreen() {
     return [cityLabel, weekday, weatherNow ? weatherLine(weatherNow) : null].filter(Boolean).join(' \u00b7 ');
   }, [cityLabel, weatherNow]);
   const hasReminders = activeReminders(plans, stay).length > 0;
-  const profileInitial = (session?.user.name?.trim().slice(0, 1) || 'G').toUpperCase();
   const reduceMotion = useReducedMotionPreference();
   // ── Composer ──────────────────────────────────────────────────────────
   const [promptText, setPromptText] = useState('');
@@ -922,7 +920,6 @@ export default function CreateScreen() {
           automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}>
           <HomeHeader
             locationLabel={headerLocationLabel}
-            initial={profileInitial}
             hasReminders={hasReminders}
             onNotifications={() => router.push('/notifications')}
             onProfile={() => router.push('/profile')}

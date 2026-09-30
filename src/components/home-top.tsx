@@ -1,7 +1,6 @@
 import { type ReactNode } from 'react';
 import { ScrollView, Text, TouchableOpacity, View, type ViewStyle } from 'react-native';
 
-import { VeeMark } from '@/components/vee-mark';
 import { Glyph } from '@/components/glyph';
 import type { HomeSuggestion } from '@/lib/daypart';
 import { useRaisedSurface } from '@/lib/shadows';
@@ -46,13 +45,11 @@ export function HomeVeePanel({ children }: { children: ReactNode }) {
  * reading is worse than none (see lib/weather.ts). */
 export function HomeHeader({
   locationLabel,
-  initial,
   hasReminders,
   onNotifications,
   onProfile,
 }: {
   locationLabel: string;
-  initial: string;
   hasReminders: boolean;
   onNotifications: () => void;
   onProfile: () => void;
@@ -62,25 +59,9 @@ export function HomeHeader({
   return (
     <View style={{ paddingTop: 10 }} className="flex-row items-start justify-between gap-x-3">
       <View className="min-w-0 flex-1">
-        {/* Mark and place on one line: together they answer "where am I", and
-            stacking them made two weak rows out of one strong one.
-
-            16px mark against 14px type. Matching the numbers exactly reads
-            smaller than it measures — the glyph does not fill its box the way
-            a capital fills its em — so the mark is sized to sit optically
-            level with the type rather than numerically equal to it. */}
-        <View className="flex-row items-center gap-x-1.5">
-          {/* The lockup carried the brand's accessible name; the bare mark has
-              none of its own, so it is labelled here. */}
-          <View accessible accessibilityRole="image" accessibilityLabel="Wayvee">
-            <VeeMark size={16} variant="compact" />
-          </View>
-          {/* shrink, so a long place name truncates instead of shouldering the
-              mark out of the row. */}
-          <Text numberOfLines={1} className="shrink font-dm-bold text-body text-ink">
-            {locationLabel}
-          </Text>
-        </View>
+        <Text numberOfLines={1} className="font-dm-bold text-body text-ink">
+          {locationLabel}
+        </Text>
         {/* Its own line rather than appended to the location: at 360dp the two
             together overflow once the forecast adds a rain chance, and a single
             clipped line would drop the weather entirely. */}
@@ -106,13 +87,16 @@ export function HomeHeader({
             />
           ) : null}
         </TouchableOpacity>
+        {/* A glyph rather than an initial on a yellow disc. It sits beside the
+            bell, and two actions in the same corner reading as two different
+            kinds of control was the whole of the noise. */}
         <TouchableOpacity
           accessibilityRole="button"
           accessibilityLabel="Your Wayvee profile"
           activeOpacity={0.78}
           onPress={onProfile}
-          className="h-9 w-9 items-center justify-center rounded-full bg-warm">
-          <Text style={{ color: colors['warm-strong'] }} className="font-dm-bold text-label">{initial}</Text>
+          className="h-9 w-9 items-center justify-center rounded-full">
+          <Glyph name="user" size={19} color={colors.fg} strokeWidth={1.55} />
         </TouchableOpacity>
       </View>
     </View>

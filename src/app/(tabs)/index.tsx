@@ -10,7 +10,6 @@ import { SectionHeading } from '@/components/section-heading';
 import { Photo } from '@/components/photo';
 import { PosterCard } from '@/components/poster-card';
 import { ChevronRight, MiniChevron, Skeleton } from '@/components/ui';
-import { firstNameFor } from '@/lib/auth';
 import { nearbyMetaLine, openBadgeLabel, rankNearby } from '@/lib/nearby-pool';
 import { useContentHydrating } from '@/lib/bootstrap';
 import { useNow } from '@/lib/clock';
@@ -69,8 +68,13 @@ function EventRow({ event, matchedTag, onPress }: { event: ScoperEvent; matchedT
           <Text numberOfLines={1} className="flex-1 font-dm-bold text-[13.5px] text-ink">{event.name}</Text>
           <Text numberOfLines={1} className="shrink-0 font-dm-medium text-[10.5px] text-pine">{event.priceLabel}</Text>
         </View>
+        {/* When and where, and nothing else. This carried travel as a fourth
+            fact, which is the longest of the four and the one already on the
+            detail page — backend listings render it "0.4 mi from Downtown",
+            so the line truncated before reaching the venue that a guest is
+            actually scanning for. Price sits in the title row above. */}
         <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">
-          {eventDayGroupLabel(event)} · {event.time} · {event.venue} · {event.travel}
+          {eventDayGroupLabel(event)} · {event.time} · {event.venue}
         </Text>
         {matchedTag ? <TasteMatch tag={matchedTag} /> : null}
       </View>
@@ -289,7 +293,6 @@ export default function HomeScreen() {
   const eventsTodayCount = useMemo(() => events.filter((event) => isEventToday(event, now)).length, [events, now]);
   const hasReminders = activeReminders(s.plans, s.stay).length > 0;
   const homeLocationLabel = cityStateDisplayLabel(s.deviceLocation, GUEST.city, 'CA');
-  const guestName = firstNameFor(s.session?.user.name ?? GUEST.name);
 
   // Prefer a live kitchen count when structured hours are available. The
   // fallback names the ranked inventory honestly rather than calling unknown
@@ -474,7 +477,7 @@ export default function HomeScreen() {
           }
           title={eventLead.name}
           titleTrailing={<Text numberOfLines={1} className="shrink-0 font-dm-medium text-[11px] text-pine">{eventLead.priceLabel}</Text>}
-          meta={`${eventLead.venue} · ${eventLead.travel}`}
+          meta={eventLead.venue}
           matchedTag={getEventMatchedTag(eventLead)}
         />
       ) : null}
@@ -518,7 +521,6 @@ export default function HomeScreen() {
       <ScreenScroll gap={32} clearsTabBar refreshing={refreshing} onRefresh={onRefresh}>
         <HomeHeader
           locationLabel={homeLocationLabel}
-          initial={guestName.slice(0, 1).toUpperCase()}
           hasReminders={hasReminders}
           onNotifications={() => router.push('/notifications')}
           onProfile={() => router.push('/profile')}
