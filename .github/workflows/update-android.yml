@@ -3,8 +3,15 @@ name: Push Android update
 # Publishes a JavaScript-only update to an already-installed APK, over the air.
 # Under a minute, against roughly 10-20 for a native rebuild.
 #
-# This is how the app on a phone follows changes as they are made. The phone
-# picks the update up on next launch; there is nothing to reinstall.
+# This is how the app on a phone follows changes as they are made, and there is
+# nothing to reinstall. It lands on the SECOND cold start after publishing, not
+# the first: app.json sets no fallbackToCacheTimeout, so @expo/config-plugins
+# resolves LAUNCH_WAIT_MS to 0 (utils/Updates.js:189) against a CHECK_ON_LAUNCH
+# of ALWAYS. The app therefore starts from the bundle it already has and fetches
+# the new one in the background, which the next cold start runs. Backgrounding
+# and resuming is not a cold start. Setting updates.fallbackToCacheTimeout to a
+# few thousand ms trades a slower start for same-launch delivery — but it edits
+# app.json, so it costs a rebuild and a reinstall to take effect.
 #
 # What it CANNOT deliver is native change: a new expo-* package, a config
 # plugin, a permission, an icon, anything in app.json. app.json sets
@@ -17,6 +24,26 @@ name: Push Android update
 # Required secret: EXPO_TOKEN
 
 on:
+  # Every JavaScript change that lands on main publishes itself. The paths are
+  # the ones that end up in the bundle; a change to docs, the backend, the sync
+  # scripts or the workflows is not something a phone can receive, so it does
+  # not spend a run.
+  #
+  # app.json and eas.json are deliberately absent. Editing either changes the
+  # fingerprint, and therefore the runtime version, so an update built from it
+  # targets a runtime no installed build has — it would publish successfully
+  # and reach nothing. Those changes need "Build Android APK" and a reinstall.
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'assets/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'babel.config.js'
+      - 'metro.config.js'
+      - 'tailwind.config.js'
+      - 'tsconfig.json'
   workflow_dispatch:
     inputs:
       branch:
@@ -29,6 +56,12 @@ on:
         required: false
         default: ''
         type: string
+
+# A second push while the first is still publishing would race it, and the
+# loser would be whichever finished last rather than whichever is newer.
+concurrency:
+  group: android-update-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   update:
@@ -70,10 +103,20 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Publish update
+        env:
+          # Via env rather than ${{ }} interpolated into the script: a value
+          # containing a quote or a backtick would otherwise be parsed as
+          # shell rather than passed as text.
+          INPUT_MESSAGE: ${{ inputs.message }}
+          INPUT_BRANCH: ${{ inputs.branch }}
         run: |
-          message="${{ inputs.message }}"
+          message="$INPUT_MESSAGE"
           [ -n "$message" ] || message="$(git log -1 --pretty=%s)"
+          # Empty on a push event; preview is the channel the installed APK
+          # is built against.
+          branch="$INPUT_BRANCH"
+          [ -n "$branch" ] || branch="preview"
           eas update \
-            --branch "${{ inputs.branch }}" \
+            --branch "$branch" \
             --message "$message" \
             --non-interactive
