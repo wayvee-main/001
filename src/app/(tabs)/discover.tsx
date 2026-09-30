@@ -105,7 +105,11 @@ function EventRow({ event, onPress, onPlan }: { event: ScoperEvent; onPress: () 
             <Text numberOfLines={1} className="shrink-0 font-dm-medium text-[10.5px] text-pine">{event.priceLabel}</Text>
           </View>
           <Text numberOfLines={1} className="mt-1 font-dm-bold text-[14px] text-ink">{event.name}</Text>
-          <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">{event.time} · {event.venue} · {event.travel}</Text>
+          {/* Time and venue. Travel was the third fact here and the first to
+              be cut off, and this row is tighter than Home's — a plan chip and
+              a chevron share the width with it. The day is already the eyebrow
+              above, and travel is on the detail page. */}
+          <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">{event.time} · {event.venue}</Text>
         </View>
       </TouchableOpacity>
       {onPlan ? <PlanChip onPress={onPlan} /> : null}
