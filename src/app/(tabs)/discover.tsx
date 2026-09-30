@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { HRow, Screen, ScreenScroll } from '@/components/layout';
+import { EventMetaLine, EventPrice } from '@/components/event-meta';
 import { SectionHeading } from '@/components/section-heading';
 import { Photo } from '@/components/photo';
 import { PlanChip } from '@/components/plan-actions';
@@ -102,14 +103,12 @@ function EventRow({ event, onPress, onPlan }: { event: ScoperEvent; onPress: () 
         <View className="min-w-0 flex-1">
           <View className="flex-row items-center justify-between gap-x-2">
             <Text numberOfLines={1} className="shrink font-dm-bold text-[9.5px] tracking-[0.55px] text-peach">{eventDayGroupLabel(event).toUpperCase()}</Text>
-            <Text numberOfLines={1} className="shrink-0 font-dm-medium text-[10.5px] text-pine">{event.priceLabel}</Text>
+            <EventPrice label={event.priceLabel} />
           </View>
           <Text numberOfLines={1} className="mt-1 font-dm-bold text-[14px] text-ink">{event.name}</Text>
-          {/* Time and venue. Travel was the third fact here and the first to
-              be cut off, and this row is tighter than Home's — a plan chip and
-              a chevron share the width with it. The day is already the eyebrow
-              above, and travel is on the detail page. */}
-          <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">{event.time} · {event.venue}</Text>
+          {/* No day here: it is the eyebrow above. This row is tighter than
+              Home's — a plan chip and a chevron share the width with it. */}
+          <EventMetaLine when={event.time} venue={event.venue} />
         </View>
       </TouchableOpacity>
       {onPlan ? <PlanChip onPress={onPlan} /> : null}

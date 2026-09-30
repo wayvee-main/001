@@ -6,6 +6,7 @@ import { VeeHero, HomeVeePanel, HomeHeader, LiveTrail, type TrailItem } from '@/
 import { CardCarousel } from '@/components/card-carousel';
 import { HRow, Screen, ScreenScroll } from '@/components/layout';
 import { LeadCard, TasteMatch } from '@/components/lead-card';
+import { EventMetaLine, EventPrice } from '@/components/event-meta';
 import { SectionHeading } from '@/components/section-heading';
 import { Photo } from '@/components/photo';
 import { PosterCard } from '@/components/poster-card';
@@ -66,16 +67,9 @@ function EventRow({ event, matchedTag, onPress }: { event: ScoperEvent; matchedT
       <View className="min-w-0 flex-1">
         <View className="flex-row items-center justify-between gap-x-2">
           <Text numberOfLines={1} className="flex-1 font-dm-bold text-[13.5px] text-ink">{event.name}</Text>
-          <Text numberOfLines={1} className="shrink-0 font-dm-medium text-[10.5px] text-pine">{event.priceLabel}</Text>
+          <EventPrice label={event.priceLabel} />
         </View>
-        {/* When and where, and nothing else. This carried travel as a fourth
-            fact, which is the longest of the four and the one already on the
-            detail page — backend listings render it "0.4 mi from Downtown",
-            so the line truncated before reaching the venue that a guest is
-            actually scanning for. Price sits in the title row above. */}
-        <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">
-          {eventDayGroupLabel(event)} · {event.time} · {event.venue}
-        </Text>
+        <EventMetaLine when={`${eventDayGroupLabel(event)}, ${event.time}`} venue={event.venue} />
         {matchedTag ? <TasteMatch tag={matchedTag} /> : null}
       </View>
       <ChevronRight color={colors.peach} strokeWidth={1.8} />
@@ -476,8 +470,8 @@ export default function HomeScreen() {
             </View>
           }
           title={eventLead.name}
-          titleTrailing={<Text numberOfLines={1} className="shrink-0 font-dm-medium text-[11px] text-pine">{eventLead.priceLabel}</Text>}
-          meta={eventLead.venue}
+          titleTrailing={<EventPrice label={eventLead.priceLabel} />}
+          meta={<EventMetaLine venue={eventLead.venue} />}
           matchedTag={getEventMatchedTag(eventLead)}
         />
       ) : null}

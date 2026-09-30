@@ -25,8 +25,14 @@ export function TasteMatch({ tag }: { tag: string }) {
   return (
     <View className="mt-1 flex-row items-center gap-x-1">
       <Icon d={ICON_PATHS.sparkles} size={9} color={colors.rust} strokeWidth={2} />
-      <Text numberOfLines={1} className="font-dm-medium text-[10.5px] text-rust">
-        {tag} match
+      {/* The tag alone. "match" repeated on every card in a list, and the
+          sparkle and the rust already say why the row is here. The full
+          phrasing stays for a screen reader, which has no colour to read. */}
+      <Text
+        numberOfLines={1}
+        accessibilityLabel={`${tag} match`}
+        className="font-dm-medium text-[10.5px] text-rust">
+        {tag}
       </Text>
     </View>
   );
@@ -52,7 +58,9 @@ export function LeadCard({
   cornerBadge?: ReactNode;
   title: string;
   titleTrailing?: ReactNode;
-  meta: string;
+  /** A plain string is wrapped in Text; a node is rendered as given, which
+   * is how the event surfaces pass glyph-led facts. */
+  meta: ReactNode;
   metaAccessory?: ReactNode;
   matchedTag?: string;
   /** Start a plan from this card. Optional: an event card has a ticket path
@@ -80,7 +88,13 @@ export function LeadCard({
           {titleTrailing}
         </View>
         <View className="mt-1 flex-row items-center gap-x-1.5">
-          <Text numberOfLines={1} className="shrink font-dm text-meta text-taupe">{meta}</Text>
+          {/* A View cannot be nested inside Text on React Native, so the two
+              cases are rendered apart rather than coerced into one. */}
+          {typeof meta === 'string' ? (
+            <Text numberOfLines={1} className="shrink font-dm text-meta text-taupe">{meta}</Text>
+          ) : (
+            <View className="min-w-0 shrink">{meta}</View>
+          )}
           {metaAccessory}
         </View>
         {matchedTag ? <TasteMatch tag={matchedTag} /> : null}
