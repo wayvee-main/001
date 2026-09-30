@@ -3,7 +3,6 @@ import { useCallback, useMemo, useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 import { VeeHero, HomeVeePanel, HomeHeader, LiveTrail, type TrailItem } from '@/components/home-top';
-import { CardCarousel } from '@/components/card-carousel';
 import { HRow, Screen, ScreenScroll } from '@/components/layout';
 import { LeadCard, TasteMatch } from '@/components/lead-card';
 import { EventMetaLine, EventPrice } from '@/components/event-meta';
@@ -11,7 +10,7 @@ import { SectionHeading } from '@/components/section-heading';
 import { Photo } from '@/components/photo';
 import { PosterCard } from '@/components/poster-card';
 import { ChevronRight, MiniChevron, Skeleton } from '@/components/ui';
-import { nearbyMetaLine, openBadgeLabel, rankNearby } from '@/lib/nearby-pool';
+import { openBadgeLabel, rankNearby } from '@/lib/nearby-pool';
 import { useContentHydrating } from '@/lib/bootstrap';
 import { useNow } from '@/lib/clock';
 import {
@@ -42,7 +41,7 @@ import {
   loadRestaurantExplorations,
   type RestaurantExploration,
 } from '@/lib/exploration-history';
-import { milesBetween, usableAnchor, walkMinutes } from '@/lib/geo';
+import { formatMiles, milesBetween, usableAnchor, walkMinutes } from '@/lib/geo';
 import { openStateFor } from '@/lib/hours';
 import { cityStateDisplayLabel } from '@/lib/location';
 import { hydratePlacesFromBackend, useCuratedCoords, useCuratedHours } from '@/lib/places';
@@ -348,41 +347,40 @@ export default function HomeScreen() {
   const getEventMatchedTag = (e: ScoperEvent) =>
     s.tasteTags.find((tag) => eventHaystack(e).toLowerCase().includes(tag.toLowerCase()));
 
-  // Both place rails are the same card in the same carousel. They were a poster
-  // rail and a lead-card rail, which made two lists of restaurants read as two
-  // different kinds of thing when the only real difference is how they were
-  // chosen.
+  // One card for every rail of places: Nearby eats, Most explored and More
+  // places nearby are the same kind of thing chosen three different ways, so
+  // they are the same poster in the same row. Each carries its metadata line
+  // and a way to start a plan from it.
+  const placeMeta = (restaurant: Restaurant, miles?: number | null) =>
+    [restaurant.cuisine, restaurant.price, miles != null ? formatMiles(miles) : restaurant.distanceLabel]
+      .filter(Boolean)
+      .join(' · ');
+
+  const planHref = (restaurant: Restaurant) =>
+    `/create?restaurantId=${restaurant.id}&q=${encodeURIComponent(`Night out starting at ${restaurant.name}`)}`;
+
   const foodSection = dinnerRanked.length ? (
     <View className="gap-y-3">
       <SectionHeading title="Nearby eats" action="See all" onPress={openFoodHub} />
-      <CardCarousel
-        items={dinnerRanked.slice(0, 4)}
-        keyExtractor={(entry) => entry.restaurant.id}
-        renderItem={({ restaurant, miles }) => (
-          <LeadCard
+      <HRow gap={10}>
+        {dinnerRanked.slice(0, 4).map(({ restaurant, miles }) => (
+          <PosterCard
+            key={restaurant.id}
             image={restaurant.image}
-            accessibilityLabel={`View ${restaurant.name}`}
-            onPress={() => router.push(`/restaurant/${restaurant.id}`)}
+            eyebrow="RESTAURANT"
             title={restaurant.name}
-            titleTrailing={<Text className="shrink-0 font-dm-medium text-[11px] text-pine">{restaurant.price}</Text>}
-            meta={nearbyMetaLine({ cuisine: restaurant.cuisine, miles, distanceLabel: restaurant.distanceLabel })}
-            onPlan={() =>
-              router.push(
-                `/create?restaurantId=${restaurant.id}&q=${encodeURIComponent(`Night out starting at ${restaurant.name}`)}`,
-              )
-            }
+            meta={placeMeta(restaurant, miles)}
+            onPress={() => router.push(`/restaurant/${restaurant.id}`)}
+            onPlan={() => router.push(planHref(restaurant))}
           />
-        )}
-      />
+        ))}
+      </HRow>
     </View>
   ) : null;
 
   const mostExploredSection = mostExploredRestaurants.length ? (
     <View className="gap-y-3">
-      <View className="flex-row items-baseline justify-between gap-x-3">
-        <Text className="font-fraunces text-title text-ink">Most explored</Text>
-        <Text className="font-dm text-meta text-taupe">From your searches</Text>
-      </View>
+      <SectionHeading title="Most explored" note="From your searches" />
       <HRow gap={10}>
         {mostExploredRestaurants.map((restaurant) => (
           <PosterCard
@@ -390,54 +388,35 @@ export default function HomeScreen() {
             image={restaurant.image}
             eyebrow="RESTAURANT"
             title={restaurant.name}
-            meta={[restaurant.cuisine, restaurant.price, restaurant.distanceLabel].filter(Boolean).join(' · ')}
+            meta={placeMeta(restaurant)}
             onPress={() => router.push(`/restaurant/${restaurant.id}`)}
-            onPlan={() => router.push(`/create?restaurantId=${restaurant.id}&q=${encodeURIComponent(`Night out starting at ${restaurant.name}`)}`)}
+            onPlan={() => router.push(planHref(restaurant))}
           />
         ))}
       </HRow>
     </View>
   ) : null;
 
-
   const nearbySection = morePlacesNearby.length ? (
     <View className="gap-y-3">
       <SectionHeading title="More places nearby" action="See all" onPress={openFoodHub} />
-      <CardCarousel
-        items={morePlacesNearby}
-        keyExtractor={(entry) => entry.item.id}
-        renderItem={(entry) => {
-          const badgeLabel = openBadgeLabel(entry.state);
-          return (
-            <LeadCard
-              image={entry.item.image}
-              accessibilityLabel={`View ${entry.item.name}`}
-              onPress={() => router.push(`/restaurant/${entry.item.id}`)}
-              // Only when the hours actually say so — a place whose hours are
-              // unknown gets no badge rather than a hedged one.
-              badge={
-                badgeLabel ? (
-                  <View className="rounded-full bg-shell/95 px-2.5 py-0.5">
-                    <Text className="font-dm-bold text-[10.5px] text-ink">{badgeLabel}</Text>
-                  </View>
-                ) : undefined
-              }
-              title={entry.item.name}
-              titleTrailing={<Text className="shrink-0 font-dm-medium text-[11px] text-pine">{entry.item.price}</Text>}
-              meta={nearbyMetaLine({
-                cuisine: entry.item.cuisine,
-                miles: entry.miles,
-                distanceLabel: entry.item.distanceLabel,
-              })}
-              onPlan={() =>
-                router.push(
-                  `/create?restaurantId=${entry.item.id}&q=${encodeURIComponent(`Night out starting at ${entry.item.name}`)}`,
-                )
-              }
-            />
-          );
-        }}
-      />
+      <HRow gap={10}>
+        {morePlacesNearby.map((entry) => (
+          <PosterCard
+            key={entry.item.id}
+            image={entry.item.image}
+            // The open state earns the eyebrow where it is known, since
+            // "RESTAURANT" only repeats what the rail already says. A place
+            // whose hours are unknown keeps the generic label rather than a
+            // hedged one.
+            eyebrow={openBadgeLabel(entry.state)?.toUpperCase() ?? 'RESTAURANT'}
+            title={entry.item.name}
+            meta={placeMeta(entry.item, entry.miles)}
+            onPress={() => router.push(`/restaurant/${entry.item.id}`)}
+            onPlan={() => router.push(planHref(entry.item))}
+          />
+        ))}
+      </HRow>
     </View>
   ) : null;
 

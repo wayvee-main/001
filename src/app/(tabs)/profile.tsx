@@ -208,7 +208,7 @@ export default function ProfileScreen() {
               )}
 
               <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/plans')}>
-                <Text className="text-center font-dm-medium text-label text-rust">See all plans ›</Text>
+                <Text className="text-center font-dm-bold text-meta text-peach">See all plans</Text>
               </TouchableOpacity>
             </View>
           </>
