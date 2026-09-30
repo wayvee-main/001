@@ -1,11 +1,12 @@
 import { type ReactNode } from 'react';
 import { ScrollView, Text, TouchableOpacity, View, type ViewStyle } from 'react-native';
 
-import { WayveeWordmark } from '@/components/wayvee-wordmark';
+import { VeeMark } from '@/components/vee-mark';
 import { Glyph } from '@/components/glyph';
 import type { HomeSuggestion } from '@/lib/daypart';
 import { useRaisedSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
+import { useWeatherNow, weatherLine } from '@/lib/weather';
 
 /**
  * Home's opening region, from the approved reference build: the day-and-place
@@ -33,8 +34,16 @@ export function HomeVeePanel({ children }: { children: ReactNode }) {
   return <View className="gap-y-3">{children}</View>;
 }
 
-/** Brand and app-level actions only; guest context lives with the prompt it
- * influences rather than competing for a second header row. */
+/** Where you are, what it is doing outside, and app-level actions.
+ *
+ * The mark stands alone here without the word beside it. At this size the
+ * lockup was mostly lettering, and the app's name is not what a guest opening
+ * Home needs to read — where they are and what the weather is doing are.
+ *
+ * Weather is read here rather than passed in, so both screens that mount this
+ * header get it without threading a prop through either. It renders only when
+ * a period actually covers now: weatherAt returns null otherwise, and a stale
+ * reading is worse than none (see lib/weather.ts). */
 export function HomeHeader({
   locationLabel,
   initial,
@@ -49,13 +58,26 @@ export function HomeHeader({
   onProfile: () => void;
 }) {
   const colors = useThemeColors();
+  const weather = useWeatherNow();
   return (
     <View style={{ paddingTop: 10 }} className="flex-row items-start justify-between gap-x-3">
       <View className="min-w-0 flex-1">
-        <WayveeWordmark size={20} />
+        {/* The lockup carried the brand's accessible name; the bare mark has
+            none of its own, so it is labelled here. */}
+        <View accessible accessibilityRole="image" accessibilityLabel="Wayvee">
+          <VeeMark size={19} variant="compact" />
+        </View>
         <Text numberOfLines={1} className="mt-1 font-dm-bold text-meta text-taupe">
           {locationLabel}
         </Text>
+        {/* Its own line rather than appended to the location: at 360dp the two
+            together overflow once the forecast adds a rain chance, and a single
+            clipped line would drop the weather entirely. */}
+        {weather ? (
+          <Text numberOfLines={1} className="font-dm text-meta text-taupe">
+            {weatherLine(weather)}
+          </Text>
+        ) : null}
       </View>
 
       <View className="flex-row items-center gap-x-1">
@@ -117,7 +139,13 @@ export function VeeHero({
       style={embedded ? undefined : lift}
       className={embedded ? '' : 'gap-y-3 rounded-sheet bg-surface-soft px-4 pb-3.5 pt-4'}>
       <View>
-        <Text className={embedded ? 'font-fraunces-medium text-display text-ink' : 'font-fraunces-medium text-title text-ink'}>
+        {/* One line, always. The titles are written to four words (daypart.ts
+            enforces it in test), and this caps the damage if one ever grows:
+            it truncates visibly instead of silently reflowing to three lines
+            and pushing the search bar down the screen. */}
+        <Text
+          numberOfLines={1}
+          className={embedded ? 'font-fraunces-medium text-display text-ink' : 'font-fraunces-medium text-title text-ink'}>
           {title}
         </Text>
       </View>

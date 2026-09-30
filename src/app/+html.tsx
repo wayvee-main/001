@@ -49,7 +49,7 @@ export default function RootHtml({ children }: PropsWithChildren) {
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta
           name="description"
-          content="Oakland, minus the guesswork. Eat well, catch what's on, and get there fast."
+          content="The Bay, minus the guesswork. Eat well, catch what's on, and get there fast."
         />
         <meta name="theme-color" media="(prefers-color-scheme: light)" content={ROLES.bg.light} />
         <meta name="theme-color" media="(prefers-color-scheme: dark)" content={ROLES.bg.dark} />

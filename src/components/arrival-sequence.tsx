@@ -7,6 +7,7 @@ import { WayveeWordmark } from '@/components/wayvee-wordmark';
 import { Glyph } from '@/components/glyph';
 import { AppBackdrop } from '@/components/layout';
 import { TRIP_CONTEXTS, TRIP_CONTEXT_EFFECTS, type TripContext, type WalkBudget } from '@/lib/arrival';
+import { useActiveCityName } from '@/lib/city';
 import {
   NO_RESTRICTIONS,
   OTHER_RESTRICTION,
@@ -370,6 +371,9 @@ function MiniGlyph({ name, tone, size = 40 }: { name: string; tone: 'warm' | 've
 
 function WelcomeStep() {
   const ink = useWashInk();
+  // The catalog's city, not the device's: this line promises knowledge of a
+  // place, and the place we actually know is the one whose catalog is loaded.
+  const cityName = useActiveCityName();
   const promises: { glyph: string; tone: 'warm' | 'vee' | 'accent'; text: string }[] = [
     { glyph: 'pin', tone: 'accent', text: 'Real places, hours, and distances' },
     { glyph: 'spark', tone: 'warm', text: 'One balanced plan, shaped around you' },
@@ -379,7 +383,7 @@ function WelcomeStep() {
   return (
     <Page
       branded
-      title={'Oakland, minus\nthe guesswork.'}
+      title={`${cityName}, minus\nthe guesswork.`}
       copy="Food, events, outdoors, and fitness—planned around you.">
       <View
         style={{ backgroundColor: ink.cardBg, borderColor: ink.cardBorder }}

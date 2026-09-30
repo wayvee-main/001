@@ -23,6 +23,10 @@ import { supabase } from '@/lib/supabase';
  * bundle with backend rows checks this first. */
 export const BUNDLE_CITY = 'oakland';
 
+/** Display name for BUNDLE_CITY. Named once so the picker's seed value and the
+ * fallback below cannot drift apart. */
+export const BUNDLE_CITY_NAME = 'Oakland';
+
 const STORAGE_KEY = 'wayvee.city.v1';
 
 export interface CityOption {
@@ -34,7 +38,7 @@ type Listener = () => void;
 const listeners = new Set<Listener>();
 
 let active = BUNDLE_CITY;
-let options: CityOption[] = [{ slug: BUNDLE_CITY, name: 'Oakland' }];
+let options: CityOption[] = [{ slug: BUNDLE_CITY, name: BUNDLE_CITY_NAME }];
 
 function notify(): void {
   for (const listener of listeners) listener();
@@ -66,6 +70,18 @@ function getOptionsSnapshot(): CityOption[] {
  * replaced once the backend answers, so the picker is never empty. */
 export function useCityOptions(): CityOption[] {
   return useSyncExternalStore(subscribe, getOptionsSnapshot, getOptionsSnapshot);
+}
+
+/** The active city's display name, for copy that says where the guest is.
+ *
+ * Resolved against the launched list rather than stored alongside the slug:
+ * the name is the backend's to change, and a stored copy would outlive it.
+ * Falls back to the bundle's city, which is the one name that is always right
+ * with no backend at all. */
+export function useActiveCityName(): string {
+  const slug = useActiveCity();
+  const launched = useCityOptions();
+  return launched.find((city) => city.slug === slug)?.name ?? BUNDLE_CITY_NAME;
 }
 
 /** Restores the stored choice at launch. Falls back to the bundle's city,

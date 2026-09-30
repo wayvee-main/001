@@ -153,9 +153,17 @@ export type HomePromptContext = {
   tasteTags: string[];
 };
 
+/** Home's opening line, by hour and by why the guest is here.
+ *
+ * Two rules hold for every entry, and hero-title.test.ts enforces both:
+ * at most FOUR words, and no city name. The four words are what keeps the
+ * line to one row at display size on a narrow phone. The absent city name is
+ * what lets that survive a move beyond Oakland — 'Where will San Francisco
+ * glow?' is both a word over and far wider, and the header already states
+ * the city directly above this, so naming it twice buys nothing. */
 const HERO_TITLES: Record<Daypart, Record<TripContext | 'default', string>> = {
   morning: {
-    visiting: 'Wake up with Oakland?',
+    visiting: 'First stop this morning?',
     work: 'A spark before work?',
     live: 'What’s calling this morning?',
     default: 'What’s calling this morning?',
@@ -167,19 +175,19 @@ const HERO_TITLES: Record<Daypart, Record<TripContext | 'default', string>> = {
     default: 'Where should lunch lead?',
   },
   afternoon: {
-    visiting: 'Where next, Oakland?',
+    visiting: 'Where to next?',
     work: 'A little after-work magic?',
-    live: 'Where should the afternoon wander?',
-    default: 'Where should the afternoon wander?',
+    live: 'Where’s the afternoon going?',
+    default: 'Where’s the afternoon going?',
   },
   evening: {
-    visiting: 'Where will Oakland glow tonight?',
+    visiting: 'Where will tonight glow?',
     work: 'Where to after work?',
-    live: 'Where should tonight take you?',
-    default: 'Where should tonight take you?',
+    live: 'Where’s tonight taking you?',
+    default: 'Where’s tonight taking you?',
   },
   lateNight: {
-    visiting: 'What’s still glowing in Oakland?',
+    visiting: 'What’s still glowing?',
     work: 'One last little adventure?',
     live: 'What’s still humming nearby?',
     default: 'What’s still calling?',
@@ -192,6 +200,14 @@ const HERO_TITLES: Record<Daypart, Record<TripContext | 'default', string>> = {
 export function homeHeroPrompt(context: HomePromptContext): string {
   const titles = HERO_TITLES[currentDaypart(context.now)];
   return titles[context.tripContext ?? 'default'];
+}
+
+/** Every hero title, for the test that holds the four-word rule. Exported
+ * rather than reached through homeHeroPrompt so a title added to the table is
+ * covered the moment it exists, without the test having to know which
+ * daypart/context pair reaches it. */
+export function allHeroTitles(): string[] {
+  return Object.values(HERO_TITLES).flatMap((byContext) => Object.values(byContext));
 }
 
 const CONTEXT_CREATE_PROMPTS: Record<TripContext, Record<Daypart, { label: string; query: string }>> = {
