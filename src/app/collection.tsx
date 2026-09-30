@@ -27,7 +27,7 @@ export default function CollectionsScreen() {
       <ScreenScroll gap={16}>
         <HeaderRow title="Collections" />
         <Text className="-mt-1 font-dm text-[13px] leading-[19px] text-taupe">
-          Open a collection for the complete lineup, then continue to verified details.
+          Shortlists worth keeping.
         </Text>
 
         {collections.length > 0 ? (

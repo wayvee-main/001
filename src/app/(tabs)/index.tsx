@@ -42,7 +42,7 @@ import {
   loadRestaurantExplorations,
   type RestaurantExploration,
 } from '@/lib/exploration-history';
-import { formatMiles, milesBetween, usableAnchor, walkMinutes } from '@/lib/geo';
+import { milesBetween, usableAnchor, walkMinutes } from '@/lib/geo';
 import { openStateFor } from '@/lib/hours';
 import { cityStateDisplayLabel } from '@/lib/location';
 import { hydratePlacesFromBackend, useCuratedCoords, useCuratedHours } from '@/lib/places';
@@ -351,28 +351,34 @@ export default function HomeScreen() {
   const getEventMatchedTag = (e: ScoperEvent) =>
     s.tasteTags.find((tag) => eventHaystack(e).toLowerCase().includes(tag.toLowerCase()));
 
-  const foodSection = (
+  // Both place rails are the same card in the same carousel. They were a poster
+  // rail and a lead-card rail, which made two lists of restaurants read as two
+  // different kinds of thing when the only real difference is how they were
+  // chosen.
+  const foodSection = dinnerRanked.length ? (
     <View className="gap-y-3">
       <SectionHeading title="Nearby eats" action="See all" onPress={openFoodHub} />
-      {dinnerPicks.length ? (
-        <HRow gap={10}>
-          {dinnerRanked.slice(0, 4).map(({ restaurant, miles }) => (
-            <PosterCard
-              key={restaurant.id}
-              image={restaurant.image}
-              eyebrow="RESTAURANT"
-              title={restaurant.name}
-              meta={[restaurant.cuisine, restaurant.price, miles != null ? formatMiles(miles) : restaurant.distanceLabel]
-                .filter(Boolean)
-                .join(' · ')}
-              onPress={() => router.push(`/restaurant/${restaurant.id}`)}
-              onPlan={() => router.push(`/create?restaurantId=${restaurant.id}&q=${encodeURIComponent(`Night out starting at ${restaurant.name}`)}`)}
-            />
-          ))}
-        </HRow>
-      ) : null}
+      <CardCarousel
+        items={dinnerRanked.slice(0, 4)}
+        keyExtractor={(entry) => entry.restaurant.id}
+        renderItem={({ restaurant, miles }) => (
+          <LeadCard
+            image={restaurant.image}
+            accessibilityLabel={`View ${restaurant.name}`}
+            onPress={() => router.push(`/restaurant/${restaurant.id}`)}
+            title={restaurant.name}
+            titleTrailing={<Text className="shrink-0 font-dm-medium text-[11px] text-pine">{restaurant.price}</Text>}
+            meta={nearbyMetaLine({ cuisine: restaurant.cuisine, miles, distanceLabel: restaurant.distanceLabel })}
+            onPlan={() =>
+              router.push(
+                `/create?restaurantId=${restaurant.id}&q=${encodeURIComponent(`Night out starting at ${restaurant.name}`)}`,
+              )
+            }
+          />
+        )}
+      />
     </View>
-  );
+  ) : null;
 
   const mostExploredSection = mostExploredRestaurants.length ? (
     <View className="gap-y-3">
@@ -426,6 +432,11 @@ export default function HomeScreen() {
                 miles: entry.miles,
                 distanceLabel: entry.item.distanceLabel,
               })}
+              onPlan={() =>
+                router.push(
+                  `/create?restaurantId=${entry.item.id}&q=${encodeURIComponent(`Night out starting at ${entry.item.name}`)}`,
+                )
+              }
             />
           );
         }}
@@ -504,7 +515,7 @@ export default function HomeScreen() {
 
   return (
     <Screen>
-      <ScreenScroll gap={22} clearsTabBar refreshing={refreshing} onRefresh={onRefresh}>
+      <ScreenScroll gap={32} clearsTabBar refreshing={refreshing} onRefresh={onRefresh}>
         <HomeHeader
           locationLabel={homeLocationLabel}
           initial={guestName.slice(0, 1).toUpperCase()}

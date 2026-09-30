@@ -1421,7 +1421,14 @@ export type CuratedCollectionItem =
   | { type: 'event'; id: string; note?: string };
 
 export interface CuratedCollection {
-  id: 'late-night' | 'omca-fridays' | 'yoshis-week';
+  id:
+    | 'late-night'
+    | 'omca-fridays'
+    | 'yoshis-week'
+    | 'outdoor-tables'
+    | 'before-the-show'
+    | 'slice-order'
+    | 'morning-plates';
   title: string;
   shortTitle: string;
   eyebrow: string;
@@ -1441,7 +1448,7 @@ export const CURATED_COLLECTIONS: Record<CuratedCollection['id'], CuratedCollect
     shortTitle: 'Late-night food',
     eyebrow: 'LATE KITCHENS',
     subtitle: '3 verified stops · midnight to 24 hours',
-    description: 'Tacos until 1 AM, a Hong Kong cafe until midnight, and a 24-hour donut counter—three genuinely different ways to eat after the show.',
+    description: 'Three different ways to eat after the show.',
     coverImage: RESTAURANTS.sinaloa.image,
     items: [
       { type: 'restaurant', id: 'sinaloa', note: 'Tacos and burritos until 1 AM' },
@@ -1456,7 +1463,7 @@ export const CURATED_COLLECTIONS: Record<CuratedCollection['id'], CuratedCollect
     shortTitle: 'OMCA Fridays',
     eyebrow: 'SUMMER AT OMCA',
     subtitle: 'Outdoor music · food · community',
-    description: 'Current Friday-night programs at the Oakland Museum of California, each linked to its official event listing.',
+    description: 'Friday nights on the museum campus.',
     coverImage: EVENTS.seijiOda.image,
     items: [
       { type: 'event', id: 'seijiOda' },
@@ -1471,7 +1478,7 @@ export const CURATED_COLLECTIONS: Record<CuratedCollection['id'], CuratedCollect
     shortTitle: 'Yoshi’s this week',
     eyebrow: 'CURRENT SHOWS',
     subtitle: 'Soul, jazz and guitar · official tickets',
-    description: 'A current run of Oakland performances with a different sound each night and direct paths to official ticket listings.',
+    description: 'A different sound every night this week.',
     coverImage: EVENTS.melbaMoore.image,
     items: [
       { type: 'event', id: 'melbaMoore' },
@@ -1483,9 +1490,84 @@ export const CURATED_COLLECTIONS: Record<CuratedCollection['id'], CuratedCollect
     venueId: 'yoshis',
     sourceNote: 'Showtimes and ticket ranges checked against Yoshi’s official calendar.',
   },
+
+  'outdoor-tables': {
+    id: 'outdoor-tables',
+    title: 'Tables in the open air',
+    shortTitle: 'Outdoor tables',
+    eyebrow: 'OUTDOORS',
+    subtitle: '4 places · patios and a beer garden',
+    description: 'Eat outside while it is still warm enough.',
+    coverImage: RESTAURANTS.lakechalet.image,
+    items: [
+      { type: 'restaurant', id: 'lakechalet', note: 'Lake Merritt views from the patio' },
+      { type: 'restaurant', id: 'nido', note: 'Open-air room near Jack London' },
+      { type: 'restaurant', id: 'dona', note: 'Patio seating, California produce' },
+      { type: 'restaurant', id: 'lovelys', note: 'Smash burgers in a beer garden' },
+    ],
+    sourceNote: 'Outdoor seating taken from each restaurant’s own description.',
+  },
+  'before-the-show': {
+    id: 'before-the-show',
+    title: 'Dinner before the show',
+    shortTitle: 'Before the show',
+    eyebrow: 'UPTOWN',
+    subtitle: '4 places · walk to the theater',
+    description: 'Uptown kitchens near the Fox and the Paramount.',
+    coverImage: RESTAURANTS.calavera.image,
+    items: [
+      { type: 'restaurant', id: 'calavera', note: 'Modern Mexican plates and mezcal' },
+      { type: 'restaurant', id: 'agave', note: 'Oaxacan cooking, deep mezcal list' },
+      { type: 'restaurant', id: 'alamar', note: 'Contemporary Dominican cooking' },
+      { type: 'restaurant', id: 'sliver', note: 'Vegetarian slices, quick before curtain' },
+    ],
+    venueId: 'fox',
+    sourceNote: 'Uptown locations taken from each restaurant’s listed address.',
+  },
+  'slice-order': {
+    id: 'slice-order',
+    title: 'Five kinds of pizza',
+    shortTitle: 'Pizza, five ways',
+    eyebrow: 'FOOD',
+    subtitle: '5 places · sourdough to Detroit',
+    description: 'One city, five arguments about crust.',
+    coverImage: RESTAURANTS.nickspizza.image,
+    items: [
+      { type: 'restaurant', id: 'nickspizza', note: 'Worker-owned sourdough' },
+      { type: 'restaurant', id: 'squarepie', note: 'Crisp-edged Detroit style' },
+      { type: 'restaurant', id: 'graffiti', note: 'New York slices, open later' },
+      { type: 'restaurant', id: 'forge', note: 'Wood-fired, room for a group' },
+      { type: 'restaurant', id: 'arizmendi', note: 'Worker-owned, vegetarian' },
+    ],
+    sourceNote: 'Styles taken from each pizzeria’s own menu.',
+  },
+  'morning-plates': {
+    id: 'morning-plates',
+    title: 'Worth getting up for',
+    shortTitle: 'Breakfast picks',
+    eyebrow: 'BREAKFAST',
+    subtitle: '4 places · breakfast and brunch',
+    description: 'Breakfast that justifies the alarm.',
+    coverImage: RESTAURANTS.brendas.image,
+    items: [
+      { type: 'restaurant', id: 'brendas', note: 'New Orleans comfort food all day' },
+      { type: 'restaurant', id: 'loispie', note: 'Generations of Southern breakfast' },
+      { type: 'restaurant', id: 'sequoia', note: 'Made-from-scratch Laurel brunch' },
+      { type: 'restaurant', id: 'grandlake', note: 'All-day deli by the lake' },
+    ],
+    sourceNote: 'Breakfast and brunch service taken from each restaurant’s own menu.',
+  },
 };
 
-export const CURATED_COLLECTION_ORDER: CuratedCollection['id'][] = ['late-night', 'omca-fridays', 'yoshis-week'];
+export const CURATED_COLLECTION_ORDER: CuratedCollection['id'][] = [
+  'late-night',
+  'outdoor-tables',
+  'before-the-show',
+  'slice-order',
+  'morning-plates',
+  'omca-fridays',
+  'yoshis-week',
+];
 
 /** Prevent a dated collection from retaining an event after its Oakland calendar day passes. */
 export function activeCollectionItems(collection: CuratedCollection, now = new Date()): CuratedCollectionItem[] {

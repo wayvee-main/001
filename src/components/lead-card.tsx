@@ -12,6 +12,7 @@ import type { ReactNode } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 import { Photo } from '@/components/photo';
+import { PlanChip } from '@/components/plan-actions';
 import { Icon } from '@/components/ui';
 import { ICON_PATHS } from '@/lib/icons';
 import { useRaisedSurface } from '@/lib/shadows';
@@ -42,6 +43,7 @@ export function LeadCard({
   meta,
   metaAccessory,
   matchedTag,
+  onPlan,
 }: {
   image?: string;
   accessibilityLabel: string;
@@ -53,6 +55,9 @@ export function LeadCard({
   meta: string;
   metaAccessory?: ReactNode;
   matchedTag?: string;
+  /** Start a plan from this card. Optional: an event card has a ticket path
+   * of its own, so only the place rails pass it. */
+  onPlan?: () => void;
 }) {
   const colors = useThemeColors();
   const surface = useRaisedSurface(2);
@@ -79,6 +84,11 @@ export function LeadCard({
           {metaAccessory}
         </View>
         {matchedTag ? <TasteMatch tag={matchedTag} /> : null}
+        {onPlan ? (
+          <View className="mt-2 items-start">
+            <PlanChip onPress={onPlan} />
+          </View>
+        ) : null}
       </View>
     </TouchableOpacity>
   );

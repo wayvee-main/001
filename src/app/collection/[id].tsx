@@ -152,9 +152,12 @@ export default function CuratedCollectionScreen() {
       meta={collection.eyebrow}
       lede={collection.description}
       sections={sections}
-      // A shortlist is assembled from several official calendars, so there is
+      // A shortlist is assembled from several official sources, so there is
       // no single site to hand off to — it says where instead of linking.
-      sourceNote={`Dated entries are removed after their Oakland calendar day. ${collection.sourceNote}`}
+      // The expiry itself is not worth a sentence: activeCollectionItems has
+      // already dropped anything past its day by the time this renders, so the
+      // notice only ever described something the guest could not see.
+      sourceNote={collection.sourceNote}
       navActive="discover"
     />
   );
