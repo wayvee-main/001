@@ -251,7 +251,10 @@ launched.
   project only when `slug` matches that project's slug, so the slug here
   tracks the project on expo.dev rather than the app's name. Run `eas init`
   once in a clone and commit the `app.json` it writes — the **Build Android
-  APK** workflow refuses to start until those fields exist.
+  APK** workflow refuses to start until those fields exist. `eas.json` disables Sentry's
+  sourcemap upload on every profile; without that the Gradle build fails on
+  `sentry-cli` having no organisation, which is the one failure that costs a
+  full build cycle to discover.
 - **Key rotation.** `sb_secret_4MBx…` is in the previous repository's git
   history. It is not in this repo, but that only limits the exposure — rotating
   it in Supabase is the only thing that ends it.

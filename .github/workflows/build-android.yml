@@ -19,6 +19,15 @@ name: Build Android APK
 #
 # app.json's `owner` and `extra.eas.projectId` must both point at an Expo
 # account you can build under. `eas init` writes them.
+#
+# eas.json sets SENTRY_DISABLE_AUTO_UPLOAD=true on every profile, and that is
+# load-bearing. The Sentry Gradle script registers a sourcemap-upload task
+# (sentry.gradle line 93) guarded only by that variable; without it sentry-cli
+# runs with no organisation configured, exits 1 on "An organization ID or slug
+# is required", and fails the whole Gradle build after twenty-odd minutes of
+# real work. Sentry is inert here regardless — src/lib/monitoring.ts calls
+# init() only when EXPO_PUBLIC_SENTRY_DSN is set, and it is not. Drop the flag
+# once a real Sentry org, project and auth token exist.
 
 on:
   workflow_dispatch:
