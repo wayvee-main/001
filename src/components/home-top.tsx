@@ -62,19 +62,30 @@ export function HomeHeader({
   return (
     <View style={{ paddingTop: 10 }} className="flex-row items-start justify-between gap-x-3">
       <View className="min-w-0 flex-1">
-        {/* The lockup carried the brand's accessible name; the bare mark has
-            none of its own, so it is labelled here. */}
-        <View accessible accessibilityRole="image" accessibilityLabel="Wayvee">
-          <VeeMark size={19} variant="compact" />
+        {/* Mark and place on one line: together they answer "where am I", and
+            stacking them made two weak rows out of one strong one.
+
+            16px mark against 14px type. Matching the numbers exactly reads
+            smaller than it measures — the glyph does not fill its box the way
+            a capital fills its em — so the mark is sized to sit optically
+            level with the type rather than numerically equal to it. */}
+        <View className="flex-row items-center gap-x-1.5">
+          {/* The lockup carried the brand's accessible name; the bare mark has
+              none of its own, so it is labelled here. */}
+          <View accessible accessibilityRole="image" accessibilityLabel="Wayvee">
+            <VeeMark size={16} variant="compact" />
+          </View>
+          {/* shrink, so a long place name truncates instead of shouldering the
+              mark out of the row. */}
+          <Text numberOfLines={1} className="shrink font-dm-bold text-body text-ink">
+            {locationLabel}
+          </Text>
         </View>
-        <Text numberOfLines={1} className="mt-1 font-dm-bold text-meta text-taupe">
-          {locationLabel}
-        </Text>
         {/* Its own line rather than appended to the location: at 360dp the two
             together overflow once the forecast adds a rain chance, and a single
             clipped line would drop the weather entirely. */}
         {weather ? (
-          <Text numberOfLines={1} className="font-dm text-meta text-taupe">
+          <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">
             {weatherLine(weather)}
           </Text>
         ) : null}
