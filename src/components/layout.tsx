@@ -91,6 +91,7 @@ export function ScreenScroll({
   keyboardShouldPersistTaps,
   keyboardDismissMode,
   automaticallyAdjustKeyboardInsets,
+  centerWhenShort = false,
   clearsTabBar = false,
 }: {
   children: ReactNode;
@@ -100,6 +101,10 @@ export function ScreenScroll({
   keyboardShouldPersistTaps?: ScrollViewProps['keyboardShouldPersistTaps'];
   keyboardDismissMode?: ScrollViewProps['keyboardDismissMode'];
   automaticallyAdjustKeyboardInsets?: boolean;
+  /** Centres a short screen's content in the viewport and lets a long one
+   * scroll from the top, which is what a prompt-first screen wants: empty on
+   * arrival, ordinary once it has something to show. */
+  centerWhenShort?: boolean;
   /** Set on tab screens. Off by default so pushed routes, which have no tab
    * bar over them, don't gain a band of dead space at the bottom. */
   clearsTabBar?: boolean;
@@ -122,6 +127,7 @@ export function ScreenScroll({
         paddingHorizontal: 20,
         paddingBottom: clearsTabBar ? 24 + TAB_BAR_SPACE + Math.max(insets.bottom, TAB_BAR_MIN_BOTTOM) : 24,
         gap,
+        ...(centerWhenShort ? { flexGrow: 1, justifyContent: 'center' as const } : null),
       }}>
       {children}
     </ScrollView>

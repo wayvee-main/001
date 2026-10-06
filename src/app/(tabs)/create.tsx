@@ -29,14 +29,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { ConstraintRail, MetaValue, useConstraintPicker } from '@/components/constraint-picker';
+import { useConstraintPicker } from '@/components/constraint-picker';
 import { Glyph } from '@/components/glyph';
-import { HomeHeader } from '@/components/home-top';
+import { VeeMark } from '@/components/vee-mark';
 import { HRow, Screen, ScreenScroll } from '@/components/layout';
 import { EmptyState } from '@/components/ui';
 import { buildPlan, mergeRefineRequest, resolveAskNow } from '@/lib/concierge/adapter';
 import { requestConciergeRequest } from '@/lib/concierge/client';
-import { BUDGET_OPTIONS } from '@/lib/concierge/enums';
 import { applyFreshness, readSyncStatus } from '@/lib/concierge/freshness';
 import { routeForRequest } from '@/lib/concierge/router';
 import { CRAWLS, GUEST, NIGHTLIFE_SPOTS, RESTAURANTS, VENUES, currentEventListings, isEventToday, type ScoperEvent } from '@/lib/data';
@@ -46,10 +45,8 @@ import { saveNightDraft } from '@/lib/itinerary';
 import { defaultDinnerMinutes } from '@/lib/arrival';
 import { cityStateDisplayLabel } from '@/lib/location';
 import { useReducedMotionPreference } from '@/lib/motion';
-import { START_TIME_OPTIONS } from '@/lib/plan-constraints';
 import { useRaisedSurface } from '@/lib/shadows';
 import { useAllPlaces, useCuratedCoords, useCuratedHours } from '@/lib/places';
-import { activeReminders } from '@/lib/reminders';
 import { recordRecentAsk } from '@/lib/recent-asks';
 import { buildSearchIndex, queryIndex, type SearchResultKind } from '@/lib/search';
 import {
@@ -79,7 +76,6 @@ const PLAN_SETS = 3;
 
 type ComposerPicker = 'time' | 'budget' | 'walk' | null;
 
-const WALK_BUDGET_OPTIONS = [10, 20, null] as const;
 
 const SEARCH_RESULT_GLYPHS: Record<SearchResultKind, string> = {
   restaurant: 'food',
@@ -313,10 +309,6 @@ export default function CreateScreen() {
     budgetPreference,
     deviceLocation,
     pacePreference,
-    plans,
-    setBudgetPreference,
-    setStartTimePreference,
-    setWalkBudgetMinutes,
     startTimePreference,
     stay,
     tasteTags,
@@ -326,7 +318,6 @@ export default function CreateScreen() {
     askPlan,
     askRequest,
     savedPlaceKeys,
-    walkBudgetMinutes,
   } = useScoper();
   const colors = useThemeColors();
   const raisedSurface = useRaisedSurface(2);
@@ -359,12 +350,11 @@ export default function CreateScreen() {
     const weekday = new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: 'America/Los_Angeles' }).format(new Date());
     return [cityLabel, weekday, weatherNow ? weatherLine(weatherNow) : null].filter(Boolean).join(' \u00b7 ');
   }, [cityLabel, weatherNow]);
-  const hasReminders = activeReminders(plans, stay).length > 0;
   const reduceMotion = useReducedMotionPreference();
   // ── Composer ──────────────────────────────────────────────────────────
   const [promptText, setPromptText] = useState('');
   const [asking, setAsking] = useState(false);
-  const { open: composerPicker, toggle: toggleComposerPicker, close: closeComposerPicker, motion: pickerMotion } =
+  const { close: closeComposerPicker } =
     useConstraintPicker<Exclude<ComposerPicker, null>>();
   const focusedInputRef = useRef<TextInput>(null);
   const [sendMotion] = useState(() => new Animated.Value(0));
@@ -915,19 +905,21 @@ export default function CreateScreen() {
         <ScreenScroll
           gap={0}
           clearsTabBar
+          centerWhenShort={!showingLiveMatches && !askPlan}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
           automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}>
-          <HomeHeader
-            locationLabel={headerLocationLabel}
-            hasReminders={hasReminders}
-            onNotifications={() => router.push('/notifications')}
-            onProfile={() => router.push('/profile')}
-          />
-
-          <Text className="mt-8 max-w-[340px] font-fraunces-medium text-display text-ink">
-            {askPlan ? 'What should change?' : 'What mood are we chasing?'}
-          </Text>
+          {/* The page says its own name, then where you are and what it is
+           * doing out there. Home's header carries notifications and the
+           * profile; repeating them here made the quiet screen the busiest.
+           * One subtitle line rather than Home's two: the weather is context
+           * on this screen, not its subject. */}
+          <View style={{ paddingTop: 10 }}>
+            <Text className="font-fraunces text-[19px] text-ink">Vee</Text>
+            <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">
+              {headerLocationLabel}
+            </Text>
+          </View>
 
           {/* The plan being refined, kept on the screen you refine it from.
             * Refine used to land here with nothing on it, so a guest described
@@ -972,123 +964,70 @@ export default function CreateScreen() {
             </View>
           ) : null}
 
-          {/* The ask box. The example is a label rather than prefilled text, and
-           * Vee's assumptions ride underneath it as one line of type — five pill
-           * controls made the assumptions look like the point of the screen. */}
+          {/* The screen's whole proposition: the mark, one question, a field.
+            * The constraint pills that used to sit under it are gone — Vee
+            * parses time, budget and distance out of the sentence, and
+            * submitAsk already treats what the guest said as winning over any
+            * stored preference ("Explicit prompt wording wins", below). Three
+            * controls restating defaults made the assumptions look like the
+            * point of the screen. */}
+          {!showingLiveMatches ? (
+            <View className="mt-10 items-center">
+              <VeeMark size={84} gradient />
+              <Text className="mt-4 max-w-[280px] text-center font-fraunces text-[23px] leading-[30px] text-ink">
+                {askPlan ? 'What should change?' : 'What are we chasing tonight?'}
+              </Text>
+            </View>
+          ) : null}
+
           <View
             style={[
               raisedSurface,
-              { borderWidth: StyleSheet.hairlineWidth, borderColor: colors['vee-tint'], opacity: asking ? 0.72 : 1 },
+              {
+                borderWidth: StyleSheet.hairlineWidth,
+                borderColor: colors['edge-soft'],
+                opacity: asking ? 0.72 : 1,
+              },
             ]}
-            className="mt-5 rounded-panel px-3.5 pb-3 pt-3">
-            <View className="flex-row items-center gap-x-1.5">
-              <Glyph name="spark" size={13} color={colors['vee-strong']} strokeWidth={1.9} />
-              <Text style={{ color: colors['vee-strong'] }} className="font-dm text-[9.5px] leading-3">
-                Ask Vee
-              </Text>
-            </View>
-
-            {/* No fill: a shaded well inside an already-raised card read as a
-              * second surface stacked on the first. The hairline is enough to
-              * say "field", and the ask now sits on the card's own paper. */}
-            <View
-              style={{ borderColor: colors['edge-soft'], borderWidth: StyleSheet.hairlineWidth }}
-              className="mt-2.5 rounded-control px-3 py-2.5">
-              <TextInput
-                ref={focusedInputRef}
-                accessibilityLabel="Ask Vee"
-                accessibilityHint={`For example: ${askExampleLabel}`}
-                value={promptText}
-                onChangeText={setPromptText}
-                placeholder={askExampleLabel}
-                placeholderTextColor={colors.fg}
-                multiline
-                numberOfLines={2}
-                scrollEnabled
-                maxLength={500}
-                editable={!asking}
-                textAlignVertical="top"
-                className="h-10 font-fraunces-medium text-[15px] leading-5 text-ink"
-                style={{ padding: 0 }}
-              />
-            </View>
-
-            <View className="mt-2.5 flex-row items-center">
-              <View className="min-w-0 flex-1 flex-row flex-wrap items-center gap-1.5">
-                <MetaValue
-                  constraint="start time"
-                  glyph="clock"
-                  label={`By ${startTime.replace(':00', '')}`}
-                  onPress={() => toggleComposerPicker('time')}
-                />
-                <MetaValue constraint="budget" glyph="wallet" label={budget} onPress={() => toggleComposerPicker('budget')} />
-                <MetaValue
-                  constraint="walking limit"
-                  glyph="route"
-                  label={walkBudgetMinutes ? `${walkBudgetMinutes} min` : 'Any walk'}
-                  onPress={() => toggleComposerPicker('walk')}
-                />
-              </View>
-              <Animated.View style={{ transform: [{ scale: sendMotion.interpolate({ inputRange: [0, 1], outputRange: [0.94, 1] }) }] }}>
-                {/* Live on an empty field, not disabled. The example on screen is
-                 * a real, answerable ask built from tonight's anchor, so Ask
-                 * sends that — a guest who taps without typing gets a good night
-                 * rather than a dead button. Anything typed wins over it. */}
-                <TouchableOpacity
-                  accessibilityRole="button"
-                  accessibilityLabel={promptReady ? 'Submit request' : `Ask Vee: ${askExampleLabel}`}
-                  accessibilityState={{ disabled: asking }}
-                  activeOpacity={0.82}
-                  hitSlop={6}
-                  disabled={asking}
-                  onPress={() => void submitAsk(promptReady ? promptText : askExampleLabel)}
-                  style={{ opacity: asking ? 0.48 : 1 }}
-                  className="ml-2 h-8 shrink-0 flex-row items-center justify-center gap-x-1 rounded-full bg-ember px-3.5">
+            className={`${showingLiveMatches ? 'mt-5' : 'mt-7'} flex-row items-center gap-x-2 rounded-full py-1.5 pl-4 pr-1.5`}>
+            <TextInput
+              ref={focusedInputRef}
+              accessibilityLabel="Ask Vee"
+              accessibilityHint={`For example: ${askExampleLabel}`}
+              value={promptText}
+              onChangeText={setPromptText}
+              placeholder={askExampleLabel}
+              placeholderTextColor={colors['fg-muted']}
+              maxLength={500}
+              editable={!asking}
+              returnKeyType="send"
+              onSubmitEditing={() => void submitAsk(promptReady ? promptText : askExampleLabel)}
+              className="min-w-0 flex-1 font-dm text-[15px] text-ink"
+              style={{ paddingVertical: 10 }}
+            />
+            <Animated.View style={{ transform: [{ scale: sendMotion.interpolate({ inputRange: [0, 1], outputRange: [0.94, 1] }) }] }}>
+              {/* Live on an empty field, not disabled. The placeholder is a
+                * real, answerable ask built from tonight's anchor, so Send
+                * sends that — a guest who taps without typing gets a good
+                * night rather than a dead button. Anything typed wins. */}
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel={promptReady ? 'Send' : `Ask Vee: ${askExampleLabel}`}
+                accessibilityState={{ disabled: asking }}
+                activeOpacity={0.82}
+                hitSlop={6}
+                disabled={asking}
+                onPress={() => void submitAsk(promptReady ? promptText : askExampleLabel)}
+                style={{ opacity: asking ? 0.48 : 1 }}
+                className="h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ember">
                 {asking ? (
                   <ActivityIndicator size="small" color={colors['on-accent']} />
-                  ) : (
-                  <>
-                    <Text className="font-dm-bold text-[11px] text-on-accent">Ask</Text>
-                    <Glyph name="arrow" size={13} color={colors['on-accent']} strokeWidth={2.1} />
-                  </>
+                ) : (
+                  <Glyph name="arrowUp" size={17} color={colors['on-accent']} strokeWidth={2.2} />
                 )}
-                </TouchableOpacity>
-              </Animated.View>
-            </View>
+              </TouchableOpacity>
+            </Animated.View>
           </View>
-
-          {composerPicker ? (
-            <View className="mt-2">
-              <ConstraintRail
-                motion={pickerMotion}
-                onChoose={closeComposerPicker}
-                options={(composerPicker === 'time'
-                  ? START_TIME_OPTIONS
-                  : composerPicker === 'budget'
-                    ? BUDGET_OPTIONS
-                    : WALK_BUDGET_OPTIONS
-                ).map((option) => ({
-                  key: String(option),
-                  label: option === null ? 'No walk limit' : composerPicker === 'walk' ? `${option} min walk` : String(option),
-                  selected:
-                    composerPicker === 'time'
-                      ? option === startTimePreference
-                      : composerPicker === 'budget'
-                        ? option === budget
-                        : option === walkBudgetMinutes,
-                  onSelect: () => {
-                    if (composerPicker === 'time' && typeof option === 'string') {
-                      setStartTimePreference(option === startTimePreference ? null : option);
-                    } else if (composerPicker === 'budget' && typeof option === 'string') {
-                      setBudgetPreference(option as (typeof BUDGET_OPTIONS)[number]);
-                    } else if (composerPicker === 'walk') {
-                      setWalkBudgetMinutes(option as (typeof WALK_BUDGET_OPTIONS)[number]);
-                    }
-                  },
-                }))}
-              />
-            </View>
-          ) : null}
 
           {showingLiveMatches ? (
             <View style={raisedSurface} className="mt-3 rounded-panel px-3 py-3">

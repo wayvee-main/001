@@ -4,21 +4,25 @@ import { Keyboard, StyleSheet, Text, TouchableOpacity, View } from 'react-native
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Glyph } from '@/components/glyph';
+import { VeeMark } from '@/components/vee-mark';
 import { useThemeColors } from '@/lib/theme';
 
-/** Route → what the guest calls it. The first tab is named for the concierge
- * rather than the screen ("Vee", not "Home") because that is what the tab
- * actually opens onto now: Vee's prompt is the first thing on it. */
+/** Route → what the guest calls it.
+ *
+ * The first tab is Home again: it is the browsing screen, and calling it Vee
+ * promised a concierge that lived one tab over. `create` carries that name
+ * now, which is what it always was — 1,200 lines of composer and result, with
+ * saved plans on their own route off You.
+ *
+ * Vee's tab draws the mark itself rather than a glyph from the set. It is the
+ * only tab that is a thing rather than a category, and the mark is how the app
+ * says so everywhere else. */
 const TABS: Record<string, { label: string; glyph: string }> = {
-  index: { label: 'Vee', glyph: 'spark' },
+  index: { label: 'Home', glyph: 'home' },
   discover: { label: 'Tonight', glyph: 'clock' },
-  create: { label: 'Plans', glyph: 'calendar' },
+  create: { label: 'Vee', glyph: 'spark' },
   profile: { label: 'You', glyph: 'user' },
 };
-
-/** Diameter of the active marker. Small enough to read as punctuation rather
- * than a second control competing with the icon under it. */
-const DOT = 5;
 
 function WayveeTabBar({ state, navigation }: any) {
   const insets = useSafeAreaInsets();
@@ -43,7 +47,7 @@ function WayveeTabBar({ state, navigation }: any) {
         borderTopColor: colors.edge,
         borderTopWidth: StyleSheet.hairlineWidth,
         paddingBottom: Math.max(insets.bottom, 10),
-        paddingTop: 9,
+        paddingTop: 11,
       }}
       className="flex-row items-start">
       {state.routes.map((route: { key: string; name: string }, index: number) => {
@@ -64,17 +68,14 @@ function WayveeTabBar({ state, navigation }: any) {
             }}
             style={{ flex: 1 }}
             className="items-center justify-start gap-y-[3px] pb-0.5">
-            {/* Always laid out, only sometimes painted: an absent dot would
-             * shift the icon and label by its height on every tab change. */}
-            <View
-              style={{
-                width: DOT,
-                height: DOT,
-                borderRadius: DOT / 2,
-                backgroundColor: focused ? colors.accent : 'transparent',
-              }}
-            />
-            <Glyph name={tab.glyph} size={21} color={tint} strokeWidth={focused ? 1.8 : 1.5} />
+            {/* Tint and weight already say which tab is selected; a dot over
+             * the icon was a third signal saying the same thing, and it had to
+             * be laid out even when unpainted so the icon would not jump. */}
+            {route.name === 'create' ? (
+              <VeeMark size={21} variant="compact" color={tint} strokeWidth={focused ? 3.2 : 2.7} />
+            ) : (
+              <Glyph name={tab.glyph} size={21} color={tint} strokeWidth={focused ? 1.8 : 1.5} />
+            )}
             <Text
               numberOfLines={1}
               style={{ color: tint }}
