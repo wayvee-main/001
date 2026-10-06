@@ -217,23 +217,21 @@ function ShapeTile({
   theme,
   solved,
   selectedDateAt,
-  selected,
   onPress,
 }: {
   theme: string;
   solved: SolvedNight;
   selectedDateAt: Date;
-  selected: boolean;
   onPress: () => void;
 }) {
   const colors = useThemeColors();
   const { order, dinnerTimeLabel, walkMinutes } = useShapeFacts(solved, selectedDateAt);
   const route = shapeRoute(solved, order);
   const facts = shapeFactLine(solved, dinnerTimeLabel, walkMinutes);
-  // One swatch per stop, tinted by kind. Fills dead space at the right edge with
-  // the night's composition, so rows differ in weight instead of being three
-  // identical slabs — and it is information, not texture: two blocks or three,
-  // and which kinds, readable before the row is opened.
+  // One swatch per stop, tinted by kind — two blocks or three, and which kinds,
+  // readable before the row is opened. It leads the row now, where a radio used
+  // to sit: the night's composition is a better thing to put in that slot than
+  // a control, and the row is the control.
   const swatches = order
     .map((kind) => {
       const present = kind === 'dinner' ? solved.restaurant : kind === 'event' ? solved.event : solved.nightlifeSpot;
@@ -244,52 +242,39 @@ function ShapeTile({
 
   return (
     <TouchableOpacity
-      accessibilityRole="radio"
-      accessibilityState={{ selected }}
-      accessibilityLabel={`${theme}. ${route}${facts ? `. ${facts}` : ''}`}
+      accessibilityRole="button"
+      accessibilityLabel={`Use ${theme}. ${route}${facts ? `. ${facts}` : ''}`}
       activeOpacity={0.78}
       onPress={onPress}
       style={{
-        backgroundColor: selected ? colors.bg : colors['surface-soft'],
-        borderColor: selected ? colors['accent-fill'] : colors['edge-soft'],
+        backgroundColor: colors['surface-soft'],
+        borderColor: colors['edge-soft'],
         borderWidth: StyleSheet.hairlineWidth,
       }}
-      className="mb-1.5 flex-row items-start gap-x-3 rounded-panel px-3 py-2.5">
-      <View
-        style={{
-          borderColor: selected ? colors['accent-fill'] : colors.edge,
-          borderWidth: selected ? 5 : 1.5,
-          marginTop: 2,
-        }}
-        className="h-[18px] w-[18px] shrink-0 rounded-full"
-      />
+      className="mb-1.5 min-h-[56px] flex-row items-center gap-x-3 rounded-panel px-3 py-2.5">
+      {/* Radius is inline rather than on the scale: these are 13pt data marks,
+       * not cards, and the smallest scale step (control, 12pt) would round a
+       * block this narrow into a lozenge. */}
+      <View className="shrink-0 flex-row gap-x-1">
+        {swatches.map((tint, index) => (
+          <View key={index} style={{ backgroundColor: tint, borderRadius: 3 }} className="h-[26px] w-[9px]" />
+        ))}
+      </View>
       <View className="min-w-0 flex-1">
         <Text numberOfLines={1} className="font-fraunces text-[14px] leading-[18px] text-ink">{theme}</Text>
         <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">{route}</Text>
         {/* Every row carries its numbers, so all three are the same height and
-         * are compared on their contents rather than on their size. Selection
-         * pays off by promoting this line — muted to ink, regular to medium —
-         * rather than by revealing it, which made the chosen row grow and the
-         * other two read as lesser options. Medium rather than bold: three
-         * rows of small tabular metadata carry enough weight already, and the
-         * colour shift is what actually marks the selection. */}
+         * are compared on their contents rather than on their size. */}
         {facts ? (
           <Text
             numberOfLines={1}
-            style={{ fontVariant: ['tabular-nums'], color: selected ? colors.fg : colors['fg-muted'] }}
-            className={`mt-1 text-meta ${selected ? 'font-dm-medium' : 'font-dm'}`}>
+            style={{ fontVariant: ['tabular-nums'], color: colors['fg-muted'] }}
+            className="mt-0.5 font-dm text-meta">
             {facts}
           </Text>
         ) : null}
       </View>
-      {/* Radius is inline rather than on the scale: these are 13pt data marks,
-       * not cards, and the smallest scale step (control, 12pt) would round a
-       * block this narrow into a lozenge. */}
-      <View className="shrink-0 flex-row gap-x-1 pt-0.5">
-        {swatches.map((tint, index) => (
-          <View key={index} style={{ backgroundColor: tint, borderRadius: 3 }} className="h-[22px] w-[13px]" />
-        ))}
-      </View>
+      <Glyph name="chevron" size={15} color={colors['fg-muted']} strokeWidth={1.8} />
     </TouchableOpacity>
   );
 }
@@ -621,7 +606,6 @@ export default function CreateScreen() {
   // Which shape is open, and where we are in the regenerate cycle. Both are
   // positional rather than keyed on a solve, because a re-solve replaces every
   // card's identity while the guest's place in the list stays put.
-  const [expandedIndex, setExpandedIndex] = useState(0);
   const [setIndex, setSetIndex] = useState(0);
   // A constraint change reshapes the whole candidate pool — steering away
   // from picks that made sense under the old constraints isn't a real signal
@@ -633,7 +617,6 @@ export default function CreateScreen() {
     setAvoidConstraintKey(constraintKey);
     setAvoidIds({ restaurantIds: [], eventIds: [], nightlifeIds: [] });
     setSetIndex(0);
-    setExpandedIndex(0);
   }
 
   const solveOne = (
@@ -716,7 +699,6 @@ export default function CreateScreen() {
     if (!reduceMotion) LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     const next = (setIndex + 1) % PLAN_SETS;
     setSetIndex(next);
-    setExpandedIndex(0);
     if (next === 0) {
       setAvoidIds({ restaurantIds: [], eventIds: [], nightlifeIds: [] });
       return;
@@ -757,14 +739,15 @@ export default function CreateScreen() {
     router.push('/plan');
   };
 
-  const openIndex = Math.min(expandedIndex, Math.max(0, readyMadeCards.length - 1));
-  const focusedCard = readyMadeCards[openIndex] ?? null;
-  const focusedCardKey = focusedCard
-    ? `${setIndex}-${openIndex}-${focusedCard.theme}-${focusedCard.solved.restaurant?.id ?? ''}-${focusedCard.solved.event?.id ?? ''}`
+  // The set animates in, not a selection within it. There is no selection any
+  // more — each row acts on tap — so the key is the set itself, which is what
+  // actually changes when Reshuffle runs.
+  const shapeSetKey = readyMadeCards.length
+    ? `${setIndex}-${readyMadeCards.map((card) => `${card.theme}:${card.solved.restaurant?.id ?? ''}:${card.solved.event?.id ?? ''}`).join('|')}`
     : 'empty';
 
   useEffect(() => {
-    if (!focusedCard) return;
+    if (!readyMadeCards.length) return;
     if (reduceMotion) {
       planMotion.setValue(1);
       return;
@@ -778,7 +761,8 @@ export default function CreateScreen() {
     });
     animation.start();
     return () => animation.stop();
-  }, [focusedCard, focusedCardKey, planMotion, reduceMotion]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shapeSetKey, planMotion, reduceMotion]);
 
   /** Keep the reference behavior inside the primary page: typing searches the
    * same catalog as global search, while the Vee action remains the first row. */
@@ -1002,7 +986,7 @@ export default function CreateScreen() {
               editable={!asking}
               returnKeyType="send"
               onSubmitEditing={() => void submitAsk(promptReady ? promptText : askExampleLabel)}
-              className="min-w-0 flex-1 font-dm text-[15px] text-ink"
+              className="min-w-0 flex-1 font-dm text-[13px] text-ink"
               style={{ paddingVertical: 10 }}
             />
             <Animated.View style={{ transform: [{ scale: sendMotion.interpolate({ inputRange: [0, 1], outputRange: [0.94, 1] }) }] }}>
@@ -1165,7 +1149,7 @@ export default function CreateScreen() {
               </View>
             ) : readyMadeCards.length ? (
               <Animated.View
-                key={focusedCardKey}
+                key={shapeSetKey}
                 style={{
                   opacity: planMotion,
                   transform: [{ translateY: planMotion.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) }],
@@ -1186,22 +1170,10 @@ export default function CreateScreen() {
                       theme={card.theme}
                       solved={card.solved}
                       selectedDateAt={selectedDateAt}
-                      selected={index === openIndex}
-                      onPress={() => setExpandedIndex(index)}
+                      onPress={() => chooseReadyMade(card.solved, card.theme)}
                     />
                   ))}
                 </View>
-
-                {focusedCard ? (
-                  <TouchableOpacity
-                    accessibilityRole="button"
-                    accessibilityLabel={`Use ${focusedCard.theme}`}
-                    activeOpacity={0.82}
-                    onPress={() => chooseReadyMade(focusedCard.solved, focusedCard.theme)}
-                    className="mt-3 min-h-[52px] items-center justify-center rounded-xl bg-ember px-4 py-3.5">
-                    <Text className="font-dm-bold text-label text-on-accent">Use this plan</Text>
-                  </TouchableOpacity>
-                ) : null}
 
                 {/* "Show 3 more · 1 of 3" contradicted the "3 for tonight" above
                  * it — one count promising more, the other saying these are all
