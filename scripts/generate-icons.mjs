@@ -53,21 +53,20 @@ const GRADIENT = `<defs><linearGradient id="g" x1="0" y1="1" x2="1" y2="0">
 <stop offset="0.72" stop-color="#6F5BD1"/><stop offset="1" stop-color="#FFC757"/>
 </linearGradient></defs>`;
 
-/** The full fork. Mirrors VeeMark's `primary`. */
-const primary = (paint, sw = 2.3) => `
-<path d="M20 34 V 23" stroke="${paint}" stroke-width="${sw}" stroke-linecap="round"/>
-<path d="M20 23 C 20 16, 15.9 14.5, 12.4 14.5" stroke="${paint}" stroke-width="${sw}" stroke-linecap="round" fill="none"/>
-<path d="M20 23 C 20 16, 25.5 14.5, 29.5 14.5" stroke="${paint}" stroke-width="${sw}" stroke-linecap="round" fill="none"/>
-<circle cx="8.4" cy="14.5" r="3.2" stroke="${paint}" stroke-width="${sw}" fill="none"/>
-<circle cx="31" cy="14.5" r="3.5" fill="${paint}"/>`;
+/** Every turn of the spiral. Mirrors VeeMark's `primary`.
+ *
+ * Half turns of doubling radius — 0.9, 1.8, 3.6, 7.2, 14.4 — centred so the
+ * bounding box lands on (20, 20). Keep these numbers identical to SPIRAL in
+ * src/components/vee-mark.tsx. */
+const primary = (paint, sw = 2.1) => `
+<path d="M25.4 16.4 A0.9 0.9 0 0 1 23.6 16.4 A1.8 1.8 0 0 1 27.2 16.4 A3.6 3.6 0 0 1 20 16.4 A7.2 7.2 0 0 1 34.4 16.4 A14.4 14.4 0 0 1 5.6 16.4" stroke="${paint}" stroke-width="${sw}" stroke-linecap="round" fill="none"/>`;
 
-/** Straight branches and one heavy terminal — drawn for the favicon's 16px,
- * where the curves and the open ring of the full fork silt up. */
-const compact = (paint, sw = 4.2) => `
-<path d="M20 36 V 27" stroke="${paint}" stroke-width="${sw}" stroke-linecap="round"/>
-<path d="M20 27 L 10 17" stroke="${paint}" stroke-width="${sw}" stroke-linecap="round"/>
-<path d="M20 27 L 29.5 17.5" stroke="${paint}" stroke-width="${sw}" stroke-linecap="round"/>
-<circle cx="31" cy="15" r="5" fill="${paint}"/>`;
+/** The three outer turns only — drawn for the favicon's 16px, where the two
+ * innermost turns are narrower than the stroke drawing them and the centre
+ * silts up. Same bounding box, so it swaps in without moving. Mirrors
+ * SPIRAL_COMPACT in src/components/vee-mark.tsx. */
+const compact = (paint, sw = 3.4) => `
+<path d="M27.2 16.4 A3.6 3.6 0 0 1 20 16.4 A7.2 7.2 0 0 1 34.4 16.4 A14.4 14.4 0 0 1 5.6 16.4" stroke="${paint}" stroke-width="${sw}" stroke-linecap="round" fill="none"/>`;
 
 // `ratio` is the mark box over the tile. The app icon and favicon match the
 // approved artwork sheet; android adaptive keeps the mark inside the central
