@@ -30,7 +30,7 @@ import {
   View,
 } from 'react-native';
 import { useConstraintPicker } from '@/components/constraint-picker';
-import { Glyph } from '@/components/glyph';
+import { Glyph, type GlyphName } from '@/components/glyph';
 import { VeeMark } from '@/components/vee-mark';
 import { HRow, Screen, ScreenScroll } from '@/components/layout';
 import { EmptyState } from '@/components/ui';
@@ -65,7 +65,7 @@ import { planFromShape } from '@/lib/plan-from-shape';
 import { currentNightIso, isStayActive, parseDateOnly, stayArcPosition, stayProgress } from '@/lib/stay';
 import { useScoper } from '@/lib/store';
 import { tasteVocabulary } from '@/lib/taste';
-import { useThemeColors } from '@/lib/theme';
+import { useThemeColors, type ThemeColors } from '@/lib/theme';
 import { useViatorPicks } from '@/lib/viator';
 import { useWeatherNow, weatherLine } from '@/lib/weather';
 
@@ -211,6 +211,23 @@ function shapeFactLine(solved: SolvedNight, dinnerTimeLabel: string, walkMinutes
   return [startsAt ? `from ${startsAt}` : null, walk, solved.restaurant?.price].filter(Boolean).join(' · ');
 }
 
+type ShapeChip = { glyph: GlyphName; tint: keyof ThemeColors; ink: keyof ThemeColors };
+
+/** One mark per shape, keyed to the theme rather than to a stop kind. Three
+ * options read as three choices only if they look like three, and stop kind
+ * could not do that: nearly every shape opens on dinner, so two of the three
+ * rows came out identical. The themes are a closed set — readyMadeCards builds
+ * exactly these — and each glyph is true of the shape it marks: the primary is
+ * the walkable one, the nightcap always carries a nightlife stop. */
+const SHAPE_CHIP: Record<string, ShapeChip> = {
+  'Low-key & walkable': { glyph: 'walk', tint: 'vee-tint', ink: 'vee-strong' },
+  'Big night out': { glyph: 'music', tint: 'accent-tint', ink: 'fg-accent' },
+  'Late & loud': { glyph: 'drink', tint: 'warm-tint', ink: 'warm-strong' },
+};
+
+/** Only reachable if a new theme is added above without a mark to go with it. */
+const FALLBACK_CHIP: ShapeChip = { glyph: 'food', tint: 'accent-tint', ink: 'fg-accent' };
+
 /** A solved shape as one comparable row. The picker shows every shape the
  * engine returned rather than one card and a dice button. */
 function ShapeTile({
@@ -228,17 +245,9 @@ function ShapeTile({
   const { order, dinnerTimeLabel, walkMinutes } = useShapeFacts(solved, selectedDateAt);
   const route = shapeRoute(solved, order);
   const facts = shapeFactLine(solved, dinnerTimeLabel, walkMinutes);
-  // One swatch per stop, tinted by kind — two blocks or three, and which kinds,
-  // readable before the row is opened. It leads the row now, where a radio used
-  // to sit: the night's composition is a better thing to put in that slot than
-  // a control, and the row is the control.
-  const swatches = order
-    .map((kind) => {
-      const present = kind === 'dinner' ? solved.restaurant : kind === 'event' ? solved.event : solved.nightlifeSpot;
-      if (!present) return null;
-      return kind === 'dinner' ? colors['accent-tint'] : kind === 'event' ? colors['vee-tint'] : colors['warm-tint'];
-    })
-    .filter((tint): tint is string => Boolean(tint));
+  // Swatch-per-stop used to sit here, and also said how many stops there were;
+  // the route line names every one of them, so the count survives in words.
+  const chip = SHAPE_CHIP[theme] ?? FALLBACK_CHIP;
 
   return (
     <TouchableOpacity
@@ -246,35 +255,18 @@ function ShapeTile({
       accessibilityLabel={`Use ${theme}. ${route}${facts ? `. ${facts}` : ''}`}
       activeOpacity={0.78}
       onPress={onPress}
-      style={{
-        backgroundColor: colors['surface-soft'],
-        borderColor: colors['edge-soft'],
-        borderWidth: StyleSheet.hairlineWidth,
-      }}
-      className="mb-1.5 min-h-[56px] flex-row items-center gap-x-3 rounded-panel px-3 py-2.5">
-      {/* Radius is inline rather than on the scale: these are 13pt data marks,
-       * not cards, and the smallest scale step (control, 12pt) would round a
-       * block this narrow into a lozenge. */}
-      <View className="shrink-0 flex-row gap-x-1">
-        {swatches.map((tint, index) => (
-          <View key={index} style={{ backgroundColor: tint, borderRadius: 3 }} className="h-[26px] w-[9px]" />
-        ))}
+      style={{ borderTopColor: colors['edge-soft'], borderTopWidth: StyleSheet.hairlineWidth }}
+      className="min-h-[56px] flex-row items-center gap-x-3 py-3.5">
+      <View
+        style={{ backgroundColor: colors[chip.tint] }}
+        className="h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full">
+        <Glyph name={chip.glyph} size={15} color={colors[chip.ink]} strokeWidth={1.9} />
       </View>
       <View className="min-w-0 flex-1">
-        <Text numberOfLines={1} className="font-fraunces text-[14px] leading-[18px] text-ink">{theme}</Text>
+        <Text numberOfLines={1} className="font-dm-medium text-[14px] leading-[18px] text-ink">{theme}</Text>
         <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">{route}</Text>
-        {/* Every row carries its numbers, so all three are the same height and
-         * are compared on their contents rather than on their size. */}
-        {facts ? (
-          <Text
-            numberOfLines={1}
-            style={{ fontVariant: ['tabular-nums'], color: colors['fg-muted'] }}
-            className="mt-0.5 font-dm text-meta">
-            {facts}
-          </Text>
-        ) : null}
       </View>
-      <Glyph name="chevron" size={15} color={colors['fg-muted']} strokeWidth={1.8} />
+      <Glyph name="chevron" size={16} color={colors['fg-muted']} strokeWidth={1.8} />
     </TouchableOpacity>
   );
 }
@@ -793,9 +785,9 @@ export default function CreateScreen() {
    * anchor event when there is one. */
   const askExampleLabel = useMemo(() => {
     const nearby = rankedRestaurantsAll[0]?.item;
-    if (nearby) return `Somewhere like ${nearby.name}, but I want options`;
+    if (nearby) return `Somewhere like ${nearby.name}`;
     if (topEvent) return `Something near ${topEvent.venue}`;
-    return 'Dinner somewhere walkable, then a drink';
+    return 'Dinner, then a drink';
   }, [topEvent, rankedRestaurantsAll]);
 
   /** Starters that say a real name out loud — "Date for 2 at Nido", "Tickets to
@@ -1179,12 +1171,15 @@ export default function CreateScreen() {
                  * it — one count promising more, the other saying these are all
                  * of them. Reshuffle replaces the set, so it claims nothing the
                  * header disagrees with. */}
+                {/* Carries the same rule as the rows above it, so it closes the
+                 * list instead of floating loose under the last one. */}
                 <TouchableOpacity
                   accessibilityRole="button"
                   accessibilityLabel={`Reshuffle, ${readyMadeCards.length} new shapes`}
                   activeOpacity={0.72}
                   onPress={cycleSet}
-                  className="mt-1 h-11 flex-row items-center justify-center gap-x-2">
+                  style={{ borderTopColor: colors['edge-soft'], borderTopWidth: StyleSheet.hairlineWidth }}
+                  className="h-12 flex-row items-center justify-center gap-x-2">
                   <Glyph name="refresh" size={16} color={colors['fg-muted']} strokeWidth={1.7} />
                   <Text className="font-dm-medium text-meta text-taupe">
                     Reshuffle · {readyMadeCards.length} new shapes
