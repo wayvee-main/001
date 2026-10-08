@@ -21,6 +21,31 @@ name: Trigger Vercel deploy
 
 on:
   workflow_dispatch: {} # manual "Run workflow" button in the Actions tab
+  push:
+    branches: [main]
+    # Everything the web bundle is built from. app.json and vercel.json are in
+    # here, unlike the Android update workflow which excludes app.json on
+    # purpose: that one is gated on the runtime fingerprint, and the web build
+    # has no such thing — a favicon or a web.output change is a real change to
+    # what gets served.
+    paths:
+      - 'src/**'
+      - 'assets/**'
+      - 'app.json'
+      - 'vercel.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'babel.config.js'
+      - 'metro.config.js'
+      - 'tailwind.config.js'
+      - 'tsconfig.json'
+      - '.github/workflows/deploy-vercel.yml'
+
+# A deploy supersedes whatever is still in flight: two pushes a minute apart
+# should land the second one, not race it against the first.
+concurrency:
+  group: vercel-deploy-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   deploy:
