@@ -262,28 +262,24 @@ export default function HomeScreen() {
     aroundYouTiles.push({
       key: 'eat', count: String(cityOpenCount), glyph: 'food', label: 'Eat', hint: 'open now',
       tint: 'accent-tint', ink: 'fg-accent', onPress: openFoodHub,
-      image: dinnerPicks.map(restaurantPhoto).find(Boolean),
     });
   } else if (dinnerPicks.length) {
     // Hours unreadable: name the ranked inventory rather than call it open.
     aroundYouTiles.push({
       key: 'eat', count: String(dinnerPicks.length), glyph: 'food', label: 'Eat', hint: 'nearby',
       tint: 'accent-tint', ink: 'fg-accent', onPress: openFoodHub,
-      image: dinnerPicks.map(restaurantPhoto).find(Boolean),
     });
   }
   if (eventsTodayCount > 0) {
     aroundYouTiles.push({
       key: 'shows', count: String(eventsTodayCount), glyph: 'ticket', label: 'Shows', hint: 'tonight',
       tint: 'vee-tint', ink: 'vee-strong', onPress: () => router.push('/discover?mode=Events'),
-      image: eventLead?.image,
     });
   }
   if (NIGHTLIFE_SPOTS.length) {
     aroundYouTiles.push({
       key: 'bars', count: String(NIGHTLIFE_SPOTS.length), glyph: 'drink', label: 'Bars', hint: 'in the catalog',
       tint: 'warm-tint', ink: 'warm-strong', onPress: () => router.push('/discover?mode=Nightlife'),
-      image: NIGHTLIFE_SPOTS.find((spot) => spot.image)?.image,
     });
   }
   const crawlCount = Object.keys(CRAWLS).length;
@@ -291,7 +287,6 @@ export default function HomeScreen() {
     aroundYouTiles.push({
       key: 'routes', count: String(crawlCount), glyph: 'route', label: 'Routes', hint: 'multi-stop nights',
       tint: 'vee-tint', ink: 'vee-strong', onPress: () => router.push('/collection'),
-      image: homeCollections.find((collection) => collection.coverImage)?.coverImage,
     });
   }
 

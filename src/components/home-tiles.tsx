@@ -1,4 +1,3 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Glyph, type GlyphName } from '@/components/glyph';
@@ -15,9 +14,6 @@ export type CountTile = {
   tint: keyof ThemeColors;
   ink: keyof ThemeColors;
   glyph: GlyphName;
-  /** A real photo from the pool this tile counts — the lead event's art, a
-   * dish, a bar. Absent is fine: the tile falls back to its flat tint. */
-  image?: string;
   onPress: () => void;
 };
 
@@ -29,8 +25,9 @@ export type CountTile = {
  * lists; and each tile opens the pool it counted, because a quantity the guest
  * cannot follow is decoration (CLAUDE.md #3).
  *
- * The glyph is small and paired with the count. An oversized one — the first
- * attempt — became the loudest thing on a tile whose point is a number. */
+ * The glyph is small and paired with the count. An oversized one, and later a
+ * photograph behind the text, both became the loudest thing on a tile whose
+ * point is a number. Flat tint, one glyph, one number. */
 export function AroundYou({ tiles }: { tiles: CountTile[] }) {
   const colors = useThemeColors();
   const rows: CountTile[][] = [];
@@ -52,40 +49,9 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
                 borderColor: colors['edge-soft'],
                 borderWidth: StyleSheet.hairlineWidth,
               }}
-              className="min-h-[86px] flex-1 overflow-hidden rounded-panel px-3.5 pb-3.5 pt-3">
-              {/* The photo sits on the right and the tile's own tint is drawn
-               * back over it, opaque under the text and clearing by the right
-               * edge. The count stays on flat colour — a number read against
-               * photography is a number read twice. */}
-              {tile.image ? (
-                <>
-                  <Photo
-                    uri={tile.image}
-                    radius={0}
-                    stripedPlaceholder={false}
-                    // Tinted behind the photo: a URL that fails to load
-                    // leaves the tile's own colour, not a hole in it.
-                    style={{
-                      position: 'absolute',
-                      right: 0,
-                      top: 0,
-                      bottom: 0,
-                      width: '64%',
-                      backgroundColor: colors[tile.tint],
-                    }}
-                  />
-                  <LinearGradient
-                    colors={[colors[tile.tint], colors[tile.tint], 'transparent']}
-                    locations={[0, 0.36, 1]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={StyleSheet.absoluteFill}
-                  />
-                </>
-              ) : null}
-              {/* Glyph and count sit together on the left rather than at
-               * opposite ends of the tile: the right side is the photo now,
-               * and a number set over the fade is a number read twice. */}
+              className="min-h-[86px] flex-1 rounded-panel px-3.5 pb-3.5 pt-3">
+              {/* Glyph and count read as one mark, so they sit together
+               * rather than at opposite corners of the tile. */}
               <View className="flex-row items-center gap-x-2">
                 <Glyph name={tile.glyph} size={15} color={colors[tile.ink]} strokeWidth={1.9} />
                 <Text
