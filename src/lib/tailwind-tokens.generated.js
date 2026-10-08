@@ -16,6 +16,7 @@ module.exports = {
   open: 'rgb(var(--color-open) / <alpha-value>)',
   warm: 'rgb(var(--color-warm) / <alpha-value>)',
   "warm-strong": 'rgb(var(--color-warm-strong) / <alpha-value>)',
+  "warm-ink": 'rgb(var(--color-warm-ink) / <alpha-value>)',
   vee: 'rgb(var(--color-vee) / <alpha-value>)',
   "vee-strong": 'rgb(var(--color-vee-strong) / <alpha-value>)',
   "accent-tint": 'rgb(var(--color-accent-tint) / <alpha-value>)',

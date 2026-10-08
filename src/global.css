@@ -24,6 +24,7 @@
   --color-open: 56 113 79;
   --color-warm: 255 199 87;
   --color-warm-strong: 84 63 24;
+  --color-warm-ink: 84 63 24;
   --color-vee: 111 91 209;
   --color-vee-strong: 93 75 170;
   --color-accent-tint: 251 228 218;
@@ -50,6 +51,7 @@
   --color-open: 131 208 168;
   --color-warm: 255 199 87;
   --color-warm-strong: 61 45 16;
+  --color-warm-ink: 245 201 140;
   --color-vee: 168 150 255;
   --color-vee-strong: 197 186 255;
   --color-accent-tint: 74 42 37;

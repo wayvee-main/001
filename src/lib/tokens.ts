@@ -65,7 +65,11 @@ export const ROLES: Record<string, ThemeValue> = {
   'on-accent': { light: '#FFFFFF', dark: '#FFFFFF' }, // text/icon on accent-fill
   open: { light: '#38714F', dark: '#83D0A8' }, // open-now / confirmed / live
   warm: { light: '#FFC757', dark: '#FFC757' }, // marigold — FILL ONLY, never text (see below)
-  'warm-strong': { light: '#543F18', dark: '#3D2D10' }, // ink on a marigold fill
+  'warm-strong': { light: '#543F18', dark: '#3D2D10' }, // ink on a marigold FILL — not on warm-tint
+  // The marigold family's answer to fg-accent and vee-strong: text and icons
+  // on warm-tint. warm-strong cannot do this job — it is sized for the bright
+  // fill, so in dark it is near-black on a near-black tint (1.08:1).
+  'warm-ink': { light: '#543F18', dark: '#F5C98C' }, // text on warm-tint
   vee: { light: '#6F5BD1', dark: '#A896FF' }, // Vee's cobalt — fills, borders, icons
   'vee-strong': { light: '#5D4BAA', dark: '#C5BAFF' }, // cobalt as text
   'accent-tint': { light: '#FBE4DA', dark: '#4A2A25' }, // coral-tinted block

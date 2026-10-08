@@ -222,7 +222,7 @@ type ShapeChip = { glyph: GlyphName; tint: keyof ThemeColors; ink: keyof ThemeCo
 const SHAPE_CHIP: Record<string, ShapeChip> = {
   'Low-key & walkable': { glyph: 'walk', tint: 'vee-tint', ink: 'vee-strong' },
   'Big night out': { glyph: 'music', tint: 'accent-tint', ink: 'fg-accent' },
-  'Late & loud': { glyph: 'drink', tint: 'warm-tint', ink: 'warm-strong' },
+  'Late & loud': { glyph: 'drink', tint: 'warm-tint', ink: 'warm-ink' },
 };
 
 /** Only reachable if a new theme is added above without a mark to go with it. */

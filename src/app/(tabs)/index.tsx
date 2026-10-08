@@ -279,7 +279,7 @@ export default function HomeScreen() {
   if (NIGHTLIFE_SPOTS.length) {
     aroundYouTiles.push({
       key: 'bars', count: String(NIGHTLIFE_SPOTS.length), glyph: 'drink', label: 'Bars', hint: 'in the catalog',
-      tint: 'warm-tint', ink: 'warm-strong', onPress: () => router.push('/discover?mode=Nightlife'),
+      tint: 'warm-tint', ink: 'warm-ink', onPress: () => router.push('/discover?mode=Nightlife'),
     });
   }
   const crawlCount = Object.keys(CRAWLS).length;

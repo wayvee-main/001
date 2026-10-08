@@ -72,6 +72,10 @@ const PAIRS: Pair[] = [
   { name: 'vee-strong on surface', fg: role('vee-strong'), bg: role('surface'), min: AA_TEXT },
   { name: 'vee-strong on vee-tint', fg: role('vee-strong'), bg: role('vee-tint'), min: AA_TEXT },
   { name: 'warm-strong on warm', fg: role('warm-strong'), bg: role('warm'), min: AA_TEXT },
+  // The pair that was missing when a tile put warm-strong on warm-tint and
+  // went to 1.08:1 in dark. Every other tint family was checked; this one
+  // was not, so nothing caught it.
+  { name: 'warm-ink on warm-tint', fg: role('warm-ink'), bg: role('warm-tint'), min: AA_TEXT },
   // The tint is a surface in its own right, not the marigold fill — what sits on
   // it is ordinary body ink, and in dark that ink is paper, not the marigold ink.
   { name: 'fg on warm-tint', fg: role('fg'), bg: role('warm-tint'), min: AA_TEXT },
