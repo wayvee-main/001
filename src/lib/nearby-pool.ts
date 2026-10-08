@@ -11,6 +11,9 @@
 // source that may or may not fill the gap at call time. Ranking an unknown
 // below a known open is a preference; calling it open would be an invention.
 
+import type { Restaurant } from '@/lib/data';
+import { milesBetween, walkMinutes, type GeoPoint } from '@/lib/geo';
+
 import type { OpenState } from '@/lib/hours';
 
 export interface NearbyCandidate<T> {
@@ -58,4 +61,27 @@ export function nearbyMetaLine({
 }): string {
   const distance = miles != null ? `${miles < 10 ? miles.toFixed(1) : Math.round(miles)} mi` : distanceLabel;
   return [cuisine, distance].filter(Boolean).join(' · ');
+}
+
+/** The catalog ordered by how long it takes to walk there, nearest first.
+ *
+ * A place we cannot measure is dropped rather than ranked last: "fastest" is
+ * a claim about minutes, and a place with no coordinates has none to make.
+ * Returns an empty list when there is no anchor at all, which is the honest
+ * answer before location resolves — the caller hides the section rather than
+ * showing an arbitrary order (CLAUDE.md #6). */
+export function fastestOnFoot(
+  restaurants: Restaurant[],
+  coordsFor: (entry: { name: string; address?: string | null }) => GeoPoint | null,
+  anchor: GeoPoint | null,
+): { restaurant: Restaurant; miles: number; minutes: number }[] {
+  if (!anchor) return [];
+  const measured: { restaurant: Restaurant; miles: number; minutes: number }[] = [];
+  for (const restaurant of restaurants) {
+    const point = coordsFor(restaurant);
+    if (!point) continue;
+    const miles = milesBetween(anchor, point);
+    measured.push({ restaurant, miles, minutes: walkMinutes(miles) });
+  }
+  return measured.sort((a, b) => a.miles - b.miles);
 }

@@ -22,6 +22,12 @@ const EDGE_FADE_WIDTH = 28;
  * and violet atmosphere in light mode, and the same color story sunk into the
  * plum-black dark ground. Keeping it here lets onboarding, modals, details and
  * ordinary screens share one treatment instead of recreating one-off washes. */
+/** Three crossed washes over the base colour.
+ *
+ * Light theme leans on these harder than dark does, and has to: bg and
+ * surface-raised are the same #FFFDFA, so a card is the same colour as the
+ * page it sits on and only the wash and a hairline separate them. Dark theme
+ * has real separation between #151117 and #1B161E and needs much less. */
 export function AppBackdrop({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const colors = useThemeColors();
   const dark = colors.bg === '#151117';
@@ -32,7 +38,7 @@ export function AppBackdrop({ children, style }: { children: ReactNode; style?: 
         pointerEvents="none"
         colors={dark
           ? ['rgba(232, 93, 44, 0.11)', 'rgba(232, 93, 44, 0.035)', 'rgba(232, 93, 44, 0)']
-          : ['rgba(255, 199, 137, 0.30)', 'rgba(255, 210, 177, 0.10)', 'rgba(255, 253, 250, 0)']}
+          : ['rgba(252, 186, 120, 0.46)', 'rgba(250, 200, 166, 0.20)', 'rgba(255, 253, 250, 0)']}
         locations={[0, 0.42, 1]}
         start={{ x: 0.95, y: 0 }}
         end={{ x: 0.18, y: 0.64 }}
@@ -42,7 +48,7 @@ export function AppBackdrop({ children, style }: { children: ReactNode; style?: 
         pointerEvents="none"
         colors={dark
           ? ['rgba(111, 91, 209, 0)', 'rgba(111, 91, 209, 0.105)', 'rgba(111, 91, 209, 0)']
-          : ['rgba(111, 91, 209, 0)', 'rgba(137, 119, 222, 0.13)', 'rgba(111, 91, 209, 0)']}
+          : ['rgba(111, 91, 209, 0)', 'rgba(128, 108, 216, 0.17)', 'rgba(111, 91, 209, 0)']}
         locations={[0.16, 0.52, 0.9]}
         start={{ x: 0.04, y: 0.12 }}
         end={{ x: 1, y: 0.7 }}
@@ -52,7 +58,7 @@ export function AppBackdrop({ children, style }: { children: ReactNode; style?: 
         pointerEvents="none"
         colors={dark
           ? ['rgba(255, 199, 87, 0)', 'rgba(255, 146, 113, 0.055)', 'rgba(255, 199, 87, 0)']
-          : ['rgba(255, 199, 87, 0)', 'rgba(255, 151, 111, 0.09)', 'rgba(255, 199, 87, 0)']}
+          : ['rgba(255, 199, 87, 0)', 'rgba(250, 142, 102, 0.13)', 'rgba(255, 199, 87, 0)']}
         locations={[0.08, 0.48, 0.88]}
         start={{ x: 1, y: 0.08 }}
         end={{ x: 0.06, y: 1 }}

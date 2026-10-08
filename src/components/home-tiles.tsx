@@ -2,6 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Glyph, type GlyphName } from '@/components/glyph';
+import { MiniChevron } from '@/components/ui';
 import { Photo } from '@/components/photo';
 import { useThemeColors, type ThemeColors } from '@/lib/theme';
 
@@ -124,13 +125,33 @@ export function Umbrella({ title }: { title: string }) {
 /** The third level of Home's hierarchy: page title (19) › umbrella (17) ›
  * this. Small caps rather than a size step, because another serif heading
  * here is what made the old Home read as four competing titles. */
-export function SubLabel({ title, action, onPress }: { title: string; action?: string; onPress?: () => void }) {
+export function SubLabel({
+  title,
+  action,
+  onPress,
+}: {
+  title: string;
+  /** Wording for the way through. Omit it and the control is a chevron — the
+   * same mark every tappable row on Home ends in, which says "there is more
+   * this way" without spending a word on it. */
+  action?: string;
+  onPress?: () => void;
+}) {
   return (
-    <View className="min-h-[18px] flex-row items-baseline justify-between gap-x-2">
+    <View className="min-h-[20px] flex-row items-center justify-between gap-x-2">
       <Text className="font-dm-bold text-micro uppercase text-taupe">{title}</Text>
-      {action && onPress ? (
-        <TouchableOpacity accessibilityRole="button" activeOpacity={0.7} hitSlop={{ top: 10, bottom: 10 }} onPress={onPress}>
-          <Text className="font-dm-medium text-meta text-peach">{action}</Text>
+      {onPress ? (
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel={action ?? `See all ${title.toLowerCase()}`}
+          activeOpacity={0.7}
+          hitSlop={{ top: 10, bottom: 10, left: 10 }}
+          onPress={onPress}>
+          {action ? (
+            <Text className="font-dm-medium text-meta text-peach">{action}</Text>
+          ) : (
+            <MiniChevron />
+          )}
         </TouchableOpacity>
       ) : null}
     </View>

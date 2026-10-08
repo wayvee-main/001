@@ -1,5 +1,5 @@
-import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useRouter } from 'expo-router';
+import { useMemo, useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 import { VeeHero, HomeVeePanel, HomeHeader } from '@/components/home-top';
@@ -35,12 +35,8 @@ import {
   type HomeSuggestion,
 } from '@/lib/daypart';
 import { hydrateEventsFromBackend } from '@/lib/events-remote';
-import {
-  canonicalRestaurantHref,
-  loadRestaurantExplorations,
-  type RestaurantExploration,
-} from '@/lib/exploration-history';
 import { formatMiles, milesBetween, usableAnchor, walkMinutes } from '@/lib/geo';
+import { fastestOnFoot } from '@/lib/nearby-pool';
 import { openStateFor } from '@/lib/hours';
 import { cityStateDisplayLabel } from '@/lib/location';
 import { hydratePlacesFromBackend, useCuratedCoords, useCuratedHours } from '@/lib/places';
@@ -84,15 +80,6 @@ function collectionMeta(collection: CuratedCollection): string {
     : `${items.length} current ${items.length === 1 ? 'pick' : 'picks'} \u00b7 ${tail}`;
 }
 
-function exploredRestaurantId(href: string): string | null {
-  const canonical = canonicalRestaurantHref(href);
-  if (!canonical) return null;
-  try {
-    return decodeURIComponent(canonical.slice('/restaurant/'.length));
-  } catch {
-    return null;
-  }
-}
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -101,19 +88,6 @@ export default function HomeScreen() {
   const raisedSurface = useRaisedSurface(2);
   const hydrating = useContentHydrating();
   const [refreshing, setRefreshing] = useState(false);
-  const [restaurantExplorations, setRestaurantExplorations] = useState<RestaurantExploration[]>([]);
-
-  useFocusEffect(
-    useCallback(() => {
-      let active = true;
-      void loadRestaurantExplorations().then((entries) => {
-        if (active) setRestaurantExplorations(entries);
-      });
-      return () => {
-        active = false;
-      };
-    }, []),
-  );
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -204,22 +178,6 @@ export default function HomeScreen() {
       .sort((a, b) => b.score - a.score || a.index - b.index);
   }, [nearbyRestaurants, curatedCoords, curatedHours, distanceAnchor, s.walkBudgetMinutes, s.budgetPreference, tasteProfile, now]);
   const dinnerPicks = useMemo(() => dinnerRanked.slice(0, 10).map((entry) => entry.restaurant), [dinnerRanked]);
-  const mostExploredRestaurants = useMemo(() => {
-    const nearbyIds = new Set(dinnerPicks.map((restaurant) => restaurant.id));
-    const seen = new Set<string>();
-    const resolved: Restaurant[] = [];
-
-    for (const exploration of restaurantExplorations) {
-      const id = exploredRestaurantId(exploration.href);
-      const restaurant = id ? RESTAURANTS[id] : undefined;
-      if (!restaurant || nearbyIds.has(restaurant.id) || seen.has(restaurant.id)) continue;
-      seen.add(restaurant.id);
-      resolved.push(restaurant);
-      if (resolved.length === 4) break;
-    }
-
-    return resolved;
-  }, [dinnerPicks, restaurantExplorations]);
 
   // "Right now" snapshot (CLAUDE.md #3): real counts off the same ranked pools
   // the sections below already use, not a separate query — mirrors the Plan
@@ -356,7 +314,12 @@ export default function HomeScreen() {
   // unfolded this section opens by restating it as six rows.
   const [eatOpen, setEatOpen] = useState(false);
 
-  const forYou = mostExploredRestaurants.slice(0, 3);
+  // Nearest first across the whole catalog, not just the four ids Nearby eats
+  // draws from — "fastest" has to mean fastest, which the four cannot promise.
+  const fastest = useMemo(
+    () => fastestOnFoot(Object.values(RESTAURANTS), curatedCoords, distanceAnchor),
+    [curatedCoords, distanceAnchor],
+  );
 
   return (
     <Screen>
@@ -416,21 +379,21 @@ export default function HomeScreen() {
           </View>
         ) : null}
 
-        {forYou.length || homeCollections.length ? (
+        {fastest.length || homeCollections.length ? (
           <View className="gap-y-3">
             <Umbrella title="For you" />
 
-            {forYou.length ? (
+            {fastest.length ? (
               <View className="gap-y-2">
-                <SubLabel title="Because of what you saved" />
+                <SubLabel title="Fastest" onPress={() => router.push('/fastest')} />
                 <HRow gap={10}>
-                  {forYou.map((restaurant) => (
+                  {fastest.slice(0, 3).map((entry) => (
                     <RailCard
-                      key={restaurant.id}
-                      image={restaurantPhoto(restaurant)}
-                      title={restaurant.name}
-                      meta={placeMeta(restaurant)}
-                      onPress={() => router.push(`/restaurant/${restaurant.id}`)}
+                      key={entry.restaurant.id}
+                      image={restaurantPhoto(entry.restaurant)}
+                      title={entry.restaurant.name}
+                      meta={`${entry.minutes} min walk \u00b7 ${entry.restaurant.cuisine}`}
+                      onPress={() => router.push(`/restaurant/${entry.restaurant.id}`)}
                     />
                   ))}
                 </HRow>
@@ -439,7 +402,7 @@ export default function HomeScreen() {
 
             {homeCollections.length ? (
               <View className="gap-y-2">
-                <SubLabel title="Collections" action="All" onPress={() => router.push('/collection')} />
+                <SubLabel title="Collections" onPress={() => router.push('/collection')} />
                 <HRow gap={10}>
                   {homeCollections.map((collection) => (
                     <RailCard
