@@ -2,6 +2,21 @@
 /** Required by tailwind.config.js. Source: src/lib/tokens.ts. */
 module.exports = {
   colors: {
+  "editorial-paper": 'rgb(var(--color-editorial-paper) / <alpha-value>)',
+  "editorial-ink": 'rgb(var(--color-editorial-ink) / <alpha-value>)',
+  "editorial-muted": 'rgb(var(--color-editorial-muted) / <alpha-value>)',
+  "editorial-surface": 'rgb(var(--color-editorial-surface) / <alpha-value>)',
+  "editorial-soft": 'rgb(var(--color-editorial-soft) / <alpha-value>)',
+  "editorial-line": 'rgb(var(--color-editorial-line) / <alpha-value>)',
+  "editorial-coral": 'rgb(var(--color-editorial-coral) / <alpha-value>)',
+  "editorial-fill": 'rgb(var(--color-editorial-fill) / <alpha-value>)',
+  "editorial-on-fill": 'rgb(var(--color-editorial-on-fill) / <alpha-value>)',
+  "editorial-violet": 'rgb(var(--color-editorial-violet) / <alpha-value>)',
+  "editorial-dark": 'rgb(var(--color-editorial-dark) / <alpha-value>)',
+  "editorial-on-dark": 'rgb(var(--color-editorial-on-dark) / <alpha-value>)',
+  "editorial-dark-muted": 'rgb(var(--color-editorial-dark-muted) / <alpha-value>)',
+  "editorial-photo-shade": 'rgb(var(--color-editorial-photo-shade) / <alpha-value>)',
+  "editorial-shadow": 'rgb(var(--color-editorial-shadow) / <alpha-value>)',
   bg: 'rgb(var(--color-bg) / <alpha-value>)',
   surface: 'rgb(var(--color-surface) / <alpha-value>)',
   "surface-raised": 'rgb(var(--color-surface-raised) / <alpha-value>)',

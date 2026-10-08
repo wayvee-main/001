@@ -70,8 +70,11 @@ export function AppBackdrop({ children, style }: { children: ReactNode; style?: 
 }
 
 /** Full-height app background with safe-area top padding. */
-export function Screen({ children }: { children: ReactNode }) {
+export function Screen({ children, backgroundColor }: { children: ReactNode; backgroundColor?: string }) {
   const insets = useSafeAreaInsets();
+  if (backgroundColor) {
+    return <View style={{ flex: 1, backgroundColor, paddingTop: insets.top }}>{children}</View>;
+  }
   return (
     <AppBackdrop style={{ paddingTop: insets.top + 8 }}>
       {children}
@@ -99,6 +102,7 @@ export function ScreenScroll({
   automaticallyAdjustKeyboardInsets,
   centerWhenShort = false,
   clearsTabBar = false,
+  contentStyle,
 }: {
   children: ReactNode;
   gap?: number;
@@ -114,6 +118,8 @@ export function ScreenScroll({
   /** Set on tab screens. Off by default so pushed routes, which have no tab
    * bar over them, don't gain a band of dead space at the bottom. */
   clearsTabBar?: boolean;
+  /** Explicit geometry for approved screen-specific layouts. */
+  contentStyle?: ViewStyle;
 }) {
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
@@ -134,6 +140,7 @@ export function ScreenScroll({
         paddingBottom: clearsTabBar ? 24 + TAB_BAR_SPACE + Math.max(insets.bottom, TAB_BAR_MIN_BOTTOM) : 24,
         gap,
         ...(centerWhenShort ? { flexGrow: 1, justifyContent: 'center' as const } : null),
+        ...contentStyle,
       }}>
       {children}
     </ScrollView>

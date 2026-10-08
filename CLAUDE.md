@@ -1,3 +1,24 @@
+## Product rulebook — Approved Editorial Home
+
+The founder selected **Editorial** on October 8, 2026 and explicitly asked for
+the exact design, including its font styling. `src/components/home-editorial.tsx`
+and the `editorial-*` roles in `src/lib/tokens.ts` implement that reference.
+
+- Use **Fraunces 500** for display headings and **DM Sans 400/500/600** for text.
+- Keep the solid cream/paper ground, plum ink, coral actions, and restrained
+  violet labels. Home has no full-page gradient or pastel count grid.
+- Preserve this order: city/weather/profile, **Your city, a little closer**,
+  **Where to / next?**, search pill, stay/late-bites/open-late chips, compact
+  Eat/Shows/Bars/Routes strip, one photo-led current event, **For you**, Nearest,
+  and one **Worth lingering** collection card.
+- Preserve the reference spacing, thumbnail sizes, radii, and right-aligned
+  distance column. Do not substitute boxed rows or horizontal Nearest cards.
+- Navigation reads **Home / Tonight / Vee / You** on tabs and detail screens.
+- Real catalog data supplies places, distances, weather, and dated events.
+  Preview sample listings are not production fixtures or permission to invent
+  facts. Event dates stay explicit; empty coverage stays honest.
+- Further visual changes to this approved design require explicit direction.
+
 ## Product rulebook — Nearest
 
 - Home's **For you → Nearest** subsection is a **vertical list of three rows**

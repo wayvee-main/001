@@ -96,11 +96,36 @@ it after changing any hex.
 
 ## Typeface
 
-One family: **Hanken Grotesk** at 400/500/600/700. The Fraunces + DM Sans
-serif/sans pairing is gone. The `font-fraunces*` class names survive as the
-display-weight aliases and `font-dm*` as the text-weight ones, so the ~440
-existing call sites kept working when the family moved — only what they point at
-changed. See `tailwind.config.js`.
+**Fraunces + DM Sans**, bundled locally with Expo Font. The approved Editorial
+Home uses Fraunces 500 for the hero and headings, DM Sans 400 for body/meta,
+500 for distances, and 600 for names and labels. Other existing screens retain
+their 600/700 aliases. See `tailwind.config.js` and `src/app/_layout.tsx`.
+
+## Approved Editorial Home
+
+Approved October 8, 2026. Implement the exact selected design; its geometry is
+an explicit exception to the generic type/radius scales below. The scoped
+`editorial-*` roles in `src/lib/tokens.ts` preserve the reference colors without
+changing the existing palette on unrelated screens.
+
+| Element | Reference geometry |
+|---|---|
+| Content | 390px maximum width; 20px gutters (16px at viewport ≤400px) |
+| Ground / ink | #FFFDF8 / #291E33 in light; #17131B / #FFF9F1 in dark |
+| Hero | Fraunces 500, 36px/1.06 (33px on compact screens), −1.3px tracking; two lines, “Where to / next?” |
+| Search | 52px minimum height, 40px radius, 36px coral send circle, neutral 4px/12px shadow |
+| Chips | 32px minimum height, 11px DM Sans, 7px gaps; dashed stay chip |
+| Categories | One compact Eat / Shows / Bars / Routes strip, horizontal separators |
+| Event | 156px photo card, 15px radius, dark bottom gradient, 21px DM Sans 600 title |
+| For you | Fraunces 500, 28px; rule above; “Close to your corner.” |
+| Nearest | Three unboxed rows; 83px minimum; 58px thumbnails (51×55px compact), 11px radius; miles aligned right |
+| Collections | One warm-canvas card, 13px radius, 73px photo, “Worth lingering” eyebrow |
+| Navigation | Home / Tonight / Vee / You; 23px glyphs, 10px DM Sans labels, violet Vee icon |
+
+Live listings populate the approved composition. No preview distances or
+archived sample events are copied into production. Native safe areas and larger
+accessibility text may expand the layout. See the
+[product rulebook](CLAUDE.md#product-rulebook--approved-editorial-home).
 
 ## Type scale
 
@@ -137,8 +162,8 @@ scale. A lint rule rejects new `rounded-[Npx]` values.
 
 ## Home: Nearest
 
-**For you → Nearest** uses three vertically stacked `ListRow` entries, with
-thumbnail, name, measured distance/category, and a detail-page action. It is
+**For you → Nearest** uses three vertically stacked `EditorialNearestRow` entries, with
+thumbnail, name, category/price, right-aligned measured distance, and a detail-page action. It is
 never a horizontal carousel. The subsection header carries a visible **See all**
 action to `/nearest`, a separate page showing the complete ranked local pool
 (normally 20+ results). The three-row limit applies only to Home.

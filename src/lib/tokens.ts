@@ -40,6 +40,23 @@ export function hexToRgb(hex: string): [number, number, number] {
  * space-separated RGB triples so Tailwind's <alpha-value> opacity modifier
  * (bg-surface/50) keeps working. */
 export const ROLES: Record<string, ThemeValue> = {
+  // Approved Editorial Home: exact palette from the selected reference.
+  // Scoped roles keep other screens on their existing palette.
+  'editorial-paper': { light: '#FFFDF8', dark: '#17131B' },
+  'editorial-ink': { light: '#291E33', dark: '#FFF9F1' },
+  'editorial-muted': { light: '#776C77', dark: '#BDAFBD' },
+  'editorial-surface': { light: '#F1EDE5', dark: '#28212E' },
+  'editorial-soft': { light: '#F8F5EF', dark: '#211B26' },
+  'editorial-line': { light: '#E8E1D7', dark: '#453A4C' },
+  'editorial-coral': { light: '#C24824', dark: '#FF9A78' },
+  'editorial-fill': { light: '#ED602F', dark: '#F47648' },
+  'editorial-on-fill': { light: '#FFFDF8', dark: '#24160F' },
+  'editorial-violet': { light: '#6550BC', dark: '#BEACFF' },
+  'editorial-dark': { light: '#271A32', dark: '#211629' },
+  'editorial-on-dark': { light: '#FFF9F0', dark: '#FFF9F0' },
+  'editorial-dark-muted': { light: '#D3C4D8', dark: '#D3C4D8' },
+  'editorial-photo-shade': { light: '#110818', dark: '#110818' },
+  'editorial-shadow': { light: '#241527', dark: '#000000' },
   bg: { light: '#FFFDFA', dark: '#151117' }, // screen background — paper / plum-black
   surface: { light: '#F0EBE3', dark: '#251E29' }, // card surface — warm canvas / lifted plum
   // Reads *above* the card in light by staying paper-white and *below* it in dark by going

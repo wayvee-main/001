@@ -10,6 +10,21 @@
    go through Tailwind's <alpha-value> opacity modifier; full rgba() strings
    for tokens with fixed baked-in opacity. */
 :root {
+  --color-editorial-paper: 255 253 248;
+  --color-editorial-ink: 41 30 51;
+  --color-editorial-muted: 119 108 119;
+  --color-editorial-surface: 241 237 229;
+  --color-editorial-soft: 248 245 239;
+  --color-editorial-line: 232 225 215;
+  --color-editorial-coral: 194 72 36;
+  --color-editorial-fill: 237 96 47;
+  --color-editorial-on-fill: 255 253 248;
+  --color-editorial-violet: 101 80 188;
+  --color-editorial-dark: 39 26 50;
+  --color-editorial-on-dark: 255 249 240;
+  --color-editorial-dark-muted: 211 196 216;
+  --color-editorial-photo-shade: 17 8 24;
+  --color-editorial-shadow: 36 21 39;
   --color-bg: 255 253 250;
   --color-surface: 240 235 227;
   --color-surface-raised: 255 253 250;
@@ -37,6 +52,21 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
+  --color-editorial-paper: 23 19 27;
+  --color-editorial-ink: 255 249 241;
+  --color-editorial-muted: 189 175 189;
+  --color-editorial-surface: 40 33 46;
+  --color-editorial-soft: 33 27 38;
+  --color-editorial-line: 69 58 76;
+  --color-editorial-coral: 255 154 120;
+  --color-editorial-fill: 244 118 72;
+  --color-editorial-on-fill: 36 22 15;
+  --color-editorial-violet: 190 172 255;
+  --color-editorial-dark: 33 22 41;
+  --color-editorial-on-dark: 255 249 240;
+  --color-editorial-dark-muted: 211 196 216;
+  --color-editorial-photo-shade: 17 8 24;
+  --color-editorial-shadow: 0 0 0;
   --color-bg: 21 17 23;
   --color-surface: 37 30 41;
   --color-surface-raised: 27 22 30;

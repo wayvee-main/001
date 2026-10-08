@@ -1,6 +1,6 @@
 import '../global.css';
 
-import { DMSans_400Regular, DMSans_500Medium, DMSans_700Bold } from '@expo-google-fonts/dm-sans';
+import { DMSans_400Regular, DMSans_500Medium, DMSans_600SemiBold, DMSans_700Bold } from '@expo-google-fonts/dm-sans';
 import { Fraunces_500Medium, Fraunces_600SemiBold, Fraunces_700Bold } from '@expo-google-fonts/fraunces';
 import Constants from 'expo-constants';
 import { useFonts } from 'expo-font';
@@ -45,6 +45,7 @@ function AppShell() {
     Fraunces_700Bold,
     DMSans_400Regular,
     DMSans_500Medium,
+    DMSans_600SemiBold,
     DMSans_700Bold,
   });
   // Plays once per cold start, after bootstrap resolves so it knows where it is
