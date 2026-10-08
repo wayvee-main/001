@@ -1,6 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import { Glyph, type GlyphName } from '@/components/glyph';
 import { Photo } from '@/components/photo';
 import { useThemeColors, type ThemeColors } from '@/lib/theme';
 
@@ -12,6 +13,7 @@ export type CountTile = {
   hint: string;
   tint: keyof ThemeColors;
   ink: keyof ThemeColors;
+  glyph: GlyphName;
   /** A real photo from the pool this tile counts — the lead event's art, a
    * dish, a bar. Absent is fine: the tile falls back to its flat tint. */
   image?: string;
@@ -26,9 +28,8 @@ export type CountTile = {
  * lists; and each tile opens the pool it counted, because a quantity the guest
  * cannot follow is decoration (CLAUDE.md #3).
  *
- * No glyph. An icon here would say what the label already says, and at tile
- * size it competes with the count, which is the only thing on the tile worth
- * reading first. */
+ * The glyph is small and paired with the count. An oversized one — the first
+ * attempt — became the loudest thing on a tile whose point is a number. */
 export function AroundYou({ tiles }: { tiles: CountTile[] }) {
   const colors = useThemeColors();
   const rows: CountTile[][] = [];
@@ -81,11 +82,17 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
                   />
                 </>
               ) : null}
-              <Text
-                style={{ color: colors[tile.ink], fontVariant: ['tabular-nums'] }}
-                className="font-fraunces text-[23px] leading-[27px]">
-                {tile.count}
-              </Text>
+              {/* Glyph and count sit together on the left rather than at
+               * opposite ends of the tile: the right side is the photo now,
+               * and a number set over the fade is a number read twice. */}
+              <View className="flex-row items-center gap-x-2">
+                <Glyph name={tile.glyph} size={15} color={colors[tile.ink]} strokeWidth={1.9} />
+                <Text
+                  style={{ color: colors[tile.ink], fontVariant: ['tabular-nums'] }}
+                  className="font-fraunces text-[23px] leading-[27px]">
+                  {tile.count}
+                </Text>
+              </View>
               <Text numberOfLines={1} className="mt-1 font-dm-medium text-body text-ink">{tile.label}</Text>
               <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">{tile.hint}</Text>
             </TouchableOpacity>
