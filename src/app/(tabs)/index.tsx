@@ -408,7 +408,7 @@ export default function HomeScreen() {
 
         {aroundYouTiles.length ? (
           <View className="gap-y-3">
-            <Umbrella title="Around you" note="open right now" />
+            <Umbrella title="Around you" />
             <AroundYou tiles={aroundYouTiles} />
           </View>
         ) : null}
@@ -419,7 +419,7 @@ export default function HomeScreen() {
             exists when at least one of them does. */}
         {eventRest.length || closingSoon.length || hydrating ? (
         <View className="gap-y-3">
-          <Umbrella title="Tonight" note="ends when the kitchens do" />
+          <Umbrella title="Tonight" />
 
           {eventRest.length ? (
             <View className="gap-y-1.5">
@@ -505,7 +505,7 @@ export default function HomeScreen() {
 
         {forYou.length || homeCollections.length ? (
           <View className="gap-y-3">
-            <Umbrella title="For you" note="from this trip so far" />
+            <Umbrella title="For you" />
 
             {forYou.length ? (
               <View className="gap-y-1.5">

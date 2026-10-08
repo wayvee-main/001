@@ -98,18 +98,18 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
   );
 }
 
-/** The screen's second-level heading: a named group of sections, with a plain
- * line saying why those sections are grouped. Sits a step below the page title
- * (19px) and well under the 26–28px heroes Home used to lead every rail with,
- * so three of these read as structure rather than as three competing titles. */
-export function Umbrella({ title, note }: { title: string; note?: string }) {
+/** The screen's second-level heading: a named group of sections. Sits a step
+ * below the page title (19px) and well under the 26–28px heroes Home used to
+ * lead every rail with, so three of these read as structure rather than as
+ * three competing titles. The rule above it does the separating; the name only
+ * has to say which group this is. */
+export function Umbrella({ title }: { title: string }) {
   const colors = useThemeColors();
   return (
     <View
       style={{ borderTopColor: colors.edge, borderTopWidth: StyleSheet.hairlineWidth }}
-      className="flex-row items-baseline gap-x-2 pt-3.5">
+      className="pt-3.5">
       <Text className="font-fraunces text-section text-ink">{title}</Text>
-      {note ? <Text numberOfLines={1} className="shrink font-dm text-meta text-taupe">{note}</Text> : null}
     </View>
   );
 }
