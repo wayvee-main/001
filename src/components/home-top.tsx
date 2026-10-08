@@ -116,7 +116,9 @@ export function VeeHero({
   onAsk,
   embedded = false,
 }: {
-  title: string;
+  /** Omitted on Home, which names the city in its own header and opens
+   * straight into the ask bar. */
+  title?: string;
   suggestions: HomeSuggestion[];
   askPrompt: string;
   stayLabel: string;
@@ -133,17 +135,19 @@ export function VeeHero({
     <View
       style={embedded ? undefined : lift}
       className={embedded ? '' : 'gap-y-3 rounded-sheet bg-surface-soft px-4 pb-3.5 pt-4'}>
-      <View>
-        {/* One line, always. The titles are written to four words (daypart.ts
-            enforces it in test), and this caps the damage if one ever grows:
-            it truncates visibly instead of silently reflowing to three lines
-            and pushing the search bar down the screen. */}
-        <Text
-          numberOfLines={1}
-          className={embedded ? 'font-fraunces-medium text-display text-ink' : 'font-fraunces-medium text-title text-ink'}>
-          {title}
-        </Text>
-      </View>
+      {title ? (
+        <View>
+          {/* One line, always. The titles are written to four words (daypart.ts
+              enforces it in test), and this caps the damage if one ever grows:
+              it truncates visibly instead of silently reflowing to three lines
+              and pushing the search bar down the screen. */}
+          <Text
+            numberOfLines={1}
+            className={embedded ? 'font-fraunces-medium text-display text-ink' : 'font-fraunces-medium text-title text-ink'}>
+            {title}
+          </Text>
+        </View>
+      ) : null}
 
       {/* Always present. This is the screen's primary input, and it is a search
           bar in the plain sense — it opens the search overlay, which owns
@@ -159,7 +163,7 @@ export function VeeHero({
           launcherSurface,
           {
             height: embedded ? 56 : 48,
-            marginTop: embedded ? 14 : undefined,
+            marginTop: embedded && title ? 14 : undefined,
           },
         ]}
         className={

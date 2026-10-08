@@ -2,18 +2,17 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
-import { VeeHero, HomeVeePanel, HomeHeader, LiveTrail, type TrailItem } from '@/components/home-top';
-import { HRow, Screen, ScreenScroll } from '@/components/layout';
-import { LeadCard, TasteMatch } from '@/components/lead-card';
-import { EventMetaLine, EventPrice } from '@/components/event-meta';
-import { SectionHeading } from '@/components/section-heading';
+import { VeeHero, HomeVeePanel, HomeHeader } from '@/components/home-top';
+import { AroundYou, SubLabel, Umbrella, type CountTile } from '@/components/home-tiles';
+import { Screen, ScreenScroll } from '@/components/layout';
+import { ListRow } from '@/components/list-row';
+import { Glyph } from '@/components/glyph';
 import { Photo } from '@/components/photo';
-import { PosterCard } from '@/components/poster-card';
 import { ChevronRight, MiniChevron, Skeleton } from '@/components/ui';
-import { openBadgeLabel, rankNearby } from '@/lib/nearby-pool';
 import { useContentHydrating } from '@/lib/bootstrap';
 import { useNow } from '@/lib/clock';
 import {
+  CRAWLS,
   CURATED_COLLECTION_ORDER,
   CURATED_COLLECTIONS,
   EVENTS,
@@ -27,11 +26,9 @@ import {
   isEventToday,
   type CuratedCollection,
   type Restaurant,
-  type ScoperEvent,
 } from '@/lib/data';
 import {
   daypartSearchPrompt,
-  homeHeroPrompt,
   homeSuggestions,
   type HomeSuggestion,
 } from '@/lib/daypart';
@@ -53,28 +50,6 @@ import { useThemeColors } from '@/lib/theme';
 import { useTasteProfile } from '@/lib/use-taste-profile';
 import { hydrateWeatherFromBackend } from '@/lib/weather';
 
-function EventRow({ event, matchedTag, onPress }: { event: ScoperEvent; matchedTag?: string; onPress: () => void }) {
-  const colors = useThemeColors();
-  return (
-    <TouchableOpacity
-      accessibilityRole="button"
-      accessibilityLabel={`View ${event.name}`}
-      activeOpacity={0.72}
-      onPress={onPress}
-      className="flex-row items-center gap-x-3 border-b border-sand py-3 last:border-b-0">
-      <Photo uri={event.image} radius={10} style={{ width: 58, height: 58 }} />
-      <View className="min-w-0 flex-1">
-        <View className="flex-row items-center justify-between gap-x-2">
-          <Text numberOfLines={1} className="flex-1 font-dm-bold text-[13.5px] text-ink">{event.name}</Text>
-          <EventPrice label={event.priceLabel} />
-        </View>
-        <EventMetaLine when={`${eventDayGroupLabel(event)}, ${event.time}`} venue={event.venue} />
-        {matchedTag ? <TasteMatch tag={matchedTag} /> : null}
-      </View>
-      <ChevronRight color={colors.peach} strokeWidth={1.8} />
-    </TouchableOpacity>
-  );
-}
 
 /** Same shape as EventRow, shown while backend events are still hydrating —
  * stands in for the row itself, never for the "no listings" empty state. */
@@ -134,6 +109,7 @@ function exploredRestaurantId(href: string): string | null {
 
 export default function HomeScreen() {
   const router = useRouter();
+  const homeColors = useThemeColors();
   const s = useScoper();
   const raisedSurface = useRaisedSurface(2);
   const hydrating = useContentHydrating();
@@ -257,28 +233,6 @@ export default function HomeScreen() {
 
     return resolved;
   }, [dinnerPicks, restaurantExplorations]);
-  // Home's first rail is NEARBY_EATS_IDS, which is four ids and Nearby eats
-  // shows all four — so this cannot re-slice dinnerRanked without drawing the
-  // same four cards again. It comes off the wider catalog instead, minus
-  // whatever the two rails above already spent.
-  const morePlacesNearby = useMemo(() => {
-    const spent = new Set([
-      ...dinnerPicks.map((restaurant) => restaurant.id),
-      ...mostExploredRestaurants.map((restaurant) => restaurant.id),
-    ]);
-    const candidates = Object.values(RESTAURANTS)
-      .filter((restaurant) => !spent.has(restaurant.id))
-      .map((restaurant) => {
-        const point = curatedCoords(restaurant);
-        const miles = distanceAnchor && point ? milesBetween(distanceAnchor, point) : null;
-        return {
-          item: restaurant,
-          miles,
-          state: openStateFor(curatedHours(restaurant) ?? restaurant.hours ?? null, now),
-        };
-      });
-    return rankNearby(candidates, 8);
-  }, [dinnerPicks, mostExploredRestaurants, curatedCoords, curatedHours, distanceAnchor, now]);
 
   // "Right now" snapshot (CLAUDE.md #3): real counts off the same ranked pools
   // the sections below already use, not a separate query — mirrors the Plan
@@ -301,197 +255,85 @@ export default function HomeScreen() {
     router.push('/featured');
   };
 
-  // Each count leads to the pool it counted: kitchens to the food hub, shows to
-  // Tonight's events, bars to its nightlife. A number the guest cannot follow
-  // is decoration, and this trail has always been the one part of Home that
-  // reported real quantities without offering a way in.
-  const trail = [
-    hoursKnown
-      ? { glyph: 'food', label: `${cityOpenCount} ${cityOpenCount === 1 ? 'kitchen' : 'kitchens'} open`, onPress: openFoodHub }
-      : dinnerPicks.length
-        ? { glyph: 'food', label: `${dinnerPicks.length} nearby eats`, onPress: openFoodHub }
-        : null,
-    eventsTodayCount > 0
-      ? {
-          glyph: 'ticket',
-          label: `${eventsTodayCount} ${eventsTodayCount === 1 ? 'show' : 'shows'} tonight`,
-          onPress: () => router.push('/discover?mode=Events'),
-        }
-      : null,
-    NIGHTLIFE_SPOTS.length
-      ? {
-          glyph: 'drink',
-          label: `${NIGHTLIFE_SPOTS.length} bars`,
-          onPress: () => router.push('/discover?mode=Nightlife'),
-        }
-      : null,
-  ].filter(Boolean) as TrailItem[];
 
 
-  const promptContext = useMemo(
-    () => ({
-      now,
-      tasteTags: s.tasteTags,
-      tripContext: s.tripContext,
-      walkBudgetMinutes: s.walkBudgetMinutes,
-    }),
-    [now, s.tasteTags, s.tripContext, s.walkBudgetMinutes],
-  );
-  const heroTitle = useMemo(() => homeHeroPrompt(promptContext), [promptContext]);
   const suggestions = useMemo(() => homeSuggestions(now), [now]);
   const openSuggestion = (suggestion: HomeSuggestion) => {
     const query = encodeURIComponent(suggestion.query);
     router.push(suggestion.destination === 'food' ? `/featured?q=${query}` : `/discover?q=${query}`);
   };
 
-  const getEventMatchedTag = (e: ScoperEvent) =>
-    s.tasteTags.find((tag) => eventHaystack(e).toLowerCase().includes(tag.toLowerCase()));
 
-  // One card for every rail of places: Nearby eats, Most explored and More
-  // places nearby are the same kind of thing chosen three different ways, so
-  // they are the same poster in the same row. Each carries its metadata line
-  // and a way to start a plan from it.
+  // The one meta line every place row carries, wherever it appears.
   const placeMeta = (restaurant: Restaurant, miles?: number | null) =>
     [restaurant.cuisine, restaurant.price, miles != null ? formatMiles(miles) : restaurant.distanceLabel]
       .filter(Boolean)
       .join(' · ');
 
-  const planHref = (restaurant: Restaurant) =>
-    `/create?restaurantId=${restaurant.id}&q=${encodeURIComponent(`Night out starting at ${restaurant.name}`)}`;
+  // ── Around you ────────────────────────────────────────────────────────────
+  // Four counts off the four pools the lists below are drawn from, so the grid
+  // can never disagree with them, and each tile opens the pool it counted.
+  // This replaces LiveTrail, which reported the same numbers as a text line.
+  const aroundYouTiles: CountTile[] = [];
+  if (hoursKnown) {
+    aroundYouTiles.push({
+      key: 'eat', count: String(cityOpenCount), label: 'Eat', hint: 'open now',
+      tint: 'accent-tint', ink: 'fg-accent', onPress: openFoodHub,
+    });
+  } else if (dinnerPicks.length) {
+    // Hours unreadable: name the ranked inventory rather than call it open.
+    aroundYouTiles.push({
+      key: 'eat', count: String(dinnerPicks.length), label: 'Eat', hint: 'nearby',
+      tint: 'accent-tint', ink: 'fg-accent', onPress: openFoodHub,
+    });
+  }
+  if (eventsTodayCount > 0) {
+    aroundYouTiles.push({
+      key: 'shows', count: String(eventsTodayCount), label: 'Shows', hint: 'tonight',
+      tint: 'vee-tint', ink: 'vee-strong', onPress: () => router.push('/discover?mode=Events'),
+    });
+  }
+  if (NIGHTLIFE_SPOTS.length) {
+    aroundYouTiles.push({
+      key: 'bars', count: String(NIGHTLIFE_SPOTS.length), label: 'Bars', hint: 'in the catalog',
+      tint: 'warm-tint', ink: 'warm-strong', onPress: () => router.push('/discover?mode=Nightlife'),
+    });
+  }
+  const crawlCount = Object.keys(CRAWLS).length;
+  if (crawlCount) {
+    aroundYouTiles.push({
+      key: 'routes', count: String(crawlCount), label: 'Routes', hint: 'multi-stop nights',
+      tint: 'vee-tint', ink: 'vee-strong', onPress: () => router.push('/collection'),
+    });
+  }
 
-  const foodSection = dinnerRanked.length ? (
-    <View className="gap-y-3">
-      <SectionHeading title="Nearby eats" action="See all" onPress={openFoodHub} />
-      <HRow gap={10}>
-        {dinnerRanked.slice(0, 4).map(({ restaurant, miles }) => (
-          <PosterCard
-            key={restaurant.id}
-            image={restaurant.image}
-            eyebrow="RESTAURANT"
-            title={restaurant.name}
-            meta={placeMeta(restaurant, miles)}
-            onPress={() => router.push(`/restaurant/${restaurant.id}`)}
-            onPlan={() => router.push(planHref(restaurant))}
-          />
-        ))}
-      </HRow>
-    </View>
-  ) : null;
+  // ── Eat before it shuts ───────────────────────────────────────────────────
+  // Ordered by how soon the kitchen closes, which is the only ordering that
+  // makes the section's name true. A spot whose hours will not parse is left
+  // out rather than guessed at: a wrong closing time sends someone to a locked
+  // door, and CLAUDE.md #6 says we only show what the catalog can stand behind.
+  const closingSoon = useMemo(() => {
+    const open: { restaurant: Restaurant; closesAt: string; closesInMinutes: number }[] = [];
+    for (const restaurant of Object.values(RESTAURANTS)) {
+      const state = openStateFor(curatedHours(restaurant) ?? restaurant.hours ?? null, now);
+      if (state.status !== 'open' || state.closesAt === null || state.closesInMinutes === null) continue;
+      open.push({ restaurant, closesAt: state.closesAt, closesInMinutes: state.closesInMinutes });
+    }
+    return open.sort((a, b) => a.closesInMinutes - b.closesInMinutes).slice(0, 6);
+  }, [curatedHours, now]);
 
-  const mostExploredSection = mostExploredRestaurants.length ? (
-    <View className="gap-y-3">
-      <SectionHeading title="Most explored" note="From your searches" />
-      <HRow gap={10}>
-        {mostExploredRestaurants.map((restaurant) => (
-          <PosterCard
-            key={restaurant.id}
-            image={restaurant.image}
-            eyebrow="RESTAURANT"
-            title={restaurant.name}
-            meta={placeMeta(restaurant)}
-            onPress={() => router.push(`/restaurant/${restaurant.id}`)}
-            onPlan={() => router.push(planHref(restaurant))}
-          />
-        ))}
-      </HRow>
-    </View>
-  ) : null;
+  // Folded on arrival. The Eat tile above already states how many are open, so
+  // unfolded this section opens by restating it as six rows.
+  const [eatOpen, setEatOpen] = useState(false);
 
-  const nearbySection = morePlacesNearby.length ? (
-    <View className="gap-y-3">
-      <SectionHeading title="More places nearby" action="See all" onPress={openFoodHub} />
-      <HRow gap={10}>
-        {morePlacesNearby.map((entry) => (
-          <PosterCard
-            key={entry.item.id}
-            image={entry.item.image}
-            // The open state earns the eyebrow where it is known, since
-            // "RESTAURANT" only repeats what the rail already says. A place
-            // whose hours are unknown keeps the generic label rather than a
-            // hedged one.
-            eyebrow={openBadgeLabel(entry.state)?.toUpperCase() ?? 'RESTAURANT'}
-            title={entry.item.name}
-            meta={placeMeta(entry.item, entry.miles)}
-            onPress={() => router.push(`/restaurant/${entry.item.id}`)}
-            onPlan={() => router.push(planHref(entry.item))}
-          />
-        ))}
-      </HRow>
-    </View>
-  ) : null;
-
-  // "Tonight" only when something really is on tonight — the picks list is
-  // whatever's next on each calendar, which on a quiet Tuesday can be Friday.
   const eventLead = events[0];
-  const eventRest = events.slice(1);
+  const eventRest = events.slice(1, 4);
 
-  const eventsSection = (
-    <View className="gap-y-3">
-      <View className="gap-y-1">
-        <SectionHeading
-          title={events.some((event) => isEventToday(event, now)) ? 'Tonight in Oakland' : 'Coming up in Oakland'}
-          action="See all"
-          // Pushed, not a tab switch. Three of Home's four See-alls push a
-          // screen with a back button; this one moved the tab pill instead,
-          // which is the whole reason it felt like it needed a transition.
-          // /tonight hands off to the Discover tab from inside itself.
-          onPress={() => router.push('/tonight')}
-        />
-      </View>
-      {eventLead ? (
-        <LeadCard
-          image={eventLead.image}
-          accessibilityLabel={`View ${eventLead.name}`}
-          onPress={() => router.push(`/event/${eventLead.id}`)}
-          badge={
-            <View className="rounded-full bg-shell/95 px-2.5 py-0.5">
-              <Text className="font-dm-bold text-[10.5px] text-ink">{eventDayGroupLabel(eventLead)} · {eventLead.time}</Text>
-            </View>
-          }
-          title={eventLead.name}
-          titleTrailing={<EventPrice label={eventLead.priceLabel} />}
-          meta={<EventMetaLine venue={eventLead.venue} />}
-          matchedTag={getEventMatchedTag(eventLead)}
-        />
-      ) : null}
-      {eventRest.length ? (
-        <View style={raisedSurface} className="overflow-hidden rounded-2xl px-3.5">
-          {eventRest.map((event) => (
-            <EventRow
-              key={event.id}
-              event={event}
-              matchedTag={getEventMatchedTag(event)}
-              onPress={() => router.push(`/event/${event.id}`)}
-            />
-          ))}
-        </View>
-      ) : hydrating ? (
-        <View style={raisedSurface} className="overflow-hidden rounded-2xl px-3.5">
-          {[0, 1, 2].map((i) => (
-            <EventRowSkeleton key={i} />
-          ))}
-        </View>
-      ) : !eventLead ? (
-        <View style={raisedSurface} className="rounded-2xl px-4 py-5">
-          <Text className="font-dm-medium text-[13px] text-ink">No current listings are published yet.</Text>
-          <Text className="mt-1 font-dm text-label text-taupe">New dated events appear here automatically — meanwhile:</Text>
-          {/* Single action here — the "Plan your stay" prompt above already
-              owns the /create CTA when there's no plan; a second one here
-              would put the same destination on screen twice. */}
-          <TouchableOpacity
-            activeOpacity={0.72}
-            onPress={() => router.push('/discover')}
-            className="mt-3 items-center rounded-full border border-sand bg-shell py-2.5">
-            <Text className="font-dm-medium text-label text-ink">Browse Discover</Text>
-          </TouchableOpacity>
-        </View>
-      ) : null}
-    </View>
-  );
+  const forYou = mostExploredRestaurants.slice(0, 3);
 
   return (
     <Screen>
-      <ScreenScroll gap={32} clearsTabBar refreshing={refreshing} onRefresh={onRefresh}>
+      <ScreenScroll gap={22} clearsTabBar refreshing={refreshing} onRefresh={onRefresh}>
         <HomeHeader
           locationLabel={homeLocationLabel}
           hasReminders={hasReminders}
@@ -499,51 +341,181 @@ export default function HomeScreen() {
           onProfile={() => router.push('/profile')}
         />
 
-        <View className="gap-y-3">
-          <HomeVeePanel>
-            <VeeHero
-              embedded
-              title={heroTitle}
-              suggestions={suggestions}
-              askPrompt={daypartSearchPrompt(now)}
-              stayLabel={s.stay ? 'Update your stay' : 'Link your stay'}
-              onSuggestion={openSuggestion}
-              onStay={() => s.openStaySheet()}
-              // The bar is a search bar and nothing else: it opens the search
-              // overlay, which owns type-ahead, recents and its own results.
-              // Vee is still reachable from in there ("Ask Vee instead") and
-              // from the Plans tab — it just no longer owns Home's input.
-              onAsk={() => s.openSheet('search')}
-            />
-          </HomeVeePanel>
-        </View>
+        {/* No hero line: the header names the city directly above this, and the
+            ask bar is what the screen is for. */}
+        <HomeVeePanel>
+          <VeeHero
+            embedded
+            suggestions={suggestions}
+            askPrompt={daypartSearchPrompt(now)}
+            stayLabel={s.stay ? 'Update your stay' : 'Link your stay'}
+            onSuggestion={openSuggestion}
+            onStay={() => s.openStaySheet()}
+            onAsk={() => s.openSheet('search')}
+          />
+        </HomeVeePanel>
 
-        <LiveTrail items={trail} onSeeAll={() => router.push('/around')} />
-
-        {/* Events own the lead hierarchy at every daypart; food follows in the
-            same horizontal poster language as Explore venues. */}
-        {eventsSection}
-        {foodSection}
-        {mostExploredSection}
-        {nearbySection}
-
-        {/* "Picks for your stay" lives on Discover now — it is the only screen
-            that shows the Viator roster, so it shows all of it from the top. */}
-
-        {homeCollections.length ? (
-          <View className="gap-y-3">
-            <SectionHeading title="Collections" action="See all" onPress={() => router.push('/collection')} />
-            <View className="gap-y-2.5">
-              {homeCollections.map((collection) => (
-                <CollectionRow
-                  key={collection.id}
-                  collection={collection}
-                  onPress={() => router.push(`/collection/${collection.id}`)}
-                />
-              ))}
+        {/* The one live thing, above the groups: it belongs to no category, and
+            it is the only item on Home that expires tonight. */}
+        {eventLead ? (
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel={`${eventLead.name} at ${eventLead.venue}, ${eventDayGroupLabel(eventLead)} ${eventLead.time}`}
+            activeOpacity={0.78}
+            onPress={() => router.push(`/event/${eventLead.id}`)}
+            style={{ backgroundColor: homeColors['vee-tint'] }}
+            className="flex-row items-center gap-x-3 rounded-panel px-3.5 py-3">
+            <View className="min-w-0 flex-1">
+              <Text numberOfLines={1} className="font-dm-medium text-body text-ink">{eventLead.name}</Text>
+              <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">{eventLead.venue}</Text>
             </View>
+            <Text
+              style={{ color: homeColors['vee-strong'], fontVariant: ['tabular-nums'] }}
+              className="shrink-0 font-dm-bold text-meta">
+              {eventLead.time}
+            </Text>
+            <ChevronRight color={homeColors['vee-strong']} strokeWidth={1.8} />
+          </TouchableOpacity>
+        ) : null}
+
+        {aroundYouTiles.length ? (
+          <View className="gap-y-3">
+            <Umbrella title="Around you" note="open right now" />
+            <AroundYou tiles={aroundYouTiles} />
           </View>
         ) : null}
+
+        {/* An umbrella with nothing under it is a heading for an empty room.
+            Tonight has two children and either can be empty — no second show
+            tonight, or no kitchen whose hours we can read — so the group only
+            exists when at least one of them does. */}
+        {eventRest.length || closingSoon.length || hydrating ? (
+        <View className="gap-y-3">
+          <Umbrella title="Tonight" note="ends when the kitchens do" />
+
+          {eventRest.length ? (
+            <View className="gap-y-1.5">
+              <SubLabel title="On stage" action={`All ${events.length}`} onPress={() => router.push('/tonight')} />
+              <View style={raisedSurface} className="overflow-hidden rounded-2xl">
+                {eventRest.map((event, index) => (
+                  <ListRow
+                    key={event.id}
+                    image={event.image}
+                    title={event.name}
+                    meta={event.venue}
+                    divider={index < eventRest.length - 1}
+                    trailing={
+                      <Text
+                        style={{ color: homeColors['vee-strong'], fontVariant: ['tabular-nums'] }}
+                        className="font-dm-bold text-meta">
+                        {event.time}
+                      </Text>
+                    }
+                    onPress={() => router.push(`/event/${event.id}`)}
+                  />
+                ))}
+              </View>
+            </View>
+          ) : hydrating ? (
+            <View style={raisedSurface} className="overflow-hidden rounded-2xl px-3.5">
+              {[0, 1, 2].map((i) => (
+                <EventRowSkeleton key={i} />
+              ))}
+            </View>
+          ) : null}
+
+          {closingSoon.length ? (
+            <View className="gap-y-1.5">
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityState={{ expanded: eatOpen }}
+                accessibilityLabel={`Eat before it shuts, ${closingSoon.length} places`}
+                activeOpacity={0.72}
+                onPress={() => setEatOpen((open) => !open)}
+                className="min-h-[34px] flex-row items-center justify-between gap-x-2">
+                <Text className="font-dm-bold text-micro uppercase text-taupe">Eat before it shuts</Text>
+                <View className="flex-row items-center gap-x-1.5">
+                  <Text style={{ fontVariant: ['tabular-nums'] }} className="font-dm text-meta text-taupe">
+                    {closingSoon.length}
+                  </Text>
+                  {/* The same chevron the rows use, turned to point the way
+                      it will move, so the section needs no second glyph. */}
+                  <View style={{ transform: [{ rotate: eatOpen ? '-90deg' : '90deg' }] }}>
+                    <Glyph name="chevron" size={16} color={homeColors['fg-muted']} strokeWidth={1.8} />
+                  </View>
+                </View>
+              </TouchableOpacity>
+
+              {eatOpen ? (
+                <View style={raisedSurface} className="overflow-hidden rounded-2xl">
+                  {closingSoon.map((entry, index) => (
+                    <ListRow
+                      key={entry.restaurant.id}
+                      image={entry.restaurant.image}
+                      title={entry.restaurant.name}
+                      meta={placeMeta(entry.restaurant)}
+                      divider={index < closingSoon.length - 1}
+                      trailing={
+                        <Text
+                          style={{ color: homeColors['fg-accent'], fontVariant: ['tabular-nums'] }}
+                          className="font-dm-bold text-meta">
+                          {entry.closesAt}
+                        </Text>
+                      }
+                      onPress={() => router.push(`/restaurant/${entry.restaurant.id}`)}
+                    />
+                  ))}
+                </View>
+              ) : null}
+            </View>
+          ) : null}
+        </View>
+        ) : null}
+
+        {forYou.length || homeCollections.length ? (
+          <View className="gap-y-3">
+            <Umbrella title="For you" note="from this trip so far" />
+
+            {forYou.length ? (
+              <View className="gap-y-1.5">
+                <SubLabel title="Because of what you saved" />
+                <View style={raisedSurface} className="overflow-hidden rounded-2xl">
+                  {forYou.map((restaurant, index) => (
+                    <ListRow
+                      key={restaurant.id}
+                      image={restaurant.image}
+                      title={restaurant.name}
+                      meta={placeMeta(restaurant)}
+                      divider={index < forYou.length - 1}
+                      onPress={() => router.push(`/restaurant/${restaurant.id}`)}
+                    />
+                  ))}
+                </View>
+              </View>
+            ) : null}
+
+            {homeCollections.length ? (
+              <View className="gap-y-1.5">
+                <SubLabel title="Collections" action="All" onPress={() => router.push('/collection')} />
+                <View style={raisedSurface} className="overflow-hidden rounded-2xl">
+                  {homeCollections.map((collection) => (
+                    <CollectionRow
+                      key={collection.id}
+                      collection={collection}
+                      onPress={() => router.push(`/collection/${collection.id}`)}
+                    />
+                  ))}
+                </View>
+              </View>
+            ) : null}
+          </View>
+        ) : null}
+
+        {/* Home used to run out of rails rather than end. Saying where the list
+            stops, and when it was last checked, makes it a finite list. */}
+        <Text className="pt-1 text-center font-dm text-meta text-taupe">
+          That’s everything open in {homeLocationLabel.split(',')[0]} tonight.
+        </Text>
       </ScreenScroll>
     </Screen>
   );

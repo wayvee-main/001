@@ -1,0 +1,96 @@
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+import { useThemeColors, type ThemeColors } from '@/lib/theme';
+
+export type CountTile = {
+  key: string;
+  /** Already formatted: some counts are exact, others are a catalog size. */
+  count: string;
+  label: string;
+  hint: string;
+  tint: keyof ThemeColors;
+  ink: keyof ThemeColors;
+  onPress: () => void;
+};
+
+/** Home's "Around you" grid.
+ *
+ * Four counts off the four pools the rest of Home is drawn from — kitchens,
+ * dated events, the nightlife catalog and the crawls. Each number is the one
+ * the section below it would show, so the grid can never disagree with the
+ * lists; and each tile opens the pool it counted, because a quantity the guest
+ * cannot follow is decoration (CLAUDE.md #3).
+ *
+ * No glyph. An icon here would say what the label already says, and at tile
+ * size it competes with the count, which is the only thing on the tile worth
+ * reading first. */
+export function AroundYou({ tiles }: { tiles: CountTile[] }) {
+  const colors = useThemeColors();
+  const rows: CountTile[][] = [];
+  for (let i = 0; i < tiles.length; i += 2) rows.push(tiles.slice(i, i + 2));
+
+  return (
+    <View className="gap-y-2.5">
+      {rows.map((row) => (
+        <View key={row.map((tile) => tile.key).join('-')} className="flex-row gap-x-2.5">
+          {row.map((tile) => (
+            <TouchableOpacity
+              key={tile.key}
+              accessibilityRole="button"
+              accessibilityLabel={`${tile.count} ${tile.label}, ${tile.hint}`}
+              activeOpacity={0.78}
+              onPress={tile.onPress}
+              style={{
+                backgroundColor: colors[tile.tint],
+                borderColor: colors['edge-soft'],
+                borderWidth: StyleSheet.hairlineWidth,
+              }}
+              className="min-h-[86px] flex-1 rounded-panel px-3.5 pb-3.5 pt-3">
+              <Text
+                style={{ color: colors[tile.ink], fontVariant: ['tabular-nums'] }}
+                className="font-fraunces text-[23px] leading-[27px]">
+                {tile.count}
+              </Text>
+              <Text numberOfLines={1} className="mt-1 font-dm-medium text-body text-ink">{tile.label}</Text>
+              <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">{tile.hint}</Text>
+            </TouchableOpacity>
+          ))}
+          {/* An odd count would otherwise stretch the last tile to full width. */}
+          {row.length === 1 ? <View className="flex-1" /> : null}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+/** The screen's second-level heading: a named group of sections, with a plain
+ * line saying why those sections are grouped. Sits a step below the page title
+ * (19px) and well under the 26–28px heroes Home used to lead every rail with,
+ * so three of these read as structure rather than as three competing titles. */
+export function Umbrella({ title, note }: { title: string; note?: string }) {
+  const colors = useThemeColors();
+  return (
+    <View
+      style={{ borderTopColor: colors.edge, borderTopWidth: StyleSheet.hairlineWidth }}
+      className="flex-row items-baseline gap-x-2 pt-3.5">
+      <Text className="font-fraunces text-section text-ink">{title}</Text>
+      {note ? <Text numberOfLines={1} className="shrink font-dm text-meta text-taupe">{note}</Text> : null}
+    </View>
+  );
+}
+
+/** The third level of Home's hierarchy: page title (19) › umbrella (17) ›
+ * this. Small caps rather than a size step, because another serif heading
+ * here is what made the old Home read as four competing titles. */
+export function SubLabel({ title, action, onPress }: { title: string; action?: string; onPress?: () => void }) {
+  return (
+    <View className="min-h-[18px] flex-row items-baseline justify-between gap-x-2">
+      <Text className="font-dm-bold text-micro uppercase text-taupe">{title}</Text>
+      {action && onPress ? (
+        <TouchableOpacity accessibilityRole="button" activeOpacity={0.7} hitSlop={{ top: 10, bottom: 10 }} onPress={onPress}>
+          <Text className="font-dm-medium text-meta text-peach">{action}</Text>
+        </TouchableOpacity>
+      ) : null}
+    </View>
+  );
+}

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 import { Glyph } from '@/components/glyph';
@@ -21,6 +22,7 @@ export function ListRow({
   meta,
   tasteTag,
   divider = true,
+  trailing,
   onPress,
 }: {
   image?: string;
@@ -32,6 +34,10 @@ export function ListRow({
    * "why you're seeing this" line Home puts under a matched pick. */
   tasteTag?: string;
   divider?: boolean;
+  /** Replaces the chevron when the row ends in a fact rather than an arrow —
+   * a closing time, a start time. A row carries one or the other, never both:
+   * two trailing marks read as two different affordances. */
+  trailing?: ReactNode;
   onPress: () => void;
 }) {
   const colors = useThemeColors();
@@ -69,9 +75,13 @@ export function ListRow({
           </View>
         ) : null}
       </View>
-      <View className="h-7 w-7 shrink-0 items-center justify-center">
-        <ChevronRight color={colors.peach} strokeWidth={1.8} />
-      </View>
+      {trailing ? (
+        <View className="shrink-0">{trailing}</View>
+      ) : (
+        <View className="h-7 w-7 shrink-0 items-center justify-center">
+          <ChevronRight color={colors.peach} strokeWidth={1.8} />
+        </View>
+      )}
     </TouchableOpacity>
   );
 }
