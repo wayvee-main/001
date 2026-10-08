@@ -281,11 +281,30 @@ export default function HomeScreen() {
   const eventLead = events[0];
   const eventRest = events.slice(1, 4);
 
+  /** The low end and a plus: "$89\u2013$129" becomes "$89+". The top of a range
+   * is the tier nobody prices a night against, and it costs nine characters on
+   * a line that also has to carry a venue. Free stays Free; boilerplate
+   * ("Official tickets") is dropped, the same rule EventPrice follows. */
+  const briefPrice = (label: string): string | null => {
+    if (!isPrintablePrice(label)) return null;
+    const trimmed = label.trim();
+    if (/^free$/i.test(trimmed)) return 'Free';
+    const low = trimmed.match(/\$?\d[\d,]*/)?.[0];
+    if (!low) return trimmed;
+    return /[\u2013\u2014-]/.test(trimmed) ? `${low}+` : low;
+  };
+
   /** Venue, then what it costs to walk in — the two facts that decide whether
-   * a show is worth the walk. A price that is not a real number ("See site")
-   * is dropped rather than printed, same rule EventPrice follows. */
+   * a show is worth it. */
   const eventMeta = (event: ScoperEvent): string =>
-    [event.venue, isPrintablePrice(event.priceLabel) ? event.priceLabel : null].filter(Boolean).join(' \u00b7 ');
+    [event.venue, briefPrice(event.priceLabel)].filter(Boolean).join(' \u00b7 ');
+
+  /** Sixteen characters, then an ellipsis. Long enough to keep Melba Moore and
+   * Brandon Flowers whole, short enough that a festival listing cannot push
+   * the time off the end of the banner. */
+  const BANNER_TITLE_MAX = 16;
+  const bannerTitle = (name: string): string =>
+    name.length <= BANNER_TITLE_MAX ? name : `${name.slice(0, BANNER_TITLE_MAX).trimEnd()}\u2026`;
 
   /** The catalog carries dish photos per menu item and, for some places, one on
    * the record itself. Either is a real photograph of that restaurant's food. */
@@ -389,7 +408,7 @@ export default function HomeScreen() {
             style={{ backgroundColor: homeColors['vee-tint'] }}
             className="flex-row items-center gap-x-3 rounded-panel border border-sand px-3.5 py-3">
             <View className="min-w-0 flex-1">
-              <Text numberOfLines={1} className="font-dm-medium text-body text-ink">{eventLead.name}</Text>
+              <Text numberOfLines={1} className="font-dm-medium text-body text-ink">{bannerTitle(eventLead.name)}</Text>
               <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">
                 {eventMeta(eventLead)}
               </Text>
