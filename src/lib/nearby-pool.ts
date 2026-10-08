@@ -12,7 +12,7 @@
 // below a known open is a preference; calling it open would be an invention.
 
 import type { Restaurant } from '@/lib/data';
-import { milesBetween, walkMinutes, type GeoPoint } from '@/lib/geo';
+import { milesBetween, type GeoPoint } from '@/lib/geo';
 
 import type { OpenState } from '@/lib/hours';
 
@@ -63,25 +63,29 @@ export function nearbyMetaLine({
   return [cuisine, distance].filter(Boolean).join(' · ');
 }
 
-/** The catalog ordered by how long it takes to walk there, nearest first.
+/** The catalog ordered by distance, nearest first.
  *
- * A place we cannot measure is dropped rather than ranked last: "fastest" is
- * a claim about minutes, and a place with no coordinates has none to make.
+ * Nearest, not fastest: milesBetween is straight-line, so this knows which
+ * place is closest but nothing about how you actually get there. It returns
+ * the distance and leaves it at that — a walking time off a crow-flies
+ * measurement would understate every route that is not a straight line.
+ *
+ * A place we cannot measure is dropped rather than ranked last: the ordering
+ * is a claim about distance, and a place with no coordinates has none to make.
  * Returns an empty list when there is no anchor at all, which is the honest
  * answer before location resolves — the caller hides the section rather than
  * showing an arbitrary order (CLAUDE.md #6). */
-export function fastestOnFoot(
+export function nearestOnFoot(
   restaurants: Restaurant[],
   coordsFor: (entry: { name: string; address?: string | null }) => GeoPoint | null,
   anchor: GeoPoint | null,
-): { restaurant: Restaurant; miles: number; minutes: number }[] {
+): { restaurant: Restaurant; miles: number }[] {
   if (!anchor) return [];
-  const measured: { restaurant: Restaurant; miles: number; minutes: number }[] = [];
+  const measured: { restaurant: Restaurant; miles: number }[] = [];
   for (const restaurant of restaurants) {
     const point = coordsFor(restaurant);
     if (!point) continue;
-    const miles = milesBetween(anchor, point);
-    measured.push({ restaurant, miles, minutes: walkMinutes(miles) });
+    measured.push({ restaurant, miles: milesBetween(anchor, point) });
   }
   return measured.sort((a, b) => a.miles - b.miles);
 }

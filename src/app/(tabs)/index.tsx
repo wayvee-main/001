@@ -36,7 +36,7 @@ import {
 } from '@/lib/daypart';
 import { hydrateEventsFromBackend } from '@/lib/events-remote';
 import { formatMiles, milesBetween, usableAnchor, walkMinutes } from '@/lib/geo';
-import { fastestOnFoot } from '@/lib/nearby-pool';
+import { nearestOnFoot } from '@/lib/nearby-pool';
 import { openStateFor } from '@/lib/hours';
 import { cityStateDisplayLabel } from '@/lib/location';
 import { hydratePlacesFromBackend, useCuratedCoords, useCuratedHours } from '@/lib/places';
@@ -310,9 +310,9 @@ export default function HomeScreen() {
   const [eatOpen, setEatOpen] = useState(false);
 
   // Nearest first across the whole catalog, not just the four ids Nearby eats
-  // draws from — "fastest" has to mean fastest, which the four cannot promise.
-  const fastest = useMemo(
-    () => fastestOnFoot(Object.values(RESTAURANTS), curatedCoords, distanceAnchor),
+  // draws from — a "nearest" claim the four places cannot honestly make.
+  const nearest = useMemo(
+    () => nearestOnFoot(Object.values(RESTAURANTS), curatedCoords, distanceAnchor),
     [curatedCoords, distanceAnchor],
   );
 
@@ -374,20 +374,20 @@ export default function HomeScreen() {
           </View>
         ) : null}
 
-        {fastest.length || homeCollections.length ? (
+        {nearest.length || homeCollections.length ? (
           <View className="gap-y-3">
             <Umbrella title="For you" />
 
-            {fastest.length ? (
+            {nearest.length ? (
               <View className="gap-y-2">
-                <SubLabel title="Fastest" onPress={() => router.push('/fastest')} />
+                <SubLabel title="Nearest" onPress={() => router.push('/nearest')} />
                 <HRow gap={10}>
-                  {fastest.slice(0, 3).map((entry) => (
+                  {nearest.slice(0, 3).map((entry) => (
                     <RailCard
                       key={entry.restaurant.id}
                       image={restaurantPhoto(entry.restaurant)}
                       title={entry.restaurant.name}
-                      meta={`${entry.minutes} min walk \u00b7 ${entry.restaurant.cuisine}`}
+                      meta={`${formatMiles(entry.miles)} \u00b7 ${entry.restaurant.cuisine}`}
                       onPress={() => router.push(`/restaurant/${entry.restaurant.id}`)}
                     />
                   ))}
