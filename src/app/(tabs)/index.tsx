@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Text, View } from 'react-native';
 
 import { EditorialCategories, EditorialCollection, EditorialEvent, EditorialForYouHeading, EditorialHeader, EditorialHero, EditorialNearestRow, EditorialSubheading, editorialStyles } from '@/components/home-editorial';
@@ -32,16 +32,16 @@ export default function HomeScreen() {
   const nearest = useNearestPlaces();
   const preview = nearest.slice(0, NEAREST_HOME_LIMIT);
 
-  const events = useMemo(() => homeEventPicks(now)
+  const events = homeEventPicks(now)
     .map((event, index) => ({ event, index, dayRank: isEventToday(event, now) ? 0 : 1, score: profileAffinity(eventHaystack(event), tasteProfile).score + (event.venueId && s.followedVenues.includes(event.venueId) ? 3 : 0) }))
     .sort((a, b) => a.dayRank - b.dayRank || b.score - a.score || a.index - b.index)
-    .map((entry) => entry.event), [now, tasteProfile, s.followedVenues]);
-  const collections = useMemo(() => CURATED_COLLECTION_ORDER
+    .map((entry) => entry.event);
+  const collections = CURATED_COLLECTION_ORDER
     .map((id) => CURATED_COLLECTIONS[id])
     .filter((collection) => activeCollectionItems(collection, now).length > 0)
     .map((collection, index) => ({ collection, index, score: profileAffinity(collectionHaystack(collection), tasteProfile).score }))
     .sort((a, b) => b.score - a.score || a.index - b.index)
-    .map((entry) => entry.collection), [tasteProfile, now]);
+    .map((entry) => entry.collection);
   const collection = collections.find((entry) => entry.id === 'outdoor-tables') ?? collections[0];
   const event = events[0];
 

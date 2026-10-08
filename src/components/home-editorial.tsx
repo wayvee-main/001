@@ -110,7 +110,7 @@ export function EditorialNearestRow({ entry, last = false, onPress }: { entry: N
     <TouchableOpacity testID="editorial-nearest-row" accessibilityRole="button" accessibilityLabel={`View ${entry.name}, ${formatMiles(entry.miles)}`} onPress={onPress} activeOpacity={0.75} style={[styles.row, { gap: compact ? 9 : 12, borderBottomWidth: last ? 0 : 1, borderColor: c.line }]}>
       <Photo uri={entry.image} radius={11} style={{ width: compact ? 51 : 58, height: compact ? 55 : 58 }} />
       <View style={styles.grow}>
-        <Text numberOfLines={2} style={[styles.rowName, { color: c.ink, fontSize: compact ? 13 : 14 }]}>{entry.name}</Text>
+        <Text numberOfLines={2} style={[styles.rowName, { color: c.ink, fontSize: compact ? 13 : 14, lineHeight: compact ? 15.6 : 16.8 }]}>{entry.name}</Text>
         <Text numberOfLines={1} style={[styles.rowMeta, { color: c.muted }]}>{[entry.cuisine, entry.price].filter(Boolean).join(' · ')}</Text>
       </View>
       <View style={[styles.rowEnd, { gap: compact ? 2 : 5 }]}><Text style={[styles.rowDistance, { color: c.ink, fontSize: compact ? 11 : 12 }]}>{formatMiles(entry.miles)}</Text><Glyph name="chevron" size={compact ? 11 : 13} color={c.coral} /></View>
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
   forYouHeading: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 8, borderTopWidth: 1, paddingTop: 18 },
   forYouTitle: { fontFamily: F.display, fontSize: 28, lineHeight: 30.8, letterSpacing: -0.55 },
   caption: { fontFamily: F.regular, fontSize: 11, lineHeight: 15.4 },
-  subheading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 14, minHeight: 36 },
+  subheading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 14 },
   subheadingTitle: { fontFamily: F.strong, fontSize: 11, lineHeight: 15.4, letterSpacing: 1 },
   seeAll: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 36 },
   seeAllText: { fontFamily: F.strong, fontSize: 12, lineHeight: 16.8 },

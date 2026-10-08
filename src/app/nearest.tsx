@@ -1,9 +1,9 @@
 import { useRouter } from 'expo-router';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 
 import { Glyph } from '@/components/glyph';
 import { EditorialNearestRow, editorialStyles } from '@/components/home-editorial';
-import { Screen, ScreenScroll } from '@/components/layout';
+import { Screen } from '@/components/layout';
 import { useActiveCityName } from '@/lib/city';
 import { useEditorial } from '@/lib/editorial';
 import { useNearestPlaces } from '@/lib/use-nearest-places';
@@ -18,15 +18,25 @@ export default function NearestScreen() {
   const ranked = useNearestPlaces();
   return (
     <Screen backgroundColor={c.paper}>
-      <ScreenScroll gap={0} contentStyle={{ maxWidth: 390, paddingHorizontal: gutter }}>
+      <FlatList
+        data={ranked}
+        keyExtractor={(entry) => entry.key}
+        style={{ flex: 1, width: '100%', maxWidth: 390, alignSelf: 'center' }}
+        contentContainerStyle={{ paddingHorizontal: gutter, paddingBottom: 24 }}
+        initialNumToRender={20}
+        maxToRenderPerBatch={20}
+        windowSize={7}
+        renderItem={({ item: entry, index }) => <EditorialNearestRow entry={entry} last={index === ranked.length - 1} onPress={() => router.push(entry.href)} />}
+        ListHeaderComponent={<>
         <View style={editorialStyles.listHeader}>
           <TouchableOpacity accessibilityRole="button" accessibilityLabel="Back to Home" onPress={() => router.canGoBack() ? router.back() : router.replace('/')} hitSlop={4} style={editorialStyles.back}><Glyph name="back" size={20} color={c.ink} /></TouchableOpacity>
           <Text accessibilityRole="header" style={[editorialStyles.listTitle, { color: c.ink }]}>{phone ? 'Nearest to you' : `Nearest in ${cityName}`}</Text>
         </View>
         <Text style={[editorialStyles.listCount, { color: c.ink }]}>{ranked.length} {ranked.length === 1 ? 'place' : 'places'} within 5 miles</Text>
         <Text style={[editorialStyles.listBlurb, { color: c.muted }]}>Within 5 miles of the {cityName} reference. Closest first, with straight-line distances {phone ? 'from your location' : 'from the downtown reference'}.</Text>
-        {ranked.length ? ranked.map((entry, index) => <EditorialNearestRow key={entry.key} entry={entry} last={index === ranked.length - 1} onPress={() => router.push(entry.href)} />) : <Text style={[editorialStyles.status, { color: c.muted }]}>No nearby places loaded yet. Pull to refresh Home to load the local catalog. Location permission is optional.</Text>}
-      </ScreenScroll>
+        </>}
+        ListEmptyComponent={<Text style={[editorialStyles.status, { color: c.muted }]}>No nearby places loaded yet. Pull to refresh Home to load the local catalog. Location permission is optional.</Text>}
+      />
     </Screen>
   );
 }
