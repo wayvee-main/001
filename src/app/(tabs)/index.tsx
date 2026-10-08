@@ -7,6 +7,7 @@ import { AroundYou, SubLabel, Umbrella, type CountTile } from '@/components/home
 import { Screen, ScreenScroll } from '@/components/layout';
 import { ListRow } from '@/components/list-row';
 import { Glyph } from '@/components/glyph';
+import { isPrintablePrice } from '@/components/event-meta';
 import { Photo } from '@/components/photo';
 import { ChevronRight, MiniChevron, Skeleton } from '@/components/ui';
 import { useContentHydrating } from '@/lib/bootstrap';
@@ -26,9 +27,11 @@ import {
   isEventToday,
   type CuratedCollection,
   type Restaurant,
+  type ScoperEvent,
 } from '@/lib/data';
 import {
   daypartSearchPrompt,
+  homeHeroPrompt,
   homeSuggestions,
   type HomeSuggestion,
 } from '@/lib/daypart';
@@ -257,6 +260,11 @@ export default function HomeScreen() {
 
 
 
+  const promptContext = useMemo(
+    () => ({ now, tasteTags: s.tasteTags, tripContext: s.tripContext, walkBudgetMinutes: s.walkBudgetMinutes }),
+    [now, s.tasteTags, s.tripContext, s.walkBudgetMinutes],
+  );
+  const heroTitle = useMemo(() => homeHeroPrompt(promptContext), [promptContext]);
   const suggestions = useMemo(() => homeSuggestions(now), [now]);
   const openSuggestion = (suggestion: HomeSuggestion) => {
     const query = encodeURIComponent(suggestion.query);
@@ -270,6 +278,20 @@ export default function HomeScreen() {
       .filter(Boolean)
       .join(' · ');
 
+  const eventLead = events[0];
+  const eventRest = events.slice(1, 4);
+
+  /** Venue, then what it costs to walk in — the two facts that decide whether
+   * a show is worth the walk. A price that is not a real number ("See site")
+   * is dropped rather than printed, same rule EventPrice follows. */
+  const eventMeta = (event: ScoperEvent): string =>
+    [event.venue, isPrintablePrice(event.priceLabel) ? event.priceLabel : null].filter(Boolean).join(' \u00b7 ');
+
+  /** The catalog carries dish photos per menu item and, for some places, one on
+   * the record itself. Either is a real photograph of that restaurant's food. */
+  const restaurantPhoto = (restaurant: Restaurant): string | undefined =>
+    restaurant.image ?? restaurant.menuHighlights?.find((item) => item.image)?.image;
+
   // ── Around you ────────────────────────────────────────────────────────────
   // Four counts off the four pools the lists below are drawn from, so the grid
   // can never disagree with them, and each tile opens the pool it counted.
@@ -279,24 +301,28 @@ export default function HomeScreen() {
     aroundYouTiles.push({
       key: 'eat', count: String(cityOpenCount), label: 'Eat', hint: 'open now',
       tint: 'accent-tint', ink: 'fg-accent', onPress: openFoodHub,
+      image: dinnerPicks.map(restaurantPhoto).find(Boolean),
     });
   } else if (dinnerPicks.length) {
     // Hours unreadable: name the ranked inventory rather than call it open.
     aroundYouTiles.push({
       key: 'eat', count: String(dinnerPicks.length), label: 'Eat', hint: 'nearby',
       tint: 'accent-tint', ink: 'fg-accent', onPress: openFoodHub,
+      image: dinnerPicks.map(restaurantPhoto).find(Boolean),
     });
   }
   if (eventsTodayCount > 0) {
     aroundYouTiles.push({
       key: 'shows', count: String(eventsTodayCount), label: 'Shows', hint: 'tonight',
       tint: 'vee-tint', ink: 'vee-strong', onPress: () => router.push('/discover?mode=Events'),
+      image: eventLead?.image,
     });
   }
   if (NIGHTLIFE_SPOTS.length) {
     aroundYouTiles.push({
       key: 'bars', count: String(NIGHTLIFE_SPOTS.length), label: 'Bars', hint: 'in the catalog',
       tint: 'warm-tint', ink: 'warm-strong', onPress: () => router.push('/discover?mode=Nightlife'),
+      image: NIGHTLIFE_SPOTS.find((spot) => spot.image)?.image,
     });
   }
   const crawlCount = Object.keys(CRAWLS).length;
@@ -304,6 +330,7 @@ export default function HomeScreen() {
     aroundYouTiles.push({
       key: 'routes', count: String(crawlCount), label: 'Routes', hint: 'multi-stop nights',
       tint: 'vee-tint', ink: 'vee-strong', onPress: () => router.push('/collection'),
+      image: homeCollections.find((collection) => collection.coverImage)?.coverImage,
     });
   }
 
@@ -326,9 +353,6 @@ export default function HomeScreen() {
   // unfolded this section opens by restating it as six rows.
   const [eatOpen, setEatOpen] = useState(false);
 
-  const eventLead = events[0];
-  const eventRest = events.slice(1, 4);
-
   const forYou = mostExploredRestaurants.slice(0, 3);
 
   return (
@@ -341,11 +365,10 @@ export default function HomeScreen() {
           onProfile={() => router.push('/profile')}
         />
 
-        {/* No hero line: the header names the city directly above this, and the
-            ask bar is what the screen is for. */}
         <HomeVeePanel>
           <VeeHero
             embedded
+            title={heroTitle}
             suggestions={suggestions}
             askPrompt={daypartSearchPrompt(now)}
             stayLabel={s.stay ? 'Update your stay' : 'Link your stay'}
@@ -364,16 +387,21 @@ export default function HomeScreen() {
             activeOpacity={0.78}
             onPress={() => router.push(`/event/${eventLead.id}`)}
             style={{ backgroundColor: homeColors['vee-tint'] }}
-            className="flex-row items-center gap-x-3 rounded-panel px-3.5 py-3">
+            className="flex-row items-center gap-x-3 rounded-panel border border-sand px-3.5 py-3">
             <View className="min-w-0 flex-1">
               <Text numberOfLines={1} className="font-dm-medium text-body text-ink">{eventLead.name}</Text>
-              <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">{eventLead.venue}</Text>
+              <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">
+                {eventMeta(eventLead)}
+              </Text>
             </View>
-            <Text
-              style={{ color: homeColors['vee-strong'], fontVariant: ['tabular-nums'] }}
-              className="shrink-0 font-dm-bold text-meta">
-              {eventLead.time}
-            </Text>
+            <View className="shrink-0 flex-row items-center gap-x-1.5">
+              <Glyph name="ticket" size={13} color={homeColors['vee-strong']} strokeWidth={1.8} />
+              <Text
+                style={{ color: homeColors['vee-strong'], fontVariant: ['tabular-nums'] }}
+                className="font-dm-bold text-meta">
+                {eventLead.time}
+              </Text>
+            </View>
             <ChevronRight color={homeColors['vee-strong']} strokeWidth={1.8} />
           </TouchableOpacity>
         ) : null}
@@ -396,20 +424,23 @@ export default function HomeScreen() {
           {eventRest.length ? (
             <View className="gap-y-1.5">
               <SubLabel title="On stage" action={`All ${events.length}`} onPress={() => router.push('/tonight')} />
-              <View style={raisedSurface} className="overflow-hidden rounded-2xl">
+              <View style={raisedSurface} className="overflow-hidden rounded-2xl border border-sand">
                 {eventRest.map((event, index) => (
                   <ListRow
                     key={event.id}
                     image={event.image}
                     title={event.name}
-                    meta={event.venue}
+                    meta={eventMeta(event)}
                     divider={index < eventRest.length - 1}
                     trailing={
-                      <Text
-                        style={{ color: homeColors['vee-strong'], fontVariant: ['tabular-nums'] }}
-                        className="font-dm-bold text-meta">
-                        {event.time}
-                      </Text>
+                      <View className="flex-row items-center gap-x-1.5">
+                        <Glyph name="ticket" size={13} color={homeColors['vee-strong']} strokeWidth={1.8} />
+                        <Text
+                          style={{ color: homeColors['vee-strong'], fontVariant: ['tabular-nums'] }}
+                          className="font-dm-bold text-meta">
+                          {event.time}
+                        </Text>
+                      </View>
                     }
                     onPress={() => router.push(`/event/${event.id}`)}
                   />
@@ -417,7 +448,7 @@ export default function HomeScreen() {
               </View>
             </View>
           ) : hydrating ? (
-            <View style={raisedSurface} className="overflow-hidden rounded-2xl px-3.5">
+            <View style={raisedSurface} className="overflow-hidden rounded-2xl border border-sand px-3.5">
               {[0, 1, 2].map((i) => (
                 <EventRowSkeleton key={i} />
               ))}
@@ -447,7 +478,7 @@ export default function HomeScreen() {
               </TouchableOpacity>
 
               {eatOpen ? (
-                <View style={raisedSurface} className="overflow-hidden rounded-2xl">
+                <View style={raisedSurface} className="overflow-hidden rounded-2xl border border-sand">
                   {closingSoon.map((entry, index) => (
                     <ListRow
                       key={entry.restaurant.id}
@@ -479,7 +510,7 @@ export default function HomeScreen() {
             {forYou.length ? (
               <View className="gap-y-1.5">
                 <SubLabel title="Because of what you saved" />
-                <View style={raisedSurface} className="overflow-hidden rounded-2xl">
+                <View style={raisedSurface} className="overflow-hidden rounded-2xl border border-sand">
                   {forYou.map((restaurant, index) => (
                     <ListRow
                       key={restaurant.id}
@@ -497,7 +528,7 @@ export default function HomeScreen() {
             {homeCollections.length ? (
               <View className="gap-y-1.5">
                 <SubLabel title="Collections" action="All" onPress={() => router.push('/collection')} />
-                <View style={raisedSurface} className="overflow-hidden rounded-2xl">
+                <View style={raisedSurface} className="overflow-hidden rounded-2xl border border-sand">
                   {homeCollections.map((collection) => (
                     <CollectionRow
                       key={collection.id}

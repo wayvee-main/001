@@ -1,5 +1,7 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import { Photo } from '@/components/photo';
 import { useThemeColors, type ThemeColors } from '@/lib/theme';
 
 export type CountTile = {
@@ -10,6 +12,9 @@ export type CountTile = {
   hint: string;
   tint: keyof ThemeColors;
   ink: keyof ThemeColors;
+  /** A real photo from the pool this tile counts — the lead event's art, a
+   * dish, a bar. Absent is fine: the tile falls back to its flat tint. */
+  image?: string;
   onPress: () => void;
 };
 
@@ -45,7 +50,37 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
                 borderColor: colors['edge-soft'],
                 borderWidth: StyleSheet.hairlineWidth,
               }}
-              className="min-h-[86px] flex-1 rounded-panel px-3.5 pb-3.5 pt-3">
+              className="min-h-[86px] flex-1 overflow-hidden rounded-panel px-3.5 pb-3.5 pt-3">
+              {/* The photo sits on the right and the tile's own tint is drawn
+               * back over it, opaque under the text and clearing by the right
+               * edge. The count stays on flat colour — a number read against
+               * photography is a number read twice. */}
+              {tile.image ? (
+                <>
+                  <Photo
+                    uri={tile.image}
+                    radius={0}
+                    stripedPlaceholder={false}
+                    // Tinted behind the photo: a URL that fails to load
+                    // leaves the tile's own colour, not a hole in it.
+                    style={{
+                      position: 'absolute',
+                      right: 0,
+                      top: 0,
+                      bottom: 0,
+                      width: '64%',
+                      backgroundColor: colors[tile.tint],
+                    }}
+                  />
+                  <LinearGradient
+                    colors={[colors[tile.tint], colors[tile.tint], 'transparent']}
+                    locations={[0, 0.36, 1]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={StyleSheet.absoluteFill}
+                  />
+                </>
+              ) : null}
               <Text
                 style={{ color: colors[tile.ink], fontVariant: ['tabular-nums'] }}
                 className="font-fraunces text-[23px] leading-[27px]">
