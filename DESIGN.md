@@ -135,6 +135,18 @@ ribbons, the stay anchor), `rounded-sheet` (25px, the Vee hero, bottom sheets,
 modals). `rounded-full` for pills — that's Tailwind's built-in, not part of this
 scale. A lint rule rejects new `rounded-[Npx]` values.
 
+## Home: Nearest
+
+**For you → Nearest** uses three vertically stacked `ListRow` entries, with
+thumbnail, name, measured distance/category, and a detail-page action. It is
+never a horizontal carousel. The subsection header carries a visible **See all**
+action to `/nearest`, a separate page showing the complete ranked local pool
+(normally 20+ results). The three-row limit applies only to Home.
+
+The [Nearest product rulebook](CLAUDE.md#product-rulebook--nearest) governs this
+layout and the five-mile city-reference/GPS behavior; [DATA.md](DATA.md#nearest-pool)
+records the shared source and sparse-coverage behavior.
+
 ## The signature: walk time
 
 Principle 2 (walkability is the primary sort, not a filter) has no fixed

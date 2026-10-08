@@ -11,11 +11,11 @@ const place = (id: string, lat = CITY_CENTER.latitude, lon = CITY_CENTER.longitu
 const noCoords = () => null;
 
 describe('Nearest city-reference pool', () => {
-  it('populates 20+ places without GPS and exposes 20 Home cards', () => {
+  it('populates 20+ places without GPS and previews only three Home rows', () => {
     const places = Array.from({ length: 24 }, (_, i) => place(`p${i}`, CITY_CENTER.latitude + i * 0.001));
     const ranked = rankNearestPlaces([], places, noCoords, CITY_CENTER, null);
     expect(ranked).toHaveLength(24);
-    expect(ranked.slice(0, NEAREST_HOME_LIMIT)).toHaveLength(20);
+    expect(ranked.slice(0, NEAREST_HOME_LIMIT)).toHaveLength(3);
     expect(ranked[0].miles).toBe(0);
   });
 

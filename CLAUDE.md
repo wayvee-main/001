@@ -1,3 +1,19 @@
+## Product rulebook — Nearest
+
+- Home's **For you → Nearest** subsection is a **vertical list of three rows**
+  (or all available rows when fewer than three exist), never a horizontal rail.
+- A visible **See all** action opens the separate **`/nearest` page**. That page
+  lists the **entire eligible pool**, normally 20 or more results, without the
+  three-row Home preview limit.
+- Pool membership is within **five straight-line miles of the selected
+  ZIP/city reference**. Downtown Oakland is one configured reference; other
+  cities, including San Francisco, use their own reference coordinates.
+- The pool populates **without location permission**. Phone coordinates only
+  reorder that same pool closest first and update displayed distances.
+- Use real, measured places only. Show fewer results when coverage is sparse;
+  never fabricate entries or extend the radius to fill a count. Keep loading
+  and unavailable-catalog status visible under Nearest.
+
 ## Implementation workflow (mandatory)
 
 For every non-trivial task, **do not start coding immediately.**

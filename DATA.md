@@ -172,12 +172,16 @@ expire, and without a scheduled run the backend keeps serving them.
 
 ## Nearest pool
 
-Home's Nearest rail and `/nearest` share `useNearestPlaces`. Membership uses a
+Home's Nearest vertical list and `/nearest` share `useNearestPlaces`. Membership uses a
 five-mile straight-line radius around the active city's `cities.anchor_lat` /
 `anchor_lon` (the configured downtown/ZIP reference). Oakland defaults to the
 bundled 12th St / Broadway reference; another city never falls back to Oakland.
 The phone, when available, only changes ordering and displayed distances.
-Home exposes the first 20 cards; the full screen lists the entire pool.
+Home previews the first three rows with a visible **See all** action. That
+action opens the separate `/nearest` page, which lists the entire eligible pool
+(normally 20+ results), without applying Home's three-row limit. See the
+[product rulebook](CLAUDE.md#product-rulebook--nearest) and
+[design rule](DESIGN.md#home-nearest).
 
 Candidates combine measured curated restaurants with the city's live/cached
 places directory, deduplicating matched locations. No GPS permission is needed.

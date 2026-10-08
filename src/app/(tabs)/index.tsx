@@ -307,6 +307,7 @@ export default function HomeScreen() {
 
   // A city-reference pool is available without GPS; location only reorders it.
   const nearest = useNearestPlaces();
+  const nearestPreview = nearest.slice(0, NEAREST_HOME_LIMIT);
 
   return (
     <Screen>
@@ -370,18 +371,19 @@ export default function HomeScreen() {
             <Umbrella title="For you" />
 
               <View className="gap-y-2">
-                <SubLabel title="Nearest" onPress={() => router.push('/nearest')} />
-                {nearest.length ? <HRow gap={10}>
-                  {nearest.slice(0, NEAREST_HOME_LIMIT).map((entry) => (
-                    <RailCard
+                <SubLabel title="Nearest" action="See all" onPress={() => router.push('/nearest')} />
+                {nearestPreview.length ? <View style={raisedSurface} className="overflow-hidden rounded-card border border-sand">
+                  {nearestPreview.map((entry, index) => (
+                    <ListRow
                       key={entry.key}
                       image={entry.image}
                       title={entry.name}
-                      meta={`${formatMiles(entry.miles)} \u00b7 ${entry.cuisine}`}
+                      meta={[formatMiles(entry.miles), entry.cuisine, entry.price].filter(Boolean).join(' · ')}
+                      divider={index < nearestPreview.length - 1}
                       onPress={() => router.push(entry.href)}
                     />
                   ))}
-                </HRow> : (
+                </View> : (
                   <Text className="font-dm text-meta text-taupe">
                     {hydrating ? 'Loading nearby places…' : 'The local catalog is unavailable. Pull to refresh.'}
                   </Text>

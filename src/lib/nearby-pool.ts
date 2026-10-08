@@ -93,7 +93,8 @@ export function nearestOnFoot(
 }
 
 export const NEAREST_RADIUS_MILES = 5;
-export const NEAREST_HOME_LIMIT = 20;
+/** Home previews three vertical rows; /nearest keeps the full ranked pool. */
+export const NEAREST_HOME_LIMIT = 3;
 
 export interface NearestPlace {
   key: string;
