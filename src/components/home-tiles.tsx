@@ -129,3 +129,41 @@ export function SubLabel({ title, action, onPress }: { title: string; action?: s
     </View>
   );
 }
+
+/** A card for a horizontal rail: picture on top, two lines under it.
+ *
+ * Narrow enough that the next card is always part-visible, which is what tells
+ * you the row scrolls — the edge fade HRow draws only appears once the content
+ * actually overflows, so on a short row the card peeking out is the only cue. */
+export function RailCard({
+  image,
+  title,
+  meta,
+  onPress,
+}: {
+  image?: string;
+  title: string;
+  meta?: string;
+  onPress: () => void;
+}) {
+  const colors = useThemeColors();
+  return (
+    <TouchableOpacity
+      accessibilityRole="button"
+      accessibilityLabel={meta ? `${title}. ${meta}` : title}
+      activeOpacity={0.78}
+      onPress={onPress}
+      style={{
+        backgroundColor: colors['surface-raised'],
+        borderColor: colors['edge-soft'],
+        borderWidth: StyleSheet.hairlineWidth,
+      }}
+      className="w-[158px] overflow-hidden rounded-panel">
+      <Photo uri={image} radius={0} style={{ width: '100%', height: 94 }} />
+      <View className="px-3 pb-3 pt-2.5">
+        <Text numberOfLines={2} className="font-dm-medium text-body leading-[18px] text-ink">{title}</Text>
+        {meta ? <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">{meta}</Text> : null}
+      </View>
+    </TouchableOpacity>
+  );
+}

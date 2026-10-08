@@ -3,13 +3,12 @@ import { useCallback, useMemo, useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 import { VeeHero, HomeVeePanel, HomeHeader } from '@/components/home-top';
-import { AroundYou, SubLabel, Umbrella, type CountTile } from '@/components/home-tiles';
-import { Screen, ScreenScroll } from '@/components/layout';
+import { AroundYou, RailCard, SubLabel, Umbrella, type CountTile } from '@/components/home-tiles';
+import { HRow, Screen, ScreenScroll } from '@/components/layout';
 import { ListRow } from '@/components/list-row';
 import { Glyph } from '@/components/glyph';
 import { isPrintablePrice } from '@/components/event-meta';
-import { Photo } from '@/components/photo';
-import { ChevronRight, MiniChevron, Skeleton } from '@/components/ui';
+import { ChevronRight, Skeleton } from '@/components/ui';
 import { useContentHydrating } from '@/lib/bootstrap';
 import { useNow } from '@/lib/clock';
 import {
@@ -71,33 +70,18 @@ function EventRowSkeleton() {
 /** Names the collection's leading current item instead of a bare count, so
  * the row previews real content ("Tacos Sinaloa +2 more") rather than making
  * you tap in to find out what's actually inside. */
-function CollectionRow({ collection, onPress }: { collection: CuratedCollection; onPress: () => void }) {
-  const surface = useRaisedSurface(2);
+/** "Lake Chalet +3 more · patios and a beer garden" — the lead pick, how many
+ * follow it, and the tail of the collection's own subtitle. Lives outside the
+ * row that used to own it so the rail card states a collection the same way. */
+function collectionMeta(collection: CuratedCollection): string {
   const items = activeCollectionItems(collection);
   const lead = items[0];
   const leadName = lead ? (lead.type === 'restaurant' ? RESTAURANTS[lead.id]?.name : EVENTS[lead.id]?.name) : undefined;
   const extra = items.length - (leadName ? 1 : 0);
-  const tail = collection.subtitle.split(' · ').slice(-1)[0];
-  const meta = leadName
-    ? `${leadName}${extra > 0 ? ` +${extra} more` : ''} · ${tail}`
-    : `${items.length} current ${items.length === 1 ? 'pick' : 'picks'} · ${tail}`;
-
-  return (
-    <TouchableOpacity
-      accessibilityRole="button"
-      accessibilityLabel={`Open ${collection.title}`}
-      activeOpacity={0.72}
-      onPress={onPress}
-      style={surface}
-      className="flex-row items-center gap-x-3 rounded-2xl p-3">
-      <Photo uri={collection.coverImage} radius={10} style={{ width: 56, height: 56 }} />
-      <View className="min-w-0 flex-1">
-        <Text numberOfLines={1} className="font-fraunces text-[16px] text-ink">{collection.title}</Text>
-        <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">{meta}</Text>
-      </View>
-      <MiniChevron />
-    </TouchableOpacity>
-  );
+  const tail = collection.subtitle.split(' \u00b7 ').slice(-1)[0];
+  return leadName
+    ? `${leadName}${extra > 0 ? ` +${extra} more` : ''} \u00b7 ${tail}`
+    : `${items.length} current ${items.length === 1 ? 'pick' : 'picks'} \u00b7 ${tail}`;
 }
 
 function exploredRestaurantId(href: string): string | null {
@@ -432,6 +416,46 @@ export default function HomeScreen() {
           </View>
         ) : null}
 
+        {forYou.length || homeCollections.length ? (
+          <View className="gap-y-3">
+            <Umbrella title="For you" />
+
+            {forYou.length ? (
+              <View className="gap-y-2">
+                <SubLabel title="Because of what you saved" />
+                <HRow gap={10}>
+                  {forYou.map((restaurant) => (
+                    <RailCard
+                      key={restaurant.id}
+                      image={restaurantPhoto(restaurant)}
+                      title={restaurant.name}
+                      meta={placeMeta(restaurant)}
+                      onPress={() => router.push(`/restaurant/${restaurant.id}`)}
+                    />
+                  ))}
+                </HRow>
+              </View>
+            ) : null}
+
+            {homeCollections.length ? (
+              <View className="gap-y-2">
+                <SubLabel title="Collections" action="All" onPress={() => router.push('/collection')} />
+                <HRow gap={10}>
+                  {homeCollections.map((collection) => (
+                    <RailCard
+                      key={collection.id}
+                      image={collection.coverImage}
+                      title={collection.title}
+                      meta={collectionMeta(collection)}
+                      onPress={() => router.push(`/collection/${collection.id}`)}
+                    />
+                  ))}
+                </HRow>
+              </View>
+            ) : null}
+          </View>
+        ) : null}
+
         {/* An umbrella with nothing under it is a heading for an empty room.
             Tonight has two children and either can be empty — no second show
             tonight, or no kitchen whose hours we can read — so the group only
@@ -520,45 +544,6 @@ export default function HomeScreen() {
             </View>
           ) : null}
         </View>
-        ) : null}
-
-        {forYou.length || homeCollections.length ? (
-          <View className="gap-y-3">
-            <Umbrella title="For you" />
-
-            {forYou.length ? (
-              <View className="gap-y-1.5">
-                <SubLabel title="Because of what you saved" />
-                <View style={raisedSurface} className="overflow-hidden rounded-2xl border border-sand">
-                  {forYou.map((restaurant, index) => (
-                    <ListRow
-                      key={restaurant.id}
-                      image={restaurant.image}
-                      title={restaurant.name}
-                      meta={placeMeta(restaurant)}
-                      divider={index < forYou.length - 1}
-                      onPress={() => router.push(`/restaurant/${restaurant.id}`)}
-                    />
-                  ))}
-                </View>
-              </View>
-            ) : null}
-
-            {homeCollections.length ? (
-              <View className="gap-y-1.5">
-                <SubLabel title="Collections" action="All" onPress={() => router.push('/collection')} />
-                <View style={raisedSurface} className="overflow-hidden rounded-2xl border border-sand">
-                  {homeCollections.map((collection) => (
-                    <CollectionRow
-                      key={collection.id}
-                      collection={collection}
-                      onPress={() => router.push(`/collection/${collection.id}`)}
-                    />
-                  ))}
-                </View>
-              </View>
-            ) : null}
-          </View>
         ) : null}
 
         {/* Home used to run out of rails rather than end. Saying where the list
