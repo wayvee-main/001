@@ -130,11 +130,12 @@ export function SubLabel({ title, action, onPress }: { title: string; action?: s
   );
 }
 
-/** A card for a horizontal rail: picture on top, two lines under it.
+/** A card for a horizontal rail, shaped like the banner above it: thumbnail
+ * left, two lines right, one hairline edge around the whole thing.
  *
- * Narrow enough that the next card is always part-visible, which is what tells
- * you the row scrolls — the edge fade HRow draws only appears once the content
- * actually overflows, so on a short row the card peeking out is the only cue. */
+ * Wide enough for a real place name on one line, narrow enough that the next
+ * card is always part-visible — on a two-item row that peek is the only cue
+ * the row scrolls, since HRow's fade only paints once content overflows. */
 export function RailCard({
   image,
   title,
@@ -155,13 +156,13 @@ export function RailCard({
       onPress={onPress}
       style={{
         backgroundColor: colors['surface-raised'],
-        borderColor: colors['edge-soft'],
+        borderColor: colors.edge,
         borderWidth: StyleSheet.hairlineWidth,
       }}
-      className="w-[158px] overflow-hidden rounded-panel">
-      <Photo uri={image} radius={0} style={{ width: '100%', height: 94 }} />
-      <View className="px-3 pb-3 pt-2.5">
-        <Text numberOfLines={2} className="font-dm-medium text-body leading-[18px] text-ink">{title}</Text>
+      className="w-[252px] flex-row items-center gap-x-3 rounded-panel p-2.5">
+      <Photo uri={image} radius={11} style={{ width: 52, height: 52 }} />
+      <View className="min-w-0 flex-1 pr-1">
+        <Text numberOfLines={1} className="font-dm-medium text-body text-ink">{title}</Text>
         {meta ? <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">{meta}</Text> : null}
       </View>
     </TouchableOpacity>
