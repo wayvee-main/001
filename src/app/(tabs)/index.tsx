@@ -36,7 +36,8 @@ import {
 } from '@/lib/daypart';
 import { hydrateEventsFromBackend } from '@/lib/events-remote';
 import { formatMiles, milesBetween, usableAnchor, walkMinutes } from '@/lib/geo';
-import { nearestOnFoot } from '@/lib/nearby-pool';
+import { NEAREST_HOME_LIMIT } from '@/lib/nearby-pool';
+import { useNearestPlaces } from '@/lib/use-nearest-places';
 import { openStateFor } from '@/lib/hours';
 import { cityStateDisplayLabel } from '@/lib/location';
 import { hydratePlacesFromBackend, useCuratedCoords, useCuratedHours } from '@/lib/places';
@@ -248,11 +249,6 @@ export default function HomeScreen() {
   const bannerTitle = (name: string): string =>
     name.length <= BANNER_TITLE_MAX ? name : `${name.slice(0, BANNER_TITLE_MAX).trimEnd()}\u2026`;
 
-  /** The catalog carries dish photos per menu item and, for some places, one on
-   * the record itself. Either is a real photograph of that restaurant's food. */
-  const restaurantPhoto = (restaurant: Restaurant): string | undefined =>
-    restaurant.image ?? restaurant.menuHighlights?.find((item) => item.image)?.image;
-
   // ── Around you ────────────────────────────────────────────────────────────
   // Four counts off the four pools the lists below are drawn from, so the grid
   // can never disagree with them, and each tile opens the pool it counted.
@@ -309,12 +305,8 @@ export default function HomeScreen() {
   // unfolded this section opens by restating it as six rows.
   const [eatOpen, setEatOpen] = useState(false);
 
-  // Nearest first across the whole catalog, not just the four ids Nearby eats
-  // draws from — a "nearest" claim the four places cannot honestly make.
-  const nearest = useMemo(
-    () => nearestOnFoot(Object.values(RESTAURANTS), curatedCoords, distanceAnchor),
-    [curatedCoords, distanceAnchor],
-  );
+  // A city-reference pool is available without GPS; location only reorders it.
+  const nearest = useNearestPlaces();
 
   return (
     <Screen>
@@ -374,26 +366,27 @@ export default function HomeScreen() {
           </View>
         ) : null}
 
-        {nearest.length || homeCollections.length ? (
-          <View className="gap-y-3">
+        <View className="gap-y-3">
             <Umbrella title="For you" />
 
-            {nearest.length ? (
               <View className="gap-y-2">
                 <SubLabel title="Nearest" onPress={() => router.push('/nearest')} />
-                <HRow gap={10}>
-                  {nearest.slice(0, 3).map((entry) => (
+                {nearest.length ? <HRow gap={10}>
+                  {nearest.slice(0, NEAREST_HOME_LIMIT).map((entry) => (
                     <RailCard
-                      key={entry.restaurant.id}
-                      image={restaurantPhoto(entry.restaurant)}
-                      title={entry.restaurant.name}
-                      meta={`${formatMiles(entry.miles)} \u00b7 ${entry.restaurant.cuisine}`}
-                      onPress={() => router.push(`/restaurant/${entry.restaurant.id}`)}
+                      key={entry.key}
+                      image={entry.image}
+                      title={entry.name}
+                      meta={`${formatMiles(entry.miles)} \u00b7 ${entry.cuisine}`}
+                      onPress={() => router.push(entry.href)}
                     />
                   ))}
-                </HRow>
+                </HRow> : (
+                  <Text className="font-dm text-meta text-taupe">
+                    {hydrating ? 'Loading nearby places…' : 'The local catalog is unavailable. Pull to refresh.'}
+                  </Text>
+                )}
               </View>
-            ) : null}
 
             {homeCollections.length ? (
               <View className="gap-y-2">
@@ -411,8 +404,7 @@ export default function HomeScreen() {
                 </HRow>
               </View>
             ) : null}
-          </View>
-        ) : null}
+        </View>
 
         {/* An umbrella with nothing under it is a heading for an empty room.
             Tonight has two children and either can be empty — no second show

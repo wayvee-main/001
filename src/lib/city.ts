@@ -9,7 +9,9 @@
 // The active city is one value, held here and persisted, rather than threaded
 // through every query: the hydrators in places.ts, events-remote.ts,
 // viator.ts and weather.ts read it directly, and changing it re-runs them.
-import { useSyncExternalStore } from 'react';
+import { useMemo, useSyncExternalStore } from 'react';
+
+import { CITY_CENTER, type GeoPoint } from '@/lib/geo';
 
 import { getStoredItem, setStoredItem } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
@@ -32,6 +34,8 @@ const STORAGE_KEY = 'wayvee.city.v1';
 export interface CityOption {
   slug: string;
   name: string;
+  anchor_lat?: number;
+  anchor_lon?: number;
 }
 
 type Listener = () => void;
@@ -125,7 +129,7 @@ export function cityCacheKey(base: string, slug: string = active): string {
 export async function hydrateCitiesFromBackend(): Promise<boolean> {
   if (!supabase) return false;
   try {
-    const { data, error } = await supabase.from('cities').select('slug, name').eq('launched', true).order('name');
+    const { data, error } = await supabase.from('cities').select('slug, name, anchor_lat, anchor_lon').eq('launched', true).order('name');
     if (error || !data?.length) return false;
 
     options = (data as CityOption[]).filter((city) => city.slug && city.name);
@@ -142,4 +146,20 @@ export async function hydrateCitiesFromBackend(): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+/** The selected market's configured ZIP/downtown reference, never the phone.
+ * Oakland has a bundled reference; other cities use their own backend row. */
+export function useActiveCityAnchor(): GeoPoint | null {
+  const slug = useActiveCity();
+  const cities = useCityOptions();
+  const city = cities.find((option) => option.slug === slug);
+  const lat = city?.anchor_lat;
+  const lon = city?.anchor_lon;
+  return useMemo(() => {
+    if (lat != null && lon != null && Number.isFinite(lat) && Number.isFinite(lon)) {
+      return { latitude: lat, longitude: lon };
+    }
+    return slug === BUNDLE_CITY ? CITY_CENTER : null;
+  }, [slug, lat, lon]);
 }

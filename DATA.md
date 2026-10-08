@@ -169,3 +169,18 @@ expire, and without a scheduled run the backend keeps serving them.
 - Ratings appear only where a licensed/attributable source is represented —
   omit rather than estimate.
 - Prices, hours, and lineups carry the date they were checked.
+
+## Nearest pool
+
+Home's Nearest rail and `/nearest` share `useNearestPlaces`. Membership uses a
+five-mile straight-line radius around the active city's `cities.anchor_lat` /
+`anchor_lon` (the configured downtown/ZIP reference). Oakland defaults to the
+bundled 12th St / Broadway reference; another city never falls back to Oakland.
+The phone, when available, only changes ordering and displayed distances.
+Home exposes the first 20 cards; the full screen lists the entire pool.
+
+Candidates combine measured curated restaurants with the city's live/cached
+places directory, deduplicating matched locations. No GPS permission is needed.
+The local catalog and real coordinates are still required: sparse coverage is
+shown honestly, never padded beyond five miles or with invented locations.
+An empty or loading catalog keeps the section visible with status copy.

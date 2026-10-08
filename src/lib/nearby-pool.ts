@@ -14,6 +14,8 @@
 import type { Restaurant } from '@/lib/data';
 import { milesBetween, type GeoPoint } from '@/lib/geo';
 
+import type { Place } from '@/lib/places';
+
 import type { OpenState } from '@/lib/hours';
 
 export interface NearbyCandidate<T> {
@@ -88,4 +90,79 @@ export function nearestOnFoot(
     measured.push({ restaurant, miles: milesBetween(anchor, point) });
   }
   return measured.sort((a, b) => a.miles - b.miles);
+}
+
+export const NEAREST_RADIUS_MILES = 5;
+export const NEAREST_HOME_LIMIT = 20;
+
+export interface NearestPlace {
+  key: string;
+  name: string;
+  image?: string;
+  cuisine: string;
+  address?: string | null;
+  price?: string;
+  hours: string | null;
+  href: string;
+  miles: number;
+  referenceMiles: number;
+}
+
+function validPoint(point: GeoPoint): boolean {
+  return Number.isFinite(point.latitude) && Math.abs(point.latitude) <= 90
+    && Number.isFinite(point.longitude) && Math.abs(point.longitude) <= 180;
+}
+
+/** Membership is fixed around the selected ZIP/city reference. GPS changes
+ * only ordering and displayed distances, never the five-mile pool. */
+export function rankNearestPlaces(
+  restaurants: Restaurant[],
+  places: Place[],
+  coordsFor: (entry: { name: string; address?: string | null }) => GeoPoint | null,
+  reference: GeoPoint | null,
+  phone: GeoPoint | null,
+): NearestPlace[] {
+  if (!reference || !validPoint(reference)) return [];
+  const origin = phone && validPoint(phone) ? phone : reference;
+  const result: NearestPlace[] = [];
+  const seen = new Set<string>();
+  const identity = (name: string, point: GeoPoint) =>
+    `${name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '')}|${point.latitude.toFixed(3)}|${point.longitude.toFixed(3)}`;
+  const add = (point: GeoPoint | null, item: Omit<NearestPlace, 'miles' | 'referenceMiles'>) => {
+    if (!point || !validPoint(point)) return;
+    const referenceMiles = milesBetween(reference, point);
+    if (referenceMiles > NEAREST_RADIUS_MILES) return;
+    const key = identity(item.name, point);
+    if (seen.has(key)) return;
+    seen.add(key);
+    result.push({ ...item, referenceMiles, miles: milesBetween(origin, point) });
+  };
+  const curatedPoints: { name: string; point: GeoPoint }[] = [];
+  for (const restaurant of restaurants) {
+    const point = coordsFor(restaurant);
+    add(point, {
+      key: `restaurant:${restaurant.id}`, name: restaurant.name,
+      image: restaurant.image || restaurant.menuHighlights?.find((item) => item.image)?.image,
+      cuisine: restaurant.cuisine, address: restaurant.address, price: restaurant.price,
+      hours: restaurant.hours ?? null, href: `/restaurant/${restaurant.id}`,
+    });
+    if (point && validPoint(point)) curatedPoints.push({ name: restaurant.name, point });
+  }
+  for (const place of places) {
+    if (place.needsReview || !['restaurant', 'cafe', 'bakery', 'bar', 'pub', 'brewery', 'wine_bar', 'night_club'].includes(place.category)) continue;
+    const point = { latitude: place.lat, longitude: place.lon };
+    // The resolver matched this exact location to a curated record already.
+    if (curatedPoints.some((known) => {
+      const curatedName = known.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const placeName = place.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+      return known.point.latitude === point.latitude && known.point.longitude === point.longitude
+        && (placeName === curatedName || placeName.startsWith(curatedName));
+    })) continue;
+    add(point, {
+      key: `place:${place.id}`, name: place.name, image: place.image ?? undefined,
+      cuisine: place.cuisine ?? place.category.replace(/_/g, ' '), address: place.address,
+      hours: place.openingHours, href: `/place/${place.id}`,
+    });
+  }
+  return result.sort((a, b) => a.miles - b.miles || a.key.localeCompare(b.key));
 }
