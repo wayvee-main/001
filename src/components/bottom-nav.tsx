@@ -3,20 +3,18 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Glyph } from '@/components/glyph';
+import { VeeMark } from '@/components/vee-mark';
 import { useThemeColors } from '@/lib/theme';
 
 /** Mirrors (tabs)/_layout.tsx exactly — same labels, glyphs, strip treatment.
  * Two copies exist because pushed detail screens live outside the tab
  * navigator; they must not drift apart. */
 const ITEMS = [
-  { key: 'home', label: 'Vee', href: '/', glyph: 'spark' },
+  { key: 'home', label: 'Home', href: '/', glyph: 'home' },
   { key: 'discover', label: 'Tonight', href: '/discover', glyph: 'clock' },
-  { key: 'create', label: 'Plans', href: '/create', glyph: 'calendar' },
+  { key: 'create', label: 'Vee', href: '/create', glyph: 'spark' },
   { key: 'profile', label: 'You', href: '/profile', glyph: 'user' },
 ] as const;
-
-/** Diameter of the active marker. Keep in step with (tabs)/_layout.tsx. */
-const DOT = 5;
 
 /** Shared tab treatment for place-detail screens. */
 export function DetailBottomNav({ active = 'home' }: { active?: (typeof ITEMS)[number]['key'] }) {
@@ -31,7 +29,7 @@ export function DetailBottomNav({ active = 'home' }: { active?: (typeof ITEMS)[n
         borderTopColor: colors.edge,
         borderTopWidth: StyleSheet.hairlineWidth,
         paddingBottom: Math.max(insets.bottom, 10),
-        paddingTop: 9,
+        paddingTop: 11,
       }}
       className="flex-row items-start">
       {ITEMS.map((item) => {
@@ -47,17 +45,14 @@ export function DetailBottomNav({ active = 'home' }: { active?: (typeof ITEMS)[n
             onPress={() => router.replace(item.href)}
             style={{ flex: 1 }}
             className="items-center justify-start gap-y-[3px] pb-0.5">
-            {/* Always laid out, only sometimes painted: an absent dot would
-             * shift the icon and label by its height on every tab change. */}
-            <View
-              style={{
-                width: DOT,
-                height: DOT,
-                borderRadius: DOT / 2,
-                backgroundColor: selected ? colors.accent : 'transparent',
-              }}
-            />
-            <Glyph name={item.glyph} size={21} color={tint} strokeWidth={selected ? 1.8 : 1.5} />
+            {/* Tint and weight already say which tab is selected; a dot over
+             * the icon was a third signal saying the same thing, and it had to
+             * be laid out even when unpainted so the icon would not jump. */}
+            {item.key === 'create' ? (
+              <VeeMark size={21} variant="compact" color={tint} strokeWidth={selected ? 3.2 : 2.7} />
+            ) : (
+              <Glyph name={item.glyph} size={21} color={tint} strokeWidth={selected ? 1.8 : 1.5} />
+            )}
             <Text
               numberOfLines={1}
               style={{ color: tint }}
