@@ -2,7 +2,6 @@ import {
   IconAdjustmentsHorizontal,
   IconArrowLeft,
   IconArrowRight,
-  IconArrowUpRight,
   IconBarbell,
   IconBell,
   IconBolt,
@@ -10,7 +9,6 @@ import {
   IconCalendar,
   IconCheck,
   IconChevronRight,
-  IconChevronDown,
   IconClock,
   IconCompass,
   IconCoffee,
@@ -57,7 +55,6 @@ import {
  */
 const GLYPHS: Record<string, TablerIcon> = {
   arrow: IconArrowRight,
-  'arrow-up-right': IconArrowUpRight,
   back: IconArrowLeft,
   bell: IconBell,
   bolt: IconBolt,
@@ -65,7 +62,6 @@ const GLYPHS: Record<string, TablerIcon> = {
   calendar: IconCalendar,
   check: IconCheck,
   chevron: IconChevronRight,
-  'chevron-down': IconChevronDown,
   clock: IconClock,
   close: IconX,
   compass: IconCompass,

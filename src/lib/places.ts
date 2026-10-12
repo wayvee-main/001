@@ -9,7 +9,7 @@
 // bug this session), so there's no reason to repeat it here.
 import { useCallback, useSyncExternalStore } from 'react';
 
-import { activeCity, cityCacheKey, useActiveCity } from '@/lib/city';
+import { activeCity, cityCacheKey } from '@/lib/city';
 import type { GeoPoint } from '@/lib/geo';
 import { getStoredItem, setStoredItem } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
@@ -98,12 +98,9 @@ const PLACES: Record<string, Place> = {};
 type Listener = () => void;
 const listeners = new Set<Listener>();
 let snapshot: Place[] = [];
-let snapshotCity: string | null = null;
-const EMPTY_PLACES: Place[] = [];
 
 function notify() {
   snapshot = Object.values(PLACES);
-  snapshotCity = activeCity();
   for (const listener of listeners) listener();
 }
 
@@ -118,9 +115,7 @@ function getSnapshot(): Place[] {
 
 /** Reactive read of every hydrated place — re-renders the caller once real rows land. */
 export function useAllPlaces(): Place[] {
-  const city = useActiveCity();
-  const places = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
-  return snapshotCity === city ? places : EMPTY_PLACES;
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 }
 
 // ── Real coordinates for curated entries ────────────────────────────────────
@@ -279,7 +274,7 @@ export async function hydratePlacesFromBackend(force = false): Promise<boolean> 
   const city = activeCity();
   const hydrated = hydratedCity === city;
   if (hydrated && !force) return false;
-  if (snapshotCity !== null && snapshotCity !== city) {
+  if (hydratedCity !== null && !hydrated) {
     // Switched city: drop the previous one's rows before the new ones land,
     // so the two are never on screen together.
     for (const id of Object.keys(PLACES)) delete PLACES[id];
@@ -291,7 +286,6 @@ export async function hydratePlacesFromBackend(force = false): Promise<boolean> 
   }
   try {
     const { data, error } = await supabase.from('places').select('*').eq('city', city);
-    if (city !== activeCity()) return false;
     if (error || !data?.length) {
       if (!hydrated) await loadPlacesFromCache();
       return false;

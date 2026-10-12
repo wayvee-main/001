@@ -1,10 +1,11 @@
 import { Tabs } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Keyboard, Text, TouchableOpacity, View } from 'react-native';
+import { Keyboard, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Glyph } from '@/components/glyph';
-import { EDITORIAL_FONTS, useEditorial } from '@/lib/editorial';
+import { VeeMark } from '@/components/vee-mark';
+import { useThemeColors } from '@/lib/theme';
 
 /** Route → what the guest calls it.
  *
@@ -25,7 +26,7 @@ const TABS: Record<string, { label: string; glyph: string }> = {
 
 function WayveeTabBar({ state, navigation }: any) {
   const insets = useSafeAreaInsets();
-  const { c } = useEditorial();
+  const colors = useThemeColors();
   const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   useEffect(() => {
@@ -42,19 +43,18 @@ function WayveeTabBar({ state, navigation }: any) {
   return (
     <View
       style={{
-        backgroundColor: c.paper,
-        borderTopColor: c.line,
-        borderTopWidth: 1,
-        paddingBottom: Math.max(insets.bottom, 18),
-        paddingTop: 13,
+        backgroundColor: colors['surface-raised'],
+        borderTopColor: colors.edge,
+        borderTopWidth: StyleSheet.hairlineWidth,
+        paddingBottom: Math.max(insets.bottom, 10),
+        paddingTop: 11,
       }}
-      >
-      <View style={{ flexDirection: 'row', width: '100%', maxWidth: 390, alignSelf: 'center', paddingHorizontal: 10 }}>
+      className="flex-row items-start">
       {state.routes.map((route: { key: string; name: string }, index: number) => {
         const focused = state.index === index;
         const tab = TABS[route.name];
         if (!tab) return null;
-        const tint = focused ? c.coral : c.muted;
+        const tint = focused ? colors['fg-accent'] : colors['fg-muted'];
         return (
           <TouchableOpacity
             key={route.key}
@@ -66,20 +66,25 @@ function WayveeTabBar({ state, navigation }: any) {
               const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
               if (!focused && !event.defaultPrevented) navigation.navigate(route.name);
             }}
-            style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start', gap: 4 }}>
+            style={{ flex: 1 }}
+            className="items-center justify-start gap-y-[3px] pb-0.5">
             {/* Tint and weight already say which tab is selected; a dot over
              * the icon was a third signal saying the same thing, and it had to
              * be laid out even when unpainted so the icon would not jump. */}
-            <Glyph name={tab.glyph} size={23} color={route.name === 'create' ? c.violet : tint} strokeWidth={2} />
+            {route.name === 'create' ? (
+              <VeeMark size={21} variant="compact" color={tint} strokeWidth={focused ? 3.2 : 2.7} />
+            ) : (
+              <Glyph name={tab.glyph} size={21} color={tint} strokeWidth={focused ? 1.8 : 1.5} />
+            )}
             <Text
               numberOfLines={1}
-              style={{ color: tint, fontFamily: focused ? EDITORIAL_FONTS.strong : EDITORIAL_FONTS.regular, fontSize: 10, lineHeight: 14 }}>
+              style={{ color: tint }}
+              className={focused ? 'font-dm-bold text-meta' : 'font-dm-medium text-meta'}>
               {tab.label}
             </Text>
           </TouchableOpacity>
         );
       })}
-      </View>
     </View>
   );
 }

@@ -1496,11 +1496,10 @@ export const CURATED_COLLECTIONS: Record<CuratedCollection['id'], CuratedCollect
     title: 'Tables in the open air',
     shortTitle: 'Outdoor tables',
     eyebrow: 'OUTDOORS',
-    subtitle: '5 places · patios and a beer garden',
+    subtitle: '4 places · patios and a beer garden',
     description: 'Eat outside while it is still warm enough.',
-    coverImage: RESTAURANTS.cookfarmer.image,
+    coverImage: RESTAURANTS.lakechalet.image,
     items: [
-      { type: 'restaurant', id: 'cookfarmer', note: 'Garden seating at Swan’s Market' },
       { type: 'restaurant', id: 'lakechalet', note: 'Lake Merritt views from the patio' },
       { type: 'restaurant', id: 'nido', note: 'Open-air room near Jack London' },
       { type: 'restaurant', id: 'dona', note: 'Patio seating, California produce' },

@@ -1,40 +1,42 @@
 import { useRouter } from 'expo-router';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Glyph } from '@/components/glyph';
-import { EDITORIAL_FONTS, useEditorial } from '@/lib/editorial';
+import { useThemeColors } from '@/lib/theme';
 
 /** Mirrors (tabs)/_layout.tsx exactly — same labels, glyphs, strip treatment.
  * Two copies exist because pushed detail screens live outside the tab
  * navigator; they must not drift apart. */
 const ITEMS = [
-  { key: 'home', label: 'Home', href: '/', glyph: 'home' },
+  { key: 'home', label: 'Vee', href: '/', glyph: 'spark' },
   { key: 'discover', label: 'Tonight', href: '/discover', glyph: 'clock' },
-  { key: 'create', label: 'Vee', href: '/create', glyph: 'spark' },
+  { key: 'create', label: 'Plans', href: '/create', glyph: 'calendar' },
   { key: 'profile', label: 'You', href: '/profile', glyph: 'user' },
 ] as const;
+
+/** Diameter of the active marker. Keep in step with (tabs)/_layout.tsx. */
+const DOT = 5;
 
 /** Shared tab treatment for place-detail screens. */
 export function DetailBottomNav({ active = 'home' }: { active?: (typeof ITEMS)[number]['key'] }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { c } = useEditorial();
+  const colors = useThemeColors();
 
   return (
     <View
       style={{
-        backgroundColor: c.paper,
-        borderTopColor: c.line,
-        borderTopWidth: 1,
-        paddingBottom: Math.max(insets.bottom, 18),
-        paddingTop: 13,
+        backgroundColor: colors['surface-raised'],
+        borderTopColor: colors.edge,
+        borderTopWidth: StyleSheet.hairlineWidth,
+        paddingBottom: Math.max(insets.bottom, 10),
+        paddingTop: 9,
       }}
-      >
-      <View style={{ flexDirection: 'row', width: '100%', maxWidth: 390, alignSelf: 'center', paddingHorizontal: 10 }}>
+      className="flex-row items-start">
       {ITEMS.map((item) => {
         const selected = item.key === active;
-        const tint = selected ? c.coral : c.muted;
+        const tint = selected ? colors['fg-accent'] : colors['fg-muted'];
         return (
           <TouchableOpacity
             key={item.key}
@@ -43,17 +45,28 @@ export function DetailBottomNav({ active = 'home' }: { active?: (typeof ITEMS)[n
             accessibilityLabel={item.label}
             activeOpacity={0.6}
             onPress={() => router.replace(item.href)}
-            style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start', gap: 4 }}>
-            <Glyph name={item.glyph} size={23} color={item.key === 'create' ? c.violet : tint} strokeWidth={2} />
+            style={{ flex: 1 }}
+            className="items-center justify-start gap-y-[3px] pb-0.5">
+            {/* Always laid out, only sometimes painted: an absent dot would
+             * shift the icon and label by its height on every tab change. */}
+            <View
+              style={{
+                width: DOT,
+                height: DOT,
+                borderRadius: DOT / 2,
+                backgroundColor: selected ? colors.accent : 'transparent',
+              }}
+            />
+            <Glyph name={item.glyph} size={21} color={tint} strokeWidth={selected ? 1.8 : 1.5} />
             <Text
               numberOfLines={1}
-              style={{ color: tint, fontFamily: selected ? EDITORIAL_FONTS.strong : EDITORIAL_FONTS.regular, fontSize: 10, lineHeight: 14 }}>
+              style={{ color: tint }}
+              className={selected ? 'font-dm-bold text-meta' : 'font-dm-medium text-meta'}>
               {item.label}
             </Text>
           </TouchableOpacity>
         );
       })}
-      </View>
     </View>
   );
 }

@@ -17,7 +17,6 @@ module.exports = {
         'fraunces-bold': ['Fraunces_700Bold'],
         dm: ['DMSans_400Regular'],
         'dm-medium': ['DMSans_500Medium'],
-        'dm-semibold': ['DMSans_600SemiBold'],
         'dm-bold': ['DMSans_700Bold'],
       },
     },
