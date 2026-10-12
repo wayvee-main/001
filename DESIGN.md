@@ -96,11 +96,14 @@ it after changing any hex.
 
 ## Typeface
 
-One family: **Hanken Grotesk** at 400/500/600/700. The Fraunces + DM Sans
-serif/sans pairing is gone. The `font-fraunces*` class names survive as the
-display-weight aliases and `font-dm*` as the text-weight ones, so the ~440
-existing call sites kept working when the family moved — only what they point at
-changed. See `tailwind.config.js`.
+Two families: **Fraunces** for display (500 Medium, 600 SemiBold, 700 Bold) and
+**DM Sans** for text (400 Regular, 500 Medium, 700 Bold), bundled locally with
+Expo Font. `font-fraunces*` names the display weights and `font-dm*` the text
+ones, across roughly 440 call sites. See `tailwind.config.js` for the aliases
+and `src/app/_layout.tsx` for what is loaded.
+
+A single Hanken Grotesk family was described here for a while and never
+shipped — the serif/sans pairing has been in the code throughout.
 
 ## Type scale
 
