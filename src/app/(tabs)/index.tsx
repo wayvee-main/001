@@ -49,20 +49,6 @@ import { useTasteProfile } from '@/lib/use-taste-profile';
 import { hydrateWeatherFromBackend } from '@/lib/weather';
 
 
-/** The four tile illustrations, bundled with the app rather than fetched.
- *
- * Supplied by the founder as finished artwork. They are required statically so
- * the bundler fingerprints them: the grid never waits on a network, never
- * shows a placeholder, and looks the same offline as on. Routes has one like
- * the rest, which no photographic treatment could manage — a crawl is a
- * sequence of places and has no picture of its own. */
-const TILE_ART = {
-  eat: require('@/assets/images/tiles/eat.png'),
-  shows: require('@/assets/images/tiles/shows.png'),
-  bars: require('@/assets/images/tiles/bars.png'),
-  routes: require('@/assets/images/tiles/routes.png'),
-} as const;
-
 /** Same shape as EventRow, shown while backend events are still hydrating —
  * stands in for the row itself, never for the "no listings" empty state. */
 function EventRowSkeleton() {
@@ -271,30 +257,36 @@ export default function HomeScreen() {
   // Four counts off the four pools the lists below are drawn from, so the grid
   // can never disagree with them, and each tile opens the pool it counted.
   // This replaces LiveTrail, which reported the same numbers as a text line.
+  // Each tile's photograph comes from the same pool its number does, so the
+  // picture is of something the tap actually leads to. Where a pool carries no
+  // picture the field is left off and that tile stays the flat tint it was.
+  const eatPhoto = dinnerPicks.map(restaurantPhoto).find(Boolean);
+  const barPhoto = NIGHTLIFE_SPOTS.find((spot) => spot.image)?.image;
+
   const aroundYouTiles: CountTile[] = [];
   if (hoursKnown) {
     aroundYouTiles.push({
       key: 'eat', count: String(cityOpenCount), glyph: 'food', label: 'Eat', hint: 'open now',
-      tint: 'accent-tint', ink: 'fg-accent', art: TILE_ART.eat, onPress: openFoodHub,
+      tint: 'accent-tint', ink: 'fg-accent', image: eatPhoto, onPress: openFoodHub,
     });
   } else if (dinnerPicks.length) {
     // Hours unreadable: name the ranked inventory rather than call it open.
     aroundYouTiles.push({
       key: 'eat', count: String(dinnerPicks.length), glyph: 'food', label: 'Eat', hint: 'nearby',
-      tint: 'accent-tint', ink: 'fg-accent', art: TILE_ART.eat, onPress: openFoodHub,
+      tint: 'accent-tint', ink: 'fg-accent', image: eatPhoto, onPress: openFoodHub,
     });
   }
   if (eventsTodayCount > 0) {
     aroundYouTiles.push({
       key: 'shows', count: String(eventsTodayCount), glyph: 'ticket', label: 'Shows', hint: 'tonight',
-      tint: 'vee-tint', ink: 'vee-strong', art: TILE_ART.shows,
+      tint: 'vee-tint', ink: 'vee-strong', image: eventLead?.image,
       onPress: () => router.push('/discover?mode=Events'),
     });
   }
   if (NIGHTLIFE_SPOTS.length) {
     aroundYouTiles.push({
       key: 'bars', count: String(NIGHTLIFE_SPOTS.length), glyph: 'drink', label: 'Bars', hint: 'in the catalog',
-      tint: 'warm-tint', ink: 'warm-ink', art: TILE_ART.bars,
+      tint: 'warm-tint', ink: 'warm-ink', image: barPhoto,
       onPress: () => router.push('/discover?mode=Nightlife'),
     });
   }
@@ -302,8 +294,7 @@ export default function HomeScreen() {
   if (crawlCount) {
     aroundYouTiles.push({
       key: 'routes', count: String(crawlCount), glyph: 'route', label: 'Routes', hint: 'multi-stop nights',
-      tint: 'vee-tint', ink: 'vee-strong', art: TILE_ART.routes,
-      onPress: () => router.push('/collection'),
+      tint: 'vee-tint', ink: 'vee-strong', onPress: () => router.push('/collection'),
     });
   }
 
