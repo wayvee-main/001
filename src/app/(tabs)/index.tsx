@@ -257,29 +257,37 @@ export default function HomeScreen() {
   // Four counts off the four pools the lists below are drawn from, so the grid
   // can never disagree with them, and each tile opens the pool it counted.
   // This replaces LiveTrail, which reported the same numbers as a text line.
+  // Each tile's photograph comes from the same pool its number does, so the
+  // picture is of something the tap actually leads to. Where a pool carries no
+  // picture the field is left off and that tile stays the flat tint it was.
+  const eatPhoto = dinnerPicks.map(restaurantPhoto).find(Boolean);
+  const barPhoto = NIGHTLIFE_SPOTS.find((spot) => spot.image)?.image;
+
   const aroundYouTiles: CountTile[] = [];
   if (hoursKnown) {
     aroundYouTiles.push({
       key: 'eat', count: String(cityOpenCount), glyph: 'food', label: 'Eat', hint: 'open now',
-      tint: 'accent-tint', ink: 'fg-accent', onPress: openFoodHub,
+      tint: 'accent-tint', ink: 'fg-accent', image: eatPhoto, onPress: openFoodHub,
     });
   } else if (dinnerPicks.length) {
     // Hours unreadable: name the ranked inventory rather than call it open.
     aroundYouTiles.push({
       key: 'eat', count: String(dinnerPicks.length), glyph: 'food', label: 'Eat', hint: 'nearby',
-      tint: 'accent-tint', ink: 'fg-accent', onPress: openFoodHub,
+      tint: 'accent-tint', ink: 'fg-accent', image: eatPhoto, onPress: openFoodHub,
     });
   }
   if (eventsTodayCount > 0) {
     aroundYouTiles.push({
       key: 'shows', count: String(eventsTodayCount), glyph: 'ticket', label: 'Shows', hint: 'tonight',
-      tint: 'vee-tint', ink: 'vee-strong', onPress: () => router.push('/discover?mode=Events'),
+      tint: 'vee-tint', ink: 'vee-strong', image: eventLead?.image,
+      onPress: () => router.push('/discover?mode=Events'),
     });
   }
   if (NIGHTLIFE_SPOTS.length) {
     aroundYouTiles.push({
       key: 'bars', count: String(NIGHTLIFE_SPOTS.length), glyph: 'drink', label: 'Bars', hint: 'in the catalog',
-      tint: 'warm-tint', ink: 'warm-ink', onPress: () => router.push('/discover?mode=Nightlife'),
+      tint: 'warm-tint', ink: 'warm-ink', image: barPhoto,
+      onPress: () => router.push('/discover?mode=Nightlife'),
     });
   }
   const crawlCount = Object.keys(CRAWLS).length;
