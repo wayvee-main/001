@@ -1,7 +1,4 @@
-import { useColorScheme } from 'nativewind';
-import { useId } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Svg, { Defs, Image as SvgImage, Mask, Rect, RadialGradient, Stop } from 'react-native-svg';
 
 import { Glyph, type GlyphName } from '@/components/glyph';
 import { MiniChevron } from '@/components/ui';
@@ -17,71 +14,8 @@ export type CountTile = {
   tint: keyof ThemeColors;
   ink: keyof ThemeColors;
   glyph: GlyphName;
-  /** A photograph from the same pool the count came from. Optional on purpose:
-   * Routes counts crawls, which are sequences of places and so have no picture
-   * of their own, and a sparse pool may have none either. Without it the tile
-   * is exactly the flat tint it has always been. */
-  image?: string;
   onPress: () => void;
 };
-
-/** The photograph behind a count, faded to nothing through a radial mask
- * anchored off the top-right corner.
- *
- * No hard edge anywhere, and the count sits at top-left where the mask has
- * already fallen to zero — so contrast is a property of the layout, not of
- * whatever the venue happened to put on its website. Of the treatments tried,
- * the two that failed did so here: an oversized glyph and a scrimmed photo
- * both won the tile from the number.
- *
- * Drawn with react-native-svg rather than CSS: `mask-image` is web-only, and
- * this has to hold on iOS and Android too. The ids must be unique per instance
- * because on web every Svg shares one document, and four tiles declaring
- * `url(#fade)` would all resolve to whichever mounted first. */
-function TileSpotlight({ uri }: { uri: string }) {
-  const { colorScheme } = useColorScheme();
-  const unique = useId().replace(/[^a-zA-Z0-9]/g, '');
-  const fade = `fade-${unique}`;
-  const mask = `mask-${unique}`;
-  // The dark tints are near-black, so the same photograph reads far brighter
-  // against them than it does on paper.
-  const opacity = colorScheme === 'light' ? 0.9 : 0.55;
-
-  return (
-    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-      <Svg width="100%" height="100%">
-        <Defs>
-          {/* `r` only: SVG's radialGradient has no rx/ry, so an elliptical
-            * radius is silently dropped on web and the falloff collapses to a
-            * default circle in the corner. In objectBoundingBox units the
-            * circle is stretched to the tile's own 2:1 proportions anyway,
-            * which is the ellipse we wanted. */}
-          {/* r is a fraction of the tile, so 0.62 puts the photograph at zero
-            * about two-thirds of the way across — past the count and the
-            * label, which both start at the left edge. */}
-          <RadialGradient id={fade} cx="100%" cy="0%" r="62%">
-            <Stop offset="0" stopColor="#FFFFFF" stopOpacity="1" />
-            <Stop offset="0.45" stopColor="#FFFFFF" stopOpacity="0.5" />
-            <Stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
-          </RadialGradient>
-          <Mask id={mask}>
-            <Rect x="0" y="0" width="100%" height="100%" fill={`url(#${fade})`} />
-          </Mask>
-        </Defs>
-        <SvgImage
-          href={{ uri }}
-          x="0"
-          y="0"
-          width="100%"
-          height="100%"
-          preserveAspectRatio="xMidYMid slice"
-          opacity={opacity}
-          mask={`url(#${mask})`}
-        />
-      </Svg>
-    </View>
-  );
-}
 
 /** Home's "Around you" grid.
  *
@@ -92,10 +26,8 @@ function TileSpotlight({ uri }: { uri: string }) {
  * cannot follow is decoration (CLAUDE.md #3).
  *
  * The glyph is small and paired with the count. An oversized one, and later a
- * photograph scrimmed behind the text, both became the loudest thing on a tile
- * whose point is a number. The photograph is back on different terms: masked
- * to nothing before it reaches the count (see TileSpotlight), and absent
- * entirely wherever the pool has no picture. */
+ * photograph behind the text, both became the loudest thing on a tile whose
+ * point is a number. Flat tint, one glyph, one number. */
 export function AroundYou({ tiles }: { tiles: CountTile[] }) {
   const colors = useThemeColors();
   const rows: CountTile[][] = [];
@@ -116,12 +48,8 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
                 backgroundColor: colors[tile.tint],
                 borderColor: colors['edge-soft'],
                 borderWidth: StyleSheet.hairlineWidth,
-                // The spotlight is drawn to the tile's full bounds; without
-                // this it would square off the panel's corners.
-                overflow: 'hidden',
               }}
               className="min-h-[86px] flex-1 rounded-panel px-3.5 pb-3.5 pt-3">
-              {tile.image ? <TileSpotlight uri={tile.image} /> : null}
               {/* Glyph and count read as one mark, so they sit together
                * rather than at opposite corners of the tile. */}
               <View className="flex-row items-center gap-x-2">
