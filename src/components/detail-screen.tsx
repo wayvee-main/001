@@ -31,7 +31,7 @@ import { DetailSheet, ImmersiveDetailHero, SourceLink } from '@/components/detai
 import { DetailDisclosureGroup, type DetailDisclosure } from '@/components/disclosure-rows';
 import { FactStrip, type HubFact } from '@/components/fact-strip';
 import { Glyph } from '@/components/glyph';
-import { AppBackdrop } from '@/components/layout';
+import { AppBackdrop, useAppGutter } from '@/components/layout';
 import { SectionHeading } from '@/components/section-heading';
 import { Icon } from '@/components/ui';
 import { LiveStatusRow } from '@/components/visual-depictions';
@@ -105,6 +105,7 @@ export function DetailScreen({
   actions?: DetailScreenAction[];
   navActive?: 'home' | 'discover' | 'create' | 'profile';
 }) {
+  const gutter = useAppGutter();
   const colors = useThemeColors();
 
   return (
@@ -183,7 +184,7 @@ export function DetailScreen({
       </ScrollView>
 
       {actions.length ? (
-        <View className="border-t border-sand bg-cream px-5 py-3">
+        <View style={{ paddingHorizontal: gutter }} className="border-t border-sand bg-cream py-3">
           <View style={{ width: '100%', maxWidth: 720, alignSelf: 'center' }} className="flex-row gap-x-2">
             {actions.map((action, index) => (
               <TouchableOpacity

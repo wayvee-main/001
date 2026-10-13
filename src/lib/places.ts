@@ -9,7 +9,8 @@
 // bug this session), so there's no reason to repeat it here.
 import { useCallback, useSyncExternalStore } from 'react';
 
-import { activeCity, cityCacheKey } from '@/lib/city';
+import { activeCity, BUNDLE_CITY, cityCacheKey } from '@/lib/city';
+import { NEARBY_OAKLAND } from '@/lib/nearby-oakland';
 import type { GeoPoint } from '@/lib/geo';
 import { getStoredItem, setStoredItem } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
@@ -93,11 +94,12 @@ export function placeMetaLine(place: Place): string {
   return [place.cuisine, placeCategoryLabel(place)].filter(Boolean).join(' · ');
 }
 
-const PLACES: Record<string, Place> = {};
+const PLACES: Record<string, Place> = Object.fromEntries(NEARBY_OAKLAND.map((place) => [place.id, place]));
+let snapshotCity = BUNDLE_CITY;
 
 type Listener = () => void;
 const listeners = new Set<Listener>();
-let snapshot: Place[] = [];
+let snapshot: Place[] = Object.values(PLACES);
 
 function notify() {
   snapshot = Object.values(PLACES);
@@ -274,10 +276,12 @@ export async function hydratePlacesFromBackend(force = false): Promise<boolean> 
   const city = activeCity();
   const hydrated = hydratedCity === city;
   if (hydrated && !force) return false;
-  if (hydratedCity !== null && !hydrated) {
+  if (snapshotCity !== city) {
     // Switched city: drop the previous one's rows before the new ones land,
     // so the two are never on screen together.
     for (const id of Object.keys(PLACES)) delete PLACES[id];
+    snapshotCity = city;
+    if (city === BUNDLE_CITY) for (const place of NEARBY_OAKLAND) PLACES[place.id] = place;
     notify();
   }
   if (!supabase) {
@@ -290,6 +294,8 @@ export async function hydratePlacesFromBackend(force = false): Promise<boolean> 
       if (!hydrated) await loadPlacesFromCache();
       return false;
     }
+    // Successful live reads replace the offline snapshot, including removals.
+    for (const id of Object.keys(PLACES)) delete PLACES[id];
     for (const row of data as unknown as PlaceRow[]) {
       if (!row?.id || !row.name || row.lat == null || row.lon == null) continue;
       PLACES[row.id] = rowToPlace(row);

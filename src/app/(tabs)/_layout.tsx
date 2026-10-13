@@ -19,7 +19,7 @@ import { useThemeColors } from '@/lib/theme';
  * says so everywhere else. */
 const TABS: Record<string, { label: string; glyph: string }> = {
   index: { label: 'Home', glyph: 'home' },
-  discover: { label: 'Tonight', glyph: 'clock' },
+  discover: { label: 'Discover', glyph: 'compass' },
   create: { label: 'Vee', glyph: 'spark' },
   profile: { label: 'You', glyph: 'user' },
 };

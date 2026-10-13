@@ -40,12 +40,12 @@ export function hexToRgb(hex: string): [number, number, number] {
  * space-separated RGB triples so Tailwind's <alpha-value> opacity modifier
  * (bg-surface/50) keeps working. */
 export const ROLES: Record<string, ThemeValue> = {
-  bg: { light: '#FFFDFA', dark: '#151117' }, // screen background — paper / plum-black
-  surface: { light: '#F0EBE3', dark: '#251E29' }, // card surface — warm canvas / lifted plum
+  bg: { light: '#FBF7F0', dark: '#17121C' }, // approved Nightfall ground
+  surface: { light: '#EFE9DF', dark: '#282625' }, // contained editorial cards
   // Reads *above* the card in light by staying paper-white and *below* it in dark by going
   // deeper. Both directions separate it from `surface`, which is the job — matching the
   // direction across themes is not, and forcing that would flatten one theme or the other.
-  'surface-raised': { light: '#FFFDFA', dark: '#1B161E' }, // ask bar, peek rows
+  'surface-raised': { light: '#FFFDFA', dark: '#29222F' }, // input and sheet surfaces
   // The lightest card tier — about a quarter of `surface`'s separation from the
   // page. For the run of cards that opens Home (Vee's hero, its pick, the stay
   // anchor), which lead the screen and shouldn't feel heavy before any content
@@ -54,9 +54,16 @@ export const ROLES: Record<string, ThemeValue> = {
   // object wants `surface`.
   'surface-soft': { light: '#FBF8F4', dark: '#372E3C' },
   'surface-sunk': { light: '#E7E0D6', dark: '#100D13' }, // input wells, sheet track
-  fg: { light: '#2A1B33', dark: '#FFFDFA' }, // primary text/icon — plum ink
-  'fg-muted': { light: '#716672', dark: '#B8AAB5' }, // secondary text/icon
-  'fg-accent': { light: '#A14325', dark: '#FF9271' }, // accent TEXT on surfaces — see the note below
+  fg: { light: '#312039', dark: '#FAF2E8' }, // Nightfall editorial ink
+  'fg-muted': { light: '#6A5F6B', dark: '#BDAFBD' },
+  'card-ink': { light: '#2D2926', dark: '#F5EDE3' },
+  'card-muted': { light: '#645D56', dark: '#C3B9AF' },
+  ribbon: { light: '#EEE6F0', dark: '#29192E' },
+  'tile-eat': { light: '#F2E8CA', dark: '#493E2E' },
+  'tile-bars': { light: '#F2DFDF', dark: '#493342' },
+  'tile-routes': { light: '#E6DEEF', dark: '#3A3047' },
+  'tile-events': { light: '#E2EBDF', dark: '#2C4139' },
+  'fg-accent': { light: '#9E3D23', dark: '#FF9271' }, // readable accent text on Nightfall surfaces
   // A shade under the CTA's coral so it still clears 3:1 as an icon or border on
   // `surface`, which the exact CTA hex does not (2.93:1). The CTA keeps the
   // approved hex below; this is the role that has to survive being drawn small.
@@ -136,6 +143,9 @@ export const TYPE_SCALE: Record<string, [string, { lineHeight: string; letterSpa
   'body-strong': ['14px', { lineHeight: '20px' }], // card titles, buttons
   label: ['12.5px', { lineHeight: '16px' }], // chips, list rows
   meta: ['11.5px', { lineHeight: '15px' }], // distance, hours, price
+  'card-name': ['14px', { lineHeight: '17.22px', letterSpacing: '-0.2px' }],
+  'table-name': ['18px', { lineHeight: '20.16px', letterSpacing: '-0.2px' }],
+  fine: ['11px', { lineHeight: '15.4px' }],
   micro: ['9.5px', { lineHeight: '12px', letterSpacing: '0.6px' }], // eyebrows, badges (pair with uppercase)
 };
 
@@ -143,7 +153,7 @@ export const TYPE_SCALE: Record<string, [string, { lineHeight: string; letterSpa
  * just Tailwind's built-in `rounded-full`, not repeated here. */
 export const RADIUS: Record<string, string> = {
   control: '12px', // buttons, option pills, inputs, small thumbnails
-  card: '18px', // poster/venue/list cards, peek rows
+  card: '17px', // approved Essential containment
   panel: '22px', // option cards, ribbons, the stay anchor
   sheet: '25px', // the Vee hero, bottom sheets, modals
 };

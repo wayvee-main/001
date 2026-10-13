@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DetailBottomNav } from '@/components/bottom-nav';
 import { DetailSheet } from '@/components/detail';
-import { AppBackdrop, Screen } from '@/components/layout';
+import { AppBackdrop, Screen, useAppGutter } from '@/components/layout';
 import { Photo } from '@/components/photo';
 import { BackButton, Check, EmptyState, Icon } from '@/components/ui';
 import { useScoper } from '@/lib/store';
@@ -47,6 +47,7 @@ function PlanCircle({ active, label, onPress }: { active: boolean; label: string
 }
 
 export default function PickScreen() {
+  const gutter = useAppGutter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -62,7 +63,7 @@ export default function PickScreen() {
       <Screen>
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ width: '100%', maxWidth: 720, alignSelf: 'center', paddingHorizontal: 20, paddingBottom: 24, gap: 16 }}>
+          contentContainerStyle={{ width: '100%', maxWidth: 720, alignSelf: 'center', paddingHorizontal: gutter, paddingBottom: 24, gap: 16 }}>
           <View className="flex-row items-center">
             <BackButton />
           </View>
@@ -191,7 +192,7 @@ export default function PickScreen() {
         </DetailSheet>
       </ScrollView>
 
-      <View className="border-t border-sand bg-cream px-5 pt-3" style={{ paddingBottom: Math.max(insets.bottom, 12) }}>
+      <View className="border-t border-sand bg-cream pt-3" style={{ paddingHorizontal: gutter, paddingBottom: Math.max(insets.bottom, 12) }}>
         <View style={{ maxWidth: 720, width: '100%', alignSelf: 'center' }} className="gap-y-2">
           <View className="flex-row items-center justify-between">
             <View className="min-w-0 flex-1">

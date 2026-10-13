@@ -2,7 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 import { DetailScreen, type DetailSection } from '@/components/detail-screen';
-import { Screen } from '@/components/layout';
+import { Screen, useAppGutter } from '@/components/layout';
 import { Photo } from '@/components/photo';
 import { RaisedTouchable, RaisedView } from '@/components/raised-surface';
 import { BackButton, ChevronRight } from '@/components/ui';
@@ -23,6 +23,7 @@ export async function generateStaticParams(): Promise<{ id: string }[]> {
 }
 
 export default function CuratedCollectionScreen() {
+  const gutter = useAppGutter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const collection = Object.values(CURATED_COLLECTIONS).find((candidate) => candidate.id === id);
@@ -31,7 +32,7 @@ export default function CuratedCollectionScreen() {
   if (!collection) {
     return (
       <Screen>
-        <View className="mx-auto w-full max-w-[720px] flex-1 px-5">
+        <View style={{ paddingHorizontal: gutter }} className="mx-auto w-full max-w-[720px] flex-1">
           <BackButton />
           <View className="flex-1 items-center justify-center px-6 pb-16">
             <Text className="font-fraunces text-display text-ink">Collection unavailable</Text>

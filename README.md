@@ -27,8 +27,8 @@ npm run typecheck  # tsc --noEmit
 
 | Area | Route | Notes |
 | --- | --- | --- |
-| Home | `(tabs)/index` | Greeting, search, current plans, active events, nearby food, collections |
-| Discover | `(tabs)/discover` | Tonight in Oakland — official listings, after-show options, verified hours, bar crawls, venues |
+| Home | `(tabs)/index` | Compact Vee ribbon, four tiles, three vertical Nearest rows, collections |
+| Discover | `(tabs)/discover` | Editorial shows, dining, after-dinner cards, routes and venues; glyph category pills |
 | Plan | `(tabs)/create` | Working launchpad for food, events, and the account’s synced plan timeline |
 | Profile hub | `(tabs)/profile` | Plans-first launcher with saved places, taste, location, ordering preference, and sign out |
 | My plans | `/plans` | Current events grouped by date plus accessible past plans |

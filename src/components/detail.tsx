@@ -1,3 +1,4 @@
+import { useAppGutter } from '@/components/layout';
 import * as Linking from 'expo-linking';
 import type { ReactNode } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
@@ -31,10 +32,11 @@ export function ImmersiveDetailHero({ image, actions }: { image?: string; action
  * caller must pair it with `flexGrow: 1` on the ScrollView's content
  * container, or there is no leftover height to take. */
 export function DetailSheet({ children, fill = false }: { children: ReactNode; fill?: boolean }) {
+  const gutter = useAppGutter();
   return (
     <View
-      className={`-mt-5 rounded-t-sheet bg-cream px-5 pt-5 ${fill ? 'pb-6' : ''}`}
-      style={{ width: '100%', maxWidth: 720, alignSelf: 'center', gap: 18, flexGrow: fill ? 1 : 0 }}>
+      className={`-mt-5 rounded-t-sheet bg-cream pt-5 ${fill ? 'pb-6' : ''}`}
+      style={{ width: '100%', maxWidth: 720, alignSelf: 'center', paddingHorizontal: gutter, gap: 18, flexGrow: fill ? 1 : 0 }}>
       {children}
     </View>
   );

@@ -4,7 +4,7 @@ import { Text, TouchableOpacity, View } from 'react-native';
 
 import { DetailIconButton } from '@/components/detail';
 import { DetailScreen, type DetailScreenAction } from '@/components/detail-screen';
-import { Screen } from '@/components/layout';
+import { Screen, useAppGutter } from '@/components/layout';
 import { BackButton } from '@/components/ui';
 import { ICON_PATHS } from '@/lib/icons';
 import { NIGHTLIFE_SPOTS } from '@/lib/data';
@@ -21,6 +21,7 @@ export async function generateStaticParams(): Promise<{ id: string }[]> {
 }
 
 export default function NightSpotScreen() {
+  const gutter = useAppGutter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { deviceLocation, isPlanned, isSaved, showToast, toggleSaved, togglePlan } = useScoper();
@@ -30,7 +31,7 @@ export default function NightSpotScreen() {
   if (!spot) {
     return (
       <Screen>
-        <View className="mx-auto w-full max-w-[720px] flex-1 px-5">
+        <View style={{ paddingHorizontal: gutter }} className="mx-auto w-full max-w-[720px] flex-1">
           <BackButton />
           <View className="flex-1 items-center justify-center px-6 pb-16">
             <Text className="font-fraunces text-display text-ink">Spot unavailable</Text>

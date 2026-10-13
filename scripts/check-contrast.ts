@@ -82,6 +82,14 @@ const PAIRS: Pair[] = [
   { name: 'danger on bg', fg: role('danger'), bg: role('bg'), min: AA_TEXT },
   { name: 'fg-accent on coral-50 tint', fg: role('fg-accent'), bg: tint('coral-50', 'bg'), min: AA_TEXT },
   { name: 'fg-accent on blush tint', fg: role('fg-accent'), bg: tint('blush', 'surface'), min: AA_TEXT },
+  { name: 'card-ink on surface', fg: role('card-ink'), bg: role('surface'), min: AA_TEXT },
+  { name: 'card-muted on surface', fg: role('card-muted'), bg: role('surface'), min: AA_TEXT },
+  { name: 'fg on ribbon', fg: role('fg'), bg: role('ribbon'), min: AA_TEXT },
+  { name: 'fg-muted on ribbon', fg: role('fg-muted'), bg: role('ribbon'), min: AA_TEXT },
+  ...['tile-eat', 'tile-bars', 'tile-routes', 'tile-events'].flatMap((surface) => [
+    { name: `fg on ${surface}`, fg: role('fg'), bg: role(surface), min: AA_TEXT },
+    { name: `fg-muted on ${surface}`, fg: role('fg-muted'), bg: role(surface), min: AA_TEXT },
+  ]),
   // Non-text: a control's edge only has to separate from the ground behind it.
   { name: 'accent-fill vs bg (control edge)', fg: role('accent-fill'), bg: role('bg'), min: AA_LARGE },
   { name: 'accent vs surface (icon/border)', fg: role('accent'), bg: role('surface'), min: AA_LARGE },

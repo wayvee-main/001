@@ -11,7 +11,7 @@ import {
   type DetailScreenAction,
   type DetailSection,
 } from '@/components/detail-screen';
-import { Screen } from '@/components/layout';
+import { Screen, useAppGutter } from '@/components/layout';
 import { Photo } from '@/components/photo';
 import { RaisedView } from '@/components/raised-surface';
 import { BackButton, EmptyState } from '@/components/ui';
@@ -58,6 +58,7 @@ export async function generateStaticParams(): Promise<{ id: string }[]> {
 }
 
 export default function EventScreen() {
+  const gutter = useAppGutter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { deviceLocation, isPlanned, showToast, togglePlan, walkBudgetMinutes } = useScoper();
@@ -124,7 +125,7 @@ export default function EventScreen() {
       <Screen>
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ width: '100%', maxWidth: 720, alignSelf: 'center', paddingHorizontal: 20, paddingBottom: 24, gap: 16 }}>
+          contentContainerStyle={{ width: '100%', maxWidth: 720, alignSelf: 'center', paddingHorizontal: gutter, paddingBottom: 24, gap: 16 }}>
           <View className="flex-row items-center">
             <BackButton />
           </View>

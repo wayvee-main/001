@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { VeeMark } from '@/components/vee-mark';
 import { WayveeWordmark } from '@/components/wayvee-wordmark';
 import { Glyph } from '@/components/glyph';
-import { AppBackdrop } from '@/components/layout';
+import { AppBackdrop, useAppGutter } from '@/components/layout';
 import { TRIP_CONTEXTS, TRIP_CONTEXT_EFFECTS, type TripContext, type WalkBudget } from '@/lib/arrival';
 import { useActiveCityName } from '@/lib/city';
 import {
@@ -199,11 +199,12 @@ function Backdrop({ children }: { children: ReactNode }) {
 
 function Chrome({ page, canGoBack, onBack }: { page: number; canGoBack: boolean; onBack: () => void }) {
   const insets = useSafeAreaInsets();
+  const gutter = useAppGutter();
   const ink = useWashInk();
   return (
     <View
-      style={{ paddingTop: insets.top + 8 }}
-      className="flex-row items-center justify-between px-5 pb-2">
+      style={{ paddingHorizontal: gutter, paddingTop: insets.top + 8 }}
+      className="flex-row items-center justify-between pb-2">
       {canGoBack ? (
         <TouchableOpacity
           accessibilityRole="button"
@@ -260,12 +261,13 @@ function Page({
 }) {
   const ink = useWashInk();
   const colors = useThemeColors();
+  const gutter = useAppGutter();
   return (
     <ScrollView
       className="flex-1"
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
-      contentContainerStyle={{ paddingHorizontal: 26, paddingTop: 14, paddingBottom: 28 }}>
+      contentContainerStyle={{ paddingHorizontal: gutter, paddingTop: 14, paddingBottom: 28 }}>
       <View className="flex-row items-center gap-x-2.5">
         {branded ? (
           <WayveeWordmark size={32} color={colors.fg} />
@@ -296,8 +298,9 @@ function Page({
 
 function SingleFooter({ label, onPress }: { label: string; onPress: () => void }) {
   const insets = useSafeAreaInsets();
+  const gutter = useAppGutter();
   return (
-    <View style={{ paddingBottom: insets.bottom + 16 }} className="px-5 pt-2">
+    <View style={{ paddingHorizontal: gutter, paddingBottom: insets.bottom + 16 }} className="pt-2">
       <TouchableOpacity
         accessibilityRole="button"
         activeOpacity={0.86}
@@ -327,9 +330,10 @@ function SplitFooter({
   vee?: boolean;
 }) {
   const insets = useSafeAreaInsets();
+  const gutter = useAppGutter();
   const ink = useWashInk();
   return (
-    <View style={{ paddingBottom: insets.bottom + 16 }} className="px-5 pt-2">
+    <View style={{ paddingHorizontal: gutter, paddingBottom: insets.bottom + 16 }} className="pt-2">
       <View className="flex-row gap-x-3">
         <TouchableOpacity
           accessibilityRole="button"

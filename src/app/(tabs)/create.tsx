@@ -32,7 +32,7 @@ import {
 import { useConstraintPicker } from '@/components/constraint-picker';
 import { Glyph, type GlyphName } from '@/components/glyph';
 import { VeeMark } from '@/components/vee-mark';
-import { HRow, Screen, ScreenScroll } from '@/components/layout';
+import { Screen, ScreenScroll } from '@/components/layout';
 import { EmptyState } from '@/components/ui';
 import { buildPlan, mergeRefineRequest, resolveAskNow } from '@/lib/concierge/adapter';
 import { requestConciergeRequest } from '@/lib/concierge/client';
@@ -331,6 +331,7 @@ export default function CreateScreen() {
   // ── Composer ──────────────────────────────────────────────────────────
   const [promptText, setPromptText] = useState('');
   const [asking, setAsking] = useState(false);
+  const [composerFocused, setComposerFocused] = useState(false);
   const { close: closeComposerPicker } =
     useConstraintPicker<Exclude<ComposerPicker, null>>();
   const focusedInputRef = useRef<TextInput>(null);
@@ -343,13 +344,6 @@ export default function CreateScreen() {
   const handledQueryRef = useRef<string | null>(null);
   const handledFocusRef = useRef(false);
 
-  /** Example rows fill the primary field in place so typing never changes
-   * layers or loses context behind the keyboard. */
-  const prefillPrimary = (text: string) => {
-    if (asking) return;
-    setPromptText(text);
-    setTimeout(() => focusedInputRef.current?.focus(), 0);
-  };
 
   const promptReady = Boolean(promptText.trim());
   useEffect(() => {
@@ -790,91 +784,6 @@ export default function CreateScreen() {
     return 'Dinner, then a drink';
   }, [topEvent, rankedRestaurantsAll]);
 
-  /** Starters that say a real name out loud — "Date for 2 at Nido", "Tickets to
-   * Brandon Flowers at Fox Theater" — instead of a generic verb. Every name is
-   * read off the same ranked catalog the shapes below are solved from, so a chip
-   * can never advertise somewhere that isn't on the map (CLAUDE.md #6); a night
-   * with nothing listed drops the chip rather than filling it with a
-   * plausible-sounding name. The name is carried into the query verbatim too,
-   * which is what lets an "open late" ask resolve against the real catalog
-   * (concierge/fact.ts) instead of declining as unresolvable.
-   *
-   * The row scrolls, so the count is bounded by what's worth suggesting rather
-   * than by what fits on one line. */
-  const askExamples = useMemo(() => {
-    // The placeholder above already names the top-ranked restaurant, so the
-    // chips start one below it rather than echoing the field they sit under.
-    const [dateSpot, nearbySpot, groupSpot] = rankedRestaurantsAll.slice(1, 4).map((ranked) => ranked.item);
-    // Tonight's listings first, then the next ticketed show on the calendar —
-    // "tickets to X" claims no date, so an upcoming one is still honest. Only a
-    // ticketed listing gets a ticket chip; a free night isn't sold.
-    const show =
-      rankedEventsAll.map((ranked) => ranked.item).find((event) => event.ticketed) ??
-      currentEventListings(selectedDateAt).find((event) => event.ticketed) ??
-      null;
-    const freeTonight = rankedEventsAll.some((ranked) => /free|no cover/i.test(ranked.item.priceLabel));
-    const spots = rankedNightlifeAll.map((ranked) => ranked.item);
-    // Only somewhere the catalog itself calls a cocktail bar gets a cocktail
-    // chip; anywhere else is offered as plain drinks.
-    const cocktailBar = spots.find((spot) => /cocktail/i.test(spot.kind));
-    const drinksSpot = cocktailBar ?? spots[0];
-    const lateSpot = spots.find((spot) => /12|1 ?am|2 ?am|late/i.test(spot.hours));
-
-    return [
-      dateSpot
-        ? {
-            query: `Plan a date night for two at ${dateSpot.name}, then somewhere for a drink.`,
-            action: `Date for 2 at ${dateSpot.name}`,
-            glyph: 'calendar',
-            tone: 'accent',
-          }
-        : null,
-      show
-        ? {
-            query: `Tickets to ${show.name} at ${show.venue}.`,
-            action: `Tickets to ${show.name} at ${show.venue}`,
-            glyph: 'ticket',
-            tone: 'warm',
-          }
-        : null,
-      drinksSpot
-        ? {
-            query: `Plan dinner, then ${cocktailBar ? 'cocktails' : 'drinks'} at ${drinksSpot.name}.`,
-            action: `${cocktailBar ? 'Cocktails' : 'Drinks'} at ${drinksSpot.name}`,
-            glyph: 'drink',
-            tone: 'vee',
-          }
-        : null,
-      topEvent
-        ? {
-            query: `Somewhere walkable for dinner near ${topEvent.venue}.`,
-            action: `Dinner near ${topEvent.venue}`,
-            glyph: 'food',
-            tone: 'accent',
-          }
-        : nearbySpot
-          ? {
-              query: `Somewhere walkable for dinner in the next hour, like ${nearbySpot.name}.`,
-              action: `Dinner near ${nearbySpot.name}`,
-              glyph: 'food',
-              tone: 'accent',
-            }
-          : null,
-      groupSpot
-        ? {
-            query: `Plan a night out for six, starting with dinner at ${groupSpot.name}.`,
-            action: `Dinner for six at ${groupSpot.name}`,
-            glyph: 'user',
-            tone: 'vee',
-          }
-        : null,
-      lateSpot
-        ? { query: `Is ${lateSpot.name} open late tonight?`, action: `Is ${lateSpot.name} open late?`, glyph: 'clock', tone: 'warm' }
-        : null,
-      // Only offered on a night that actually has a free listing behind it.
-      freeTonight ? { query: 'What’s free tonight?', action: 'What’s free tonight?', glyph: 'spark', tone: 'vee' } : null,
-    ].filter((entry): entry is NonNullable<typeof entry> => entry !== null);
-  }, [rankedRestaurantsAll, rankedEventsAll, rankedNightlifeAll, topEvent, selectedDateAt]);
 
   return (
     <Screen>
@@ -951,7 +860,7 @@ export default function CreateScreen() {
             <View className="mt-10 items-center">
               <VeeMark size={84} gradient />
               <Text className="mt-4 max-w-[280px] text-center font-fraunces text-[23px] leading-[30px] text-ink">
-                {askPlan ? 'What should change?' : 'What are we chasing tonight?'}
+                {askPlan ? 'What should change?' : 'What sounds\ngood tonight?'}
               </Text>
             </View>
           ) : null}
@@ -961,11 +870,17 @@ export default function CreateScreen() {
               raisedSurface,
               {
                 borderWidth: StyleSheet.hairlineWidth,
-                borderColor: colors['edge-soft'],
+                borderColor: composerFocused ? colors['vee-strong'] : colors.edge,
                 opacity: asking ? 0.72 : 1,
+                height: 151.912,
+                paddingHorizontal: 16,
+                paddingTop: 14.4,
+                paddingBottom: 9.9,
+                borderRadius: 25,
               },
             ]}
-            className={`${showingLiveMatches ? 'mt-5' : 'mt-7'} flex-row items-center gap-x-2 rounded-full py-1.5 pl-4 pr-1.5`}>
+            className={`${showingLiveMatches ? 'mt-5' : 'mt-7'}`}>
+            <Text className="mb-2 font-dm text-fine text-taupe">Your starting point</Text>
             <TextInput
               ref={focusedInputRef}
               accessibilityLabel="Ask Vee"
@@ -974,13 +889,27 @@ export default function CreateScreen() {
               onChangeText={setPromptText}
               placeholder={askExampleLabel}
               placeholderTextColor={colors['fg-muted']}
+              multiline
+              submitBehavior="submit"
+              onFocus={() => setComposerFocused(true)}
+              onBlur={() => setComposerFocused(false)}
               maxLength={500}
               editable={!asking}
               returnKeyType="send"
               onSubmitEditing={() => void submitAsk(promptReady ? promptText : askExampleLabel)}
-              className="min-w-0 flex-1 font-dm text-[13px] text-ink"
-              style={{ paddingVertical: 10 }}
+              className="min-w-0 flex-1 font-dm text-body text-ink"
+              style={{ padding: 0, borderWidth: 0, textAlignVertical: 'top', ...(Platform.OS === 'web' ? { outlineWidth: 0 } as any : {}) }}
             />
+            <View className="mt-1 flex-row items-center justify-between">
+              <TouchableOpacity accessibilityRole="button" accessibilityLabel="Add a preference" onPress={() => useScoper.getState().openSheet('addConstraint')} hitSlop={8}
+                className="h-9 flex-row items-center gap-x-1.5">
+                <Glyph name="plus" size={14} color={colors['fg-muted']} /><Text className="font-dm text-fine text-taupe">Details</Text>
+              </TouchableOpacity>
+              <View className="flex-row items-center gap-x-2.5">
+                <TouchableOpacity accessibilityRole="button" accessibilityLabel="Focus the Vee composer" onPress={() => focusedInputRef.current?.focus()} hitSlop={4}
+                  className="h-9 w-9 items-center justify-center rounded-full bg-surface">
+                  <Glyph name="mic" size={16} color={colors.fg} />
+                </TouchableOpacity>
             <Animated.View style={{ transform: [{ scale: sendMotion.interpolate({ inputRange: [0, 1], outputRange: [0.94, 1] }) }] }}>
               {/* Live on an empty field, not disabled. The placeholder is a
                 * real, answerable ask built from tonight's anchor, so Send
@@ -1003,6 +932,8 @@ export default function CreateScreen() {
                 )}
               </TouchableOpacity>
             </Animated.View>
+              </View>
+            </View>
           </View>
 
           {showingLiveMatches ? (
@@ -1078,58 +1009,6 @@ export default function CreateScreen() {
             </View>
           ) : null}
 
-          {!showingLiveMatches ? (
-            <>
-              {/* One compact chip per secondary job. The full example remains
-               * behind the tap, where it can teach by filling the real field. */}
-              <Text className="mt-5 font-dm-medium text-label text-taupe">Vee can also…</Text>
-              {/* A rail rather than a wrap: the list is worth growing past what
-               * fits on one line, and HRow already bleeds to the gutters and
-               * fades its trailing edge so a half-visible chip reads as "more"
-               * instead of a clipped one. */}
-              <View className="mt-2">
-              <HRow gap={8}>
-                {askExamples.map((example) => {
-                  const background = example.tone === 'accent'
-                    ? colors['accent-tint']
-                    : example.tone === 'warm'
-                      ? colors['warm-tint']
-                      : colors['vee-tint'];
-                  const foreground = example.tone === 'accent'
-                    ? colors['fg-accent']
-                    : example.tone === 'warm'
-                      ? colors['warm-strong']
-                      : colors['vee-strong'];
-                  return (
-                    <TouchableOpacity
-                      key={example.query}
-                      accessibilityRole="button"
-                      accessibilityLabel={example.query}
-                      accessibilityState={{ disabled: asking }}
-                      activeOpacity={0.72}
-                      hitSlop={4}
-                      disabled={asking}
-                      onPress={() => prefillPrimary(example.query)}
-                      style={{
-                        backgroundColor: background,
-                        borderColor: colors['edge-soft'],
-                        borderWidth: StyleSheet.hairlineWidth,
-                      }}
-                      className="min-h-9 flex-row items-center justify-center gap-x-1.5 rounded-full px-2.5 py-2">
-                      <Glyph name={example.glyph} size={13} color={foreground} strokeWidth={1.8} />
-                      {/* Capped so one unusually long listing name ellipsizes
-                        * instead of stretching a chip past the screen; the rail
-                        * scrolls, so the rest keep their natural width. */}
-                      <Text numberOfLines={1} style={{ color: foreground, maxWidth: 260 }} className="font-dm-medium text-meta">
-                        {example.action}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </HRow>
-              </View>
-            </>
-          ) : null}
 
           {/* All three solved shapes, not one card and a reroll: they are already
            * computed on every render, and three comparable options read as a

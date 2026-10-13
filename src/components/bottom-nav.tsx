@@ -11,7 +11,7 @@ import { useThemeColors } from '@/lib/theme';
  * navigator; they must not drift apart. */
 const ITEMS = [
   { key: 'home', label: 'Home', href: '/', glyph: 'home' },
-  { key: 'discover', label: 'Tonight', href: '/discover', glyph: 'clock' },
+  { key: 'discover', label: 'Discover', href: '/discover', glyph: 'compass' },
   { key: 'create', label: 'Vee', href: '/create', glyph: 'spark' },
   { key: 'profile', label: 'You', href: '/profile', glyph: 'user' },
 ] as const;

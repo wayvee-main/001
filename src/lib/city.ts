@@ -10,6 +10,7 @@
 // through every query: the hydrators in places.ts, events-remote.ts,
 // viator.ts and weather.ts read it directly, and changing it re-runs them.
 import { useSyncExternalStore } from 'react';
+import { CITY_CENTER, type GeoPoint } from '@/lib/geo';
 
 import { getStoredItem, setStoredItem } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
@@ -32,13 +33,14 @@ const STORAGE_KEY = 'wayvee.city.v1';
 export interface CityOption {
   slug: string;
   name: string;
+  anchor?: GeoPoint;
 }
 
 type Listener = () => void;
 const listeners = new Set<Listener>();
 
 let active = BUNDLE_CITY;
-let options: CityOption[] = [{ slug: BUNDLE_CITY, name: BUNDLE_CITY_NAME }];
+let options: CityOption[] = [{ slug: BUNDLE_CITY, name: BUNDLE_CITY_NAME, anchor: CITY_CENTER }];
 
 function notify(): void {
   for (const listener of listeners) listener();
@@ -70,6 +72,12 @@ function getOptionsSnapshot(): CityOption[] {
  * replaced once the backend answers, so the picker is never empty. */
 export function useCityOptions(): CityOption[] {
   return useSyncExternalStore(subscribe, getOptionsSnapshot, getOptionsSnapshot);
+}
+
+export function useActiveCityAnchor(): GeoPoint | null {
+  const slug = useActiveCity();
+  const cities = useCityOptions();
+  return cities.find((city) => city.slug === slug)?.anchor ?? (slug === BUNDLE_CITY ? CITY_CENTER : null);
 }
 
 /** The active city's display name, for copy that says where the guest is.
@@ -125,10 +133,15 @@ export function cityCacheKey(base: string, slug: string = active): string {
 export async function hydrateCitiesFromBackend(): Promise<boolean> {
   if (!supabase) return false;
   try {
-    const { data, error } = await supabase.from('cities').select('slug, name').eq('launched', true).order('name');
+    const { data, error } = await supabase.from('cities').select('slug, name, anchor_lat, anchor_lon').eq('launched', true).order('name');
     if (error || !data?.length) return false;
 
-    options = (data as CityOption[]).filter((city) => city.slug && city.name);
+    options = data.filter((city) => city.slug && city.name).map((city) => ({
+      slug: city.slug, name: city.name,
+      ...(Number.isFinite(city.anchor_lat) && Number.isFinite(city.anchor_lon)
+        ? { anchor: { latitude: city.anchor_lat, longitude: city.anchor_lon } }
+        : city.slug === BUNDLE_CITY ? { anchor: CITY_CENTER } : {}),
+    }));
 
     // A city that was launched when the guest last opened the app can be
     // unlaunched later. Falling back to the bundle's city keeps them on the

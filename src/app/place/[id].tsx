@@ -4,7 +4,7 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { DetailBottomNav } from '@/components/bottom-nav';
 import { DetailFactList, DetailIconButton, DetailSheet, ImmersiveDetailHero, SourceLink } from '@/components/detail';
-import { AppBackdrop, Screen } from '@/components/layout';
+import { AppBackdrop, Screen, useAppGutter } from '@/components/layout';
 import { BackButton, Icon } from '@/components/ui';
 import { formatMiles, milesBetween, usableAnchor } from '@/lib/geo';
 import { hoursSummary, openStateFor, openStateLabel } from '@/lib/hours';
@@ -19,6 +19,7 @@ const PHONE = 'M5 4h4l2 5l-3 2a11 11 0 0 0 5 5l2-3l5 2v4a2 2 0 0 1 -2 2c-8.3 0 -
 const HEART = 'M20.84 4.61a5.5 5.5 0 0 0 -7.78 0l-1.06 1.06l-1.06 -1.06a5.5 5.5 0 0 0 -7.78 7.78l1.06 1.06l7.78 7.78l7.78 -7.78l1.06 -1.06a5.5 5.5 0 0 0 0 -7.78z';
 
 export default function PlaceScreen() {
+  const gutter = useAppGutter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { deviceLocation, isSaved, showToast, toggleSaved } = useScoper();
@@ -29,7 +30,7 @@ export default function PlaceScreen() {
   if (!place) {
     return (
       <Screen>
-        <View className="mx-auto w-full max-w-[720px] flex-1 px-5">
+        <View style={{ paddingHorizontal: gutter }} className="mx-auto w-full max-w-[720px] flex-1">
           <BackButton />
           <View className="flex-1 items-center justify-center px-6 pb-16">
             <Text className="font-fraunces text-[25px] text-ink">Place unavailable</Text>
@@ -125,7 +126,7 @@ export default function PlaceScreen() {
         </DetailSheet>
       </ScrollView>
 
-      <View className="border-t border-sand bg-cream px-5 py-3">
+      <View style={{ paddingHorizontal: gutter }} className="border-t border-sand bg-cream py-3">
         <View style={{ width: '100%', maxWidth: 720, alignSelf: 'center' }}>
           <TouchableOpacity
             accessibilityRole="button"

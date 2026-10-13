@@ -3,9 +3,9 @@ import { useState, type ReactNode } from 'react';
 import {
   RefreshControl,
   ScrollView,
-  StyleSheet,
   Text,
   View,
+  useWindowDimensions,
   type ScrollViewProps,
   type StyleProp,
   type ViewStyle,
@@ -18,55 +18,20 @@ import { useThemeColors } from '@/lib/theme';
 
 const EDGE_FADE_WIDTH = 28;
 
-/** The app-wide ground established by Plans: warm paper with restrained coral
- * and violet atmosphere in light mode, and the same color story sunk into the
- * plum-black dark ground. Keeping it here lets onboarding, modals, details and
- * ordinary screens share one treatment instead of recreating one-off washes. */
-/** Three crossed washes over the base colour.
- *
- * Light theme leans on these harder than dark does, and has to: bg and
- * surface-raised are the same #FFFDFA, so a card is the same colour as the
- * page it sits on and only the wash and a hairline separate them. Dark theme
- * has real separation between #151117 and #1B161E and needs much less. */
+/** Flat Nightfall paper/plum ground shared by screens, details and onboarding. */
 export function AppBackdrop({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const colors = useThemeColors();
-  const dark = colors.bg === '#151117';
-
   return (
     <View style={[{ flex: 1, backgroundColor: colors.bg, overflow: 'hidden' }, style]}>
-      <LinearGradient
-        pointerEvents="none"
-        colors={dark
-          ? ['rgba(232, 93, 44, 0.11)', 'rgba(232, 93, 44, 0.035)', 'rgba(232, 93, 44, 0)']
-          : ['rgba(252, 186, 120, 0.46)', 'rgba(250, 200, 166, 0.20)', 'rgba(255, 253, 250, 0)']}
-        locations={[0, 0.42, 1]}
-        start={{ x: 0.95, y: 0 }}
-        end={{ x: 0.18, y: 0.64 }}
-        style={StyleSheet.absoluteFill}
-      />
-      <LinearGradient
-        pointerEvents="none"
-        colors={dark
-          ? ['rgba(111, 91, 209, 0)', 'rgba(111, 91, 209, 0.105)', 'rgba(111, 91, 209, 0)']
-          : ['rgba(111, 91, 209, 0)', 'rgba(128, 108, 216, 0.17)', 'rgba(111, 91, 209, 0)']}
-        locations={[0.16, 0.52, 0.9]}
-        start={{ x: 0.04, y: 0.12 }}
-        end={{ x: 1, y: 0.7 }}
-        style={StyleSheet.absoluteFill}
-      />
-      <LinearGradient
-        pointerEvents="none"
-        colors={dark
-          ? ['rgba(255, 199, 87, 0)', 'rgba(255, 146, 113, 0.055)', 'rgba(255, 199, 87, 0)']
-          : ['rgba(255, 199, 87, 0)', 'rgba(250, 142, 102, 0.13)', 'rgba(255, 199, 87, 0)']}
-        locations={[0.08, 0.48, 0.88]}
-        start={{ x: 1, y: 0.08 }}
-        end={{ x: 0.06, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
       {children}
     </View>
   );
+}
+
+/** The approved extra 14px on each side, including narrow phones. */
+export function useAppGutter(): number {
+  const { width } = useWindowDimensions();
+  return width <= 400 ? 30 : 34;
 }
 
 /** Full-height app background with safe-area top padding. */
@@ -79,7 +44,7 @@ export function Screen({ children }: { children: ReactNode }) {
   );
 }
 
-/** Standard scrolling body: 20px gutters, spaced sections. Pass refreshing/onRefresh to enable pull-to-refresh. */
+/** Standard scrolling body: approved 30/34px gutters, spaced sections. Pass refreshing/onRefresh to enable pull-to-refresh. */
 /** Height of the tab bar above the safe-area inset, so a tab screen's last
  * element can be scrolled clear of it: 9pt of top padding, the 5pt active dot,
  * a 21pt glyph, a 15pt label, the 3pt gaps between them and 2pt under the label
@@ -117,6 +82,7 @@ export function ScreenScroll({
 }) {
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
+  const gutter = useAppGutter();
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
@@ -130,7 +96,7 @@ export function ScreenScroll({
         width: '100%',
         maxWidth: 720,
         alignSelf: 'center',
-        paddingHorizontal: 20,
+        paddingHorizontal: gutter,
         paddingBottom: clearsTabBar ? 24 + TAB_BAR_SPACE + Math.max(insets.bottom, TAB_BAR_MIN_BOTTOM) : 24,
         gap,
         ...(centerWhenShort ? { flexGrow: 1, justifyContent: 'center' as const } : null),
@@ -181,8 +147,9 @@ export function HeaderRow({
 /** Horizontal carousel that bleeds to the screen edges (gutter-to-gutter). Fades
  * the trailing edge into the background so a partially-scrolled card reads as
  * "more to scroll" rather than a hard, clipped-off cut. */
-export function HRow({ children, gap = 8 }: { children: ReactNode; gap?: number }) {
+export function HRow({ children, gap = 8, bleed = true }: { children: ReactNode; gap?: number; bleed?: boolean }) {
   const colors = useThemeColors();
+  const gutter = useAppGutter();
   const [viewport, setViewport] = useState(0);
   const [content, setContent] = useState(0);
   // The fade means "there's more this way". A row that fits has no more, and
@@ -191,13 +158,13 @@ export function HRow({ children, gap = 8 }: { children: ReactNode; gap?: number 
   // result-derived category chips now do.
   const overflows = viewport > 0 && content > viewport + 1;
   return (
-    <View style={{ marginHorizontal: -20, marginVertical: -6 }}>
+    <View style={{ marginHorizontal: bleed ? -gutter : 0, marginVertical: -6 }}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         onLayout={(event) => setViewport(event.nativeEvent.layout.width)}
         onContentSizeChange={(width) => setContent(width)}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 6, gap }}>
+        contentContainerStyle={{ paddingHorizontal: bleed ? gutter : 0, paddingVertical: 6, gap }}>
         {children}
       </ScrollView>
       {overflows ? (

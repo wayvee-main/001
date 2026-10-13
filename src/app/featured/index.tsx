@@ -4,7 +4,7 @@ import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-nativ
 
 import { AskVeeRow } from '@/components/ask-vee-row';
 import { FactStrip, FoodHubRow, HubDropdown, HubMenu, type HubFact } from '@/components/featured';
-import { HeaderRow, HRow, Screen } from '@/components/layout';
+import { HeaderRow, HRow, Screen, useAppGutter } from '@/components/layout';
 import { RaisedView } from '@/components/raised-surface';
 import { SectionHeading } from '@/components/section-heading';
 import { TrustChip } from '@/components/trust-chip';
@@ -118,6 +118,7 @@ function listingFromPlace(place: Place, distanceMiles?: number, tasteTag?: strin
 }
 
 export default function FeaturedDirectoryScreen() {
+  const gutter = useAppGutter();
   const router = useRouter();
   const { q } = useLocalSearchParams<{ q?: string }>();
   const s = useScoper();
@@ -371,7 +372,7 @@ export default function FeaturedDirectoryScreen() {
       <ScrollView
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ width: '100%', maxWidth: 720, alignSelf: 'center', paddingHorizontal: 20, paddingBottom: 30, gap: 16 }}>
+        contentContainerStyle={{ width: '100%', maxWidth: 720, alignSelf: 'center', paddingHorizontal: gutter, paddingBottom: 30, gap: 16 }}>
         <HeaderRow title={pageTitle} glyph={titleGlyph} trailing={showHub ? <TrustChip /> : undefined} />
         <FactStrip facts={showHub ? hubFacts : pageFacts} pullUp />
 

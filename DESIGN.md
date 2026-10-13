@@ -1,5 +1,64 @@
 # Wayvee design system
 
+The approved October 13, 2026 editorial iteration is the current UI contract.
+Palette and dimensions come from `src/lib/tokens.ts`; regenerate the CSS,
+inline palette and Tailwind tokens together with `npm run tokens`.
+
+## Approved rules
+
+- Keep the original Vee mark and Fraunces / DM Sans typography.
+- Nightfall stays in both themes: light `#FBF7F0`, dark `#17121C`.
+- Add 14px to the previous horizontal gutters throughout screens and layers:
+  34px normally, 30px on phones up to 400px. Use `useAppGutter`.
+- Home keeps four tiles, ordered Eat, Bars, Routes, Events. Counts describe
+  actual inventory, never unsupported opening status.
+- “Your evening, with Vee” is a compact ribbon, with a pale light-mode surface.
+  Home's dividers are faint.
+- For you → Nearest is **three vertical rows**, with **See all** opening `/nearest`.
+  The default pool targets 24 real results (at least 20 where the catalog has
+  them) within five miles of the selected city/ZIP trip anchor. GPS reorders
+  that same pool. It must populate without GPS. Never use Oakland's curated
+  distances for another city; backend city anchors and local places vary.
+  A tilde identifies a curated distance estimate.
+- The second tab is **Discover** in both tab bars. Its glyph pills are one
+  horizontal row, without hard borders, with subtle elevation and an extra
+  5px gap (11.44px total).
+- Discover's default order is On stage / More on stage, Find a good table,
+  More good tables, After dinner, A little wandering, Rooms worth knowing.
+- On stage has one hero; More on stage is a horizontal Essential card rail.
+  Both use warm neutral containment, not a purple poster surface. Card copy
+  is brief; metadata uses glyphs. Current listings replace expired samples.
+- Find a good table uses full-width Menu Slip banners, 20% shorter than the
+  original slips. Establishment headings have two-line blocks, including
+  MUA / Oakland. Cuisine, price and distance belong in one inline metadata
+  group, wrapping only when required by a narrow phone.
+- **Find a good table has no See all action. More good tables keeps See all.**
+  The latter is a separate set of three compact rows with distinct venues.
+- After dinner uses the same contained Essential treatment as More on stage:
+  149/157px card widths, 111px images, 17px rounding, warm neutral fill,
+  10px / 11px / 12px body padding. Keep the original dimensions.
+- A little wandering and Rooms worth knowing retain their quiet editorial
+  treatment. The five paired alternatives are pending a selection.
+- Vee has no slogan or suggestion pills. Its modern composer is 151.912px
+  high, has no inner horizontal divider or rectangular focus border, and
+  has 36px round controls with larger touch targets. Keep the rounded outer
+  focus treatment. Existing submission and planning behavior remains intact.
+
+## Validation
+
+Run typecheck, lint, the relevant Jest suites, `tokens:contrast`, and the
+production web export. Inspect phone layouts in both themes. Contrast covers
+Nightfall cards, the ribbon and all four tile surfaces. The existing coral
+CTA retains its documented brand exception; smaller supporting text uses
+readable semantic ink tokens.
+
+## Previous palette reference
+
+The notes below describe the pre-Nightfall iteration and remain as historical
+context. The current rules above and generated token values govern the app.
+
+### Earlier design system
+
 Source of truth: [src/lib/tokens.ts](src/lib/tokens.ts). Edit that file, then
 run `npm run tokens` — it regenerates:
 

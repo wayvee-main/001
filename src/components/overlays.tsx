@@ -1,3 +1,4 @@
+import { useAppGutter } from '@/components/layout';
 import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
@@ -164,6 +165,7 @@ function useKeyboardShift(bottomInset: number) {
 }
 
 function SheetBase({ children, scrollable = false }: { children: ReactNode; scrollable?: boolean }) {
+  const gutter = useAppGutter();
   const closeSheet = useScoper((s) => s.closeSheet);
   const insets = useSafeAreaInsets();
   const [anim] = useState(() => new Animated.Value(0));
@@ -212,11 +214,11 @@ function SheetBase({ children, scrollable = false }: { children: ReactNode; scro
               // Without this the first tap while the keyboard is up is spent
               // dismissing it instead of hitting the button/date underneath.
               keyboardShouldPersistTaps="handled"
-              contentContainerStyle={{ paddingHorizontal: 20 }}>
+              contentContainerStyle={{ paddingHorizontal: gutter }}>
               {body}
             </ScrollView>
           ) : (
-            <View className="px-5">{body}</View>
+            <View style={{ paddingHorizontal: gutter }}>{body}</View>
           )}
         </View>
       </Animated.View>
@@ -891,6 +893,7 @@ const SUGGESTION_QUERY_LENGTH = 3;
 const KIND_ORDER: SearchResultKind[] = ['restaurant', 'dish', 'place', 'event', 'venue', 'night', 'crawl', 'pick', 'collection'];
 
 function SearchOverlay() {
+  const gutter = useAppGutter();
   const closeSheet = useScoper((s) => s.closeSheet);
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -997,7 +1000,7 @@ function SearchOverlay() {
         zIndex: 30,
         backgroundColor: colors.cream,
         paddingTop: insets.top + 16,
-        paddingHorizontal: 20,
+        paddingHorizontal: gutter,
         opacity: anim,
       }}>
       <View className="flex-row items-center gap-x-2.5">

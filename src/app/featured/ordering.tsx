@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { Linking, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { CompactPromo } from '@/components/compact-promo';
-import { HeaderRow, Screen } from '@/components/layout';
+import { HeaderRow, Screen, useAppGutter } from '@/components/layout';
 import { Photo } from '@/components/photo';
 import { ChevronRight, MiniChevron } from '@/components/ui';
 import { FAV_POOL, RESTAURANTS, restaurantMetaLine } from '@/lib/data';
@@ -12,6 +12,7 @@ import { useScoper } from '@/lib/store';
 import { useThemeColors } from '@/lib/theme';
 
 export default function FeaturedOrderingScreen() {
+  const gutter = useAppGutter();
   const router = useRouter();
   const showToast = useScoper((state) => state.showToast);
   const colors = useThemeColors();
@@ -27,7 +28,7 @@ export default function FeaturedOrderingScreen() {
     <Screen>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ width: '100%', maxWidth: 720, alignSelf: 'center', paddingHorizontal: 20, paddingBottom: 30, gap: 18 }}>
+        contentContainerStyle={{ width: '100%', maxWidth: 720, alignSelf: 'center', paddingHorizontal: gutter, paddingBottom: 30, gap: 18 }}>
         <HeaderRow title="Menus and ordering" />
 
         <View className="rounded-card border border-sand bg-coral-50 p-4">

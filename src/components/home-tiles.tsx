@@ -120,20 +120,20 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
                 // this it would square off the panel's corners.
                 overflow: 'hidden',
               }}
-              className="min-h-[86px] flex-1 rounded-panel px-3.5 pb-3.5 pt-3">
+              className="min-h-[100px] flex-1 rounded-panel px-3 pb-3 pt-3">
               {tile.image ? <TileSpotlight uri={tile.image} /> : null}
               {/* Glyph and count read as one mark, so they sit together
                * rather than at opposite corners of the tile. */}
-              <View className="flex-row items-center gap-x-2">
+              <View className="flex-row items-center justify-between gap-x-2">
                 <Glyph name={tile.glyph} size={15} color={colors[tile.ink]} strokeWidth={1.9} />
                 <Text
                   style={{ color: colors[tile.ink], fontVariant: ['tabular-nums'] }}
-                  className="font-fraunces text-[23px] leading-[27px]">
+                  className="font-fraunces text-[18px] leading-[22px]">
                   {tile.count}
                 </Text>
               </View>
               <Text numberOfLines={1} className="mt-1 font-dm-medium text-body text-ink">{tile.label}</Text>
-              <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">{tile.hint}</Text>
+              <Text numberOfLines={2} className="mt-0.5 font-dm text-fine text-taupe">{tile.hint}</Text>
             </TouchableOpacity>
           ))}
           {/* An odd count would otherwise stretch the last tile to full width. */}

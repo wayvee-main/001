@@ -10,14 +10,21 @@
    go through Tailwind's <alpha-value> opacity modifier; full rgba() strings
    for tokens with fixed baked-in opacity. */
 :root {
-  --color-bg: 255 253 250;
-  --color-surface: 240 235 227;
+  --color-bg: 251 247 240;
+  --color-surface: 239 233 223;
   --color-surface-raised: 255 253 250;
   --color-surface-soft: 251 248 244;
   --color-surface-sunk: 231 224 214;
-  --color-fg: 42 27 51;
-  --color-fg-muted: 113 102 114;
-  --color-fg-accent: 161 67 37;
+  --color-fg: 49 32 57;
+  --color-fg-muted: 106 95 107;
+  --color-card-ink: 45 41 38;
+  --color-card-muted: 100 93 86;
+  --color-ribbon: 238 230 240;
+  --color-tile-eat: 242 232 202;
+  --color-tile-bars: 242 223 223;
+  --color-tile-routes: 230 222 239;
+  --color-tile-events: 226 235 223;
+  --color-fg-accent: 158 61 35;
   --color-accent: 228 85 38;
   --color-accent-fill: 232 93 44;
   --color-on-accent: 255 255 255;
@@ -31,19 +38,26 @@
   --color-warm-tint: 255 243 216;
   --color-vee-tint: 227 223 247;
   --color-danger: 201 53 55;
-  --color-edge: rgba(42, 27, 51, 0.12);
-  --color-edge-soft: rgba(42, 27, 51, 0.08);
+  --color-edge: rgba(49, 32, 57, 0.12);
+  --color-edge-soft: rgba(49, 32, 57, 0.08);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-  --color-bg: 21 17 23;
-  --color-surface: 37 30 41;
-  --color-surface-raised: 27 22 30;
+  --color-bg: 23 18 28;
+  --color-surface: 40 38 37;
+  --color-surface-raised: 41 34 47;
   --color-surface-soft: 55 46 60;
   --color-surface-sunk: 16 13 19;
-  --color-fg: 255 253 250;
-  --color-fg-muted: 184 170 181;
+  --color-fg: 250 242 232;
+  --color-fg-muted: 189 175 189;
+  --color-card-ink: 245 237 227;
+  --color-card-muted: 195 185 175;
+  --color-ribbon: 41 25 46;
+  --color-tile-eat: 73 62 46;
+  --color-tile-bars: 73 51 66;
+  --color-tile-routes: 58 48 71;
+  --color-tile-events: 44 65 57;
   --color-fg-accent: 255 146 113;
   --color-accent: 255 146 113;
   --color-accent-fill: 232 93 44;
@@ -58,7 +72,7 @@
   --color-warm-tint: 64 51 33;
   --color-vee-tint: 53 44 77;
   --color-danger: 255 107 109;
-  --color-edge: rgba(255, 253, 250, 0.12);
-  --color-edge-soft: rgba(255, 253, 250, 0.08);
+  --color-edge: rgba(250, 242, 232, 0.12);
+  --color-edge-soft: rgba(250, 242, 232, 0.08);
   }
 }

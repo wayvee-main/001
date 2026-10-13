@@ -10,7 +10,7 @@ import {
   type DetailScreenAction,
 } from '@/components/detail-screen';
 import { DetailFactList, DetailIconButton } from '@/components/detail';
-import { Screen } from '@/components/layout';
+import { Screen, useAppGutter } from '@/components/layout';
 import { Photo } from '@/components/photo';
 import { RaisedView } from '@/components/raised-surface';
 import { BackButton, ChevronRight } from '@/components/ui';
@@ -38,6 +38,7 @@ export async function generateStaticParams(): Promise<{ id: string }[]> {
 }
 
 export default function RestaurantScreen() {
+  const gutter = useAppGutter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { deviceLocation, isSaved, showToast, toggleSaved, walkBudgetMinutes } = useScoper();
@@ -74,7 +75,7 @@ export default function RestaurantScreen() {
   if (!restaurant) {
     return (
       <Screen>
-        <View className="mx-auto w-full max-w-[720px] flex-1 px-5">
+        <View style={{ paddingHorizontal: gutter }} className="mx-auto w-full max-w-[720px] flex-1">
           <BackButton />
           <View className="flex-1 items-center justify-center px-6 pb-16">
             <Text className="font-fraunces text-display text-ink">Restaurant unavailable</Text>
