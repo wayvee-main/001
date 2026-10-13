@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View, type ImageSourcePropType } from 'react-native';
 
 import { Glyph, type GlyphName } from '@/components/glyph';
 import { MiniChevron } from '@/components/ui';
@@ -14,6 +14,10 @@ export type CountTile = {
   tint: keyof ThemeColors;
   ink: keyof ThemeColors;
   glyph: GlyphName;
+  /** The tile's illustration, bundled rather than fetched. Every tile has one,
+   * including Routes — which is the point: a drawn subject exists for a crawl,
+   * where no photograph of one ever could. */
+  art?: ImageSourcePropType;
   onPress: () => void;
 };
 
@@ -25,9 +29,11 @@ export type CountTile = {
  * lists; and each tile opens the pool it counted, because a quantity the guest
  * cannot follow is decoration (CLAUDE.md #3).
  *
- * The glyph is small and paired with the count. An oversized one, and later a
- * photograph behind the text, both became the loudest thing on a tile whose
- * point is a number. Flat tint, one glyph, one number. */
+ * The glyph is small and paired with the count. The illustration sits in the
+ * bottom-right corner and the text keeps a reserved column to its left, so the
+ * two never meet whatever the art is. An oversized glyph and a scrimmed
+ * photograph both failed by winning the tile from the number; this one cannot,
+ * because it is never behind the number. */
 export function AroundYou({ tiles }: { tiles: CountTile[] }) {
   const colors = useThemeColors();
   const rows: CountTile[][] = [];
@@ -49,7 +55,18 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
                 borderColor: colors['edge-soft'],
                 borderWidth: StyleSheet.hairlineWidth,
               }}
-              className="min-h-[86px] flex-1 rounded-panel px-3.5 pb-3.5 pt-3">
+              className="min-h-[92px] flex-1 overflow-hidden rounded-panel px-3.5 pb-3.5 pt-3">
+              {tile.art ? (
+                <Image
+                  source={tile.art}
+                  resizeMode="contain"
+                  accessibilityIgnoresInvertColors
+                  // Inset rather than bled: these are square illustrations with
+                  // the subject filling the frame, so running them off the
+                  // corner cuts the car in half.
+                  style={{ position: 'absolute', right: 7, bottom: 7, width: 52, height: 52 }}
+                />
+              ) : null}
               {/* Glyph and count read as one mark, so they sit together
                * rather than at opposite corners of the tile. */}
               <View className="flex-row items-center gap-x-2">
@@ -60,8 +77,12 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
                   {tile.count}
                 </Text>
               </View>
-              <Text numberOfLines={1} className="mt-1 font-dm-medium text-body text-ink">{tile.label}</Text>
-              <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">{tile.hint}</Text>
+              {/* The reserved column: the label and hint stop before the art
+               * rather than running under it. */}
+              <View style={{ paddingRight: tile.art ? 56 : 0 }}>
+                <Text numberOfLines={1} className="mt-1 font-dm-medium text-body text-ink">{tile.label}</Text>
+                <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">{tile.hint}</Text>
+              </View>
             </TouchableOpacity>
           ))}
           {/* An odd count would otherwise stretch the last tile to full width. */}
