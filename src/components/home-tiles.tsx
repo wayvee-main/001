@@ -1,9 +1,11 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { Image, StyleSheet, Text, TouchableOpacity, View, type ImageSourcePropType } from 'react-native';
 
 import { Glyph, type GlyphName } from '@/components/glyph';
 import { MiniChevron } from '@/components/ui';
 import { Photo } from '@/components/photo';
 import { useThemeColors, type ThemeColors } from '@/lib/theme';
+import { hexToRgb } from '@/lib/tokens';
 
 export type CountTile = {
   key: string;
@@ -20,6 +22,41 @@ export type CountTile = {
   art?: ImageSourcePropType;
   onPress: () => void;
 };
+
+/** A tile's illustration, inset in the bottom-right and fading into the tint.
+ *
+ * Inset rather than bled: these are square illustrations with the subject
+ * filling the frame, so running them off the corner cuts the car in half.
+ *
+ * The fade is a gradient of the tile's own tint laid over the art, opaque at
+ * the top-left corner and clear at the bottom-right. The illustration emerges
+ * from the tile rather than sitting on it, and the corner nearest the text is
+ * the one that disappears. It works because the tile behind is a flat fill —
+ * the gradient is literally the same colour, so there is no seam to see. */
+function TileArt({ art, tint }: { art: ImageSourcePropType; tint: string }) {
+  const [r, g, b] = hexToRgb(tint);
+  return (
+    <View
+      pointerEvents="none"
+      style={{ position: 'absolute', right: 7, bottom: 7, width: 45, height: 45 }}>
+      <Image
+        source={art}
+        resizeMode="contain"
+        accessibilityIgnoresInvertColors
+        style={{ width: '100%', height: '100%' }}
+      />
+      {/* Named with explicit alpha rather than 'transparent': that keyword is
+       * rgba(0,0,0,0) and some platforms interpolate it through black, which
+       * would dirty the fade. */}
+      <LinearGradient
+        colors={[`rgba(${r},${g},${b},0.92)`, `rgba(${r},${g},${b},0)`]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0.78, y: 0.78 }}
+        style={StyleSheet.absoluteFill}
+      />
+    </View>
+  );
+}
 
 /** Home's "Around you" grid.
  *
@@ -56,17 +93,7 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
                 borderWidth: StyleSheet.hairlineWidth,
               }}
               className="min-h-[92px] flex-1 overflow-hidden rounded-panel px-3.5 pb-3.5 pt-3">
-              {tile.art ? (
-                <Image
-                  source={tile.art}
-                  resizeMode="contain"
-                  accessibilityIgnoresInvertColors
-                  // Inset rather than bled: these are square illustrations with
-                  // the subject filling the frame, so running them off the
-                  // corner cuts the car in half.
-                  style={{ position: 'absolute', right: 7, bottom: 7, width: 52, height: 52 }}
-                />
-              ) : null}
+              {tile.art ? <TileArt art={tile.art} tint={colors[tile.tint]} /> : null}
               {/* Glyph and count read as one mark, so they sit together
                * rather than at opposite corners of the tile. */}
               <View className="flex-row items-center gap-x-2">
@@ -79,7 +106,7 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
               </View>
               {/* The reserved column: the label and hint stop before the art
                * rather than running under it. */}
-              <View style={{ paddingRight: tile.art ? 56 : 0 }}>
+              <View style={{ paddingRight: tile.art ? 50 : 0 }}>
                 <Text numberOfLines={1} className="mt-1 font-dm-medium text-body text-ink">{tile.label}</Text>
                 <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">{tile.hint}</Text>
               </View>
