@@ -201,7 +201,7 @@ export default function AnswerScreen() {
               activeOpacity={0.85}
               onPress={() => router.replace('/(tabs)/discover')}
               className="w-full items-center rounded-full bg-ember py-3.5">
-              <Text className="font-dm-bold text-label text-white">Show me what&apos;s on</Text>
+              <Text className="font-dm-bold text-label text-on-accent">Show me what&apos;s on</Text>
             </TouchableOpacity>
           </View>
         ) : shape === 'fact' ? (
@@ -225,7 +225,7 @@ export default function AnswerScreen() {
                   activeOpacity={0.85}
                   onPress={() => router.push(`/restaurant/${factSubject.id}`)}
                   className="w-full items-center rounded-full bg-ember py-3.5">
-                  <Text className="font-dm-bold text-label text-white">View details</Text>
+                  <Text className="font-dm-bold text-label text-on-accent">View details</Text>
                 </TouchableOpacity>
               ) : factSubject.sourceUrl ? (
                 <TouchableOpacity
@@ -233,7 +233,7 @@ export default function AnswerScreen() {
                   activeOpacity={0.85}
                   onPress={() => Linking.openURL(factSubject.sourceUrl!).catch(() => showToast('Could not open that link'))}
                   className="w-full items-center rounded-full bg-ember py-3.5">
-                  <Text className="font-dm-bold text-label text-white">Official site</Text>
+                  <Text className="font-dm-bold text-label text-on-accent">Official site</Text>
                 </TouchableOpacity>
               ) : null}
             </View>

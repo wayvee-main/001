@@ -199,8 +199,8 @@ export default function PickScreen() {
               <Text numberOfLines={1} className="font-dm text-meta text-taupe">{summaryLine}</Text>
               <Text numberOfLines={1} className="font-dm-bold text-[18px] text-ink">{total ?? 'See price on Viator'}</Text>
             </View>
-            <TouchableOpacity activeOpacity={0.85} onPress={bookOnViator} className="h-12 items-center justify-center rounded-full bg-rust px-6">
-              <Text className="font-dm-medium text-[13.5px] text-white">Book now</Text>
+            <TouchableOpacity activeOpacity={0.85} onPress={bookOnViator} className="h-12 items-center justify-center rounded-full bg-accent-fill px-6">
+              <Text className="font-dm-medium text-[13.5px] text-on-accent">Book now</Text>
             </TouchableOpacity>
           </View>
           <Text className="font-dm text-[10.5px] leading-[14px] text-taupe">

@@ -195,8 +195,8 @@ export function DetailScreen({
                 className={`h-12 min-w-0 flex-1 flex-row items-center justify-center gap-x-1.5 rounded-full ${
                   index === 0 ? 'bg-ember' : 'border border-sand bg-shell'
                 }`}>
-                <Icon d={action.iconD} size={15} color={index === 0 ? '#FFFFFF' : colors.ink} strokeWidth={1.9} />
-                <Text numberOfLines={1} className={`font-dm-medium text-label ${index === 0 ? 'text-white' : 'text-ink'}`}>
+                <Icon d={action.iconD} size={15} color={index === 0 ? colors['on-accent'] : colors.ink} strokeWidth={1.9} />
+                <Text numberOfLines={1} className={`font-dm-medium text-label ${index === 0 ? 'text-on-accent' : 'text-ink'}`}>
                   {action.label}
                 </Text>
               </TouchableOpacity>

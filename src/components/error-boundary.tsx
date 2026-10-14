@@ -21,7 +21,7 @@ export function AppErrorBoundary({ children }: { children: React.ReactNode }) {
             activeOpacity={0.85}
             onPress={resetError}
             className="mt-6 h-[48px] items-center justify-center rounded-full bg-ember px-8">
-            <Text className="font-dm-bold text-[14px] text-white">Try again</Text>
+            <Text className="font-dm-bold text-[14px] text-on-accent">Try again</Text>
           </TouchableOpacity>
         </SafeAreaView>
       )}>

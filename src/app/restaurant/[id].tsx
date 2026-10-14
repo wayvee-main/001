@@ -81,7 +81,7 @@ export default function RestaurantScreen() {
             <Text className="font-fraunces text-display text-ink">Restaurant unavailable</Text>
             <Text className="mt-2 text-center font-dm text-body text-taupe">Browse the current food directory instead.</Text>
             <TouchableOpacity onPress={() => router.replace('/featured')} className="mt-5 rounded-full bg-ember px-6 py-3">
-              <Text className="font-dm-medium text-body text-white">Browse food</Text>
+              <Text className="font-dm-medium text-body text-on-accent">Browse food</Text>
             </TouchableOpacity>
           </View>
         </View>

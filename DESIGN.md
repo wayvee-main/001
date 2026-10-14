@@ -7,13 +7,20 @@ inline palette and Tailwind tokens together with `npm run tokens`.
 ## Approved rules
 
 - Keep the original Vee mark and Fraunces / DM Sans typography.
+  Editorial serif headings use the reference's Fraunces 500 weight; explicit
+  bold variants remain available for emphasis.
 - Nightfall stays in both themes: light `#FBF7F0`, dark `#17121C`.
 - Add 14px to the previous horizontal gutters throughout screens and layers:
   34px normally, 30px on phones up to 400px. Use `useAppGutter`.
 - Home keeps four tiles, ordered Eat, Bars, Routes, Events. Counts describe
   actual inventory, never unsupported opening status.
+  Tiles use a 145-degree gradient from raised paper (first 50%) to their
+  category tint, a 1px paper border, round paper glyph discs and serif labels.
+  Home search has a filled round arrow; the stay chip uses the Eat tint.
+  Chips and inputs use the approved control edge. Filled controls pair
+  `accent-fill` with `on-accent` in both themes, never hardcoded white.
 - “Your evening, with Vee” is a compact ribbon, with a pale light-mode surface.
-  Home's dividers are faint.
+  Home's dividers are faint. The ribbon has a 1px theme-aware edge and 13px radius.
 - For you → Nearest is **three vertical rows**, with **See all** opening `/nearest`.
   The default pool targets 24 real results (at least 20 where the catalog has
   them) within five miles of the selected city/ZIP trip anchor. GPS reorders
@@ -23,11 +30,18 @@ inline palette and Tailwind tokens together with `npm run tokens`.
 - The second tab is **Discover** in both tab bars. Its glyph pills are one
   horizontal row, without hard borders, with subtle elevation and an extra
   5px gap (11.44px total).
+  Bottom navigation uses the reference's floating dark pill, with the same
+  gutters, rounded active glyph highlight and preserved Vee mark. Tabs and
+  detail navigation share this treatment and clear content below it.
 - Discover's default order is On stage / More on stage, Find a good table,
   More good tables, After dinner, A little wandering, Rooms worth knowing.
 - On stage has one hero; More on stage is a horizontal Essential card rail.
   Both use warm neutral containment, not a purple poster surface. Card copy
   is brief; metadata uses glyphs. Current listings replace expired samples.
+  The full hero containment is 15% shorter and More on stage cards are 10%
+  shorter than the October 13 release. Photos absorb the reduction; text and
+  metadata keep their size and wrap without clipping. After dinner keeps
+  its prior dimensions and matching containment style.
 - Find a good table uses full-width Menu Slip banners, 20% shorter than the
   original slips. Establishment headings have two-line blocks, including
   MUA / Oakland. Cuisine, price and distance belong in one inline metadata
@@ -37,8 +51,17 @@ inline palette and Tailwind tokens together with `npm run tokens`.
 - After dinner uses the same contained Essential treatment as More on stage:
   149/157px card widths, 111px images, 17px rounding, warm neutral fill,
   10px / 11px / 12px body padding. Keep the original dimensions.
-- A little wandering and Rooms worth knowing retain their quiet editorial
-  treatment. The five paired alternatives are pending a selection.
+- A little wandering and Rooms worth knowing use the selected **Field Notes**
+  treatment: numbered route rows, serif names, short captions and glyph facts;
+  venue rows have small portrait photos on the right. Full detail pages stay
+  linked. Rows have faint dividers and no containment.
+- Profile follows the editorial mockup: Your Wayvee, a gradient guest avatar,
+  three live count cards, Your starting point and Preferences setting rows.
+  Appearance and launched-city choices open sheets. Existing authentication,
+  location permissions, stay linking, saves, plans and following remain real.
+  Manual Light/Dark choices override the OS in both CSS and inline colors;
+  System follows OS changes. Tailwind uses class-based dark mode and the token
+  generator emits the matching dark root variables.
 - Vee has no slogan or suggestion pills. Its modern composer is 151.912px
   high, has no inner horizontal divider or rectangular focus border, and
   has 36px round controls with larger touch targets. Keep the rounded outer
@@ -48,9 +71,8 @@ inline palette and Tailwind tokens together with `npm run tokens`.
 
 Run typecheck, lint, the relevant Jest suites, `tokens:contrast`, and the
 production web export. Inspect phone layouts in both themes. Contrast covers
-Nightfall cards, the ribbon and all four tile surfaces. The existing coral
-CTA retains its documented brand exception; smaller supporting text uses
-readable semantic ink tokens.
+Nightfall cards, the ribbon, selected controls and all four tile surfaces.
+The restored editorial CTA pairs clear AA in both themes.
 
 ## Previous palette reference
 

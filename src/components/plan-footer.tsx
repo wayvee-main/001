@@ -41,7 +41,7 @@ function ActionButton({ action, filled }: { action: PlanAction; filled: boolean 
     : action.done
       ? 'border border-rust bg-blush'
       : 'border border-sand bg-shell';
-  const fg = filled ? '#FFFFFF' : colors.peach;
+  const fg = filled ? colors['on-accent'] : colors.peach;
   return (
     <TouchableOpacity
       accessibilityRole="button"
@@ -50,7 +50,7 @@ function ActionButton({ action, filled }: { action: PlanAction; filled: boolean 
       onPress={action.onPress}
       className={`h-11 min-w-0 flex-1 flex-row items-center justify-center gap-x-2 rounded-full ${tone}`}>
       <Icon d={action.icon} size={15} color={fg} fill={!filled && action.done ? fg : 'none'} />
-      <Text numberOfLines={1} className={`font-dm-medium text-label ${filled ? 'text-white' : 'text-ink'}`}>
+      <Text numberOfLines={1} className={`font-dm-medium text-label ${filled ? 'text-on-accent' : 'text-ink'}`}>
         {action.done ? action.doneLabel : action.label}
       </Text>
     </TouchableOpacity>

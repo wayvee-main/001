@@ -50,7 +50,7 @@ export default function CrawlScreen() {
             <View key={st.name} className="flex-row gap-x-3.5">
               <View className="w-[26px] items-center">
                 <View className="h-[26px] w-[26px] items-center justify-center rounded-full bg-ember">
-                  <Text className="font-dm-bold text-label text-white">{i + 1}</Text>
+                  <Text className="font-dm-bold text-label text-on-accent">{i + 1}</Text>
                 </View>
                 {i < crawl.stops.length - 1 ? <View className="my-1 w-0.5 flex-1 bg-sand" /> : null}
               </View>

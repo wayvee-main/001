@@ -2,6 +2,7 @@
 const tokens = require('./src/lib/tailwind-tokens.generated.js');
 
 module.exports = {
+  darkMode: 'class',
   content: ['./src/**/*.{js,jsx,ts,tsx}'],
   presets: [require('nativewind/preset')],
   theme: {
@@ -12,7 +13,7 @@ module.exports = {
       fontSize: tokens.fontSize,
       borderRadius: tokens.borderRadius,
       fontFamily: {
-        fraunces: ['Fraunces_600SemiBold'],
+        fraunces: ['Fraunces_500Medium'],
         'fraunces-medium': ['Fraunces_500Medium'],
         'fraunces-bold': ['Fraunces_700Bold'],
         dm: ['DMSans_400Regular'],

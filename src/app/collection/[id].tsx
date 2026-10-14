@@ -40,7 +40,7 @@ export default function CuratedCollectionScreen() {
               Browse the current Oakland shortlists instead.
             </Text>
             <TouchableOpacity onPress={() => router.replace('/collection')} className="mt-5 rounded-full bg-ember px-5 py-3">
-              <Text className="font-dm-medium text-label text-white">Browse collections</Text>
+              <Text className="font-dm-medium text-label text-on-accent">Browse collections</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -113,7 +113,7 @@ export default function CuratedCollectionScreen() {
         <Text className="font-dm-medium text-body text-ink">This shortlist has ended.</Text>
         <Text className="mt-1 text-center font-dm text-label text-taupe">Expired listings have been removed.</Text>
         <TouchableOpacity onPress={() => router.replace('/discover')} className="mt-3 rounded-full bg-ember px-4 py-2.5">
-          <Text className="font-dm-medium text-label text-white">See current events</Text>
+          <Text className="font-dm-medium text-label text-on-accent">See current events</Text>
         </TouchableOpacity>
       </RaisedView>
     ),

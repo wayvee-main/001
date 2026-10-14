@@ -3,6 +3,7 @@ import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { EssentialEvent, EssentialNight, MenuSlip, MoreTable, StageHero } from '@/components/discover-cards';
 import { Glyph } from '@/components/glyph';
+import { RoomNote, RouteNote } from '@/components/field-notes';
 import { HRow, Screen, ScreenScroll } from '@/components/layout';
 import { ListRow } from '@/components/list-row';
 import { VeeMark } from '@/components/vee-mark';
@@ -94,24 +95,11 @@ export default function DiscoverScreen() {
   const nightlife=bars.length?<View className="border-t border-edge-soft pt-4"><Shelf title="After dinner" onAll={mode==='All'?()=>choose('Nightlife'):undefined}>
     {bars.slice(0,mode==='All'?5:undefined).map(x=><EssentialNight key={x.id} spot={x} onPress={()=>router.push(`/night/${x.id}`)} />)}
   </Shelf></View>:null;
-  // Last two sections retain the approved quiet editorial treatment until a
-  // paired alternative is chosen. They are not switched to a proposed design.
   const wander=routes.length?<View className="gap-y-2 border-t border-edge-soft pt-4"><Heading title="A little wandering" onAll={mode==='All'?()=>choose('Routes'):undefined} />
-    <Text className="font-dm text-label text-taupe">A few stops, with room to make the evening your own.</Text>
-    {routes.slice(0,mode==='All'?2:undefined).map((x,i)=><TouchableOpacity key={x.id} accessibilityRole="button" onPress={()=>router.push(`/crawl/${x.id}`)}
-      className={`gap-y-1 py-3 ${i?'border-t border-edge-soft':''}`}>
-      <Text className="font-dm-medium text-body text-ink">{x.name}</Text><Text className="font-dm text-fine text-taupe">{x.meta}</Text>
-      <Text className="mt-1 font-dm text-label text-ink">{x.desc}</Text>
-      <Text className="mt-1 font-dm text-fine text-taupe">{x.stops.slice(0,3).map(s=>s.name).join(' → ')}</Text>
-    </TouchableOpacity>)}
+    <View>{routes.slice(0,mode==='All'?2:undefined).map((x,i)=><RouteNote key={x.id} route={x} index={i} divider={i>0} onPress={()=>router.push(`/crawl/${x.id}`)} />)}</View>
   </View>:null;
   const rooms=venues.length?<View className="gap-y-2 border-t border-edge-soft pt-4"><Heading title="Rooms worth knowing" onAll={mode==='All'?()=>choose('Venues'):undefined} />
-    <Text className="font-dm text-label text-taupe">Some places are worth going out for before you even see the bill.</Text>
-    {venues.slice(0,mode==='All'?2:undefined).map((x,i)=><TouchableOpacity key={x.id} accessibilityRole="button" onPress={()=>router.push(`/venue/${x.id}`)}
-      className={`gap-y-1 py-3 ${i?'border-t border-edge-soft':''}`}>
-      <Text className="font-dm-medium text-body text-ink">{x.name}</Text><Text className="font-dm text-fine text-taupe">{x.detailMeta}</Text>
-      <Text className="mt-1 font-dm text-label text-ink">{x.sub1}</Text>
-    </TouchableOpacity>)}
+    <View>{venues.slice(0,mode==='All'?2:undefined).map((x,i)=><RoomNote key={x.id} venue={x} divider={i>0} onPress={()=>router.push(`/venue/${x.id}`)} />)}</View>
   </View>:null;
   return <Screen><ScreenScroll gap={19} clearsTabBar refreshing={refreshing} onRefresh={onRefresh} keyboardShouldPersistTaps="handled">
     <Text className="mt-2 font-fraunces text-display text-ink">Discover</Text>
@@ -123,9 +111,9 @@ export default function DiscoverScreen() {
     <HRow gap={11.44} bleed={false}>{MODES.map(x=><TouchableOpacity key={x.value} accessibilityRole="button" accessibilityLabel={x.label}
       accessibilityState={{selected:mode===x.value}} activeOpacity={.78} hitSlop={{top:6,bottom:6}} onPress={()=>choose(x.value)}
       style={[lift,{minHeight:32.2,paddingVertical:6.44,paddingHorizontal:8.28,borderRadius:999,flexDirection:'row',alignItems:'center',gap:4.6,
-        backgroundColor:mode===x.value?colors.night:colors['surface-raised']}]}>
-      {x.value==='All'?<VeeMark size={16} color={mode===x.value?colors['on-accent']:colors.vee} />:<Glyph name={x.glyph} size={13.8} color={mode===x.value?colors['on-accent']:colors.vee} />}
-      <Text className="font-dm" style={{fontSize:11.04,lineHeight:15,color:mode===x.value?colors['on-accent']:colors.fg}}>{x.label}</Text>
+        backgroundColor:mode===x.value?colors['selected-surface']:colors['surface-raised']}]}>
+      {x.value==='All'?<VeeMark size={16} color={mode===x.value?colors['selected-glyph']:colors['vee-strong']} />:<Glyph name={x.glyph} size={13.8} color={mode===x.value?colors['selected-glyph']:colors['vee-strong']} />}
+      <Text className="font-dm" style={{fontSize:11.04,lineHeight:15,color:mode===x.value?colors['on-selected']:colors.fg}}>{x.label}</Text>
     </TouchableOpacity>)}</HRow>
     {query.trim()?<View className="gap-y-2"><Heading title={`Matches for “${query}”`} />
       {search.length?search.slice(0,40).map((x,i)=><ListRow key={`${x.kind}/${x.id}`} title={x.title} meta={x.subtitle} image={x.image} divider={i<Math.min(search.length,40)-1} onPress={()=>router.push(x.href as never)} />)

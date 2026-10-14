@@ -37,7 +37,7 @@ export default function NightSpotScreen() {
             <Text className="font-fraunces text-display text-ink">Spot unavailable</Text>
             <Text className="mt-2 text-center font-dm text-body text-taupe">Browse Discover for current night-out spots.</Text>
             <TouchableOpacity onPress={() => router.replace('/discover')} className="mt-5 rounded-full bg-ember px-6 py-3">
-              <Text className="font-dm-medium text-body text-white">Browse Discover</Text>
+              <Text className="font-dm-medium text-body text-on-accent">Browse Discover</Text>
             </TouchableOpacity>
           </View>
         </View>

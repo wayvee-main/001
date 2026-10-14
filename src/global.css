@@ -3,10 +3,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Wayvee theme tokens — "Vee Coral" palette, generated from src/lib/tokens.ts.
-   Light is the default (:root); dark overrides it under prefers-color-scheme,
-   which NativeWind resolves on native from the system scheme too (app.json's
-   userInterfaceStyle: "automatic"). RGB triples (no commas) for tokens that
+/* Wayvee Nightfall tokens, generated from src/lib/tokens.ts.
+   Light is the default (:root); .dark:root is the manual/system override.
+   appearance.ts resolves the system choice on web; NativeWind resolves it
+   on native. RGB triples (no commas) for tokens that
    go through Tailwind's <alpha-value> opacity modifier; full rgba() strings
    for tokens with fixed baked-in opacity. */
 :root {
@@ -20,14 +20,20 @@
   --color-card-ink: 45 41 38;
   --color-card-muted: 100 93 86;
   --color-ribbon: 238 230 240;
+  --color-ribbon-edge: 219 207 224;
+  --color-control-edge: 224 213 201;
+  --color-selected-surface: 43 28 53;
+  --color-on-selected: 255 247 237;
+  --color-selected-glyph: 245 180 148;
+  --color-navigation-muted: 216 199 221;
   --color-tile-eat: 242 232 202;
   --color-tile-bars: 242 223 223;
   --color-tile-routes: 230 222 239;
   --color-tile-events: 226 235 223;
   --color-fg-accent: 158 61 35;
   --color-accent: 228 85 38;
-  --color-accent-fill: 232 93 44;
-  --color-on-accent: 255 255 255;
+  --color-accent-fill: 184 70 36;
+  --color-on-accent: 255 250 244;
   --color-open: 56 113 79;
   --color-warm: 255 199 87;
   --color-warm-strong: 84 63 24;
@@ -42,8 +48,7 @@
   --color-edge-soft: rgba(49, 32, 57, 0.08);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
+.dark:root {
   --color-bg: 23 18 28;
   --color-surface: 40 38 37;
   --color-surface-raised: 41 34 47;
@@ -54,14 +59,20 @@
   --color-card-ink: 245 237 227;
   --color-card-muted: 195 185 175;
   --color-ribbon: 41 25 46;
+  --color-ribbon-edge: 73 60 80;
+  --color-control-edge: 73 60 80;
+  --color-selected-surface: 41 25 46;
+  --color-on-selected: 255 247 237;
+  --color-selected-glyph: 245 180 148;
+  --color-navigation-muted: 216 199 221;
   --color-tile-eat: 73 62 46;
   --color-tile-bars: 73 51 66;
   --color-tile-routes: 58 48 71;
   --color-tile-events: 44 65 57;
   --color-fg-accent: 255 146 113;
   --color-accent: 255 146 113;
-  --color-accent-fill: 232 93 44;
-  --color-on-accent: 255 255 255;
+  --color-accent-fill: 240 131 92;
+  --color-on-accent: 44 24 17;
   --color-open: 131 208 168;
   --color-warm: 255 199 87;
   --color-warm-strong: 61 45 16;
@@ -74,5 +85,4 @@
   --color-danger: 255 107 109;
   --color-edge: rgba(250, 242, 232, 0.12);
   --color-edge-soft: rgba(250, 242, 232, 0.08);
-  }
 }

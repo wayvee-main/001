@@ -201,7 +201,6 @@ export function Chip({
   onPress,
   iconD,
   large = false,
-  surface = 'default',
   raised = false,
 }: {
   label: string;
@@ -214,16 +213,16 @@ export function Chip({
 }) {
   const colors = useThemeColors();
   const raisedSurface = useRaisedSurface(1);
-  const fg = active ? colors.peach : colors.ink;
+  const fg = active ? colors['on-accent'] : colors.ink;
   return (
     <TouchableOpacity
       accessibilityRole="button"
       accessibilityState={{ selected: active }}
       activeOpacity={0.7}
       onPress={onPress}
-      style={raised ? raisedSurface : undefined}
+      style={[raised ? raisedSurface : undefined, {backgroundColor:active?colors['accent-fill']:colors['surface-raised'],borderColor:active?colors['accent-fill']:colors['control-edge']} ]}
       className={`shrink-0 flex-row items-center gap-x-1.5 rounded-full border ${large ? 'px-[15px] py-2' : 'px-[13px] py-[7px]'} ${
-        active ? `${surface === 'shell' ? 'bg-shell' : 'bg-blush'} border-rust` : 'bg-shell border-sand'
+        active ? 'bg-accent-fill border-accent-fill' : 'bg-shell border-control-edge'
       }`}>
       {iconD ? <Icon d={iconD} size={large ? 15 : 13} color={fg} strokeWidth={2} /> : null}
       <Text style={{ color: fg }} className={`font-dm-medium ${large ? 'text-label' : 'text-label'}`}>
@@ -250,9 +249,9 @@ export function OptionPill({
       activeOpacity={0.7}
       onPress={onPress}
       className={`flex-1 min-w-[64px] items-center rounded-control border px-1 py-2.5 ${
-        active ? 'bg-coral-50 border-sand' : 'bg-shell border-sand'
+        active ? 'bg-accent-fill border-accent-fill' : 'bg-shell border-control-edge'
       }`}>
-      <Text className={`${small ? 'text-label' : 'text-[13.5px]'} font-dm-medium text-ink`}>
+      <Text className={`${small ? 'text-label' : 'text-[13.5px]'} font-dm-medium ${active?'text-on-accent':'text-ink'}`}>
         {label}
       </Text>
     </TouchableOpacity>
@@ -263,7 +262,7 @@ export function OptionPill({
 export function PrimaryButton({ label, onPress, className = '' }: { label: string; onPress?: () => void; className?: string }) {
   return (
     <TouchableOpacity activeOpacity={0.8} onPress={onPress} className={`items-center rounded-full bg-ember py-[15px] ${className}`}>
-      <Text className="font-dm-medium text-[14.5px] text-white">{label}</Text>
+      <Text className="font-dm-medium text-[14.5px] text-on-accent">{label}</Text>
     </TouchableOpacity>
   );
 }
@@ -297,7 +296,7 @@ export function EmptyState({
       : tone === 'subtle'
         ? 'border border-sand bg-shell'
         : 'border border-rust bg-blush';
-  const buttonTextClass = tone === 'solid' ? 'text-white' : 'text-peach';
+  const buttonTextClass = tone === 'solid' ? 'text-on-accent' : 'text-peach';
   return (
     <View
       style={tint ? undefined : surface}

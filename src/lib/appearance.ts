@@ -1,4 +1,5 @@
 import { colorScheme } from 'nativewind';
+import { Platform } from 'react-native';
 
 import { getStoredItem, setStoredItem } from '@/lib/storage';
 
@@ -11,6 +12,8 @@ import { getStoredItem, setStoredItem } from '@/lib/storage';
 // "userInterfaceStyle": "automatic" already grants us. Light/dark pin it.
 
 const APPEARANCE_KEY = 'wayvee.appearance.v1';
+let activePreference: AppearancePreference = 'system';
+let systemMedia: MediaQueryList | null = null;
 
 export type AppearancePreference = 'system' | 'light' | 'dark';
 
@@ -26,7 +29,21 @@ function isAppearancePreference(value: string | null): value is AppearancePrefer
 
 /** Push the preference into NativeWind. Safe to call before restore finishes. */
 export function applyAppearance(preference: AppearancePreference): void {
-  colorScheme.set(preference);
+  activePreference = preference;
+  if (Platform.OS === 'web') {
+    if (typeof window === 'undefined') return;
+    // NativeWind's web setter removes .dark for 'system'. Resolve the OS
+    // choice explicitly so root CSS variables and inline theme colors agree.
+    if (!systemMedia) {
+      systemMedia = window.matchMedia('(prefers-color-scheme: dark)');
+      systemMedia.addEventListener('change', event => {
+        if (activePreference === 'system') colorScheme.set(event.matches ? 'dark' : 'light');
+      });
+    }
+    colorScheme.set(preference === 'system' ? systemMedia.matches ? 'dark' : 'light' : preference);
+  } else {
+    colorScheme.set(preference);
+  }
 }
 
 /** Read the stored choice, defaulting to 'system' when unset or corrupt. */

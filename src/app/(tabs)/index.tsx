@@ -17,11 +17,13 @@ import { activeReminders } from '@/lib/reminders';
 import { useScoper } from '@/lib/store';
 import { useThemeColors } from '@/lib/theme';
 import { useNearestPool } from '@/lib/use-nearest-pool';
+import { useElevation } from '@/lib/shadows';
 import { hydrateWeatherFromBackend } from '@/lib/weather';
 
 export default function HomeScreen() {
   const router = useRouter(), colors = useThemeColors(), s = useScoper();
   const city = useActiveCityName(), nearest = useNearestPool();
+  const lift = useElevation(1);
   const now = useNow();
   const [refreshing, setRefreshing] = useState(false);
   const collections = useMemo(() => CURATED_COLLECTION_ORDER.map(id => CURATED_COLLECTIONS[id]).filter(x => activeCollectionItems(x,now).length), [now]);
@@ -44,25 +46,29 @@ export default function HomeScreen() {
       <Text className="mt-1 font-dm text-label text-taupe">A good evening is closer than you think.</Text>
     </View>
     <TouchableOpacity accessibilityRole="button" accessibilityLabel="Search places, dishes and shows" onPress={()=>s.openSheet('search')}
-      className="flex-row items-center gap-x-2.5 rounded-full bg-surface-raised px-3.5 py-3">
+      style={[lift,{borderColor:colors['control-edge'],borderWidth:1,minHeight:52}]}
+      className="flex-row items-center gap-x-2.5 rounded-full bg-surface-raised pl-3.5 pr-[7px] py-[7px]">
       <Glyph name="search" size={17} color={colors['fg-muted']} />
       <Text numberOfLines={1} className="min-w-0 flex-1 font-dm text-label text-taupe">Places, dishes, or a little inspiration</Text>
-      <Glyph name="arrow" size={17} color={colors['fg-accent']} />
+      <View className="h-[37px] w-[37px] items-center justify-center rounded-full bg-accent-fill">
+        <Glyph name="arrow" size={17} color={colors['on-accent']} />
+      </View>
     </TouchableOpacity>
-    <HRow gap={8} bleed={false}>
+    <View className="flex-row flex-wrap" style={{gap:6}}>
       {[{name:s.stay?'Update your stay':'Link your stay',glyph:'briefcase',press:()=>s.openStaySheet()},
         {name:'Late bites',glyph:'food',press:()=>router.push('/featured?q=late%20bites')},
         {name:'Open late',glyph:'clock',press:()=>router.push('/featured?q=open%20late')}].map(x=><TouchableOpacity key={x.name} accessibilityRole="button" onPress={x.press}
-          className="flex-row items-center gap-x-1.5 rounded-full bg-surface-raised px-3 py-2" hitSlop={{top:5,bottom:5}}>
+          style={{backgroundColor:x.glyph==='briefcase'?colors['tile-eat']:colors['surface-raised'],borderColor:colors['control-edge'],borderWidth:1}}
+          className="flex-row items-center gap-x-1.5 rounded-full px-2.5 py-[7px]" hitSlop={{top:5,bottom:5}}>
           <Glyph name={x.glyph} size={13} color={colors['fg-muted']} /><Text className="font-dm text-fine text-ink">{x.name}</Text>
         </TouchableOpacity>)}
-    </HRow>
+    </View>
     <TouchableOpacity accessibilityRole="button" accessibilityLabel="Open your evening with Vee" onPress={()=>router.push('/create')}
-      style={{backgroundColor:colors.ribbon,minHeight:61.2,paddingHorizontal:14,paddingVertical:11,borderRadius:18,flexDirection:'row',alignItems:'center',gap:11}}>
-      <VeeMark size={26} color={colors['vee-strong']} />
+      style={[lift,{backgroundColor:colors.ribbon,borderColor:colors['ribbon-edge'],borderWidth:1,minHeight:61.2,paddingHorizontal:11,paddingVertical:8.4,borderRadius:13,flexDirection:'row',alignItems:'center',gap:7}]}>
+      <VeeMark size={28.9} color={colors['vee-strong']} />
       <View className="min-w-0 flex-1"><Text className="font-fraunces text-ink" style={{fontSize:15.3,lineHeight:18}}>Your evening, with Vee</Text>
         <Text className="mt-0.5 font-dm text-fine text-taupe">A little more city.</Text></View>
-      <Glyph name="arrow" size={16} color={colors['fg-muted']} />
+      <Glyph name="arrow" size={16} color={colors['vee-strong']} />
     </TouchableOpacity>
     <View className="gap-y-3 border-t border-edge-soft pt-4">
       <SectionHeading title="Around you" /><AroundYou tiles={tiles} />
@@ -74,11 +80,12 @@ export default function HomeScreen() {
           <Text className="font-dm-medium text-fine text-peach">See all</Text></TouchableOpacity></View>
       <View testID="nearest-preview" className="gap-y-2">
         {nearest.slice(0,3).map(x=><TouchableOpacity key={x.href} accessibilityRole="button" accessibilityLabel={`View ${x.name}`} onPress={()=>router.push(x.href)}
-          className="flex-row items-center gap-x-3 rounded-card bg-surface px-3 py-2.5">
-          <Photo uri={x.image} radius={9} style={{width:48,height:48}} />
-          <View className="min-w-0 flex-1"><Text numberOfLines={2} className="font-dm-medium text-card-name text-card-ink">{x.name}</Text>
-            <Text className="mt-1 font-dm text-fine text-card-muted">{[x.cuisine,x.price,x.distanceLabel].filter(Boolean).join(' · ')}</Text></View>
-          <Glyph name="chevron" size={14} color={colors['card-muted']} />
+          style={[lift,{borderColor:colors['control-edge'],borderWidth:1,minHeight:83}]}
+          className="flex-row items-center gap-x-3 rounded-setting bg-surface-raised px-[11px] py-[11px]">
+          <Photo uri={x.image} radius={11} style={{width:58,height:58}} />
+          <View className="min-w-0 flex-1"><Text numberOfLines={2} className="font-dm-medium text-card-name text-ink">{x.name}</Text>
+            <Text className="mt-1 font-dm text-fine text-taupe">{[x.cuisine,x.price,x.distanceLabel].filter(Boolean).join(' · ')}</Text></View>
+          <Glyph name="chevron" size={14} color={colors['fg-muted']} />
         </TouchableOpacity>)}
         {!nearest.length?<Text className="font-dm text-label text-taupe">Nearby places appear as the local catalog loads.</Text>:null}
       </View>

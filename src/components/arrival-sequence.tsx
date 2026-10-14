@@ -297,6 +297,7 @@ function Page({
 }
 
 function SingleFooter({ label, onPress }: { label: string; onPress: () => void }) {
+  const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const gutter = useAppGutter();
   return (
@@ -306,9 +307,9 @@ function SingleFooter({ label, onPress }: { label: string; onPress: () => void }
         activeOpacity={0.86}
         onPress={onPress}
         className="h-[58px] flex-row items-center justify-between rounded-full bg-ember px-5">
-        <VeeMark size={19} variant="compact" color="#FFFFFF" />
+        <VeeMark size={19} variant="compact" color={colors['on-accent']} />
         <Text className="font-dm-bold text-body-strong text-on-accent">{label}</Text>
-        <Glyph name="arrow" size={17} color="#FFFFFF" strokeWidth={1.7} />
+        <Glyph name="arrow" size={17} color={colors['on-accent']} strokeWidth={1.7} />
       </TouchableOpacity>
     </View>
   );
@@ -332,6 +333,7 @@ function SplitFooter({
   const insets = useSafeAreaInsets();
   const gutter = useAppGutter();
   const ink = useWashInk();
+  const colors = useThemeColors();
   return (
     <View style={{ paddingHorizontal: gutter, paddingBottom: insets.bottom + 16 }} className="pt-2">
       <View className="flex-row gap-x-3">
@@ -348,9 +350,9 @@ function SplitFooter({
           activeOpacity={0.86}
           onPress={onPrimary}
           className="h-[58px] flex-1 flex-row items-center justify-center gap-x-2 rounded-full bg-ember px-4">
-          {vee ? <VeeMark size={18} variant="compact" color="#FFFFFF" /> : null}
+          {vee ? <VeeMark size={18} variant="compact" color={colors['on-accent']} /> : null}
           <Text className="font-dm-bold text-body-strong text-on-accent">{primary}</Text>
-          {vee ? null : <Glyph name="arrow" size={16} color="#FFFFFF" strokeWidth={1.7} />}
+          {vee ? null : <Glyph name="arrow" size={16} color={colors['on-accent']} strokeWidth={1.7} />}
         </TouchableOpacity>
       </View>
       {note ? (

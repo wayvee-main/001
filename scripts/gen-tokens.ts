@@ -44,20 +44,18 @@ function genGlobalCss(): string {
 @tailwind components;
 @tailwind utilities;
 
-/* Wayvee theme tokens — "Vee Coral" palette, generated from src/lib/tokens.ts.
-   Light is the default (:root); dark overrides it under prefers-color-scheme,
-   which NativeWind resolves on native from the system scheme too (app.json's
-   userInterfaceStyle: "automatic"). RGB triples (no commas) for tokens that
+/* Wayvee Nightfall tokens, generated from src/lib/tokens.ts.
+   Light is the default (:root); .dark:root is the manual/system override.
+   appearance.ts resolves the system choice on web; NativeWind resolves it
+   on native. RGB triples (no commas) for tokens that
    go through Tailwind's <alpha-value> opacity modifier; full rgba() strings
    for tokens with fixed baked-in opacity. */
 :root {
 ${buildCssBlock('light')}
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
+.dark:root {
 ${buildCssBlock('dark')}
-  }
 }
 `;
 }

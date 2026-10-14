@@ -86,6 +86,10 @@ const PAIRS: Pair[] = [
   { name: 'card-muted on surface', fg: role('card-muted'), bg: role('surface'), min: AA_TEXT },
   { name: 'fg on ribbon', fg: role('fg'), bg: role('ribbon'), min: AA_TEXT },
   { name: 'fg-muted on ribbon', fg: role('fg-muted'), bg: role('ribbon'), min: AA_TEXT },
+  { name: 'fg-muted on surface-raised', fg: role('fg-muted'), bg: role('surface-raised'), min: AA_TEXT },
+  { name: 'on-selected on selected-surface', fg: role('on-selected'), bg: role('selected-surface'), min: AA_TEXT },
+  { name: 'selected-glyph on selected-surface', fg: role('selected-glyph'), bg: role('selected-surface'), min: AA_LARGE },
+  { name: 'navigation-muted on selected-surface', fg: role('navigation-muted'), bg: role('selected-surface'), min: AA_TEXT },
   ...['tile-eat', 'tile-bars', 'tile-routes', 'tile-events'].flatMap((surface) => [
     { name: `fg on ${surface}`, fg: role('fg'), bg: role(surface), min: AA_TEXT },
     { name: `fg-muted on ${surface}`, fg: role('fg-muted'), bg: role(surface), min: AA_TEXT },
@@ -98,9 +102,6 @@ const PAIRS: Pair[] = [
     fg: role('on-accent'),
     bg: role('accent-fill'),
     min: AA_TEXT,
-    exception:
-      'Approved brand coral. White on #E85D2C is 3.55:1 — clears AA for large/UI text, short of it for body. ' +
-      'Darkening the fill to reach 4.5:1 would change the brand, so the CTA is the one documented exception.',
   },
 ];
 

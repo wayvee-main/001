@@ -465,9 +465,9 @@ export default function PlanDraftScreen() {
             accessibilityRole="button"
             activeOpacity={0.85}
             onPress={generateNight}
-            className="flex-row items-center justify-center gap-x-2 rounded-full bg-rust py-[15px] shadow-sm">
-            <Icon d={ICON_PATHS.sparkles} size={15} color="#FFFFFF" strokeWidth={2} />
-            <Text className="font-dm-bold text-body-strong text-white">Generate itinerary</Text>
+            className="flex-row items-center justify-center gap-x-2 rounded-full bg-accent-fill py-[15px] shadow-sm">
+            <Icon d={ICON_PATHS.sparkles} size={15} color={colors['on-accent']} strokeWidth={2} />
+            <Text className="font-dm-bold text-body-strong text-on-accent">Generate itinerary</Text>
           </TouchableOpacity>
         ) : null}
 

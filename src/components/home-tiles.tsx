@@ -1,4 +1,5 @@
 import { useColorScheme } from 'nativewind';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useId } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Svg, { Defs, Image as SvgImage, Mask, Rect, RadialGradient, Stop } from 'react-native-svg';
@@ -113,26 +114,30 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
               activeOpacity={0.78}
               onPress={tile.onPress}
               style={{
-                backgroundColor: colors[tile.tint],
-                borderColor: colors['edge-soft'],
-                borderWidth: StyleSheet.hairlineWidth,
+                backgroundColor: colors['surface-raised'],
+                borderColor: colors['surface-raised'],
+                borderWidth: 1,
                 // The spotlight is drawn to the tile's full bounds; without
                 // this it would square off the panel's corners.
                 overflow: 'hidden',
               }}
               className="min-h-[100px] flex-1 rounded-panel px-3 pb-3 pt-3">
+              <LinearGradient pointerEvents="none" colors={[colors['surface-raised'], colors['surface-raised'], colors[tile.tint]]}
+                locations={[0, 0.5, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.7, y: 1 }} style={StyleSheet.absoluteFill} />
               {tile.image ? <TileSpotlight uri={tile.image} /> : null}
               {/* Glyph and count read as one mark, so they sit together
                * rather than at opposite corners of the tile. */}
               <View className="flex-row items-center justify-between gap-x-2">
-                <Glyph name={tile.glyph} size={15} color={colors[tile.ink]} strokeWidth={1.9} />
+                <View className="h-7 w-7 items-center justify-center rounded-full bg-surface-raised">
+                  <Glyph name={tile.glyph} size={16} color={colors[tile.ink]} strokeWidth={1.9} />
+                </View>
                 <Text
                   style={{ color: colors[tile.ink], fontVariant: ['tabular-nums'] }}
-                  className="font-fraunces text-[18px] leading-[22px]">
+                  className="font-dm-medium text-[18px] leading-[22px]">
                   {tile.count}
                 </Text>
               </View>
-              <Text numberOfLines={1} className="mt-1 font-dm-medium text-body text-ink">{tile.label}</Text>
+              <Text numberOfLines={1} className="mt-2 font-fraunces text-[20px] leading-[23px] text-ink">{tile.label}</Text>
               <Text numberOfLines={2} className="mt-0.5 font-dm text-fine text-taupe">{tile.hint}</Text>
             </TouchableOpacity>
           ))}

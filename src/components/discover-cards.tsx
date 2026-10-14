@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { Glyph } from '@/components/glyph';
 import { Photo } from '@/components/photo';
@@ -88,11 +89,15 @@ function eventCaption(x:ScoperEvent):string {
 
 export function EssentialEvent({event:x,onPress}:{event:ScoperEvent;onPress:()=>void}) {
   const {width}=useWindowDimensions();
+  const [bodyHeight,setBodyHeight]=useState(100);
+  // Reduce the entire containment by 10%, preserving text/glyph sizes and
+  // allowing real names and metadata to wrap. The photo absorbs the reduction.
+  const artHeight=Math.max(56,(111+bodyHeight)*.9-bodyHeight);
   const shortVenue=x.venue==='Fox Theater'?'Fox':x.venue==='Paramount Theatre'?'Paramount':x.venue;
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Explore ${x.name} at ${x.venue}`} onPress={onPress} activeOpacity={.78}
     className="overflow-hidden rounded-card bg-surface" style={{width:width<=400?149:157,alignSelf:'flex-start'}}>
-    <Photo uri={x.image} radius={0} style={{width:'100%',height:111}} />
-    <View style={{paddingHorizontal:11,paddingTop:10,paddingBottom:12}}>
+    <Photo uri={x.image} radius={0} style={{width:'100%',height:artHeight}} />
+    <View onLayout={e=>setBodyHeight(e.nativeEvent.layout.height)} style={{paddingHorizontal:11,paddingTop:10,paddingBottom:12}}>
       <Text numberOfLines={2} className="font-dm-medium text-card-name text-card-ink">{x.name}</Text>
       <Text numberOfLines={1} className="mt-[5px] font-dm text-fine text-card-muted">{eventCaption(x)}</Text>
       <View className="mt-[9px] flex-row flex-wrap items-center justify-between" style={{gap:4}}>
@@ -104,16 +109,19 @@ export function EssentialEvent({event:x,onPress}:{event:ScoperEvent;onPress:()=>
 
 export function StageHero({event:x,onPress}:{event:ScoperEvent;onPress:()=>void}) {
   const {width}=useWindowDimensions(),colors=useThemeColors();
+  const [bodyHeight,setBodyHeight]=useState(156);
+  const originalArt=width<=360?128.08:144.28;
+  const artHeight=Math.max(64,(originalArt+bodyHeight)*.85-bodyHeight);
   const date=x.startsAt?new Date(x.startsAt):null;
   const doors=x.date.match(/\bDoors\s+([^·]+)/i)?.[1]?.trim();
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Explore ${x.name}, ${eventDayGroupLabel(x)}, ${x.venue}`} onPress={onPress} activeOpacity={.8}
     className="overflow-hidden rounded-card bg-surface">
-    <View><Photo uri={x.image} radius={0} style={{width:'100%',height:width<=360?128.08:144.28}} />
+    <View><Photo uri={x.image} radius={0} style={{width:'100%',height:artHeight}} />
       {date?<View className="absolute left-3 top-3 rounded-control bg-surface px-2.5 py-2">
         <Text className="text-center font-dm text-fine text-card-muted">{date.toLocaleDateString('en-US',{month:'short',timeZone:'America/Los_Angeles'})}</Text>
         <Text className="text-center font-fraunces text-title text-card-ink">{date.toLocaleDateString('en-US',{day:'numeric',timeZone:'America/Los_Angeles'})}</Text>
       </View>:null}</View>
-    <View style={{padding:14,gap:7}}>
+    <View onLayout={e=>setBodyHeight(e.nativeEvent.layout.height)} style={{padding:14,gap:7}}>
       <Text numberOfLines={1} className="font-dm text-fine text-card-muted">{[eventCaption(x),x.ticketed?'Official tickets':x.priceLabel].filter(Boolean).join(' · ')}</Text>
       <Text numberOfLines={2} className="font-fraunces text-card-ink" style={{fontSize:25,lineHeight:28}}>{x.name}</Text>
       <View className="flex-row flex-wrap items-center justify-between" style={{gap:6}}><SmallFact glyph="pin" value={x.venue} /><SmallFact glyph={/ride/i.test(x.travel)?'car':'walk'} value={x.travel} /></View>

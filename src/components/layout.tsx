@@ -50,9 +50,9 @@ export function Screen({ children }: { children: ReactNode }) {
  * a 21pt glyph, a 15pt label, the 3pt gaps between them and 2pt under the label
  * (see (tabs)/_layout.tsx). A screen that ends on a real control has to clear
  * all of it, plus the bar's own bottom pad, or the control is unreachable. */
-const TAB_BAR_SPACE = 9 + 5 + 3 + 21 + 3 + 15 + 2;
+const TAB_BAR_SPACE = 64;
 /** The floor (tabs)/_layout.tsx puts under the bar's bottom padding. */
-const TAB_BAR_MIN_BOTTOM = 10;
+const TAB_BAR_MIN_BOTTOM = 18;
 
 export function ScreenScroll({
   children,
@@ -97,7 +97,7 @@ export function ScreenScroll({
         maxWidth: 720,
         alignSelf: 'center',
         paddingHorizontal: gutter,
-        paddingBottom: clearsTabBar ? 24 + TAB_BAR_SPACE + Math.max(insets.bottom, TAB_BAR_MIN_BOTTOM) : 24,
+        paddingBottom: clearsTabBar ? 24 + TAB_BAR_SPACE + insets.bottom + TAB_BAR_MIN_BOTTOM : 24,
         gap,
         ...(centerWhenShort ? { flexGrow: 1, justifyContent: 'center' as const } : null),
       }}>

@@ -59,7 +59,7 @@ export function HomeHeader({
   return (
     <View style={{ paddingTop: 10 }} className="flex-row items-start justify-between gap-x-3">
       <View className="min-w-0 flex-1">
-        <Text numberOfLines={1} className="font-dm-bold text-body text-ink">
+        <Text numberOfLines={1} className="font-dm text-body text-taupe">
           {locationLabel}
         </Text>
         {/* Its own line rather than appended to the location: at 360dp the two
@@ -78,7 +78,7 @@ export function HomeHeader({
           accessibilityLabel="Open notifications"
           activeOpacity={0.72}
           onPress={onNotifications}
-          className="h-9 w-9 items-center justify-center rounded-full">
+          className="h-9 w-9 items-center justify-center rounded-full bg-surface-raised">
           <Glyph name="bell" size={18} color={colors.fg} strokeWidth={1.55} />
           {hasReminders ? (
             <View
@@ -95,7 +95,7 @@ export function HomeHeader({
           accessibilityLabel="Your Wayvee profile"
           activeOpacity={0.78}
           onPress={onProfile}
-          className="h-9 w-9 items-center justify-center rounded-full">
+          className="h-9 w-9 items-center justify-center rounded-full bg-surface-raised">
           <Glyph name="user" size={19} color={colors.fg} strokeWidth={1.55} />
         </TouchableOpacity>
       </View>

@@ -433,6 +433,7 @@ export function AuthForm({
   titleVariant?: 'sheet' | 'page';
 }) {
   const { authError, clearAuthError, register, session, signIn, signInWithGoogle } = useScoper();
+  const colors = useThemeColors();
   const [mode, setMode] = useState<'sign-in' | 'create'>('sign-in');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -532,7 +533,7 @@ export function AuthForm({
         activeOpacity={0.75}
         onPress={googleAccess}
         className={`mt-4 h-[48px] flex-row items-center justify-center gap-x-2.5 rounded-full border border-sand bg-cream ${busy ? 'opacity-60' : ''}`}>
-        {busyAction === 'google' ? <ActivityIndicator color="#FFFFFF" /> : <GoogleLogo size={17} />}
+        {busyAction === 'google' ? <ActivityIndicator color={colors.fg} /> : <GoogleLogo size={17} />}
         <Text className="font-dm-medium text-[13.5px] text-ink">Continue with Google</Text>
       </TouchableOpacity>
 
@@ -577,7 +578,7 @@ export function AuthForm({
         activeOpacity={0.82}
         onPress={submit}
         className={`mt-4 h-[48px] items-center justify-center rounded-full bg-ember ${busy ? 'opacity-60' : ''}`}>
-        {busyAction === 'email' ? <ActivityIndicator color="#FFFFFF" /> : <Text className="font-dm-bold text-[14px] text-white">{submitLabel}</Text>}
+        {busyAction === 'email' ? <ActivityIndicator color={colors['on-accent']} /> : <Text className="font-dm-bold text-[14px] text-on-accent">{submitLabel}</Text>}
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -668,7 +669,7 @@ function LogoutSheet() {
           disabled={signingOut}
           onPress={confirmLogout}
           className="items-center rounded-full bg-ember py-[15px]" style={{ opacity: signingOut ? 0.6 : 1 }}>
-          <Text className="font-dm-medium text-[14.5px] text-white">{signingOut ? 'Logging out…' : 'Log out'}</Text>
+          <Text className="font-dm-medium text-[14.5px] text-on-accent">{signingOut ? 'Logging out…' : 'Log out'}</Text>
         </TouchableOpacity>
         <TouchableOpacity accessibilityRole="button" activeOpacity={0.8} disabled={signingOut} onPress={closeSheet} className="items-center rounded-full border border-sand py-[15px]">
           <Text className="font-dm-medium text-[14.5px] text-ink">Stay signed in</Text>
@@ -864,9 +865,9 @@ function StaySheet() {
           disabled={busy !== null}
           activeOpacity={0.82}
           onPress={save}
-          className={`flex-row items-center justify-center gap-x-2 rounded-full bg-rust py-[15px] ${busy ? 'opacity-60' : ''}`}>
+          className={`flex-row items-center justify-center gap-x-2 rounded-full bg-accent-fill py-[15px] ${busy ? 'opacity-60' : ''}`}>
           {busy === 'save' ? <ActivityIndicator size="small" color={c['on-accent']} /> : null}
-          <Text className="font-dm-bold text-[14px] text-white">{stay ? 'Save changes' : 'Link my stay'}</Text>
+          <Text className="font-dm-bold text-[14px] text-on-accent">{stay ? 'Save changes' : 'Link my stay'}</Text>
         </TouchableOpacity>
         {stay ? (
           <TouchableOpacity
@@ -1143,6 +1144,7 @@ function SearchOverlay() {
  * no key, rate limit, network down, a request that fails validation — falls
  * back to ordinary browsing rather than showing an error (CLAUDE.md #6). */
 function AskSheet() {
+  const colors = useThemeColors();
   const router = useRouter();
   const { closeSheet, showToast, deviceLocation, tasteTags, pacePreference, setAskPlan, askPlan, askRequest } = useScoper();
   const curatedCoords = useCuratedCoords();
@@ -1244,8 +1246,8 @@ function AskSheet() {
           activeOpacity={0.85}
           disabled={busy || !text.trim()}
           onPress={submit}
-          className={`items-center rounded-full py-[15px] ${busy || !text.trim() ? 'bg-sand' : 'bg-rust'}`}>
-          {busy ? <ActivityIndicator color="#FFFFFF" /> : <Text className="font-dm-bold text-[14.5px] text-white">Plan it</Text>}
+          className={`items-center rounded-full py-[15px] ${busy || !text.trim() ? 'bg-sand' : 'bg-accent-fill'}`}>
+          {busy ? <ActivityIndicator color={colors['on-accent']} /> : <Text className="font-dm-bold text-[14.5px] text-on-accent">Plan it</Text>}
         </TouchableOpacity>
       </View>
     </SheetBase>

@@ -64,7 +64,7 @@ export default function NotificationsScreen() {
               <Text className="mt-0.5 font-dm text-label text-taupe">Enable notifications for a nudge before plans and on checkout day.</Text>
             </View>
             <TouchableOpacity accessibilityRole="button" activeOpacity={0.75} onPress={enableNotifications} className="rounded-full bg-ember px-3.5 py-2">
-              <Text className="font-dm-medium text-label text-white">Enable</Text>
+              <Text className="font-dm-medium text-label text-on-accent">Enable</Text>
             </TouchableOpacity>
           </RaisedView>
         ) : null}

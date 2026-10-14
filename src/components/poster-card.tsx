@@ -6,6 +6,7 @@ import { PlanChip } from '@/components/plan-actions';
 import { Badge, Icon } from '@/components/ui';
 import { useRaisedSurface } from '@/lib/shadows';
 import { useScoper } from '@/lib/store';
+import { useThemeColors } from '@/lib/theme';
 import { viatorHighlightChip, viatorPriceLabel, type ViatorPick } from '@/lib/viator';
 
 const TICKET_ICON = 'M15 5l0 2 M15 11l0 2 M15 17l0 2 M5 5h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-3a2 2 0 0 0 0 -4v-3a2 2 0 0 1 2 -2';
@@ -16,6 +17,7 @@ export const POSTER_WIDTH = 173;
  * Viator picks are shown (e.g. Discover's "Experiences near you"), so both
  * carousels stay pixel-identical instead of drifting apart over time. */
 export function ViatorPickCard({ pick, onPress }: { pick: ViatorPick; onPress: () => void }) {
+  const colors = useThemeColors();
   const surface = useRaisedSurface(2);
   const price = viatorPriceLabel(pick);
   const highlight = viatorHighlightChip(pick);
@@ -37,7 +39,7 @@ export function ViatorPickCard({ pick, onPress }: { pick: ViatorPick; onPress: (
           activeOpacity={0.75}
           onPress={() => Linking.openURL(pick.bookingUrl).catch(() => showToast('Could not open Viator'))}
           className="absolute right-1.5 top-1.5 h-7 w-7 items-center justify-center rounded-full bg-ember">
-          <Icon d={TICKET_ICON} size={13} color="#FFFFFF" strokeWidth={2} />
+          <Icon d={TICKET_ICON} size={13} color={colors['on-accent']} strokeWidth={2} />
         </TouchableOpacity>
       </View>
       <View className="px-3 py-2.5">

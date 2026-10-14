@@ -11,20 +11,11 @@
  * aliases are kept pointing at the same hex so existing className strings in src/app
  * and src/components keep working; new code should reach for the semantic name.
  *
- * Palette: "Vee Coral" — coral #E85D2C, marigold #FFC757 and cobalt #6F5BD1 over a
- * paper/canvas ground, taken from the approved onboarding + home reference build.
- *
- * Two rules this palette enforces, both load-bearing:
- *
- * `accent` is not text. Coral on paper is 3.4:1 — fine for a fill, a border, an icon
- * or a progress rail, short of AA for a sentence. Accent *text* is `fg-accent`
- * (#A14325 light / #FF9271 dark), which clears AA on both `bg` and `surface`. The
- * one deliberate exception is white on `accent-fill`: the coral CTA is the approved
- * brand button, and darkening it to reach 4.5:1 would change the brand. It is
- * documented in DESIGN.md rather than silently "fixed" here.
- *
- * `warm` is a fill, never a lettering color. Marigold is 1.7:1 on paper — it exists
- * to be sat on, and anything sitting on it uses `warm-strong`.
+ * Palette: approved Nightfall editorial system. Warm paper in light, plum
+ * ground in dark, paper-to-category gradients, warm neutral discovery cards.
+ * Filled controls use the approved rust/light and peach/dark pairing with
+ * theme-specific on-accent ink. Brand accent and warm fills remain distinct
+ * from readable supporting text roles.
  */
 
 export type ThemeValue = { light: string; dark: string };
@@ -59,6 +50,12 @@ export const ROLES: Record<string, ThemeValue> = {
   'card-ink': { light: '#2D2926', dark: '#F5EDE3' },
   'card-muted': { light: '#645D56', dark: '#C3B9AF' },
   ribbon: { light: '#EEE6F0', dark: '#29192E' },
+  'ribbon-edge': { light: '#DBCFE0', dark: '#493C50' },
+  'control-edge': { light: '#E0D5C9', dark: '#493C50' },
+  'selected-surface': { light: '#2B1C35', dark: '#29192E' },
+  'on-selected': { light: '#FFF7ED', dark: '#FFF7ED' },
+  'selected-glyph': { light: '#F5B494', dark: '#F5B494' },
+  'navigation-muted': { light: '#D8C7DD', dark: '#D8C7DD' },
   'tile-eat': { light: '#F2E8CA', dark: '#493E2E' },
   'tile-bars': { light: '#F2DFDF', dark: '#493342' },
   'tile-routes': { light: '#E6DEEF', dark: '#3A3047' },
@@ -68,8 +65,8 @@ export const ROLES: Record<string, ThemeValue> = {
   // `surface`, which the exact CTA hex does not (2.93:1). The CTA keeps the
   // approved hex below; this is the role that has to survive being drawn small.
   accent: { light: '#E45526', dark: '#FF9271' }, // brand accent — icons, borders, rails
-  'accent-fill': { light: '#E85D2C', dark: '#E85D2C' }, // CTA background — approved coral, both themes
-  'on-accent': { light: '#FFFFFF', dark: '#FFFFFF' }, // text/icon on accent-fill
+  'accent-fill': { light: '#B84624', dark: '#F0835C' }, // approved editorial control fill
+  'on-accent': { light: '#FFFAF4', dark: '#2C1811' }, // theme-paired CTA ink
   open: { light: '#38714F', dark: '#83D0A8' }, // open-now / confirmed / live
   warm: { light: '#FFC757', dark: '#FFC757' }, // marigold — FILL ONLY, never text (see below)
   'warm-strong': { light: '#543F18', dark: '#3D2D10' }, // ink on a marigold FILL — not on warm-tint
@@ -154,6 +151,8 @@ export const TYPE_SCALE: Record<string, [string, { lineHeight: string; letterSpa
 export const RADIUS: Record<string, string> = {
   control: '12px', // buttons, option pills, inputs, small thumbnails
   card: '17px', // approved Essential containment
+  setting: '18px', // editorial place / preference rows
+  stat: '21px', // Profile count cards
   panel: '22px', // option cards, ribbons, the stay anchor
   sheet: '25px', // the Vee hero, bottom sheets, modals
 };

@@ -49,7 +49,7 @@ export default function VenueScreen() {
               activeOpacity={0.75}
               onPress={() => router.replace('/discover')}
               className="mt-5 rounded-full bg-ember px-6 py-3">
-              <Text className="font-dm-medium text-body text-white">Browse Discover</Text>
+              <Text className="font-dm-medium text-body text-on-accent">Browse Discover</Text>
             </TouchableOpacity>
           </View>
         </View>

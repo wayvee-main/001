@@ -102,8 +102,8 @@ export default function PlanScreen() {
               accessibilityRole="button"
               activeOpacity={0.8}
               onPress={() => router.push('/(tabs)/create')}
-              className="rounded-full bg-rust px-5 py-3">
-              <Text className="font-dm-bold text-label text-white">Ask for a plan</Text>
+              className="rounded-full bg-accent-fill px-5 py-3">
+              <Text className="font-dm-bold text-label text-on-accent">Ask for a plan</Text>
             </TouchableOpacity>
           </RaisedView>
         </ScreenScroll>
@@ -229,8 +229,8 @@ export default function PlanScreen() {
         {stopOrder.length === 0 ? (
           <RaisedView className="items-center gap-y-2 rounded-2xl p-6">
             <Text className="text-center font-dm text-body text-taupe">Nothing real matched that request tonight.</Text>
-            <TouchableOpacity accessibilityRole="button" activeOpacity={0.8} onPress={() => router.push('/(tabs)/discover')} className="rounded-full bg-rust px-5 py-3">
-              <Text className="font-dm-bold text-label text-white">Browse Discover</Text>
+            <TouchableOpacity accessibilityRole="button" activeOpacity={0.8} onPress={() => router.push('/(tabs)/discover')} className="rounded-full bg-accent-fill px-5 py-3">
+              <Text className="font-dm-bold text-label text-on-accent">Browse Discover</Text>
             </TouchableOpacity>
           </RaisedView>
         ) : (
