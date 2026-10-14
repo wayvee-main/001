@@ -40,32 +40,34 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   beside each section heading. Results are inset 20px, with 27px between sections.
   Rows sit directly on Nightfall with Fraunces 500 names and compact glyph facts.
 - On stage has one gently raised editorial lead with date, a 25px artist heading,
-  brief caption, a source-based description of up to 20 words/two lines
+  brief caption, a source-based description of up to 20 words on one line
+  with an ellipsis when needed
   (about 30% shorter than the previous version),
   and venue/time facts. Its right portrait is 78 × 114px
   (65 × 96px on narrow phones). Current listings replace samples.
   The hero uses level-1 elevation, 12px padding and a 12px radius. Both the hero
   and More on stage have a very faint 1px tonal border at roughly 4% ink opacity
   (`edge-soft` at half opacity), without affecting text or image contrast.
-- More on stage, More good tables and After dinner each use one horizontal photo row: 137px
-  elements, a shared 195px minimum height, 73px-high photos and 16px gaps.
-  More on stage has a
-  slightly raised paper surface with 8px padding, a 12px radius and level-1
-  shadow; its inset photos are 121px wide. The other two rows stay uncontained.
-  All Discover listing titles use at most five words, with an ellipsis when
-  shortened. More on stage titles are one line with ellipses. Other strip
-  titles use at most three lines; full titles stay
-  accessible and on detail pages.
-  For you shows two
-  supporting events and three bars; their See all actions expose the full pools.
+- More on stage, More good tables, After dinner and Rooms worth knowing use
+  single horizontal photo rows: 137px elements, 73px-high photos and 16px gaps.
+  All four have the same raised paper surface, 8px padding, 12px radius,
+  level-1 shadow and very faint 1px border (`edge-soft` at half opacity).
+  Inset photos are 121px wide. Heights fit content; the previous 195px minimum
+  is removed to avoid wasted space.
+- More on stage titles, captions and venue/time metadata each use one line.
+  Venue text shrinks with ellipses while time remains visible on that same row.
+  All Discover listing titles retain the five-word cap; other photo-row titles
+  use at most three lines. Full names and facts remain on the existing details.
+  For you shows two supporting events, three bars and three rooms. See all
+  exposes each full pool; More good tables keeps its existing See all destination.
 - Find a good table uses three uncontained restaurant notes, with right
   thumbnails, cuisine captions and price/distance glyphs. More good tables
   shows three distinct restaurants in its photo row with the same metadata.
   Names wrap naturally. **Find a good table has no See all action;
   More good tables keeps See all.**
 - A little wandering uses numbered route notes (23px numbers, 31px columns).
-  Rooms worth knowing uses venue notes with right-side photos. Supporting
-  thumbnails are 59 × 82px (47 × 73px on narrow phones).
+  Find a good table keeps right-side thumbnails at 59 × 82px
+  (47 × 73px on narrow phones).
 - Discover keeps category pills, full search, pull-to-refresh, city-aware data,
   See all actions, the original Vee logo and existing detail routes. Its intro
   reads “One good thing can lead to another.” The header shows the selected city.

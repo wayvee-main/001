@@ -19,29 +19,29 @@ function heroDescription(x:ScoperEvent):string {
   return briefWords(sentence,20);
 }
 
-function Fact({glyph,value,label}:{glyph:string;value:string;label?:string}) {
+function Fact({glyph,value,label,compact=false,flexible=false}:{glyph:string;value:string;label?:string;compact?:boolean;flexible?:boolean}) {
   const colors=useThemeColors();
-  return <View accessibilityLabel={label||value} className="flex-row items-center gap-x-1">
+  return <View accessibilityLabel={label||value} className="flex-row items-center gap-x-1" style={compact?{minWidth:0,flexShrink:flexible?1:0,flexGrow:flexible?1:0}:undefined}>
     <Glyph name={glyph} size={12} color={colors['fg-muted']} />
-    <Text className="font-dm text-fine text-taupe">{value}</Text>
+    <Text numberOfLines={compact?1:undefined} className="font-dm text-fine text-taupe" style={compact?{minWidth:0,flexShrink:1}:undefined}>{value}</Text>
   </View>;
 }
 
 /** Evening Trail notes and photo strips share the original detail routes. */
-function Note({name,caption,facts,image,index,divider,onPress,testID,accessibilityName,strip=false,elevated=false}:{name:string;caption:string;facts:ReactNode;image?:string;index?:number;divider:boolean;onPress:()=>void;testID:string;accessibilityName?:string;strip?:boolean;elevated?:boolean}) {
+function Note({name,caption,facts,image,index,divider,onPress,testID,accessibilityName,strip=false,elevated=false,compact=false}:{name:string;caption:string;facts:ReactNode;image?:string;index?:number;divider:boolean;onPress:()=>void;testID:string;accessibilityName?:string;strip?:boolean;elevated?:boolean;compact?:boolean}) {
   const {width}=useWindowDimensions(),narrow=width<=360;
   const colors=useThemeColors(),lift=useElevation(1);
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Explore ${accessibilityName||name}`} onPress={onPress} activeOpacity={.78} testID={testID}
     className={`items-start py-3.5 ${strip?'':`flex-row ${divider?'border-t border-edge-soft':''}`}`}
-    style={[strip?{width:137,minHeight:195,flexShrink:0}:{gap:12},elevated?{...lift,backgroundColor:colors['surface-raised'],borderRadius:12,padding:8}:null]}>
+    style={[strip?{width:137,flexShrink:0}:{gap:12},elevated?{...lift,backgroundColor:colors['surface-raised'],borderRadius:12,padding:8}:null]}>
     {elevated?<View pointerEvents="none" style={{position:'absolute',inset:0,borderRadius:12,borderWidth:1,borderColor:colors['edge-soft'],opacity:.5}} />:null}
     {strip&&image?<Photo uri={image} radius={8} style={{width:elevated?121:137,height:73,marginBottom:11}} />:null}
     {index!==undefined?<Text accessible={false} numberOfLines={1} className="font-fraunces text-peach"
       style={{width:31,flexShrink:0,fontSize:23,lineHeight:25.3}}>{String(index+1).padStart(2,'0')}</Text>:null}
     <View className={`min-w-0 ${strip?'w-full':'flex-1'}`}>
-      <Text testID="discover-listing-title" numberOfLines={elevated?1:strip?3:undefined} className="font-fraunces text-ink" style={{fontSize:strip?17:18,lineHeight:strip?19.55:20.7,letterSpacing:-.2}}>{briefWords(name,5)}</Text>
-      <Text className="font-dm text-fine text-taupe" style={{marginTop:strip?5:7}}>{caption}</Text>
-      <View className="flex-row flex-wrap" style={{marginTop:strip?8:11,columnGap:11,rowGap:4}}>{facts}</View>
+      <Text testID="discover-listing-title" numberOfLines={compact?1:strip?3:undefined} className="font-fraunces text-ink" style={{fontSize:strip?17:18,lineHeight:strip?19.55:20.7,letterSpacing:-.2}}>{briefWords(name,5)}</Text>
+      <Text numberOfLines={compact?1:undefined} className="font-dm text-fine text-taupe" style={{marginTop:strip?5:7}}>{caption}</Text>
+      <View testID={`note-facts-${testID}`} className="flex-row" style={{marginTop:strip?8:11,flexWrap:compact?'nowrap':'wrap',columnGap:compact?8:11,rowGap:4}}>{facts}</View>
     </View>
     {!strip&&image?<Photo uri={image} radius={9} style={{width:narrow?47:59,height:narrow?73:82}} />:null}
   </TouchableOpacity>;
@@ -72,7 +72,7 @@ export function TrailLead({event:x,onPress}:{event:ScoperEvent;onPress:()=>void}
       <Text className="font-dm text-fine text-peach">{date}</Text>
       <Text testID="discover-listing-title" className="mt-[7px] font-fraunces text-ink" style={{fontSize:25,lineHeight:27,letterSpacing:-.7}}>{briefWords(eventName(x),5)}</Text>
       <Text className="mt-[7px] font-dm text-fine text-taupe">{eventCaption(x)}</Text>
-      <Text testID="trail-lead-description" numberOfLines={2} className="mt-[7px] font-dm text-fine text-taupe">{heroDescription(x)}</Text>
+      <Text testID="trail-lead-description" numberOfLines={1} className="mt-[7px] font-dm text-fine text-taupe">{heroDescription(x)}</Text>
       <View className="mt-[11px] flex-row flex-wrap" style={{columnGap:11,rowGap:4}}>
         <Fact glyph="pin" value={shortVenue(x)} label={x.venue} /><Fact glyph="clock" value={x.time} label={`${date}, ${x.time}`} />
       </View>
@@ -82,13 +82,13 @@ export function TrailLead({event:x,onPress}:{event:ScoperEvent;onPress:()=>void}
 }
 
 export function ShowNote({event:x,onPress}:{event:ScoperEvent;onPress:()=>void}) {
-  return <Note accessibilityName={x.name} name={eventName(x)} caption={eventCaption(x)} image={x.image} strip elevated divider={false} onPress={onPress} testID={`trail-show-${x.id}`}
-    facts={<><Fact glyph="pin" value={shortVenue(x)} label={x.venue} /><Fact glyph="clock" value={x.time} label={`${eventDayGroupLabel(x)}, ${x.time}`} /></>} />;
+  return <Note accessibilityName={x.name} name={eventName(x)} caption={eventCaption(x)} image={x.image} strip elevated compact divider={false} onPress={onPress} testID={`trail-show-${x.id}`}
+    facts={<><Fact glyph="pin" value={shortVenue(x)} label={x.venue} compact flexible /><Fact glyph="clock" value={x.time} label={`${eventDayGroupLabel(x)}, ${x.time}`} compact /></>} />;
 }
 
 export function TableNote({restaurant:x,index,divider,onPress,strip=false}:{restaurant:Restaurant;index?:number;divider:boolean;onPress:()=>void;strip?:boolean}) {
   return <Note name={x.name} caption={x.cuisine==='American supper club'?'Supper club':x.cuisine} image={index===undefined?x.image:undefined} index={index}
-    divider={divider} strip={strip} onPress={onPress} testID={`trail-table-${x.id}`}
+    divider={divider} strip={strip} elevated={strip} onPress={onPress} testID={`trail-table-${x.id}`}
     facts={<><Fact glyph="wallet" value={x.price} label={`Price level ${x.price}`} /><Fact glyph={/ride/i.test(x.distanceLabel)?'car':/walk/i.test(x.distanceLabel)?'walk':'pin'} value={x.distanceLabel} /></>} />;
 }
 
@@ -100,7 +100,7 @@ const NIGHT_NOTES:Record<string,[string,string,string]>={
 export function BarNote({spot:x,onPress}:{spot:NightlifeSpot;onPress:()=>void}) {
   const note=NIGHT_NOTES[x.id]||[x.kind,'clock','Hours'];
   const street=x.address.split(',')[0].replace(/^\d+\s+/,'');
-  return <Note name={x.name} caption={note[0]} image={x.image} strip divider={false} onPress={onPress} testID={`trail-bar-${x.id}`}
+  return <Note name={x.name} caption={note[0]} image={x.image} strip elevated divider={false} onPress={onPress} testID={`trail-bar-${x.id}`}
     facts={<><Fact glyph="pin" value={street} label={x.address} /><Fact glyph={note[1]} value={note[2]} label={x.hours} /></>} />;
 }
 
@@ -112,11 +112,11 @@ export function RouteNote({route:x,index,divider,onPress}:{route:Crawl;index:num
 }
 
 const ROOM_CAPTIONS:Record<string,string>={yoshis:'Live music & dining',fox:'1928 movie palace',paramount:'Art Deco theatre',elis:'Blues, food & drinks'};
-export function RoomNote({venue:x,divider,onPress}:{venue:Venue;divider:boolean;onPress:()=>void}) {
+export function RoomNote({venue:x,onPress}:{venue:Venue;onPress:()=>void}) {
   const fact=x.detailFacts.find(f=>f.label==='Venue')?.value||x.sub1;
   const capacity=fact.match(/([\d,]+)-seat/i)?.[1]||fact.match(/capacity\s+(?:up to\s+)?([\d,]+)/i)?.[1];
   const primary=capacity||(/21\+/.test(fact)?'21+':/Art Deco/i.test(fact)?'Art Deco':null),travel=x.detailMeta.match(/(\d+)\s*min\s*(ride|walk)/i);
-  return <Note name={x.name} caption={ROOM_CAPTIONS[x.id]||x.sub1} image={x.image} divider={divider} onPress={onPress} testID={`field-room-${x.id}`}
+  return <Note name={x.name} caption={ROOM_CAPTIONS[x.id]||x.sub1} image={x.image} strip elevated divider={false} onPress={onPress} testID={`field-room-${x.id}`}
     facts={<>{primary?<Fact glyph={capacity?'seat':primary==='21+'?'user':'landmark'} value={primary} label={fact} />:null}
       {travel?<Fact glyph={travel[2].toLowerCase()==='ride'?'car':'walk'} value={`${travel[1]} min`} label={travel[0]} />:null}</>} />;
 }

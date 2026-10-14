@@ -113,7 +113,7 @@ export default function DiscoverScreen() {
     {routes.slice(0,mode==='All'?2:undefined).map((x,i)=><RouteNote key={x.id} route={x} index={i} divider={i>0} onPress={()=>router.push(`/crawl/${x.id}`)} />)}
   </TrailSection>:null;
   const rooms=venues.length?<TrailSection title="Rooms worth knowing" onAll={mode==='All'?()=>choose('Venues'):undefined}>
-    {venues.slice(0,mode==='All'?2:undefined).map((x,i)=><RoomNote key={x.id} venue={x} divider={i>0} onPress={()=>router.push(`/venue/${x.id}`)} />)}
+    <HRow gap={16} bleed={false}>{venues.slice(0,mode==='All'?3:undefined).map(x=><RoomNote key={x.id} venue={x} onPress={()=>router.push(`/venue/${x.id}`)} />)}</HRow>
   </TrailSection>:null;
   return <Screen><ScreenScroll gap={0} clearsTabBar refreshing={refreshing} onRefresh={onRefresh} keyboardShouldPersistTaps="handled">
     <View className="mb-5 flex-row items-center justify-between gap-x-3 pt-4">
