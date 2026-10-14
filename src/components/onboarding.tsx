@@ -43,7 +43,7 @@ export function Field({
         maxLength={maxLength}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        className={`h-[48px] rounded-card border px-4 font-dm text-[14px] text-ink ${focused ? 'border-rust bg-shell' : 'border-sand bg-shell'}`}
+        className={`h-[48px] rounded-card border px-4 font-dm text-[14px] text-ink ${focused ? 'border-rust bg-shell' : 'border-edge-faint bg-shell'}`}
       />
     </View>
   );

@@ -22,10 +22,11 @@ const WEIGHT_BAR_MAX = 56;
 const WEIGHT_BAR_FULL = 2.2;
 
 // Tabler's x (icons/outline/x.svg), cropped to its bounding box (6-18, 6-18).
-function Cross({ color = '#fff', size = 9 }: { color?: string; size?: number }) {
+function Cross({ color, size = 9 }: { color?: string; size?: number }) {
+  const colors = useThemeColors();
   return (
     <Svg width={size} height={size} viewBox="6 6 12 12">
-      <Path d="M18 6l-12 12 M6 6l12 12" stroke={color} strokeWidth={1.6} strokeLinecap="round" />
+      <Path d="M18 6l-12 12 M6 6l12 12" stroke={color ?? colors['on-accent']} strokeWidth={1.6} strokeLinecap="round" />
     </Svg>
   );
 }
@@ -105,8 +106,8 @@ export default function TasteScreen() {
                   accessibilityLabel={`Remove ${tag} from your taste profile`}
                   activeOpacity={0.7}
                   onPress={() => removeTasteTag(tag)}
-                  className="flex-row items-center gap-x-1.5 rounded-full bg-ember px-3 py-[7px]">
-                  <Text className="font-dm-medium text-label text-white">{tag}</Text>
+                  className="flex-row items-center gap-x-1.5 rounded-full bg-ember px-3 py-[7px] shadow-soft-light dark:shadow-soft-dark">
+                  <Text className="font-dm-medium text-label text-on-accent">{tag}</Text>
                   <Cross />
                 </TouchableOpacity>
               ))}
@@ -115,7 +116,7 @@ export default function TasteScreen() {
             <Text className="font-dm text-label text-taupe">Nothing yet — add a few below.</Text>
           )}
 
-          <View className="gap-y-2.5 rounded-card border border-sand bg-shell p-3.5 shadow-2xs">
+          <View className="gap-y-2.5 rounded-card border border-edge-faint bg-shell p-3.5 shadow-soft-light dark:shadow-soft-dark">
             <Text className="font-dm-medium text-label text-taupe">Add your own</Text>
             <View className="flex-row items-center gap-x-2">
               <TextInput
@@ -127,7 +128,7 @@ export default function TasteScreen() {
                 onSubmitEditing={submitCustomTag}
                 maxLength={40}
                 accessibilityLabel="New taste tag"
-                className="flex-1 rounded-full border border-sand bg-cream px-3.5 py-2 font-dm text-label text-ink"
+                className="flex-1 rounded-full border border-edge-faint bg-cream px-3.5 py-2 font-dm text-label text-ink"
               />
               <TouchableOpacity
                 accessibilityRole="button"
@@ -136,8 +137,8 @@ export default function TasteScreen() {
                 disabled={!customTag.trim()}
                 onPress={submitCustomTag}
                 style={!customTag.trim() ? { opacity: 0.5 } : undefined}
-                className="rounded-full bg-ember px-4 py-2">
-                <Text className="font-dm-medium text-label text-white">Add</Text>
+                className="rounded-full bg-ember px-4 py-2 shadow-soft-light dark:shadow-soft-dark">
+                <Text className="font-dm-medium text-label text-on-accent">Add</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -153,7 +154,7 @@ export default function TasteScreen() {
                     accessibilityLabel={`Add ${tag} to your taste profile`}
                     activeOpacity={0.7}
                     onPress={() => addTasteTag(tag)}
-                    className="rounded-full border border-sand bg-shell px-3 py-[7px]">
+                    className="rounded-full border border-edge-faint bg-shell px-3 py-[7px]">
                     <Text className="font-dm-medium text-label text-ink">+ {tag}</Text>
                   </TouchableOpacity>
                 ))}

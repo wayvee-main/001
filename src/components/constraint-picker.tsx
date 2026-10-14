@@ -13,11 +13,11 @@
 // only the pill and rewrites the open/close behaviour is how the two drift.
 
 import { useEffect, useState } from 'react';
-import { Animated, Easing, LayoutAnimation, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Easing, LayoutAnimation, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { Glyph } from '@/components/glyph';
 import { useReducedMotionPreference } from '@/lib/motion';
-import { useRaisedSurface } from '@/lib/shadows';
+import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
 
 /** One option on an open rail. `key` only has to be unique within its rail. */
@@ -45,7 +45,7 @@ export function MetaValue({
   spokenLabel?: string;
   onPress: () => void;
 }) {
-  const colors = useThemeColors();
+  const colors = useThemeColors(), surface = useControlSurface();
   return (
     <TouchableOpacity
       accessibilityRole="button"
@@ -53,7 +53,7 @@ export function MetaValue({
       activeOpacity={0.6}
       hitSlop={8}
       onPress={onPress}
-      style={{ backgroundColor: colors['surface-soft'], borderColor: colors['edge-soft'], borderWidth: StyleSheet.hairlineWidth }}
+      style={surface}
       className="h-8 shrink-0 flex-row items-center gap-x-1.5 rounded-full px-2.5">
       <Glyph name={glyph} size={13} color={colors['fg-muted']} strokeWidth={1.7} />
       {/* The value, not just the icon. Three bare glyphs read as unlabelled
@@ -82,7 +82,7 @@ export function ConstraintRail({
   onChoose: () => void;
 }) {
   const colors = useThemeColors();
-  const raisedSurface = useRaisedSurface(2);
+  const raisedSurface = useRaisedSurface(1), control = useControlSurface(), selectedControl = useControlSurface(true);
   return (
     <Animated.View
       style={{
@@ -105,13 +105,9 @@ export function ConstraintRail({
                 option.onSelect();
                 onChoose();
               }}
-              style={{
-                backgroundColor: option.selected ? colors['vee-tint'] : colors['surface-soft'],
-                borderColor: option.selected ? colors['vee-strong'] : colors['edge-soft'],
-                borderWidth: StyleSheet.hairlineWidth,
-              }}
+              style={option.selected ? selectedControl : control}
               className="h-9 items-center justify-center rounded-full px-3">
-              <Text style={{ color: option.selected ? colors['vee-strong'] : colors.fg }} className="font-dm-medium text-meta">
+              <Text style={{ color: option.selected ? colors['on-selected'] : colors.fg }} className="font-dm-medium text-meta">
                 {option.label}
               </Text>
             </TouchableOpacity>

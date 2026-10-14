@@ -3,7 +3,7 @@ import { ScrollView, Text, TouchableOpacity, View, type ViewStyle } from 'react-
 
 import { Glyph } from '@/components/glyph';
 import type { HomeSuggestion } from '@/lib/daypart';
-import { useRaisedSurface } from '@/lib/shadows';
+import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
 import { useWeatherNow, weatherLine } from '@/lib/weather';
 
@@ -54,7 +54,7 @@ export function HomeHeader({
   onNotifications: () => void;
   onProfile: () => void;
 }) {
-  const colors = useThemeColors();
+  const colors = useThemeColors(), control = useControlSurface();
   const weather = useWeatherNow();
   return (
     <View style={{ paddingTop: 10 }} className="flex-row items-start justify-between gap-x-3">
@@ -77,6 +77,7 @@ export function HomeHeader({
           accessibilityRole="button"
           accessibilityLabel="Open notifications"
           activeOpacity={0.72}
+          style={control}
           onPress={onNotifications}
           className="h-9 w-9 items-center justify-center rounded-full bg-surface-raised">
           <Glyph name="bell" size={18} color={colors.fg} strokeWidth={1.55} />
@@ -94,6 +95,7 @@ export function HomeHeader({
           accessibilityRole="button"
           accessibilityLabel="Your Wayvee profile"
           activeOpacity={0.78}
+          style={control}
           onPress={onProfile}
           className="h-9 w-9 items-center justify-center rounded-full bg-surface-raised">
           <Glyph name="user" size={19} color={colors.fg} strokeWidth={1.55} />
@@ -129,7 +131,7 @@ export function VeeHero({
 }) {
   const colors = useThemeColors();
   const lift = useSoftLift();
-  const launcherSurface = useRaisedSurface(2);
+  const launcherSurface = useRaisedSurface(1);
 
   return (
     <View

@@ -46,7 +46,7 @@ import { saveNightDraft } from '@/lib/itinerary';
 import { defaultDinnerMinutes } from '@/lib/arrival';
 import { cityStateDisplayLabel } from '@/lib/location';
 import { useReducedMotionPreference } from '@/lib/motion';
-import { useRaisedSurface } from '@/lib/shadows';
+import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
 import { useAllPlaces, useCuratedCoords, useCuratedHours } from '@/lib/places';
 import { recordRecentAsk } from '@/lib/recent-asks';
 import { buildSearchIndex, queryIndex, type SearchResultKind } from '@/lib/search';
@@ -299,7 +299,7 @@ export default function CreateScreen() {
     savedPlaceKeys,
   } = useScoper();
   const colors = useThemeColors();
-  const raisedSurface = useRaisedSurface(2);
+  const raisedSurface = useRaisedSurface(1), control = useControlSurface(), primarySurface = useControlSurface(false, true);
   const curatedCoords = useCuratedCoords();
   const curatedHours = useCuratedHours();
   const weatherNow = useWeatherNow();
@@ -903,7 +903,7 @@ export default function CreateScreen() {
               </TouchableOpacity>
               <View className="flex-row items-center" style={{gap:9}}>
                 <TouchableOpacity accessibilityRole="button" accessibilityLabel="Focus the Vee composer" onPress={() => focusedInputRef.current?.focus()} hitSlop={4}
-                  className="h-9 w-9 items-center justify-center rounded-full bg-surface">
+                  style={control} className="h-9 w-9 items-center justify-center rounded-full">
                   <Glyph name="mic" size={16} color={colors.fg} />
                 </TouchableOpacity>
             <Animated.View style={{ transform: [{ scale: sendMotion.interpolate({ inputRange: [0, 1], outputRange: [0.94, 1] }) }] }}>
@@ -919,7 +919,7 @@ export default function CreateScreen() {
                 hitSlop={6}
                 disabled={asking}
                 onPress={() => void submitAsk(promptReady ? promptText : askExampleLabel)}
-                style={{ opacity: asking ? 0.48 : 1 }}
+                style={[primarySurface,{ opacity: asking ? 0.48 : 1 }]}
                 className="h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ember">
                 {asking ? (
                   <ActivityIndicator size="small" color={colors['on-accent']} />
@@ -978,7 +978,7 @@ export default function CreateScreen() {
                           router.push(match.href as never);
                         }}
                         style={{ backgroundColor: index === 0 ? colors['surface-soft'] : colors['surface-raised'] }}
-                        className={`min-h-[64px] flex-row items-center gap-x-3 px-3 py-2.5 ${index === 0 ? 'rounded-card' : 'border-t border-sand2'}`}>
+                        className={`min-h-[64px] flex-row items-center gap-x-3 px-3 py-2.5 ${index === 0 ? 'rounded-card' : 'border-t border-edge-faint2'}`}>
                         <View
                           style={{ backgroundColor: colors['vee-tint'] }}
                           className="h-10 w-10 shrink-0 items-center justify-center rounded-full">

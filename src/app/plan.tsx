@@ -94,7 +94,7 @@ export default function PlanScreen() {
         <ScreenScroll gap={18}>
           <HeaderRow title="Plan" />
           <RaisedView className="items-center gap-y-3 rounded-2xl p-6">
-            <View className="h-12 w-12 items-center justify-center rounded-full border border-sand bg-coral-50">
+            <View className="h-12 w-12 items-center justify-center rounded-full border border-edge-faint bg-coral-50">
               <Icon d={ICON_PATHS.ticket} size={20} color={colors.rust} strokeWidth={1.9} />
             </View>
             <Text className="text-center font-dm text-body text-taupe">Nothing to show yet — ask Vee for a plan.</Text>
@@ -219,7 +219,7 @@ export default function PlanScreen() {
             accessibilityRole="button"
             activeOpacity={0.75}
             onPress={() => router.push('/(tabs)/discover')}
-            className="h-11 flex-row items-center justify-center rounded-full border border-sand bg-shell px-4">
+            className="h-11 flex-row items-center justify-center rounded-full border border-edge-faint bg-shell px-4">
             <Text className="font-dm-medium text-label text-ink">Browse Discover instead</Text>
           </TouchableOpacity>
         )}

@@ -14,12 +14,15 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   34px normally, 30px on phones up to 400px. Use `useAppGutter`.
 - Home keeps four tiles, ordered Eat, Bars, Routes, Events. Counts describe
   actual inventory, never unsupported opening status.
-  Tiles use solid category tints without gradients, a 1px paper border,
-  round paper glyph discs and serif labels.
+  Tiles use neutral raised paper without gradients or category fills, a very
+  faint 1px edge, level-1 elevation, neutral glyph discs and serif labels.
   Home search has a filled round arrow; the stay chip uses the Eat tint.
-  Chips and inputs use the approved control edge. Filled controls pair
-  `accent-fill` with `on-accent` in both themes, never hardcoded white.
-- “Your evening, with Vee” is a compact ribbon, with a pale light-mode surface.
+  The Home stay chip retains its existing Eat tint and control edge. Other
+  chips and buttons share neutral raised paper, level-1 elevation and
+  `edge-faint` (4% ink) borders. Selected choices use `selected-surface` /
+  `on-selected`; primary actions use `accent-fill` / `on-accent`. Inputs retain
+  their stronger control edge and focus treatment. Never hardcode white on coral.
+- “Your evening, with Vee” is a compact neutral raised-paper ribbon in both themes.
   Home's dividers are faint. The ribbon has a 1px theme-aware edge and 13px radius.
 - For you → Nearest is **three vertical rows**, with **See all** opening `/nearest`.
   The default pool targets 24 real results (at least 20 where the catalog has
@@ -47,11 +50,11 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   (65 × 96px on narrow phones). Current listings replace samples.
   The hero uses level-1 elevation, 12px padding and a 12px radius. Both the hero
   and More on stage have a very faint 1px tonal border at roughly 4% ink opacity
-  (`edge-soft` at half opacity), without affecting text or image contrast.
+  (`edge-faint`), without affecting text or image contrast.
 - More on stage, More good tables, After dinner and Rooms worth knowing use
   single horizontal photo rows: 137px elements, 73px-high photos and 16px gaps.
   All four have the same raised paper surface, 8px padding, 12px radius,
-  level-1 shadow and very faint 1px border (`edge-soft` at half opacity).
+  level-1 shadow and very faint 1px border (`edge-faint`).
   Inset photos are 121px wide. Heights fit content; the previous 195px minimum
   is removed to avoid wasted space.
 - More on stage titles, captions and venue/time metadata each use one line.

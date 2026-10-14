@@ -48,7 +48,7 @@ export function ListRow({
       accessibilityLabel={`View ${title}`}
       activeOpacity={0.72}
       onPress={onPress}
-      className={`flex-row items-center gap-x-3 px-3.5 py-3 ${divider ? 'border-b border-sand' : ''}`}>
+      className={`flex-row items-center gap-x-3 px-3.5 py-3 ${divider ? 'border-b border-edge-faint' : ''}`}>
       <Photo uri={image} radius={14} style={{ width: 60, height: 60, ...elevation }} />
       <View className="min-w-0 flex-1">
         <Text numberOfLines={1} ellipsizeMode="tail" className="font-dm-bold text-[14px] text-ink">

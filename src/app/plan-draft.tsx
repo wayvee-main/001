@@ -48,6 +48,7 @@ import { defaultDinnerMinutes } from '@/lib/arrival';
 import { currentNightIso, isStayActive, parseDateOnly, stayNightDates, todayIso } from '@/lib/stay';
 import { useScoper } from '@/lib/store';
 import { spokenVibes, vibeLabel } from '@/lib/vibe-label';
+import { useControlSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
 import { BUDGET_OPTIONS, PACE_OPTIONS } from '@/lib/user-data';
 import { useWeatherNow } from '@/lib/weather';
@@ -116,7 +117,7 @@ export default function PlanDraftScreen() {
     tripContext,
     toggleSaved,
   } = useScoper();
-  const colors = useThemeColors();
+  const colors = useThemeColors(), control = useControlSurface(), selectedControl = useControlSurface(true);
   const curatedCoords = useCuratedCoords();
   const curatedHours = useCuratedHours();
   const weatherNow = useWeatherNow();
@@ -375,7 +376,7 @@ export default function PlanDraftScreen() {
                 // draft → plan on the stack and a back tap would land on the
                 // builder again instead of the composer.
                 onPress={() => (router.canGoBack() ? router.back() : router.push('/plan'))}
-                className="h-9 items-center justify-center rounded-full border border-sand bg-shell px-3.5">
+                className="h-9 items-center justify-center rounded-full border border-edge-faint bg-shell px-3.5">
                 <Text className="font-dm-medium text-label text-peach">Done</Text>
               </TouchableOpacity>
             ) : null
@@ -394,12 +395,12 @@ export default function PlanDraftScreen() {
                   accessibilityState={{ selected: active }}
                   activeOpacity={0.72}
                   onPress={() => setSelectedDateIndex(index)}
-                  className={`items-center rounded-control border px-3.5 py-2 ${active ? 'border-rust bg-coral-50' : 'border-sand bg-shell'}`}>
-                  <Text className={`font-dm-bold text-label ${active ? 'text-coralDark' : 'text-ink'}`}>
+                  style={active ? selectedControl : control} className="items-center rounded-full px-3.5 py-2">
+                  <Text className={`font-dm-bold text-label ${active ? 'text-on-selected' : 'text-ink'}`}>
                     Night {index + 1}
                     {hasDraft ? ' ·' : ''}
                   </Text>
-                  <Text className="mt-0.5 font-dm text-meta text-taupe">{shortDateLabel(date)}</Text>
+                  <Text className={`mt-0.5 font-dm text-meta ${active ? 'text-on-selected' : 'text-taupe'}`}>{shortDateLabel(date)}</Text>
                 </TouchableOpacity>
               );
             })}
@@ -456,7 +457,7 @@ export default function PlanDraftScreen() {
             <TouchableOpacity
               activeOpacity={0.72}
               onPress={() => router.push('/discover')}
-              className="mt-3 items-center self-start rounded-full border border-sand bg-shell px-4 py-2.5">
+              className="mt-3 items-center self-start rounded-full border border-edge-faint bg-shell px-4 py-2.5">
               <Text className="font-dm-medium text-label text-ink">Browse Discover</Text>
             </TouchableOpacity>
           </RaisedView>
@@ -465,7 +466,7 @@ export default function PlanDraftScreen() {
             accessibilityRole="button"
             activeOpacity={0.85}
             onPress={generateNight}
-            className="flex-row items-center justify-center gap-x-2 rounded-full bg-accent-fill py-[15px] shadow-sm">
+            className="flex-row items-center justify-center gap-x-2 rounded-full bg-accent-fill py-[15px] shadow-soft-light dark:shadow-soft-dark">
             <Icon d={ICON_PATHS.sparkles} size={15} color={colors['on-accent']} strokeWidth={2} />
             <Text className="font-dm-bold text-body-strong text-on-accent">Generate itinerary</Text>
           </TouchableOpacity>
@@ -584,7 +585,7 @@ export default function PlanDraftScreen() {
                   accessibilityState={{ selected }}
                   activeOpacity={0.72}
                   onPress={() => updateDraft({ restaurantId: option.id })}
-                  className={`flex-row items-center gap-x-3 py-3 ${index < restaurants.length - 1 ? 'border-b border-sand' : ''}`}>
+                  className={`flex-row items-center gap-x-3 py-3 ${index < restaurants.length - 1 ? 'border-b border-edge-faint' : ''}`}>
                   <Photo uri={option.image} radius={10} style={{ width: 40, height: 40 }} />
                   <View className="min-w-0 flex-1">
                     <Text numberOfLines={1} className={`font-dm-bold text-body ${selected ? 'text-rust' : 'text-ink'}`}>
@@ -600,7 +601,7 @@ export default function PlanDraftScreen() {
                     className={`shrink-0 font-dm-bold text-meta ${walkMin != null && walkMin <= 5 ? 'text-pine' : 'text-taupe'}`}>
                     {walkMin != null ? `${walkMin} min` : option.distanceLabel}
                   </Text>
-                  <View className={`h-4 w-4 rounded-full border ${selected ? 'border-rust bg-ember' : 'border-sand bg-shell'}`} />
+                  <View className={`h-4 w-4 rounded-full border ${selected ? 'border-rust bg-ember' : 'border-edge-faint bg-shell'}`} />
                 </TouchableOpacity>
               );
             })}
@@ -620,7 +621,7 @@ export default function PlanDraftScreen() {
                     accessibilityState={{ selected }}
                     activeOpacity={0.72}
                     onPress={() => updateDraft({ eventId: option.id })}
-                    className={`flex-row items-center gap-x-3 py-3 ${index < eventsForSelectedDate.length - 1 ? 'border-b border-sand' : ''}`}>
+                    className={`flex-row items-center gap-x-3 py-3 ${index < eventsForSelectedDate.length - 1 ? 'border-b border-edge-faint' : ''}`}>
                     <Photo uri={option.image} radius={10} style={{ width: 40, height: 40 }} />
                     <View className="min-w-0 flex-1">
                       <Text numberOfLines={1} className={`font-dm-bold text-body ${selected ? 'text-rust' : 'text-ink'}`}>{option.name}</Text>
@@ -628,7 +629,7 @@ export default function PlanDraftScreen() {
                         {eventDayGroupLabel(option)} · {option.time} · {option.venue}
                       </Text>
                     </View>
-                    <View className={`h-4 w-4 rounded-full border ${selected ? 'border-rust bg-ember' : 'border-sand bg-shell'}`} />
+                    <View className={`h-4 w-4 rounded-full border ${selected ? 'border-rust bg-ember' : 'border-edge-faint bg-shell'}`} />
                   </TouchableOpacity>
                 );
               })}
@@ -647,7 +648,7 @@ export default function PlanDraftScreen() {
                   accessibilityLabel={`${nextListing.name}, ${eventDayGroupLabel(nextListing, selectedDateAt)}`}
                   activeOpacity={0.72}
                   onPress={() => router.push(`/event/${nextListing.id}`)}
-                  className="mt-3 flex-row items-center gap-x-2 rounded-xl border border-sand bg-cream px-3 py-2.5">
+                  className="mt-3 flex-row items-center gap-x-2 rounded-xl border border-edge-faint bg-cream px-3 py-2.5">
                   <Text style={{ color: colors['vee-strong'] }} className="shrink-0 font-dm-bold text-micro uppercase">
                     {eventDayGroupLabel(nextListing, selectedDateAt)} · {nextListing.time}
                   </Text>
@@ -658,7 +659,7 @@ export default function PlanDraftScreen() {
               <TouchableOpacity
                 activeOpacity={0.72}
                 onPress={() => router.push('/discover')}
-                className="mt-3 items-center self-start rounded-full border border-sand bg-shell px-4 py-2.5">
+                className="mt-3 items-center self-start rounded-full border border-edge-faint bg-shell px-4 py-2.5">
                 <Text className="font-dm-medium text-label text-ink">Browse Discover</Text>
               </TouchableOpacity>
             </RaisedView>

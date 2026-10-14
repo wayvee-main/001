@@ -13,13 +13,14 @@ import { useNow } from '@/lib/clock';
 import { EVENTS, isCurrentEvent } from '@/lib/data';
 import { stayProgress } from '@/lib/stay';
 import { useScoper } from '@/lib/store';
+import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
 
 function Setting({label,note,glyph,onPress}:{label:string;note:string;glyph:string;onPress:()=>void}) {
-  const colors=useThemeColors();
+  const colors=useThemeColors(),surface=useRaisedSurface(1);
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`${label}. ${note}`} onPress={onPress} activeOpacity={.78}
     className="flex-row items-center gap-x-2.5 rounded-setting bg-surface-raised px-3 py-[13px]"
-    style={{borderColor:colors['control-edge'],borderWidth:1,minHeight:62}}>
+    style={[surface,{minHeight:62}]}>
     <Glyph name={glyph} size={18} color={colors['fg-muted']} />
     <View className="min-w-0 flex-1"><Text className="font-dm text-[13px] leading-[18px] text-ink">{label}</Text>
       <Text className="mt-[3px] font-dm text-fine text-taupe">{note}</Text></View>
@@ -28,7 +29,7 @@ function Setting({label,note,glyph,onPress}:{label:string;note:string;glyph:stri
 }
 
 export default function ProfileScreen() {
-  const router=useRouter(),s=useScoper(),colors=useThemeColors();
+  const router=useRouter(),s=useScoper(),colors=useThemeColors(),control=useControlSurface();
   const city=useActiveCity(),cityName=useActiveCityName(),cityOptions=useCityOptions();
   const gutter=useAppGutter(),insets=useSafeAreaInsets(),now=useNow();
   const [appearance,setAppearance]=useState<AppearancePreference>('system');
@@ -77,7 +78,7 @@ export default function ProfileScreen() {
     {!s.session?<View className="flex-row items-center gap-x-3">
       <Text className="min-w-0 flex-1 font-dm text-label text-taupe">Sign in to save places and plans.</Text>
       <TouchableOpacity accessibilityRole="button" accessibilityLabel="Sign in or create account" onPress={()=>s.openSheet('auth')} activeOpacity={.78}
-        className="h-11 flex-row items-center gap-x-2 rounded-full bg-surface-raised px-4">
+        style={control} className="h-11 flex-row items-center gap-x-2 rounded-full bg-surface-raised px-4">
         <Text className="font-dm-medium text-label" style={{color:colors['fg-accent']}}>Sign in</Text>
         <Glyph name="arrow" size={14} color={colors['fg-accent']} />
       </TouchableOpacity>

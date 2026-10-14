@@ -87,6 +87,7 @@ export const ROLES: Record<string, ThemeValue> = {
 export const EDGE_ROLES: Record<string, { base: 'fg'; alpha: number }> = {
   edge: { base: 'fg', alpha: 0.12 }, // borders / dividers
   'edge-soft': { base: 'fg', alpha: 0.08 }, // placeholder stripe C
+  'edge-faint': { base: 'fg', alpha: 0.04 }, // raised cards and controls
 };
 
 /** Same value in both themes — either brand hue or a translucent tint over

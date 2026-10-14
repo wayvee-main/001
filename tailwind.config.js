@@ -12,6 +12,7 @@ module.exports = {
       colors: tokens.colors,
       fontSize: tokens.fontSize,
       borderRadius: tokens.borderRadius,
+      boxShadow: tokens.boxShadow,
       fontFamily: {
         fraunces: ['Fraunces_500Medium'],
         'fraunces-medium': ['Fraunces_500Medium'],

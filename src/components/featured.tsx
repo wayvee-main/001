@@ -3,6 +3,7 @@ import { Text, TouchableOpacity, View } from 'react-native';
 import { Glyph } from '@/components/glyph';
 import { ListRow } from '@/components/list-row';
 import { RaisedView } from '@/components/raised-surface';
+import { useControlSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
 
 export { FactStrip, type HubFact } from '@/components/fact-strip';
@@ -48,7 +49,8 @@ export function HubDropdown({
   onPress: () => void;
 }) {
   const colors = useThemeColors();
-  const tint = chosen ? colors['fg-accent'] : colors['fg-muted'];
+  const surface = useControlSurface(chosen);
+  const tint = chosen ? colors['on-selected'] : colors['fg-muted'];
   return (
     <TouchableOpacity
       accessibilityRole="button"
@@ -56,12 +58,10 @@ export function HubDropdown({
       accessibilityLabel={chosen ? `${label}. Change` : label}
       activeOpacity={0.74}
       onPress={onPress}
-      style={chosen ? undefined : { backgroundColor: colors['warm-tint'] }}
-      className={`h-9 shrink-0 flex-row items-center gap-x-1.5 rounded-full border px-3 ${
-        chosen ? 'border-rust bg-blush' : 'border-dashed border-fg-muted'
-      }`}>
+      style={surface}
+      className="h-9 shrink-0 flex-row items-center gap-x-1.5 rounded-full px-3">
       <Glyph name={glyph} size={13} color={tint} strokeWidth={1.9} />
-      <Text numberOfLines={1} style={{ color: chosen ? colors['fg-accent'] : colors.ink }} className="font-dm-medium text-label">
+      <Text numberOfLines={1} style={{ color: chosen ? colors['on-selected'] : colors.ink }} className="font-dm-medium text-label">
         {label}
       </Text>
       {/* No chevron-down in the Tabler set the app ships; the right-facing one
@@ -100,7 +100,7 @@ export function HubMenu({
             accessibilityState={{ selected: active }}
             activeOpacity={0.7}
             onPress={() => onSelect(option.value)}
-            className={`flex-row items-center justify-between px-3.5 py-3 ${index ? 'border-t border-sand' : ''}`}>
+            className={`flex-row items-center justify-between px-3.5 py-3 ${index ? 'border-t border-edge-faint' : ''}`}>
             <Text style={active ? { color: colors['fg-accent'] } : undefined} className="font-dm-medium text-label text-ink">
               {option.label}
             </Text>

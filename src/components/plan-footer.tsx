@@ -17,6 +17,7 @@ import { Text, TouchableOpacity, View } from 'react-native';
 
 import { Icon } from '@/components/ui';
 import { ICON_PATHS } from '@/lib/icons';
+import { useControlSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
 
 /** One save target: what it is now, and what pressing it does. `done` drives
@@ -32,25 +33,18 @@ export interface PlanAction {
 
 function ActionButton({ action, filled }: { action: PlanAction; filled: boolean }) {
   const colors = useThemeColors();
-  // Filled is the commitment; a done filled button goes pine, the same green
-  // every "this is real and confirmed" state in the app uses.
-  const tone = filled
-    ? action.done
-      ? 'bg-pine'
-      : 'bg-ember'
-    : action.done
-      ? 'border border-rust bg-blush'
-      : 'border border-sand bg-shell';
-  const fg = filled ? colors['on-accent'] : colors.peach;
+  const surface = useControlSurface(action.done, filled && !action.done);
+  const fg = action.done ? colors['on-selected'] : filled ? colors['on-accent'] : colors.fg;
   return (
     <TouchableOpacity
       accessibilityRole="button"
       accessibilityState={{ selected: action.done }}
       activeOpacity={0.72}
       onPress={action.onPress}
-      className={`h-11 min-w-0 flex-1 flex-row items-center justify-center gap-x-2 rounded-full ${tone}`}>
+      style={surface}
+      className={`h-11 min-w-0 flex-1 flex-row items-center justify-center gap-x-2 rounded-full`}>
       <Icon d={action.icon} size={15} color={fg} fill={!filled && action.done ? fg : 'none'} />
-      <Text numberOfLines={1} className={`font-dm-medium text-label ${filled ? 'text-on-accent' : 'text-ink'}`}>
+      <Text numberOfLines={1} style={{color:fg}} className="font-dm-medium text-label">
         {action.done ? action.doneLabel : action.label}
       </Text>
     </TouchableOpacity>
@@ -69,6 +63,7 @@ export function PlanFooter({
   actions: PlanAction[];
 }) {
   const colors = useThemeColors();
+  const control = useControlSurface();
   if (!leading && !actions.length) return null;
   return (
     <View className="flex-row gap-x-2">
@@ -76,12 +71,13 @@ export function PlanFooter({
         <TouchableOpacity
           accessibilityRole="button"
           activeOpacity={0.75}
+          style={control}
           onPress={leading.onPress}
-          className={`h-11 flex-row items-center justify-center gap-x-2 rounded-full border border-sand bg-shell ${
+          className={`h-11 flex-row items-center justify-center gap-x-2 rounded-full border border-edge-faint bg-shell ${
             actions.length ? 'shrink-0 px-4' : 'flex-1'
           }`}>
-          <Icon d={leading.icon} size={15} color={colors.rust} strokeWidth={2} />
-          <Text numberOfLines={1} className="font-dm-bold text-label text-rust">{leading.label}</Text>
+          <Icon d={leading.icon} size={15} color={colors['fg-muted']} strokeWidth={2} />
+          <Text numberOfLines={1} className="font-dm-bold text-label text-ink">{leading.label}</Text>
         </TouchableOpacity>
       ) : null}
       {actions.map((action, index) => (

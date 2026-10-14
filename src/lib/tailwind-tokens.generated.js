@@ -50,6 +50,7 @@ module.exports = {
   sand2: 'var(--color-edge-soft)',
   edge: 'var(--color-edge)',
   "edge-soft": 'var(--color-edge-soft)',
+  "edge-faint": 'var(--color-edge-faint)',
   coral: { 50: "rgba(232,93,44,0.11)" },
   forest: "#24463B",
   night: "#2A1B33",
@@ -79,5 +80,9 @@ module.exports = {
   stat: "21px",
   panel: "22px",
   sheet: "25px",
+  },
+  boxShadow: {
+    'soft-light': '0 2px 8px rgba(49, 32, 57, 0.06)',
+    'soft-dark': '0 2px 8px rgba(16, 13, 19, 0.3)',
   },
 };

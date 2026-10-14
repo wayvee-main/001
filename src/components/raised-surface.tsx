@@ -16,14 +16,14 @@ function useToneFill(tone: RaisedSurfaceTone) {
 /** The app's shared structural-card material. Caller styles come last so
  * layout concerns (width, opacity, transforms) still compose normally. */
 export function RaisedView({ style, tone = 'neutral', ...props }: ViewProps & { tone?: RaisedSurfaceTone }) {
-  const surface = useRaisedSurface(2);
+  const surface = useRaisedSurface(1);
   const backgroundColor = useToneFill(tone);
   return <View {...props} style={[surface, { backgroundColor }, style]} />;
 }
 
 /** Touchable structural card using the same material as RaisedView. */
 export function RaisedTouchable({ style, tone = 'neutral', ...props }: TouchableOpacityProps & { tone?: RaisedSurfaceTone }) {
-  const surface = useRaisedSurface(2);
+  const surface = useRaisedSurface(1);
   const backgroundColor = useToneFill(tone);
   return <TouchableOpacity {...props} style={[surface, { backgroundColor }, style]} />;
 }

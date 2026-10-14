@@ -8,7 +8,7 @@
 import { writeFileSync } from 'fs';
 import { resolve } from 'path';
 
-import { EDGE_ROLES, FIXED, hexToRgb, LEGACY_ALIASES, RADIUS, ROLES, STRIPES, TYPE_SCALE } from '../src/lib/tokens';
+import { EDGE_ROLES, ELEVATION, FIXED, hexToRgb, LEGACY_ALIASES, RADIUS, ROLES, STRIPES, TYPE_SCALE } from '../src/lib/tokens';
 
 const ROOT = resolve(__dirname, '..');
 const GENERATED_HEADER =
@@ -171,6 +171,10 @@ ${fontSizeLines}
   },
   borderRadius: {
 ${radiusLines}
+  },
+  boxShadow: {
+    'soft-light': '0 ${ELEVATION[1].y}px ${ELEVATION[1].blur}px ${rgba(ROLES.fg.light, Number(ELEVATION[1].opacity.light))}',
+    'soft-dark': '0 ${ELEVATION[1].y}px ${ELEVATION[1].blur}px ${rgba(ROLES['surface-sunk'].dark, Number(ELEVATION[1].opacity.dark))}',
   },
 };
 `;

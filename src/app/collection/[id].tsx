@@ -58,7 +58,7 @@ export default function CuratedCollectionScreen() {
     children: items.length ? (
       <RaisedView className="overflow-hidden rounded-card px-3.5">
         {items.map((item, index) => {
-          const divider = index < items.length - 1 ? 'border-b border-sand' : '';
+          const divider = index < items.length - 1 ? 'border-b border-edge-faint' : '';
           if (item.type === 'restaurant') {
             const restaurant = RESTAURANTS[item.id];
             if (!restaurant) return null;

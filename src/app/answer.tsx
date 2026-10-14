@@ -168,7 +168,7 @@ export default function AnswerScreen() {
         {/* The same header every pushed screen wears. What sat here was the
             bordered summary box that came off /plan two passes ago — a double
             rust border, a tinted tile, an uppercase kicker, and a divider that
-            was `border-sand/60`: `sand` is already a 12% ink, and the /60
+            was `border-edge-faint/60`: `sand` is already a 12% ink, and the /60
             modifier does not compose against a raw rgba, so it painted a solid
             dark rule. Under it, on a declined answer, nothing at all.
             A strip with no facts draws nothing, which is the honest shape. */}
@@ -272,7 +272,7 @@ export default function AnswerScreen() {
                   // The top match keeps its tint, bled to the card's edge so it
                   // reads as the first row rather than a separate object.
                   className={`flex-row items-center gap-x-3 py-3 ${
-                    index < visible.length - 1 ? 'border-b border-sand' : ''
+                    index < visible.length - 1 ? 'border-b border-edge-faint' : ''
                   } ${index === 0 ? '-mx-3.5 bg-coral-50 px-3.5' : ''}`}>
                   {row.image ? <Photo uri={row.image} radius={10} style={{ width: 56, height: 56 }} /> : null}
 
@@ -316,7 +316,7 @@ export default function AnswerScreen() {
                 accessibilityRole="button"
                 activeOpacity={0.75}
                 onPress={() => setShowExcluded(true)}
-                className="items-center rounded-2xl border border-dashed border-sand px-4 py-3">
+                className="items-center rounded-2xl border border-dashed border-edge-faint px-4 py-3">
                 <Text className="font-dm-medium text-meta text-taupe">
                   {hiddenCount} set aside — show {hiddenCount === 1 ? 'it' : 'them'} anyway
                 </Text>

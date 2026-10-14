@@ -82,7 +82,7 @@ export default function VenueScreen() {
                 accessibilityLabel={`${event.name}, ${event.date}, ${event.time}, ${event.priceLabel}`}
                 activeOpacity={0.72}
                 onPress={() => router.push(`/event/${event.id}`)}
-                className={`flex-row items-center gap-x-2.5 py-2.5 ${index < venueEvents.length - 1 ? 'border-b border-sand' : ''}`}>
+                className={`flex-row items-center gap-x-2.5 py-2.5 ${index < venueEvents.length - 1 ? 'border-b border-edge-faint' : ''}`}>
                 <Photo uri={event.image} radius={8} style={{ width: 44, height: 44 }} />
                 <View className="min-w-0 flex-1">
                   <View className="flex-row items-center justify-between gap-x-2">

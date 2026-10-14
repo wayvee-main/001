@@ -18,7 +18,7 @@ export const POSTER_WIDTH = 173;
  * carousels stay pixel-identical instead of drifting apart over time. */
 export function ViatorPickCard({ pick, onPress }: { pick: ViatorPick; onPress: () => void }) {
   const colors = useThemeColors();
-  const surface = useRaisedSurface(2);
+  const surface = useRaisedSurface(1);
   const price = viatorPriceLabel(pick);
   const highlight = viatorHighlightChip(pick);
   const showToast = useScoper((s) => s.showToast);
@@ -75,7 +75,7 @@ export function PosterCard({
   onPress: () => void;
   onPlan?: () => void;
 }) {
-  const surface = useRaisedSurface(2);
+  const surface = useRaisedSurface(1);
   return (
     <TouchableOpacity
       accessibilityRole="button"

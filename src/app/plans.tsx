@@ -48,13 +48,13 @@ function GroupedCard({
   onAddToCalendar?: () => void;
 }) {
   const colors = useThemeColors();
-  const surface = useRaisedSurface(2);
+  const surface = useRaisedSurface(1);
   return (
     <TouchableOpacity
       activeOpacity={0.7}
       onPress={onPress}
       style={dark ? undefined : surface}
-      className={`flex-row items-center gap-x-3 rounded-card px-3.5 py-3.5 ${dark ? 'border border-sand bg-coral-50' : ''}`}>
+      className={`flex-row items-center gap-x-3 rounded-card px-3.5 py-3.5 ${dark ? 'border border-edge-faint bg-coral-50' : ''}`}>
       <Icon d={icon} size={18} color={colors.peach} />
       <View className="flex-1">
         <Text className="font-dm-medium text-[14px] text-ink">{title}</Text>

@@ -1,5 +1,5 @@
 import { useColorScheme } from 'nativewind';
-import { StyleSheet, type ViewStyle } from 'react-native';
+import { type ViewStyle } from 'react-native';
 
 import { ELEVATION, hexToRgb } from '@/lib/tokens';
 import { useThemeColors } from '@/lib/theme';
@@ -17,13 +17,22 @@ export function useElevation(level: 1 | 2 | 3 | 4 = 2): { boxShadow: string } {
 
 /** Shared neutral card/panel treatment. Inputs, controls, and semantic tinted
  * blocks intentionally use their own surface roles. */
-export function useRaisedSurface(level: 1 | 2 | 3 | 4 = 2): ViewStyle {
+export function useRaisedSurface(level: 1 | 2 | 3 | 4 = 1): ViewStyle {
   const colors = useThemeColors();
   const elevation = useElevation(level);
   return {
     backgroundColor: colors['surface-raised'],
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.edge,
+    borderWidth: 1,
+    borderColor: colors['edge-faint'],
     ...elevation,
   };
+}
+
+/** One surface language for neutral, selected and primary controls. Callers
+ * pair selected fills with on-selected and primary fills with on-accent. */
+export function useControlSurface(selected = false, primary = false): ViewStyle {
+  const colors = useThemeColors();
+  const surface = useRaisedSurface(1);
+  const fill = primary ? colors['accent-fill'] : selected ? colors['selected-surface'] : colors['surface-raised'];
+  return { ...surface, backgroundColor: fill, borderColor: primary || selected ? fill : colors['edge-faint'] };
 }

@@ -67,7 +67,7 @@ export function DetailIconButton({
       accessibilityLabel={label}
       activeOpacity={0.7}
       onPress={onPress}
-      className={`h-11 w-11 items-center justify-center rounded-full border border-sand ${active ? activeClassName : 'bg-shell'}`}>
+      className={`h-11 w-11 items-center justify-center rounded-full border border-edge-faint ${active ? activeClassName : 'bg-shell'}`}>
       <Icon d={d} size={15} color={color ?? colors.peach} fill={fill} />
     </TouchableOpacity>
   );
@@ -83,7 +83,7 @@ export function DetailFactList({ facts }: { facts: DetailFact[] }) {
   return (
     <View>
       {facts.map((fact, index) => (
-        <View key={fact.label} className={`flex-row items-baseline gap-x-3 py-2.5 ${index < facts.length - 1 ? 'border-b border-sand' : ''}`}>
+        <View key={fact.label} className={`flex-row items-baseline gap-x-3 py-2.5 ${index < facts.length - 1 ? 'border-b border-edge-faint' : ''}`}>
           <Text className="w-[84px] shrink-0 font-dm-medium text-meta text-taupe">{fact.label}</Text>
           <Text className="min-w-0 flex-1 font-dm text-meta text-ink">{fact.value}</Text>
         </View>
@@ -107,7 +107,7 @@ export function DetailInfoRow({
   tone?: 'shell' | 'blush' | 'sage';
 }) {
   const colors = useThemeColors();
-  const surface = useRaisedSurface(2);
+  const surface = useRaisedSurface(1);
   const backgroundClass = tone === 'blush' ? 'bg-blush' : tone === 'sage' ? 'bg-sage' : '';
   return (
     <TouchableOpacity
@@ -117,7 +117,7 @@ export function DetailInfoRow({
       activeOpacity={0.7}
       onPress={onPress}
       style={tone === 'shell' ? surface : undefined}
-      className={`flex-row items-center gap-x-2.5 rounded-card px-3 py-2.5 ${tone === 'shell' ? '' : 'border border-sand'} ${backgroundClass}`}>
+      className={`flex-row items-center gap-x-2.5 rounded-card px-3 py-2.5 ${tone === 'shell' ? '' : 'border border-edge-faint'} ${backgroundClass}`}>
       <View className="h-8 w-8 shrink-0 items-center justify-center rounded-full bg-shell">
         <Icon d={iconD} size={15} color={colors.peach} strokeWidth={1.8} />
       </View>
@@ -142,7 +142,7 @@ export function SourceLink({ url, label = 'View official site' }: { url?: string
       accessibilityRole="link"
       activeOpacity={0.72}
       onPress={() => Linking.openURL(url).catch(() => showToast('Could not open the official site'))}
-      className="h-10 flex-row items-center justify-center gap-x-1.5 rounded-full border border-sand bg-shell px-4">
+      className="h-10 flex-row items-center justify-center gap-x-1.5 rounded-full border border-edge-faint bg-shell px-4">
       <Text className="font-dm-medium text-label text-peach">{label}</Text>
       <ChevronRight color={colors.peach} strokeWidth={1.8} />
     </TouchableOpacity>

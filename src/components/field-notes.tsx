@@ -3,7 +3,7 @@ import { Text, TouchableOpacity, View, useWindowDimensions } from 'react-native'
 import { Glyph } from '@/components/glyph';
 import { Photo } from '@/components/photo';
 import { eventDayGroupLabel, type Crawl, type NightlifeSpot, type Restaurant, type ScoperEvent, type Venue } from '@/lib/data';
-import { useElevation } from '@/lib/shadows';
+import { useRaisedSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
 
 function briefWords(value:string,max:number):string {
@@ -30,11 +30,11 @@ function Fact({glyph,value,label,compact=false,flexible=false}:{glyph:string;val
 /** Evening Trail notes and photo strips share the original detail routes. */
 function Note({name,caption,facts,image,index,divider,onPress,testID,accessibilityName,strip=false,elevated=false,compact=false}:{name:string;caption:string;facts:ReactNode;image?:string;index?:number;divider:boolean;onPress:()=>void;testID:string;accessibilityName?:string;strip?:boolean;elevated?:boolean;compact?:boolean}) {
   const {width}=useWindowDimensions(),narrow=width<=360;
-  const colors=useThemeColors(),lift=useElevation(1);
+  const surface=useRaisedSurface(1);
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Explore ${accessibilityName||name}`} onPress={onPress} activeOpacity={.78} testID={testID}
     className={`items-start py-3.5 ${strip?'':`flex-row ${divider?'border-t border-edge-soft':''}`}`}
-    style={[strip?{width:137,flexShrink:0}:{gap:12},elevated?{...lift,backgroundColor:colors['surface-raised'],borderRadius:12,padding:8}:null]}>
-    {elevated?<View pointerEvents="none" style={{position:'absolute',inset:0,borderRadius:12,borderWidth:1,borderColor:colors['edge-soft'],opacity:.5}} />:null}
+    style={[strip?{width:137,flexShrink:0}:{gap:12},elevated?{...surface,borderWidth:0,borderRadius:12,padding:8}:null]}>
+    {elevated?<View pointerEvents="none" style={{position:'absolute',inset:0,borderRadius:12,borderWidth:1,borderColor:surface.borderColor}} />:null}
     {strip&&image?<Photo uri={image} radius={8} style={{width:elevated?121:137,height:73,marginBottom:11}} />:null}
     {index!==undefined?<Text accessible={false} numberOfLines={1} className="font-fraunces text-peach"
       style={{width:31,flexShrink:0,fontSize:23,lineHeight:25.3}}>{String(index+1).padStart(2,'0')}</Text>:null}
@@ -63,11 +63,11 @@ function shortVenue(x:ScoperEvent):string {
 
 export function TrailLead({event:x,onPress}:{event:ScoperEvent;onPress:()=>void}) {
   const {width}=useWindowDimensions(),narrow=width<=360;
-  const colors=useThemeColors(),lift=useElevation(1);
+  const surface=useRaisedSurface(1);
   const date=x.startsAt?new Date(x.startsAt).toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'America/Los_Angeles'}):eventDayGroupLabel(x);
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Explore ${x.name}, ${date}, ${x.venue}`} onPress={onPress} activeOpacity={.78}
-    testID="trail-lead" className="flex-row items-start" style={{...lift,gap:12,padding:12,borderRadius:12,backgroundColor:colors['surface-raised']}}>
-    <View pointerEvents="none" style={{position:'absolute',inset:0,borderRadius:12,borderWidth:1,borderColor:colors['edge-soft'],opacity:.5}} />
+    testID="trail-lead" className="flex-row items-start" style={{...surface,borderWidth:0,gap:12,padding:12,borderRadius:12}}>
+    <View pointerEvents="none" style={{position:'absolute',inset:0,borderRadius:12,borderWidth:1,borderColor:surface.borderColor}} />
     <View className="min-w-0 flex-1">
       <Text className="font-dm text-fine text-peach">{date}</Text>
       <Text testID="discover-listing-title" className="mt-[7px] font-fraunces text-ink" style={{fontSize:25,lineHeight:27,letterSpacing:-.7}}>{briefWords(eventName(x),5)}</Text>

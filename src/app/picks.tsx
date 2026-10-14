@@ -124,7 +124,7 @@ function PickRow({ pick, onPress }: { pick: ViatorPick; onPress: () => void }) {
       accessibilityLabel={`Open ${pick.title}`}
       activeOpacity={0.72}
       onPress={onPress}
-      className="flex-row items-center gap-x-3 border-b border-sand py-3 last:border-b-0">
+      className="flex-row items-center gap-x-3 border-b border-edge-faint py-3 last:border-b-0">
       <Photo uri={pick.image} radius={10} style={{ width: 56, height: 56 }} />
       <View className="min-w-0 flex-1">
         <Text numberOfLines={2} className="font-dm-bold text-[13.5px] leading-[17px] text-ink">{pick.title}</Text>
@@ -186,7 +186,7 @@ export default function PicksScreen() {
 
         {hasAnyPicks ? (
           <>
-            <View className="flex-row items-center gap-x-2.5 rounded-card border border-sand bg-shell px-4 py-2.5 shadow-2xs">
+            <View className="flex-row items-center gap-x-2.5 rounded-card border border-edge-faint bg-shell px-4 py-2.5 shadow-soft-light dark:shadow-soft-dark">
               <SearchIcon size={15} />
               <TextInput
                 value={query}

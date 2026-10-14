@@ -36,6 +36,7 @@ import { SectionHeading } from '@/components/section-heading';
 import { Icon } from '@/components/ui';
 import { LiveStatusRow } from '@/components/visual-depictions';
 import type { LiveLine } from '@/lib/detail-facts';
+import { useControlSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
 
 export { DetailDisclosureGroup, whyRow, type DetailDisclosure } from '@/components/disclosure-rows';
@@ -106,7 +107,7 @@ export function DetailScreen({
   navActive?: 'home' | 'discover' | 'create' | 'profile';
 }) {
   const gutter = useAppGutter();
-  const colors = useThemeColors();
+  const colors = useThemeColors(), control = useControlSurface(), primary = useControlSurface(false, true);
 
   return (
     <AppBackdrop>
@@ -184,16 +185,17 @@ export function DetailScreen({
       </ScrollView>
 
       {actions.length ? (
-        <View style={{ paddingHorizontal: gutter }} className="border-t border-sand bg-cream py-3">
+        <View style={{ paddingHorizontal: gutter }} className="border-t border-edge-faint bg-cream py-3">
           <View style={{ width: '100%', maxWidth: 720, alignSelf: 'center' }} className="flex-row gap-x-2">
             {actions.map((action, index) => (
               <TouchableOpacity
                 key={action.label}
                 accessibilityRole="button"
                 activeOpacity={0.75}
+                style={index === 0 ? primary : control}
                 onPress={action.onPress}
                 className={`h-12 min-w-0 flex-1 flex-row items-center justify-center gap-x-1.5 rounded-full ${
-                  index === 0 ? 'bg-ember' : 'border border-sand bg-shell'
+                  index === 0 ? 'bg-ember' : 'border border-edge-faint bg-shell'
                 }`}>
                 <Icon d={action.iconD} size={15} color={index === 0 ? colors['on-accent'] : colors.ink} strokeWidth={1.9} />
                 <Text numberOfLines={1} className={`font-dm-medium text-label ${index === 0 ? 'text-on-accent' : 'text-ink'}`}>

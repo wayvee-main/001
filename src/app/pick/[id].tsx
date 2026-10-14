@@ -10,6 +10,7 @@ import { AppBackdrop, Screen, useAppGutter } from '@/components/layout';
 import { Photo } from '@/components/photo';
 import { BackButton, Check, EmptyState, Icon } from '@/components/ui';
 import { useScoper } from '@/lib/store';
+import { useControlSurface } from '@/lib/shadows';
 import { formatDateChip, useViatorPicks, viatorFlagLabels, viatorTotalLabel } from '@/lib/viator';
 
 const MAX_GUESTS = 8;
@@ -47,6 +48,7 @@ function PlanCircle({ active, label, onPress }: { active: boolean; label: string
 }
 
 export default function PickScreen() {
+  const control = useControlSurface(), selectedControl = useControlSurface(true);
   const gutter = useAppGutter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
@@ -136,9 +138,9 @@ export default function PickScreen() {
                       accessibilityLabel={`Select ${weekday} ${day}`}
                       activeOpacity={0.75}
                       onPress={() => setSelectedDate(iso)}
-                      className={`flex-1 items-center rounded-card border py-2.5 ${selected ? 'border-rust bg-blush' : 'border-sand bg-shell'}`}>
-                      <Text className={`font-dm text-meta ${selected ? 'text-peach' : 'text-taupe'}`}>{weekday}</Text>
-                      <Text className={`mt-0.5 font-dm-bold text-[17px] ${selected ? 'text-peach' : 'text-ink'}`}>{day}</Text>
+                      style={selected ? selectedControl : control} className="flex-1 items-center rounded-full py-2.5">
+                      <Text className={`font-dm text-meta ${selected ? 'text-on-selected' : 'text-taupe'}`}>{weekday}</Text>
+                      <Text className={`mt-0.5 font-dm-bold text-[17px] ${selected ? 'text-on-selected' : 'text-ink'}`}>{day}</Text>
                     </TouchableOpacity>
                   );
                 })}
@@ -146,7 +148,7 @@ export default function PickScreen() {
             </View>
           ) : null}
 
-          <View className="flex-row items-center justify-between rounded-card border border-sand bg-shell px-4 py-3.5 shadow-2xs">
+          <View className="flex-row items-center justify-between rounded-card border border-edge-faint bg-shell px-4 py-3.5 shadow-soft-light dark:shadow-soft-dark">
             <Text className="font-dm-medium text-[14px] text-ink">Guests</Text>
             <View className="flex-row items-center gap-x-4">
               <TouchableOpacity
@@ -155,7 +157,7 @@ export default function PickScreen() {
                 disabled={guests <= 1}
                 activeOpacity={0.7}
                 onPress={() => setGuests((g) => Math.max(1, g - 1))}
-                className={`h-8 w-8 items-center justify-center rounded-full border ${guests <= 1 ? 'border-sand' : 'border-taupe'}`}>
+                className={`h-8 w-8 items-center justify-center rounded-full border ${guests <= 1 ? 'border-edge-faint' : 'border-taupe'}`}>
                 <Text className={`font-dm-bold text-[16px] ${guests <= 1 ? 'text-taupe/50' : 'text-ink'}`}>−</Text>
               </TouchableOpacity>
               <Text className="w-5 text-center font-dm-bold text-[15px] text-ink">{guests}</Text>
@@ -192,7 +194,7 @@ export default function PickScreen() {
         </DetailSheet>
       </ScrollView>
 
-      <View className="border-t border-sand bg-cream pt-3" style={{ paddingHorizontal: gutter, paddingBottom: Math.max(insets.bottom, 12) }}>
+      <View className="border-t border-edge-faint bg-cream pt-3" style={{ paddingHorizontal: gutter, paddingBottom: Math.max(insets.bottom, 12) }}>
         <View style={{ maxWidth: 720, width: '100%', alignSelf: 'center' }} className="gap-y-2">
           <View className="flex-row items-center justify-between">
             <View className="min-w-0 flex-1">

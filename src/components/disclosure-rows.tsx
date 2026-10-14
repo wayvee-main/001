@@ -52,7 +52,7 @@ function DisclosureRow({
   const [open, setOpen] = useState(false);
 
   return (
-    <View className={divider && !open ? 'border-b border-sand' : ''}>
+    <View className={divider && !open ? 'border-b border-edge-faint' : ''}>
       <TouchableOpacity
         accessibilityRole="button"
         accessibilityState={{ expanded: open }}
@@ -75,7 +75,7 @@ function DisclosureRow({
         </View>
       </TouchableOpacity>
       {open ? (
-        <View className={`pb-3.5 ${divider ? 'border-b border-sand' : ''}`}>{row.children}</View>
+        <View className={`pb-3.5 ${divider ? 'border-b border-edge-faint' : ''}`}>{row.children}</View>
       ) : null}
     </View>
   );

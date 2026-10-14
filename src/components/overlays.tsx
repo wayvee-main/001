@@ -53,6 +53,7 @@ import { clearRecentSearches, loadRecentSearches, recordRecentSearch, type Recen
 import { addDaysIso, nightsBetween, parseDateOnly, stayNightDates, todayIso } from '@/lib/stay';
 import { useScoper } from '@/lib/store';
 import { tasteVocabulary } from '@/lib/taste';
+import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
 import { useViatorPicks } from '@/lib/viator';
 import type { VisitRating } from '@/lib/visit-feedback';
@@ -79,6 +80,7 @@ export function OfflineBanner() {
 // ── Toast ───────────────────────────────────────────────────────────────────
 
 export function Toast() {
+  const surface = useRaisedSurface(4);
   const toast = useScoper((s) => s.toast);
   const [anim] = useState(() => new Animated.Value(0));
 
@@ -103,7 +105,7 @@ export function Toast() {
         opacity: anim,
         transform: [{ translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [8, 0] }) }],
       }}>
-      <View className="rounded-full border border-sand bg-coral-50 px-[18px] py-[11px]" style={{ boxShadow: '0 6px 20px rgba(0,0,0,0.25)' }}>
+      <View className="rounded-full px-[18px] py-[11px]" style={surface}>
         <Text className="font-dm text-[13px] text-ink" numberOfLines={1}>
           {toast}
         </Text>
@@ -388,7 +390,7 @@ function RideSheet() {
     <SheetBase>
       <SheetTitle title={`Ride to ${event.venue}`} sub={`${event.name} · ${event.time} — leave by about ${leaveBy}`} />
       <RaisedView className="mt-4 rounded-card px-3.5 py-1">
-        <View className="flex-row justify-between border-b border-sand py-2.5">
+        <View className="flex-row justify-between border-b border-edge-faint py-2.5">
           <Text className="font-dm text-[13px] text-taupe">From</Text>
           <Text className="font-dm-medium text-[13px] text-ink">{deviceLocation?.label || GUEST.anchor}</Text>
         </View>
@@ -532,7 +534,7 @@ export function AuthForm({
         disabled={busy}
         activeOpacity={0.75}
         onPress={googleAccess}
-        className={`mt-4 h-[48px] flex-row items-center justify-center gap-x-2.5 rounded-full border border-sand bg-cream ${busy ? 'opacity-60' : ''}`}>
+        className={`mt-4 h-[48px] flex-row items-center justify-center gap-x-2.5 rounded-full border border-edge-faint bg-cream ${busy ? 'opacity-60' : ''}`}>
         {busyAction === 'google' ? <ActivityIndicator color={colors.fg} /> : <GoogleLogo size={17} />}
         <Text className="font-dm-medium text-[13.5px] text-ink">Continue with Google</Text>
       </TouchableOpacity>
@@ -560,13 +562,13 @@ export function AuthForm({
       </View>
 
       {error || authError ? (
-        <View className="mt-3 rounded-control border border-[rgba(69,201,194,0.35)] bg-coral-50 px-3.5 py-2.5">
+        <View className="mt-3 rounded-control border border-edge-faint bg-coral-50 px-3.5 py-2.5">
           <Text accessibilityLiveRegion="polite" className="font-dm text-[12px] leading-[17px] text-peach">{error || authError}</Text>
         </View>
       ) : null}
 
       {success ? (
-        <View className="mt-3 rounded-control border border-[rgba(97,199,154,0.35)] bg-sage px-3.5 py-2.5">
+        <View className="mt-3 rounded-control border border-edge-faint bg-sage px-3.5 py-2.5">
           <Text accessibilityLiveRegion="polite" className="font-dm text-[12px] leading-[17px] text-pine">{success}</Text>
         </View>
       ) : null}
@@ -577,7 +579,7 @@ export function AuthForm({
         disabled={busy}
         activeOpacity={0.82}
         onPress={submit}
-        className={`mt-4 h-[48px] items-center justify-center rounded-full bg-ember ${busy ? 'opacity-60' : ''}`}>
+        className={`mt-4 h-[48px] items-center justify-center rounded-full bg-ember shadow-soft-light dark:shadow-soft-dark ${busy ? 'opacity-60' : ''}`}>
         {busyAction === 'email' ? <ActivityIndicator color={colors['on-accent']} /> : <Text className="font-dm-bold text-[14px] text-on-accent">{submitLabel}</Text>}
       </TouchableOpacity>
 
@@ -628,7 +630,7 @@ function PostVisitSheet() {
             accessibilityRole="button"
             activeOpacity={0.8}
             onPress={() => void rateVisit(option.rating)}
-            className="flex-1 items-center gap-y-1.5 rounded-card border border-sand bg-cream py-3.5">
+            className="flex-1 items-center gap-y-1.5 rounded-card border border-edge-faint bg-cream py-3.5">
             <Text style={{ fontSize: 24 }}>{option.emoji}</Text>
             <Text className="font-dm-medium text-label text-ink">{option.label}</Text>
           </TouchableOpacity>
@@ -668,10 +670,10 @@ function LogoutSheet() {
           activeOpacity={0.8}
           disabled={signingOut}
           onPress={confirmLogout}
-          className="items-center rounded-full bg-ember py-[15px]" style={{ opacity: signingOut ? 0.6 : 1 }}>
+          className="items-center rounded-full bg-ember py-[15px] shadow-soft-light dark:shadow-soft-dark" style={{ opacity: signingOut ? 0.6 : 1 }}>
           <Text className="font-dm-medium text-[14.5px] text-on-accent">{signingOut ? 'Logging out…' : 'Log out'}</Text>
         </TouchableOpacity>
-        <TouchableOpacity accessibilityRole="button" activeOpacity={0.8} disabled={signingOut} onPress={closeSheet} className="items-center rounded-full border border-sand py-[15px]">
+        <TouchableOpacity accessibilityRole="button" activeOpacity={0.8} disabled={signingOut} onPress={closeSheet} className="items-center rounded-full border border-edge-faint bg-surface-raised py-[15px] shadow-soft-light dark:shadow-soft-dark">
           <Text className="font-dm-medium text-[14.5px] text-ink">Stay signed in</Text>
         </TouchableOpacity>
       </View>
@@ -719,16 +721,18 @@ function StayDateChip({
   active: boolean;
   onPress: () => void;
 }) {
+  const surface = useControlSurface(active);
   return (
     <TouchableOpacity
       activeOpacity={0.7}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={`${label}: ${value ? formatStayDate(value) : 'not set'}`}
-      className={`flex-1 rounded-control border px-3 py-2 ${active ? 'border-rust bg-blush' : 'border-transparent bg-surface-sunk'}`}
+      style={surface}
+      className="flex-1 rounded-full px-3 py-2"
     >
-      <Text className="font-dm text-micro uppercase text-taupe">{label}</Text>
-      <Text className={`mt-0.5 font-dm-medium text-body ${value ? 'text-ink' : 'text-taupe'}`}>
+      <Text className={`font-dm text-micro uppercase ${active ? 'text-on-selected' : 'text-taupe'}`}>{label}</Text>
+      <Text className={`mt-0.5 font-dm-medium text-body ${active ? 'text-on-selected' : value ? 'text-ink' : 'text-taupe'}`}>
         {value ? formatStayDate(value) : 'Select'}
       </Text>
     </TouchableOpacity>
@@ -818,7 +822,7 @@ function StaySheet() {
           <StayDateChip label="Checkout" value={checkOut} active={focus === 'checkOut'} onPress={() => openCalendar(checkIn ? 'checkOut' : 'checkIn')} />
         </View>
         {focus ? (
-          <View className="overflow-hidden rounded-card border border-sand">
+          <View className="overflow-hidden rounded-card border border-edge-faint">
             <Calendar
               // Re-initializes the visible month when the focused end changes, so
               // re-editing either date lands on that date's month, not today's.
@@ -843,7 +847,7 @@ function StaySheet() {
                 textDayHeaderFontFamily: 'DMSans_500Medium',
               }}
             />
-            <View className="flex-row items-center justify-between border-t border-sand px-3 py-2">
+            <View className="flex-row items-center justify-between border-t border-edge-faint px-3 py-2">
               <Text className="font-dm text-meta text-taupe">
                 {focus === 'checkOut' && checkIn ? 'Now pick your checkout day' : 'Pick your check-in day'}
               </Text>
@@ -874,7 +878,7 @@ function StaySheet() {
             disabled={busy !== null}
             activeOpacity={0.7}
             onPress={remove}
-            className={`flex-row items-center justify-center gap-x-2 rounded-full border border-sand py-[15px] ${busy ? 'opacity-60' : ''}`}>
+            className={`flex-row items-center justify-center gap-x-2 rounded-full border border-edge-faint bg-surface-raised py-[15px] shadow-soft-light dark:shadow-soft-dark ${busy ? 'opacity-60' : ''}`}>
             {busy === 'remove' ? <ActivityIndicator size="small" color={c.taupe} /> : null}
             <Text className="font-dm-medium text-[13.5px] text-taupe">Remove stay</Text>
           </TouchableOpacity>
@@ -1005,7 +1009,7 @@ function SearchOverlay() {
         opacity: anim,
       }}>
       <View className="flex-row items-center gap-x-2.5">
-        <View className="flex-1 flex-row items-center gap-x-2.5 rounded-full border border-sand bg-blush px-4 py-1">
+        <View className="flex-1 flex-row items-center gap-x-2.5 rounded-full border border-edge-faint bg-blush px-4 py-1">
           <SearchIcon size={15} />
           <TextInput
             autoFocus
@@ -1033,7 +1037,7 @@ function SearchOverlay() {
                     accessibilityRole="button"
                     activeOpacity={0.7}
                     onPress={() => setQuery(s.query)}
-                    className="rounded-full border border-rust bg-blush px-3.5 py-1.5">
+                    className="rounded-full border border-edge-faint bg-surface-raised px-3.5 py-1.5 shadow-soft-light dark:shadow-soft-dark">
                     <Text className="font-dm-medium text-label text-peach">{s.label}</Text>
                   </TouchableOpacity>
                 ))}
@@ -1078,7 +1082,7 @@ function SearchOverlay() {
                   accessibilityRole="button"
                   activeOpacity={0.7}
                   onPress={() => goFoodAction(link)}
-                  className="rounded-full border border-rust bg-blush px-3.5 py-1.5">
+                  className="rounded-full border border-edge-faint bg-surface-raised px-3.5 py-1.5 shadow-soft-light dark:shadow-soft-dark">
                   <Text className="font-dm-medium text-label text-peach">{link.label}</Text>
                 </TouchableOpacity>
               ))}
@@ -1104,7 +1108,7 @@ function SearchOverlay() {
                       accessibilityRole="button"
                       activeOpacity={0.7}
                       onPress={() => goRecent(entry)}
-                      className="rounded-full border border-sand bg-shell px-3.5 py-1.5">
+                      className="rounded-full border border-edge-faint bg-shell px-3.5 py-1.5">
                       <Text numberOfLines={1} className="font-dm-medium text-label text-ink">{entry.label}</Text>
                     </TouchableOpacity>
                   ))}
@@ -1232,7 +1236,7 @@ function AskSheet() {
           onChangeText={setText}
           placeholder="Dinner and something with live music, walking distance, back by 10:30"
           placeholderTextColor="#9C9086"
-          className="min-h-[64px] rounded-card border border-sand bg-shell px-3.5 py-3 font-dm text-[14px] text-ink"
+          className="min-h-[64px] rounded-card border border-edge-faint bg-shell px-3.5 py-3 font-dm text-[14px] text-ink"
         />
         {moodVocabulary.length > 0 ? (
           <View className="flex-row flex-wrap gap-2">
@@ -1283,6 +1287,8 @@ function StartTimePickerSheet() {
  * a single option rather than padding the list with placeholder toggles. */
 function AddConstraintSheet() {
   const { wantsNightlife, setWantsNightlife, closeSheet } = useScoper();
+  const surface = useControlSurface(wantsNightlife === true);
+  const colors = useThemeColors();
   return (
     <SheetBase>
       <SheetTitle title="Add a constraint" />
@@ -1295,14 +1301,12 @@ function AddConstraintSheet() {
             setWantsNightlife(true);
             closeSheet();
           }}
-          className={`flex-row items-center justify-between rounded-card border px-4 py-3.5 ${
-            wantsNightlife === true ? 'border-rust bg-coral-50' : 'border-sand bg-shell'
-          }`}>
+          style={surface} className="flex-row items-center justify-between rounded-card px-4 py-3.5">
           <View className="min-w-0 flex-1">
-            <Text className="font-dm-medium text-[13.5px] text-ink">Nightcap</Text>
-            <Text className="mt-0.5 font-dm text-meta text-taupe">Add a late-night stop after dinner</Text>
+            <Text className={`font-dm-medium text-[13.5px] ${wantsNightlife === true ? 'text-on-selected' : 'text-ink'}`}>Nightcap</Text>
+            <Text className={`mt-0.5 font-dm text-meta ${wantsNightlife === true ? 'text-on-selected' : 'text-taupe'}`}>Add a late-night stop after dinner</Text>
           </View>
-          <ChevronRight />
+          <ChevronRight color={wantsNightlife === true ? colors['on-selected'] : colors['fg-muted']} />
         </TouchableOpacity>
       </View>
     </SheetBase>

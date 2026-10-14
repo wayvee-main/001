@@ -3,7 +3,7 @@ import { Text, TouchableOpacity, View, type StyleProp, type ViewStyle } from 're
 import { useRouter } from 'expo-router';
 import Svg, { Defs, Path, Pattern, Rect } from 'react-native-svg';
 
-import { useRaisedSurface } from '@/lib/shadows';
+import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
 
 // ── Icons ───────────────────────────────────────────────────────────────────
@@ -93,10 +93,11 @@ export function Star({ size = 12, color }: { size?: number; color?: string }) {
 
 // Tabler's check (icons/outline/check.svg), path "M5 12l5 5l10 -10",
 // cropped to its bounding box (x 5-20, y 7-17).
-export function Check({ size = 24, color = '#fff' }: { size?: number; color?: string }) {
+export function Check({ size = 24, color }: { size?: number; color?: string }) {
+  const colors = useThemeColors();
   return (
     <Svg width={size} height={(size * 2) / 3} viewBox="5 7 15 10">
-      <Path d="M5 12l5 5l10 -10" stroke={color} strokeWidth={3} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M5 12l5 5l10 -10" stroke={color ?? colors['on-accent']} strokeWidth={3} fill="none" strokeLinecap="round" strokeLinejoin="round" />
     </Svg>
   );
 }
@@ -158,9 +159,9 @@ export function Skeleton({ width, height, radius = 8 }: { width?: ViewStyle['wid
 // ── Badges ──────────────────────────────────────────────────────────────────
 
 const BADGE_TONES = {
-  accent: { border: 'border-[rgba(69,201,194,0.35)]', bg: 'bg-blush', text: 'text-peach' },
-  success: { border: 'border-[rgba(97,199,154,0.35)]', bg: 'bg-sage', text: 'text-pine' },
-  default: { border: 'border-sand', bg: 'bg-shell', text: 'text-ink' },
+  accent: { border: 'border-edge-faint', bg: 'bg-blush', text: 'text-peach' },
+  success: { border: 'border-edge-faint', bg: 'bg-sage', text: 'text-pine' },
+  default: { border: 'border-edge-faint', bg: 'bg-shell', text: 'text-ink' },
 } as const;
 
 /** Small filled pill. `eyebrow` (uppercase, bold, on poster/card art) and
@@ -201,7 +202,6 @@ export function Chip({
   onPress,
   iconD,
   large = false,
-  raised = false,
 }: {
   label: string;
   active?: boolean;
@@ -212,18 +212,16 @@ export function Chip({
   raised?: boolean;
 }) {
   const colors = useThemeColors();
-  const raisedSurface = useRaisedSurface(1);
-  const fg = active ? colors['on-accent'] : colors.ink;
+  const surface = useControlSurface(active);
+  const fg = active ? colors['on-selected'] : colors.fg;
   return (
     <TouchableOpacity
       accessibilityRole="button"
       accessibilityState={{ selected: active }}
       activeOpacity={0.7}
       onPress={onPress}
-      style={[raised ? raisedSurface : undefined, {backgroundColor:active?colors['accent-fill']:colors['surface-raised'],borderColor:active?colors['accent-fill']:colors['control-edge']} ]}
-      className={`shrink-0 flex-row items-center gap-x-1.5 rounded-full border ${large ? 'px-[15px] py-2' : 'px-[13px] py-[7px]'} ${
-        active ? 'bg-accent-fill border-accent-fill' : 'bg-shell border-control-edge'
-      }`}>
+      style={surface}
+      className={`shrink-0 flex-row items-center gap-x-1.5 rounded-full ${large ? 'px-[15px] py-2' : 'px-[13px] py-[7px]'}`}>
       {iconD ? <Icon d={iconD} size={large ? 15 : 13} color={fg} strokeWidth={2} /> : null}
       <Text style={{ color: fg }} className={`font-dm-medium ${large ? 'text-label' : 'text-label'}`}>
         {label}
@@ -244,14 +242,16 @@ export function OptionPill({
   onPress?: () => void;
   small?: boolean;
 }) {
+  const surface = useControlSurface(active);
   return (
     <TouchableOpacity
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
       activeOpacity={0.7}
       onPress={onPress}
-      className={`flex-1 min-w-[64px] items-center rounded-control border px-1 py-2.5 ${
-        active ? 'bg-accent-fill border-accent-fill' : 'bg-shell border-control-edge'
-      }`}>
-      <Text className={`${small ? 'text-label' : 'text-[13.5px]'} font-dm-medium ${active?'text-on-accent':'text-ink'}`}>
+      style={surface}
+      className="flex-1 min-w-[64px] items-center rounded-full px-1 py-2.5">
+      <Text className={`${small ? 'text-label' : 'text-[13.5px]'} font-dm-medium ${active?'text-on-selected':'text-ink'}`}>
         {label}
       </Text>
     </TouchableOpacity>
@@ -260,8 +260,9 @@ export function OptionPill({
 
 /** Full-width deep accent CTA. */
 export function PrimaryButton({ label, onPress, className = '' }: { label: string; onPress?: () => void; className?: string }) {
+  const surface = useControlSurface(false, true);
   return (
-    <TouchableOpacity activeOpacity={0.8} onPress={onPress} className={`items-center rounded-full bg-ember py-[15px] ${className}`}>
+    <TouchableOpacity accessibilityRole="button" style={surface} activeOpacity={0.8} onPress={onPress} className={`items-center rounded-full bg-ember py-[15px] ${className}`}>
       <Text className="font-dm-medium text-[14.5px] text-on-accent">{label}</Text>
     </TouchableOpacity>
   );
@@ -278,7 +279,6 @@ export function EmptyState({
   actionLabel,
   onAction,
   tone = 'outline',
-  tint = false,
   compact = false,
 }: {
   title: string;
@@ -289,18 +289,13 @@ export function EmptyState({
   tint?: boolean;
   compact?: boolean;
 }) {
-  const surface = useRaisedSurface(2);
-  const buttonClass =
-    tone === 'solid'
-      ? 'bg-ember'
-      : tone === 'subtle'
-        ? 'border border-sand bg-shell'
-        : 'border border-rust bg-blush';
-  const buttonTextClass = tone === 'solid' ? 'text-on-accent' : 'text-peach';
+  const surface = useRaisedSurface(1);
+  const buttonSurface = useControlSurface(false, tone === 'solid');
+  const buttonTextClass = tone === 'solid' ? 'text-on-accent' : 'text-ink';
   return (
     <View
-      style={tint ? undefined : surface}
-      className={`items-center rounded-card ${tint ? 'border border-sand bg-coral-50' : ''} ${
+      style={surface}
+      className={`items-center rounded-card ${
         compact ? 'px-5 py-6' : 'px-5 py-8'
       }`}>
       <Text className={`font-fraunces ${compact ? 'text-section' : 'text-title'} text-ink`}>{title}</Text>
@@ -310,8 +305,10 @@ export function EmptyState({
       {actionLabel ? (
         <TouchableOpacity
           activeOpacity={0.72}
+          accessibilityRole="button"
+          style={buttonSurface}
           onPress={onAction}
-          className={`rounded-full px-4 ${compact ? 'mt-3 py-1.5' : 'mt-4 py-2.5'} ${buttonClass}`}>
+          className={`rounded-full px-4 ${compact ? 'mt-3 py-1.5' : 'mt-4 py-2.5'}`}>
           <Text className={`font-dm-medium ${compact ? 'text-meta' : 'text-label'} ${buttonTextClass}`}>{actionLabel}</Text>
         </TouchableOpacity>
       ) : null}
@@ -323,6 +320,7 @@ export function EmptyState({
 export function BackButton({ label, onPress }: { label?: string; onPress?: () => void }) {
   const router = useRouter();
   const colors = useThemeColors();
+  const surface = useControlSurface();
   const handlePress = onPress ?? (() => (router.canGoBack() ? router.back() : router.replace('/')));
 
   if (label) {
@@ -332,7 +330,8 @@ export function BackButton({ label, onPress }: { label?: string; onPress?: () =>
         onPress={handlePress}
         accessibilityRole="button"
         accessibilityLabel={`Go back, ${label}`}
-        className="flex-row items-center gap-x-2 rounded-full border border-sand bg-shell px-3.5 py-2 shadow-2xs">
+        style={surface}
+        className="flex-row items-center gap-x-2 rounded-full border border-edge-faint bg-shell px-3.5 py-2">
         <Svg width={7} height={12} viewBox="0 0 8 14">
           <Path d="M7 1L1 7l6 6" stroke={colors.ink} strokeWidth={2.2} fill="none" strokeLinecap="round" strokeLinejoin="round" />
         </Svg>
@@ -347,7 +346,8 @@ export function BackButton({ label, onPress }: { label?: string; onPress?: () =>
       onPress={handlePress}
       accessibilityRole="button"
       accessibilityLabel="Go back"
-      className="h-10 w-10 shrink-0 items-center justify-center rounded-full border border-sand bg-shell shadow-2xs">
+      style={surface}
+      className="h-10 w-10 shrink-0 items-center justify-center rounded-full border border-edge-faint bg-shell">
       <Svg width={8} height={14} viewBox="0 0 8 14">
         <Path d="M7 1L1 7l6 6" stroke={colors.ink} strokeWidth={2.2} fill="none" strokeLinecap="round" strokeLinejoin="round" />
       </Svg>

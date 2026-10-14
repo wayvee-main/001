@@ -205,7 +205,7 @@ export default function EventScreen() {
       children: (
         <View className="flex-row flex-wrap gap-1.5">
           {(ev.vibeTags ?? []).map((tag) => (
-            <View key={tag} className="rounded-full border border-sand bg-shell px-[11px] py-1.5">
+            <View key={tag} className="rounded-full border border-edge-faint bg-shell px-[11px] py-1.5">
               <Text className="font-dm text-meta text-ink">{tag}</Text>
             </View>
           ))}
@@ -229,7 +229,7 @@ export default function EventScreen() {
               accessibilityLabel={`${pick.restaurant.name}, ${pick.minutes} minute walk from ${ev.venue}`}
               activeOpacity={0.72}
               onPress={() => router.push(`/restaurant/${pick.restaurant.id}`)}
-              className={`flex-row items-center gap-x-3 py-2.5 ${index < dinnerPicks.length - 1 ? 'border-b border-sand' : ''}`}>
+              className={`flex-row items-center gap-x-3 py-2.5 ${index < dinnerPicks.length - 1 ? 'border-b border-edge-faint' : ''}`}>
               <Photo uri={pick.restaurant.image} radius={9} style={{ width: 44, height: 44 }} />
               <View className="min-w-0 flex-1">
                 <Text numberOfLines={1} className="font-dm-bold text-label text-ink">{pick.restaurant.name}</Text>
@@ -260,7 +260,7 @@ export default function EventScreen() {
               accessibilityLabel={`${entry.name}, ${entry.date}, ${entry.priceLabel}`}
               activeOpacity={0.72}
               onPress={() => router.push(`/event/${entry.id}`)}
-              className={`flex-row items-center gap-x-3 py-2.5 ${index < shown.length - 1 ? 'border-b border-sand' : ''}`}>
+              className={`flex-row items-center gap-x-3 py-2.5 ${index < shown.length - 1 ? 'border-b border-edge-faint' : ''}`}>
               <View className="w-[52px] shrink-0">
                 <Text className="font-dm-bold text-micro tracking-[0.4px] text-peach">
                   {entry.date.split('·')[0].trim().toUpperCase()}

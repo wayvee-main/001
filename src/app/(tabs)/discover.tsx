@@ -14,7 +14,7 @@ import { useContentHydrating } from '@/lib/bootstrap';
 import { hydrateEventsFromBackend } from '@/lib/events-remote';
 import { hydratePlacesFromBackend, useAllPlaces } from '@/lib/places';
 import { buildSearchIndex, queryIndex } from '@/lib/search';
-import { useElevation } from '@/lib/shadows';
+import { useControlSurface } from '@/lib/shadows';
 import { useScoper } from '@/lib/store';
 import { useThemeColors } from '@/lib/theme';
 import { useNow } from '@/lib/clock';
@@ -67,7 +67,7 @@ function Shelf({title,children,onAll,fullWidth=false}:{title:string;children:Rea
 }
 
 export default function DiscoverScreen() {
-  const router=useRouter(),params=useLocalSearchParams<{q?:string;mode?:string}>(),colors=useThemeColors(),lift=useElevation(1);
+  const router=useRouter(),params=useLocalSearchParams<{q?:string;mode?:string}>(),colors=useThemeColors(),control=useControlSurface(),selectedControl=useControlSurface(true);
   const city=useActiveCity(),cityName=useActiveCityName(),local=city===BUNDLE_CITY;
   const [query,setQuery]=useState(params.q||''),[mode,setMode]=useState<Mode>(normalizeMode(params.mode));
   const [seed,setSeed]=useState(`${params.q||''}:${params.mode||''}`),[refreshing,setRefreshing]=useState(false);
@@ -130,9 +130,8 @@ export default function DiscoverScreen() {
     </View>
     <View className="mt-2.5 mb-[18px]"><HRow gap={11.44} bleed={false}>{MODES.map(x=><TouchableOpacity key={x.value} accessibilityRole="button" accessibilityLabel={x.label}
       accessibilityState={{selected:mode===x.value}} activeOpacity={.78} hitSlop={{top:6,bottom:6}} onPress={()=>choose(x.value)}
-      style={[lift,{minHeight:32.2,paddingVertical:6.44,paddingHorizontal:8.28,borderRadius:999,flexDirection:'row',alignItems:'center',gap:4.6,
-        backgroundColor:mode===x.value?colors['selected-surface']:colors['surface-raised']}]}>
-      {x.value==='All'?<VeeMark size={16} color={mode===x.value?colors['selected-glyph']:colors['vee-strong']} />:<Glyph name={x.glyph} size={13.8} color={mode===x.value?colors['selected-glyph']:colors['vee-strong']} />}
+      style={[mode===x.value?selectedControl:control,{minHeight:32.2,paddingVertical:6.44,paddingHorizontal:8.28,borderRadius:999,flexDirection:'row',alignItems:'center',gap:4.6}]}>
+      {x.value==='All'?<VeeMark size={16} color={mode===x.value?colors['selected-glyph']:colors['fg-muted']} />:<Glyph name={x.glyph} size={13.8} color={mode===x.value?colors['selected-glyph']:colors['fg-muted']} />}
       <Text className="font-dm" style={{fontSize:11.04,lineHeight:15,color:mode===x.value?colors['on-selected']:colors.fg}}>{x.label}</Text>
     </TouchableOpacity>)}</HRow></View>
     {query.trim()?<View className="gap-y-2"><Heading title={`Matches for “${query}”`} />

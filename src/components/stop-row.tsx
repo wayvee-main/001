@@ -75,7 +75,7 @@ export function StopRow({
   const meta = [subtitle, legLabel].filter(Boolean).join(' · ');
 
   return (
-    <View className={`flex-row items-center gap-x-3 py-3 ${last ? '' : 'border-b border-sand'}`}>
+    <View className={`flex-row items-center gap-x-3 py-3 ${last ? '' : 'border-b border-edge-faint'}`}>
       <View className={`h-8 w-8 shrink-0 items-center justify-center rounded-full ${style.tint}`}>
         <Icon d={style.icon} size={15} color={colors[style.fg]} strokeWidth={1.9} />
       </View>
@@ -111,7 +111,7 @@ export function StopRow({
           accessibilityLabel={`${actionLabel} ${title}`}
           activeOpacity={0.75}
           onPress={onAction}
-          className="shrink-0 rounded-full border border-rust px-3 py-1.5">
+          className="shrink-0 rounded-full border border-edge-faint bg-surface-raised px-3 py-1.5 shadow-soft-light dark:shadow-soft-dark">
           <Text className="font-dm-medium text-meta text-rust">{actionLabel}</Text>
         </TouchableOpacity>
       ) : null}

@@ -6,6 +6,7 @@ import { Text, TouchableOpacity } from 'react-native';
 
 import { Icon } from '@/components/ui';
 import { ICON_PATHS } from '@/lib/icons';
+import { useControlSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
 
 /** Bottom-bar secondary CTA — "Plan a night around this" — for detail screens
@@ -14,15 +15,16 @@ import { useThemeColors } from '@/lib/theme';
  * build from /create's own eventId/restaurantId/nightlifeId/venueId/crawlId
  * params (see lib/concierge/adapter.ts's ConciergeContext). */
 export function PlanCta({ label = 'Plan a night around this', onPress }: { label?: string; onPress: () => void }) {
-  const colors = useThemeColors();
+  const colors = useThemeColors(), control = useControlSurface();
   return (
     <TouchableOpacity
       accessibilityRole="button"
       activeOpacity={0.75}
       onPress={onPress}
-      className="h-11 flex-row items-center justify-center gap-x-1.5 rounded-full border border-accent/40 bg-surface">
-      <Icon d={ICON_PATHS.sparkles} size={14} color={colors.accent} strokeWidth={2} />
-      <Text className="font-dm-bold text-[12.5px] text-peach">{label}</Text>
+      style={control}
+      className="h-11 flex-row items-center justify-center gap-x-1.5 rounded-full ">
+      <Icon d={ICON_PATHS.sparkles} size={14} color={colors['fg-muted']} strokeWidth={2} />
+      <Text className="font-dm-bold text-[12.5px] text-ink">{label}</Text>
     </TouchableOpacity>
   );
 }
@@ -31,16 +33,17 @@ export function PlanCta({ label = 'Plan a night around this', onPress }: { label
  * TrendingEventRow already used for events, generalized so every row kind
  * (venue, nightlife, route) can reach the concierge the same way. */
 export function PlanChip({ onPress }: { onPress: () => void }) {
-  const colors = useThemeColors();
+  const colors = useThemeColors(), control = useControlSurface();
   return (
     <TouchableOpacity
       accessibilityRole="button"
       accessibilityLabel="Plan a night around this"
       activeOpacity={0.75}
       onPress={onPress}
-      className="flex-row items-center gap-x-1 rounded-full border border-sand bg-coral-50 px-2.5 py-1.5 shadow-2xs">
-      <Icon d={ICON_PATHS.sparkles} size={11} color={colors.rust} strokeWidth={2} />
-      <Text className="font-dm-bold text-[11px] text-rust">Plan</Text>
+      style={control}
+      className="flex-row items-center gap-x-1 rounded-full  px-2.5 py-1.5">
+      <Icon d={ICON_PATHS.sparkles} size={11} color={colors['fg-muted']} strokeWidth={2} />
+      <Text className="font-dm-bold text-[11px] text-ink">Plan</Text>
     </TouchableOpacity>
   );
 }
