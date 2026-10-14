@@ -27,6 +27,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useConstraintPicker } from '@/components/constraint-picker';
@@ -272,6 +273,7 @@ function ShapeTile({
 }
 
 export default function CreateScreen() {
+  const { width: screenWidth } = useWindowDimensions();
   const router = useRouter();
   const params = useLocalSearchParams<{
     q?: string;
@@ -332,6 +334,7 @@ export default function CreateScreen() {
   const [promptText, setPromptText] = useState('');
   const [asking, setAsking] = useState(false);
   const [composerFocused, setComposerFocused] = useState(false);
+  const [showShapes, setShowShapes] = useState(false);
   const { close: closeComposerPicker } =
     useConstraintPicker<Exclude<ComposerPicker, null>>();
   const focusedInputRef = useRef<TextInput>(null);
@@ -790,7 +793,6 @@ export default function CreateScreen() {
         <ScreenScroll
           gap={0}
           clearsTabBar
-          centerWhenShort={!showingLiveMatches && !askPlan}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
           automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}>
@@ -799,9 +801,9 @@ export default function CreateScreen() {
            * profile; repeating them here made the quiet screen the busiest.
            * One subtitle line rather than Home's two: the weather is context
            * on this screen, not its subject. */}
-          <View style={{ paddingTop: 10 }}>
-            <Text className="font-fraunces text-[19px] text-ink">Vee</Text>
-            <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">
+          <View style={{ paddingTop: 16 }}>
+            <Text className="font-fraunces text-ink" style={{fontSize:21,lineHeight:25.2}}>Vee</Text>
+            <Text numberOfLines={1} className="mt-1 font-dm text-fine text-taupe">
               {headerLocationLabel}
             </Text>
           </View>
@@ -857,30 +859,24 @@ export default function CreateScreen() {
             * controls restating defaults made the assumptions look like the
             * point of the screen. */}
           {!showingLiveMatches ? (
-            <View className="mt-10 items-center">
-              <VeeMark size={84} gradient />
-              <Text className="mt-4 max-w-[280px] text-center font-fraunces text-[23px] leading-[30px] text-ink">
-                {askPlan ? 'What should change?' : 'What sounds\ngood tonight?'}
+            <View testID="vee-open-letter" style={{marginTop:askPlan?32:100,alignItems:'flex-start'}}>
+              <VeeMark size={47} gradient />
+              <Text className="font-fraunces text-ink" style={{marginTop:24,fontSize:screenWidth<=360?31:35,lineHeight:(screenWidth<=360?31:35)*1.13,letterSpacing:-.65}}>
+                {askPlan ? 'What should change?' : 'Dear evening,\nlet’s see where\nwe end up.'}
               </Text>
             </View>
           ) : null}
 
           <View
-            style={[
-              raisedSurface,
-              {
-                borderWidth: StyleSheet.hairlineWidth,
-                borderColor: composerFocused ? colors['vee-strong'] : colors.edge,
+            testID="vee-letter-composer"
+            style={{
+                borderBottomWidth: 1,
+                borderBottomColor: composerFocused ? colors['fg-accent'] : colors['edge-soft'],
                 opacity: asking ? 0.72 : 1,
-                height: 151.912,
-                paddingHorizontal: 16,
-                paddingTop: 14.4,
-                paddingBottom: 9.9,
-                borderRadius: 25,
-              },
-            ]}
-            className={`${showingLiveMatches ? 'mt-5' : 'mt-7'}`}>
-            <Text className="mb-2 font-dm text-fine text-taupe">Your starting point</Text>
+                paddingBottom: 13,
+                marginTop: showingLiveMatches ? 20 : 30,
+              }}>
+            <Text className="font-dm text-fine text-taupe" style={{marginBottom:15}}>Your starting point</Text>
             <TextInput
               ref={focusedInputRef}
               accessibilityLabel="Ask Vee"
@@ -897,15 +893,15 @@ export default function CreateScreen() {
               editable={!asking}
               returnKeyType="send"
               onSubmitEditing={() => void submitAsk(promptReady ? promptText : askExampleLabel)}
-              className="min-w-0 flex-1 font-dm text-body text-ink"
-              style={{ padding: 0, borderWidth: 0, textAlignVertical: 'top', ...(Platform.OS === 'web' ? { outlineWidth: 0 } as any : {}) }}
+              className="min-w-0 font-dm text-ink"
+              style={{ height:75,fontSize:18,lineHeight:26.1,padding:0,borderWidth:0,textAlignVertical:'top', ...(Platform.OS === 'web' ? { outlineWidth: 0 } as any : {}) }}
             />
-            <View className="mt-1 flex-row items-center justify-between">
+            <View className="flex-row items-center justify-between" style={{marginTop:7}}>
               <TouchableOpacity accessibilityRole="button" accessibilityLabel="Add a preference" onPress={() => useScoper.getState().openSheet('addConstraint')} hitSlop={8}
                 className="h-9 flex-row items-center gap-x-1.5">
                 <Glyph name="plus" size={14} color={colors['fg-muted']} /><Text className="font-dm text-fine text-taupe">Details</Text>
               </TouchableOpacity>
-              <View className="flex-row items-center gap-x-2.5">
+              <View className="flex-row items-center" style={{gap:9}}>
                 <TouchableOpacity accessibilityRole="button" accessibilityLabel="Focus the Vee composer" onPress={() => focusedInputRef.current?.focus()} hitSlop={4}
                   className="h-9 w-9 items-center justify-center rounded-full bg-surface">
                   <Glyph name="mic" size={16} color={colors.fg} />
@@ -1014,6 +1010,12 @@ export default function CreateScreen() {
            * computed on every render, and three comparable options read as a
            * choice rather than a verdict. */}
           <View className="mt-4">
+            <TouchableOpacity accessibilityRole="button" accessibilityLabel="Start from a shape" accessibilityState={{expanded:showShapes}}
+              onPress={()=>setShowShapes(value=>!value)} activeOpacity={.78} className="min-h-[36px] flex-row items-center justify-between">
+              <Text className="font-dm text-fine text-taupe">Start from a shape</Text>
+              <View style={{transform:[{rotate:showShapes?'270deg':'90deg'}]}}><Glyph name="chevron" size={13} color={colors['fg-muted']} /></View>
+            </TouchableOpacity>
+            {showShapes?<View className="mt-2">
             {isSolving ? (
               <View className="items-center py-8">
                 <ActivityIndicator size="small" color={colors.accent} />
@@ -1025,10 +1027,7 @@ export default function CreateScreen() {
                   opacity: planMotion,
                   transform: [{ translateY: planMotion.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) }],
                 }}>
-                <View className="flex-row items-baseline justify-between">
-                  <Text style={{ color: colors['vee-strong'] }} className="font-dm-medium text-[11px] leading-4">
-                    Or start from a shape
-                  </Text>
+                <View className="flex-row items-baseline justify-end">
                   <Text className="font-dm text-meta text-taupe">
                     {readyMadeCards.length} for {headerContextLabel.toLowerCase()}
                   </Text>
@@ -1074,6 +1073,7 @@ export default function CreateScreen() {
                 onAction={() => router.push('/discover')}
               />
             )}
+            </View>:null}
           </View>
 
           <View className="h-5" />

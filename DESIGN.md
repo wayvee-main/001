@@ -40,18 +40,21 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   beside each section heading. Results are inset 20px, with 27px between sections.
   Rows sit directly on Nightfall with Fraunces 500 names and compact glyph facts.
 - On stage has one gently raised editorial lead with date, a 25px artist heading,
-  brief caption, a source-based description of up to 28 words/three lines,
+  brief caption, a source-based description of up to 20 words/two lines
+  (about 30% shorter than the previous version),
   and venue/time facts. Its right portrait is 78 × 114px
   (65 × 96px on narrow phones). Current listings replace samples.
   The hero uses level-1 elevation, 12px padding and a 12px radius. Both the hero
   and More on stage have a very faint 1px tonal border at roughly 4% ink opacity
   (`edge-soft` at half opacity), without affecting text or image contrast.
 - More on stage, More good tables and After dinner each use one horizontal photo row: 137px
-  elements, 73px-high photos and 16px gaps. More on stage has a
+  elements, a shared 195px minimum height, 73px-high photos and 16px gaps.
+  More on stage has a
   slightly raised paper surface with 8px padding, a 12px radius and level-1
   shadow; its inset photos are 121px wide. The other two rows stay uncontained.
   All Discover listing titles use at most five words, with an ellipsis when
-  shortened. Strip titles also use at most three lines; full titles stay
+  shortened. More on stage titles are one line with ellipses. Other strip
+  titles use at most three lines; full titles stay
   accessible and on detail pages.
   For you shows two
   supporting events and three bars; their See all actions expose the full pools.
@@ -77,10 +80,17 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   Manual Light/Dark choices override the OS in both CSS and inline colors;
   System follows OS changes. Tailwind uses class-based dark mode and the token
   generator emits the matching dark root variables.
-- Vee has no slogan or suggestion pills. Its modern composer is 151.912px
-  high, has no inner horizontal divider or rectangular focus border, and
-  has 36px round controls with larger touch targets. Keep the rounded outer
-  focus treatment. Existing submission and planning behavior remains intact.
+- Vee uses the selected **Open Letter** design. The 47px original gradient mark
+  and left-aligned Fraunces heading lead with “Dear evening, / let’s see where /
+  we end up.” The heading is 35px (31px on narrow phones), with 24px after the
+  mark and a 100px opening gap below the live city/weather header.
+  The composer is open on Nightfall, without a filled container or shadow:
+  a small starting-point label, a 75px writing field in 18px DM Sans, and a
+  faint bottom underline that gains accent color on focus. No inner divider,
+  rectangular focus border or suggestion pills. Keep 36px round mic/send
+  controls, Details, live search, preferences, submission and plan refinement.
+  Ready-made evenings remain behind a quiet “Start from a shape” text action,
+  collapsed initially so the opening retains the selected design's whitespace.
 
 ## Validation
 
