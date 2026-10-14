@@ -3,7 +3,21 @@ import { Text, TouchableOpacity, View, useWindowDimensions } from 'react-native'
 import { Glyph } from '@/components/glyph';
 import { Photo } from '@/components/photo';
 import { eventDayGroupLabel, type Crawl, type NightlifeSpot, type Restaurant, type ScoperEvent, type Venue } from '@/lib/data';
+import { useElevation } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
+
+function briefWords(value:string,max:number):string {
+  const words=value.trim().split(/\s+/);
+  return words.length>max?`${words.slice(0,max).join(' ').replace(/[.,;:!?–—-]+$/,'')}…`:value.trim();
+}
+
+function heroDescription(x:ScoperEvent):string {
+  let text=(x.know||x.lineup).replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
+  const intro=`An Evening With ${x.name.replace(/:/g,'').replace(/\s+/g,' ').trim()}`;
+  if(text.toLowerCase().startsWith(intro.toLowerCase()))text=text.slice(intro.length).trim();
+  const sentence=text.match(/^.*?[.!?](?:\s|$)/)?.[0]?.trim()||text;
+  return briefWords(sentence,28);
+}
 
 function Fact({glyph,value,label}:{glyph:string;value:string;label?:string}) {
   const colors=useThemeColors();
@@ -14,15 +28,18 @@ function Fact({glyph,value,label}:{glyph:string;value:string;label?:string}) {
 }
 
 /** Evening Trail notes and photo strips share the original detail routes. */
-function Note({name,caption,facts,image,index,divider,onPress,testID,accessibilityName,strip=false}:{name:string;caption:string;facts:ReactNode;image?:string;index?:number;divider:boolean;onPress:()=>void;testID:string;accessibilityName?:string;strip?:boolean}) {
+function Note({name,caption,facts,image,index,divider,onPress,testID,accessibilityName,strip=false,elevated=false}:{name:string;caption:string;facts:ReactNode;image?:string;index?:number;divider:boolean;onPress:()=>void;testID:string;accessibilityName?:string;strip?:boolean;elevated?:boolean}) {
   const {width}=useWindowDimensions(),narrow=width<=360;
+  const colors=useThemeColors(),lift=useElevation(1);
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Explore ${accessibilityName||name}`} onPress={onPress} activeOpacity={.78} testID={testID}
-    className={`items-start py-3.5 ${strip?'':`flex-row ${divider?'border-t border-edge-soft':''}`}`} style={strip?{width:137,flexShrink:0}:{gap:12}}>
-    {strip&&image?<Photo uri={image} radius={8} style={{width:137,height:73,marginBottom:11}} />:null}
+    className={`items-start py-3.5 ${strip?'':`flex-row ${divider?'border-t border-edge-soft':''}`}`}
+    style={[strip?{width:137,flexShrink:0}:{gap:12},elevated?{...lift,backgroundColor:colors['surface-raised'],borderRadius:12,padding:8}:null]}>
+    {elevated?<View pointerEvents="none" style={{position:'absolute',inset:0,borderRadius:12,borderWidth:1,borderColor:colors['edge-soft'],opacity:.5}} />:null}
+    {strip&&image?<Photo uri={image} radius={8} style={{width:elevated?121:137,height:73,marginBottom:11}} />:null}
     {index!==undefined?<Text accessible={false} numberOfLines={1} className="font-fraunces text-peach"
       style={{width:31,flexShrink:0,fontSize:23,lineHeight:25.3}}>{String(index+1).padStart(2,'0')}</Text>:null}
     <View className={`min-w-0 ${strip?'w-full':'flex-1'}`}>
-      <Text numberOfLines={strip?3:undefined} className="font-fraunces text-ink" style={{fontSize:strip?17:18,lineHeight:strip?19.55:20.7,letterSpacing:-.2}}>{name}</Text>
+      <Text testID="discover-listing-title" numberOfLines={strip?3:undefined} className="font-fraunces text-ink" style={{fontSize:strip?17:18,lineHeight:strip?19.55:20.7,letterSpacing:-.2}}>{briefWords(name,5)}</Text>
       <Text className="font-dm text-fine text-taupe" style={{marginTop:strip?5:7}}>{caption}</Text>
       <View className="flex-row flex-wrap" style={{marginTop:strip?8:11,columnGap:11,rowGap:4}}>{facts}</View>
     </View>
@@ -46,13 +63,16 @@ function shortVenue(x:ScoperEvent):string {
 
 export function TrailLead({event:x,onPress}:{event:ScoperEvent;onPress:()=>void}) {
   const {width}=useWindowDimensions(),narrow=width<=360;
+  const colors=useThemeColors(),lift=useElevation(1);
   const date=x.startsAt?new Date(x.startsAt).toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'America/Los_Angeles'}):eventDayGroupLabel(x);
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Explore ${x.name}, ${date}, ${x.venue}`} onPress={onPress} activeOpacity={.78}
-    testID="trail-lead" className="flex-row items-start pt-2.5 pb-4" style={{gap:12}}>
+    testID="trail-lead" className="flex-row items-start" style={{...lift,gap:12,padding:12,borderRadius:12,backgroundColor:colors['surface-raised']}}>
+    <View pointerEvents="none" style={{position:'absolute',inset:0,borderRadius:12,borderWidth:1,borderColor:colors['edge-soft'],opacity:.5}} />
     <View className="min-w-0 flex-1">
       <Text className="font-dm text-fine text-peach">{date}</Text>
-      <Text className="mt-[7px] font-fraunces text-ink" style={{fontSize:25,lineHeight:27,letterSpacing:-.7}}>{eventName(x)}</Text>
+      <Text testID="discover-listing-title" className="mt-[7px] font-fraunces text-ink" style={{fontSize:25,lineHeight:27,letterSpacing:-.7}}>{briefWords(eventName(x),5)}</Text>
       <Text className="mt-[7px] font-dm text-fine text-taupe">{eventCaption(x)}</Text>
+      <Text testID="trail-lead-description" numberOfLines={3} className="mt-[7px] font-dm text-fine text-taupe">{heroDescription(x)}</Text>
       <View className="mt-[11px] flex-row flex-wrap" style={{columnGap:11,rowGap:4}}>
         <Fact glyph="pin" value={shortVenue(x)} label={x.venue} /><Fact glyph="clock" value={x.time} label={`${date}, ${x.time}`} />
       </View>
@@ -62,7 +82,7 @@ export function TrailLead({event:x,onPress}:{event:ScoperEvent;onPress:()=>void}
 }
 
 export function ShowNote({event:x,onPress}:{event:ScoperEvent;onPress:()=>void}) {
-  return <Note accessibilityName={x.name} name={eventName(x)} caption={eventCaption(x)} image={x.image} strip divider={false} onPress={onPress} testID={`trail-show-${x.id}`}
+  return <Note accessibilityName={x.name} name={eventName(x)} caption={eventCaption(x)} image={x.image} strip elevated divider={false} onPress={onPress} testID={`trail-show-${x.id}`}
     facts={<><Fact glyph="pin" value={shortVenue(x)} label={x.venue} /><Fact glyph="clock" value={x.time} label={`${eventDayGroupLabel(x)}, ${x.time}`} /></>} />;
 }
 
