@@ -1,19 +1,16 @@
 import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Linking, Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Glyph } from '@/components/glyph';
 import { Screen, ScreenScroll, useAppGutter } from '@/components/layout';
-import { PrimaryButton } from '@/components/ui';
 import { APPEARANCE_OPTIONS, restoreAppearance, saveAppearance, type AppearancePreference } from '@/lib/appearance';
 import { initialsFor } from '@/lib/auth';
 import { switchCity } from '@/lib/bootstrap';
 import { useActiveCity, useActiveCityName, useCityOptions } from '@/lib/city';
 import { useNow } from '@/lib/clock';
 import { EVENTS, isCurrentEvent } from '@/lib/data';
-import { useElevation } from '@/lib/shadows';
 import { stayProgress } from '@/lib/stay';
 import { useScoper } from '@/lib/store';
 import { useThemeColors } from '@/lib/theme';
@@ -31,7 +28,7 @@ function Setting({label,note,glyph,onPress}:{label:string;note:string;glyph:stri
 }
 
 export default function ProfileScreen() {
-  const router=useRouter(),s=useScoper(),colors=useThemeColors(),lift=useElevation(1);
+  const router=useRouter(),s=useScoper(),colors=useThemeColors();
   const city=useActiveCity(),cityName=useActiveCityName(),cityOptions=useCityOptions();
   const gutter=useAppGutter(),insets=useSafeAreaInsets(),now=useNow();
   const [appearance,setAppearance]=useState<AppearancePreference>('system');
@@ -65,34 +62,30 @@ export default function ProfileScreen() {
     setPicker(null);void switchCity(slug).catch(()=>s.showToast('Could not switch city'));
   };
   return <Screen><ScreenScroll gap={20} clearsTabBar>
-    <View className="mt-2 flex-row items-center justify-between">
-      <Text className="font-fraunces text-display text-ink">Your Wayvee</Text>
+    <View className="mt-2 flex-row items-center gap-x-3">
+      <View className="items-center justify-center rounded-full bg-surface-raised" style={{width:44,height:44,borderWidth:1,borderColor:colors['control-edge'],overflow:'hidden'}}>
+        {s.profileAvatarUrl?<Image source={{uri:s.profileAvatarUrl}} contentFit="cover" style={{width:44,height:44}} />:
+          <Text className="font-dm-medium text-[17px] text-ink">{s.session?initialsFor(displayName):'G'}</Text>}
+      </View>
+      <View className="min-w-0 flex-1"><Text className="font-fraunces text-ink" style={{fontSize:22,lineHeight:27}}>{displayName}</Text>
+        <Text className="mt-1 font-dm text-fine text-taupe">{cityName}</Text></View>
       <TouchableOpacity accessibilityRole="button" accessibilityLabel="Open notifications" onPress={()=>router.push('/notifications')}
-        className="h-9 w-9 items-center justify-center rounded-full bg-surface-raised">
-        <Glyph name="bell" size={18} color={colors.fg} />
+        className="h-11 w-11 items-center justify-center rounded-full">
+        <Glyph name="bell" size={18} color={colors['fg-muted']} />
       </TouchableOpacity>
     </View>
-    <View className="flex-row items-center gap-x-[13px]">
-      <View style={[lift,{width:56,height:56,borderRadius:28,borderWidth:5,borderColor:colors['surface-raised'],overflow:'hidden'}]}>
-        {s.profileAvatarUrl?<Image source={{uri:s.profileAvatarUrl}} contentFit="cover" style={{width:46,height:46}} />:
-          <LinearGradient colors={[colors['tile-bars'],colors['tile-eat'],colors['tile-routes']]} start={{x:0,y:0}} end={{x:1,y:1}}
-            style={{flex:1,alignItems:'center',justifyContent:'center'}}>
-            <Text className="font-dm-medium text-[22px] text-ink">{s.session?initialsFor(displayName):'G'}</Text>
-          </LinearGradient>}
-      </View>
-      <View className="min-w-0 flex-1"><Text className="font-fraunces text-ink" style={{fontSize:25,lineHeight:29}}>{displayName}</Text>
-        <Text className="mt-[7px] font-dm text-fine text-taupe">{cityName} · Your city, at your pace</Text></View>
-    </View>
-    {!s.session?<LinearGradient colors={[colors['surface-raised'],colors['tile-eat']]} start={{x:0,y:0}} end={{x:1,y:1}}
-      style={{borderRadius:17,padding:14,borderWidth:1,borderColor:colors['control-edge']}}>
-      <Text className="font-fraunces text-[19px] leading-[23px] text-ink">Make yourself at home.</Text>
-      <Text className="mt-[7px] font-dm text-label text-taupe">Keep your favorite places, plans and preferences together.</Text>
-      <PrimaryButton label="Sign in or create account" onPress={()=>s.openSheet('auth')} className="mt-4" />
-    </LinearGradient>:null}
-    <View className="flex-row gap-x-[9px]">
-      {stats.map(x=><TouchableOpacity key={x.label} accessibilityRole="button" accessibilityLabel={`${x.label}: ${x.value}`} onPress={()=>router.push(x.href as never)} activeOpacity={.78}
-        className="min-w-0 flex-1 items-center rounded-stat bg-surface-raised py-3.5 px-[5px]" style={{borderColor:colors['control-edge'],borderWidth:1}}>
-        <Text className="font-fraunces text-[24px] leading-[29px] text-ink">{x.value}</Text>
+    {!s.session?<View className="flex-row items-center gap-x-3">
+      <Text className="min-w-0 flex-1 font-dm text-label text-taupe">Sign in to save places and plans.</Text>
+      <TouchableOpacity accessibilityRole="button" accessibilityLabel="Sign in or create account" onPress={()=>s.openSheet('auth')} activeOpacity={.78}
+        className="h-11 flex-row items-center gap-x-2 rounded-full bg-surface-raised px-4">
+        <Text className="font-dm-medium text-label" style={{color:colors['fg-accent']}}>Sign in</Text>
+        <Glyph name="arrow" size={14} color={colors['fg-accent']} />
+      </TouchableOpacity>
+    </View>:null}
+    <View className="flex-row border-y border-edge-soft py-3.5">
+      {stats.map((x,index)=><TouchableOpacity key={x.label} accessibilityRole="button" accessibilityLabel={`${x.label}: ${x.value}`} onPress={()=>router.push(x.href as never)} activeOpacity={.78}
+        className="min-w-0 flex-1 items-center px-[5px]" style={{borderColor:colors['edge-soft'],borderLeftWidth:index?1:0,minHeight:44}}>
+        <Text className="font-fraunces text-[23px] leading-[28px] text-ink">{x.value}</Text>
         <Text className="mt-1 font-dm text-fine text-taupe">{x.label}</Text>
       </TouchableOpacity>)}
     </View>

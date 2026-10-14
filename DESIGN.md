@@ -56,8 +56,12 @@ inline palette and Tailwind tokens together with `npm run tokens`.
 - Discover keeps category pills, full search, pull-to-refresh, city-aware data,
   See all actions and the original Vee logo. Its intro reads “A few things worth
   going out for.” The header shows the selected city and a Vee launcher.
-- Profile follows the editorial mockup: Your Wayvee, a gradient guest avatar,
-  three live count cards, Your starting point and Preferences setting rows.
+- Home greets with “Shall we wander?”; the city appears only in its location
+  and weather header, without repetition in the greeting.
+- Profile opens without a page heading, with a notification button, a 44px
+  avatar and a compact serif greeting above the city name. Guest sign-in is a
+  quiet inline row; three live counts use faint dividers without card fills.
+  Your starting point and Preferences retain their setting rows.
   Appearance and launched-city choices open sheets. Existing authentication,
   location permissions, stay linking, saves, plans and following remain real.
   Manual Light/Dark choices override the OS in both CSS and inline colors;

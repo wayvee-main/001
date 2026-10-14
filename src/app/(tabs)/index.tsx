@@ -42,7 +42,7 @@ export default function HomeScreen() {
     <HomeHeader locationLabel={`${city}, CA`} hasReminders={activeReminders(s.plans,s.stay).length>0}
       onNotifications={()=>router.push('/notifications')} onProfile={()=>router.push('/profile')} />
     <View>
-      <Text className="font-fraunces text-ink" style={{fontSize:25,lineHeight:29,letterSpacing:-.8}}>Hello, {city}.</Text>
+      <Text className="font-fraunces text-ink" style={{fontSize:25,lineHeight:29,letterSpacing:-.8}}>Shall we wander?</Text>
       <Text className="mt-1 font-dm text-label text-taupe">A good evening is closer than you think.</Text>
     </View>
     <TouchableOpacity accessibilityRole="button" accessibilityLabel="Search places, dishes and shows" onPress={()=>s.openSheet('search')}
