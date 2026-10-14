@@ -14,8 +14,8 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   34px normally, 30px on phones up to 400px. Use `useAppGutter`.
 - Home keeps four tiles, ordered Eat, Bars, Routes, Events. Counts describe
   actual inventory, never unsupported opening status.
-  Tiles use a 145-degree gradient from raised paper (first 50%) to their
-  category tint, a 1px paper border, round paper glyph discs and serif labels.
+  Tiles use solid category tints without gradients, a 1px paper border,
+  round paper glyph discs and serif labels.
   Home search has a filled round arrow; the stay chip uses the Eat tint.
   Chips and inputs use the approved control edge. Filled controls pair
   `accent-fill` with `on-accent` in both themes, never hardcoded white.
@@ -35,27 +35,28 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   detail navigation share this treatment and clear content below it.
 - Discover's default order is On stage / More on stage, Find a good table,
   More good tables, After dinner, A little wandering, Rooms worth knowing.
-- All seven Discover sections use the selected **Field Journal** design.
-  This supersedes the contained Essential cards and Menu Slip rails on Discover.
-  Rows sit directly on Nightfall, with faint dividers, Fraunces 500 names,
-  short captions, compact glyph facts and generous vertical spacing.
-- On stage has one uncontained editorial lead: date, large artist heading,
-  brief caption and venue/time facts, with a portrait photo on the right
-  (95 × 138px; 73 × 112px on narrow phones). Current listings replace samples.
-- More on stage uses numbered vertical notes with no photo or containment.
-  For you shows two; Events exposes the remaining live calendar.
-- Find a good table uses three uncontained restaurant notes with right-side
-  thumbnails, cuisine captions and price/distance glyphs. Names wrap naturally.
-  More good tables uses three distinct numbered notes without photos.
-- **Find a good table has no See all action. More good tables keeps See all.**
-- After dinner uses three uncontained vertical notes with short captions,
-  street/age/hours glyphs and right-side thumbnails. Bars exposes the full pool.
-- A little wandering uses numbered route notes; Rooms worth knowing uses
-  venue notes with right-side photos. All supporting thumbnails are 59 × 82px
-  (47 × 73px on narrow phones). Full detail pages stay linked.
+- All seven Discover sections use the selected **Evening Trail** design,
+  superseding Field Journal. A faint 1px thread at the left connects rust dots
+  beside each section heading. Results are inset 20px, with 27px between sections.
+  Rows sit directly on Nightfall with Fraunces 500 names and compact glyph facts.
+- On stage has one uncontained editorial lead with date, a 25px artist heading,
+  brief caption and venue/time facts. Its right portrait is 78 × 114px
+  (65 × 96px on narrow phones). Current listings replace samples.
+- More on stage and After dinner each use one horizontal photo row: 137px
+  elements, 73px-high photos, 16px gaps and no containment. Long strip names
+  use at most three lines; full titles stay accessible and on detail pages.
+  For you shows two
+  supporting events and three bars; their See all actions expose the full pools.
+- Find a good table and More good tables use three uncontained restaurant
+  notes each, with right thumbnails, cuisine captions and price/distance glyphs.
+  Names wrap naturally. **Find a good table has no See all action;
+  More good tables keeps See all.**
+- A little wandering uses numbered route notes (23px numbers, 31px columns).
+  Rooms worth knowing uses venue notes with right-side photos. Supporting
+  thumbnails are 59 × 82px (47 × 73px on narrow phones).
 - Discover keeps category pills, full search, pull-to-refresh, city-aware data,
-  See all actions and the original Vee logo. Its intro reads “A few things worth
-  going out for.” The header shows the selected city and a Vee launcher.
+  See all actions, the original Vee logo and existing detail routes. Its intro
+  reads “One good thing can lead to another.” The header shows the selected city.
 - Home greets with “Shall we wander?”; the city appears only in its location
   and weather header, without repetition in the greeting.
 - Profile opens without a page heading, with a notification button, a 44px

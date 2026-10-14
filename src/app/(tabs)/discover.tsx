@@ -2,7 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Glyph } from '@/components/glyph';
-import { BarNote, JournalLead, RoomNote, RouteNote, ShowNote, TableNote } from '@/components/field-notes';
+import { BarNote, TrailLead, RoomNote, RouteNote, ShowNote, TableNote } from '@/components/field-notes';
 import { HRow, Screen, ScreenScroll } from '@/components/layout';
 import { ListRow } from '@/components/list-row';
 import { VeeMark } from '@/components/vee-mark';
@@ -26,12 +26,21 @@ const MODES=[{value:'All',label:'For you',glyph:'spark'},{value:'Food',label:'Ea
 type Mode=(typeof MODES)[number]['value'];
 function normalizeMode(raw?:string):Mode {return MODES.find(x=>x.value.toLowerCase()===String(raw).toLowerCase()||x.label.toLowerCase()===String(raw).toLowerCase())?.value||'All';}
 
-function Heading({title,onAll}:{title:string;onAll?:()=>void}) {
+function Heading({title,onAll,trail=false}:{title:string;onAll?:()=>void;trail?:boolean}) {
   const colors=useThemeColors();
   return <View className="flex-row items-center justify-between gap-x-2.5">
-    <Text className="min-w-0 flex-1 font-fraunces text-ink" style={{fontSize:21,lineHeight:25.2,letterSpacing:-.35}}>{title}</Text>
+    {trail?<View pointerEvents="none" style={{position:'absolute',left:-26,top:3,width:18,height:18,borderRadius:9,backgroundColor:colors.bg,alignItems:'center',justifyContent:'center'}}>
+      <View testID="trail-section-dot" style={{width:8,height:8,borderRadius:4,backgroundColor:colors['fg-accent']}} />
+    </View>:null}
+    <Text className="min-w-0 flex-1 font-fraunces text-ink" style={{fontSize:trail?20:21,lineHeight:trail?24:25.2,letterSpacing:-.35}}>{title}</Text>
     {onAll?<TouchableOpacity accessibilityRole="button" accessibilityLabel={`See all ${title.toLowerCase()}`} hitSlop={10} onPress={onAll}>
       <View className="flex-row items-center gap-x-1"><Text className="font-dm text-fine text-peach">See all</Text><Glyph name="arrow" size={12} color={colors['fg-accent']} /></View></TouchableOpacity>:null}
+  </View>;
+}
+
+function TrailSection({title,children,onAll}:{title:string;children:ReactNode;onAll?:()=>void}) {
+  return <View className="mt-[27px]" testID={`trail-section-${title.toLowerCase().replace(/\s+/g,'-')}`}>
+    <Heading title={title} onAll={onAll} trail /><View className="mt-2">{children}</View>
   </View>;
 }
 
@@ -83,31 +92,29 @@ export default function DiscoverScreen() {
   const routes=local?Object.values(CRAWLS):[],venues=local?Object.values(VENUES):[];
   const onRefresh=async()=>{setRefreshing(true);try{await Promise.all([hydrateEventsFromBackend(true),hydratePlacesFromBackend(true),hydrateViatorPicksFromBackend(true)]);}finally{setRefreshing(false);}};
   const choose=(value:Mode)=>setMode(value);
-  const stage=shows.length?<View>
-    <Heading title="On stage" /><JournalLead event={shows[0]} onPress={()=>router.push(`/event/${shows[0].id}`)} />
-    {shows.length>1?<View className="mt-[25px] border-t border-edge-soft pt-[21px]" testID="journal-more-on-stage">
-      <Heading title="More on stage" onAll={mode==='All'?()=>choose('Events'):undefined} />
-      {shows.slice(1,mode==='All'?3:undefined).map((x,i)=><ShowNote key={x.id} event={x} index={i} divider={i>0} onPress={()=>router.push(`/event/${x.id}`)} />)}
-    </View>:null}
-  </View>:<EmptyState compact title={hydrating?'Loading the stage…':'No current shows yet'} message={hydrating?'Checking the live calendar.':'Current listings appear here as the calendar updates.'} />;
-  const food=tables.length?<View className="mt-[25px] border-t border-edge-soft pt-[21px]">
-    <Heading title="Find a good table" />
+  const stage=shows.length?<>
+    <TrailSection title="On stage"><TrailLead event={shows[0]} onPress={()=>router.push(`/event/${shows[0].id}`)} /></TrailSection>
+    {shows.length>1?<TrailSection title="More on stage" onAll={mode==='All'?()=>choose('Events'):undefined}>
+      <HRow gap={16} bleed={false}>{shows.slice(1,mode==='All'?3:undefined).map(x=><ShowNote key={x.id} event={x} onPress={()=>router.push(`/event/${x.id}`)} />)}</HRow>
+    </TrailSection>:null}
+  </>:<TrailSection title="On stage"><EmptyState compact title={hydrating?'Loading the stage…':'No current shows yet'} message={hydrating?'Checking the live calendar.':'Current listings appear here as the calendar updates.'} /></TrailSection>;
+  const food=tables.length?<>
+    <TrailSection title="Find a good table">
     {tables.slice(0,mode==='All'?3:undefined).map((x,i)=><TableNote key={x.id} restaurant={x} divider={i>0} onPress={()=>router.push(`/restaurant/${x.id}`)} />)}
-    {more.length?<View className="mt-[25px] border-t border-edge-soft pt-[21px]" testID="journal-more-good-tables">
-      <Heading title="More good tables" onAll={()=>router.push('/featured')} />
-      {more.map((x,i)=><TableNote key={x.id} restaurant={x} index={i} divider={i>0} onPress={()=>router.push(`/restaurant/${x.id}`)} />)}
-    </View>:null}
-  </View>:null;
-  const nightlife=bars.length?<View className="mt-[25px] border-t border-edge-soft pt-[21px]" testID="journal-after-dinner">
-    <Heading title="After dinner" onAll={mode==='All'?()=>choose('Nightlife'):undefined} />
-    {bars.slice(0,mode==='All'?3:undefined).map((x,i)=><BarNote key={x.id} spot={x} divider={i>0} onPress={()=>router.push(`/night/${x.id}`)} />)}
-  </View>:null;
-  const wander=routes.length?<View className="mt-[25px] border-t border-edge-soft pt-[21px]"><Heading title="A little wandering" onAll={mode==='All'?()=>choose('Routes'):undefined} />
+    </TrailSection>
+    {more.length?<TrailSection title="More good tables" onAll={()=>router.push('/featured')}>
+      {more.map((x,i)=><TableNote key={x.id} restaurant={x} divider={i>0} onPress={()=>router.push(`/restaurant/${x.id}`)} />)}
+    </TrailSection>:null}
+  </>:null;
+  const nightlife=bars.length?<TrailSection title="After dinner" onAll={mode==='All'?()=>choose('Nightlife'):undefined}>
+    <HRow gap={16} bleed={false}>{bars.slice(0,mode==='All'?3:undefined).map(x=><BarNote key={x.id} spot={x} onPress={()=>router.push(`/night/${x.id}`)} />)}</HRow>
+  </TrailSection>:null;
+  const wander=routes.length?<TrailSection title="A little wandering" onAll={mode==='All'?()=>choose('Routes'):undefined}>
     {routes.slice(0,mode==='All'?2:undefined).map((x,i)=><RouteNote key={x.id} route={x} index={i} divider={i>0} onPress={()=>router.push(`/crawl/${x.id}`)} />)}
-  </View>:null;
-  const rooms=venues.length?<View className="mt-[25px] border-t border-edge-soft pt-[21px]"><Heading title="Rooms worth knowing" onAll={mode==='All'?()=>choose('Venues'):undefined} />
+  </TrailSection>:null;
+  const rooms=venues.length?<TrailSection title="Rooms worth knowing" onAll={mode==='All'?()=>choose('Venues'):undefined}>
     {venues.slice(0,mode==='All'?2:undefined).map((x,i)=><RoomNote key={x.id} venue={x} divider={i>0} onPress={()=>router.push(`/venue/${x.id}`)} />)}
-  </View>:null;
+  </TrailSection>:null;
   return <Screen><ScreenScroll gap={0} clearsTabBar refreshing={refreshing} onRefresh={onRefresh} keyboardShouldPersistTaps="handled">
     <View className="mb-5 flex-row items-center justify-between gap-x-3 pt-4">
       <View><Text className="font-dm text-fine text-taupe">{cityName}, CA</Text>
@@ -132,7 +139,9 @@ export default function DiscoverScreen() {
       {search.length?search.slice(0,40).map((x,i)=><ListRow key={`${x.kind}/${x.id}`} title={x.title} meta={x.subtitle} image={x.image} divider={i<Math.min(search.length,40)-1} onPress={()=>router.push(x.href as never)} />)
         :<EmptyState title="Nothing here just yet" message="Try another place, artist or kind of evening." actionLabel="Clear search" onAction={()=>setQuery('')} />}
     </View>:<>
-      <Text className="mb-6 font-dm text-[12px] leading-[17px] text-taupe">A few things worth going out for.</Text>
+      <Text className="mb-6 font-dm text-[12px] leading-[17px] text-taupe">One good thing can lead to another.</Text>
+      <View testID="evening-trail" style={{paddingLeft:20,position:'relative'}}>
+      <View testID="evening-trail-thread" pointerEvents="none" style={{position:'absolute',left:3,top:16,bottom:20,width:1,backgroundColor:colors['edge-soft']}} />
       {(mode==='All'||mode==='Events')?stage:null}
       {(mode==='All'||mode==='Food')?food:null}
       {(mode==='All'||mode==='Nightlife')?nightlife:null}
@@ -142,6 +151,7 @@ export default function DiscoverScreen() {
       {mode==='Routes'&&allPicks.length?<Shelf title="Picks for your stay" onAll={()=>router.push('/picks')}>
         {sortedViatorPicks(allPicks).slice(0,12).map(x=><ViatorPickCard key={x.id} pick={x} onPress={()=>router.push(`/pick/${x.id}`)} />)}
       </Shelf>:null}
+      </View>
     </>}
   </ScreenScroll></Screen>;
 }

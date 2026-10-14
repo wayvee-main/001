@@ -13,19 +13,20 @@ function Fact({glyph,value,label}:{glyph:string;value:string;label?:string}) {
   </View>;
 }
 
-/** Shared uncontained Field Journal row; full details stay on the existing routes. */
-function Note({name,caption,facts,image,index,divider,onPress,testID,accessibilityName}:{name:string;caption:string;facts:ReactNode;image?:string;index?:number;divider:boolean;onPress:()=>void;testID:string;accessibilityName?:string}) {
+/** Evening Trail notes and photo strips share the original detail routes. */
+function Note({name,caption,facts,image,index,divider,onPress,testID,accessibilityName,strip=false}:{name:string;caption:string;facts:ReactNode;image?:string;index?:number;divider:boolean;onPress:()=>void;testID:string;accessibilityName?:string;strip?:boolean}) {
   const {width}=useWindowDimensions(),narrow=width<=360;
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Explore ${accessibilityName||name}`} onPress={onPress} activeOpacity={.78} testID={testID}
-    className={`flex-row items-start py-3.5 ${divider?'border-t border-edge-soft':''}`} style={{gap:12}}>
+    className={`items-start py-3.5 ${strip?'':`flex-row ${divider?'border-t border-edge-soft':''}`}`} style={strip?{width:137,flexShrink:0}:{gap:12}}>
+    {strip&&image?<Photo uri={image} radius={8} style={{width:137,height:73,marginBottom:11}} />:null}
     {index!==undefined?<Text accessible={false} numberOfLines={1} className="font-fraunces text-peach"
-      style={{width:narrow?34:35,flexShrink:0,fontSize:narrow?24:25,lineHeight:28}}>{String(index+1).padStart(2,'0')}</Text>:null}
-    <View className="min-w-0 flex-1">
-      <Text className="font-fraunces text-ink" style={{fontSize:18,lineHeight:20.7,letterSpacing:-.2}}>{name}</Text>
-      <Text className="mt-[7px] font-dm text-fine text-taupe">{caption}</Text>
-      <View className="mt-[11px] flex-row flex-wrap" style={{columnGap:11,rowGap:4}}>{facts}</View>
+      style={{width:31,flexShrink:0,fontSize:23,lineHeight:25.3}}>{String(index+1).padStart(2,'0')}</Text>:null}
+    <View className={`min-w-0 ${strip?'w-full':'flex-1'}`}>
+      <Text numberOfLines={strip?3:undefined} className="font-fraunces text-ink" style={{fontSize:strip?17:18,lineHeight:strip?19.55:20.7,letterSpacing:-.2}}>{name}</Text>
+      <Text className="font-dm text-fine text-taupe" style={{marginTop:strip?5:7}}>{caption}</Text>
+      <View className="flex-row flex-wrap" style={{marginTop:strip?8:11,columnGap:11,rowGap:4}}>{facts}</View>
     </View>
-    {image?<Photo uri={image} radius={9} style={{width:narrow?47:59,height:narrow?73:82}} />:null}
+    {!strip&&image?<Photo uri={image} radius={9} style={{width:narrow?47:59,height:narrow?73:82}} />:null}
   </TouchableOpacity>;
 }
 
@@ -43,31 +44,31 @@ function shortVenue(x:ScoperEvent):string {
   return x.venue;
 }
 
-export function JournalLead({event:x,onPress}:{event:ScoperEvent;onPress:()=>void}) {
+export function TrailLead({event:x,onPress}:{event:ScoperEvent;onPress:()=>void}) {
   const {width}=useWindowDimensions(),narrow=width<=360;
   const date=x.startsAt?new Date(x.startsAt).toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'America/Los_Angeles'}):eventDayGroupLabel(x);
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Explore ${x.name}, ${date}, ${x.venue}`} onPress={onPress} activeOpacity={.78}
-    testID="journal-lead" className="flex-row items-start pt-2.5 pb-4" style={{gap:narrow?11:16}}>
+    testID="trail-lead" className="flex-row items-start pt-2.5 pb-4" style={{gap:12}}>
     <View className="min-w-0 flex-1">
       <Text className="font-dm text-fine text-peach">{date}</Text>
-      <Text className="mt-[7px] font-fraunces text-ink" style={{fontSize:narrow?25:29,lineHeight:narrow?27:31.32,letterSpacing:-.7}}>{eventName(x)}</Text>
+      <Text className="mt-[7px] font-fraunces text-ink" style={{fontSize:25,lineHeight:27,letterSpacing:-.7}}>{eventName(x)}</Text>
       <Text className="mt-[7px] font-dm text-fine text-taupe">{eventCaption(x)}</Text>
       <View className="mt-[11px] flex-row flex-wrap" style={{columnGap:11,rowGap:4}}>
         <Fact glyph="pin" value={shortVenue(x)} label={x.venue} /><Fact glyph="clock" value={x.time} label={`${date}, ${x.time}`} />
       </View>
     </View>
-    <Photo uri={x.image} radius={9} style={{width:narrow?73:95,height:narrow?112:138}} />
+    <Photo uri={x.image} radius={9} style={{width:narrow?65:78,height:narrow?96:114}} />
   </TouchableOpacity>;
 }
 
-export function ShowNote({event:x,index,divider,onPress}:{event:ScoperEvent;index:number;divider:boolean;onPress:()=>void}) {
-  return <Note accessibilityName={x.name} name={eventName(x)} caption={eventCaption(x)} index={index} divider={divider} onPress={onPress} testID={`journal-show-${x.id}`}
+export function ShowNote({event:x,onPress}:{event:ScoperEvent;onPress:()=>void}) {
+  return <Note accessibilityName={x.name} name={eventName(x)} caption={eventCaption(x)} image={x.image} strip divider={false} onPress={onPress} testID={`trail-show-${x.id}`}
     facts={<><Fact glyph="pin" value={shortVenue(x)} label={x.venue} /><Fact glyph="clock" value={x.time} label={`${eventDayGroupLabel(x)}, ${x.time}`} /></>} />;
 }
 
 export function TableNote({restaurant:x,index,divider,onPress}:{restaurant:Restaurant;index?:number;divider:boolean;onPress:()=>void}) {
   return <Note name={x.name} caption={x.cuisine==='American supper club'?'Supper club':x.cuisine} image={index===undefined?x.image:undefined} index={index}
-    divider={divider} onPress={onPress} testID={`journal-table-${x.id}`}
+    divider={divider} onPress={onPress} testID={`trail-table-${x.id}`}
     facts={<><Fact glyph="wallet" value={x.price} label={`Price level ${x.price}`} /><Fact glyph={/ride/i.test(x.distanceLabel)?'car':/walk/i.test(x.distanceLabel)?'walk':'pin'} value={x.distanceLabel} /></>} />;
 }
 
@@ -76,10 +77,10 @@ const NIGHT_NOTES:Record<string,[string,string,string]>={
   crybaby:['Live music room','calendar','Shows'],'night-heron':['Music & art','clock','Hours'],
   penelope:['Cocktails & bites','clock','Hours'],'hello-stranger':['DJ bar','clock','Hours'],
 };
-export function BarNote({spot:x,divider,onPress}:{spot:NightlifeSpot;divider:boolean;onPress:()=>void}) {
+export function BarNote({spot:x,onPress}:{spot:NightlifeSpot;onPress:()=>void}) {
   const note=NIGHT_NOTES[x.id]||[x.kind,'clock','Hours'];
   const street=x.address.split(',')[0].replace(/^\d+\s+/,'');
-  return <Note name={x.name} caption={note[0]} image={x.image} divider={divider} onPress={onPress} testID={`journal-bar-${x.id}`}
+  return <Note name={x.name} caption={note[0]} image={x.image} strip divider={false} onPress={onPress} testID={`trail-bar-${x.id}`}
     facts={<><Fact glyph="pin" value={street} label={x.address} /><Fact glyph={note[1]} value={note[2]} label={x.hours} /></>} />;
 }
 

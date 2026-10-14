@@ -1,5 +1,4 @@
 import { useColorScheme } from 'nativewind';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useId } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Svg, { Defs, Image as SvgImage, Mask, Rect, RadialGradient, Stop } from 'react-native-svg';
@@ -114,7 +113,7 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
               activeOpacity={0.78}
               onPress={tile.onPress}
               style={{
-                backgroundColor: colors['surface-raised'],
+                backgroundColor: colors[tile.tint],
                 borderColor: colors['surface-raised'],
                 borderWidth: 1,
                 // The spotlight is drawn to the tile's full bounds; without
@@ -122,8 +121,6 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
                 overflow: 'hidden',
               }}
               className="min-h-[100px] flex-1 rounded-panel px-3 pb-3 pt-3">
-              <LinearGradient pointerEvents="none" colors={[colors['surface-raised'], colors['surface-raised'], colors[tile.tint]]}
-                locations={[0, 0.5, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.7, y: 1 }} style={StyleSheet.absoluteFill} />
               {tile.image ? <TileSpotlight uri={tile.image} /> : null}
               {/* Glyph and count read as one mark, so they sit together
                * rather than at opposite corners of the tile. */}
