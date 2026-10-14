@@ -35,26 +35,27 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   detail navigation share this treatment and clear content below it.
 - Discover's default order is On stage / More on stage, Find a good table,
   More good tables, After dinner, A little wandering, Rooms worth knowing.
-- On stage has one hero; More on stage is a horizontal Essential card rail.
-  Both use warm neutral containment, not a purple poster surface. Card copy
-  is brief; metadata uses glyphs. Current listings replace expired samples.
-  The full hero containment is 15% shorter and More on stage cards are 10%
-  shorter than the October 13 release. Photos absorb the reduction; text and
-  metadata keep their size and wrap without clipping. After dinner keeps
-  its prior dimensions and matching containment style.
-- Find a good table uses full-width Menu Slip banners, 20% shorter than the
-  original slips. Establishment headings have two-line blocks, including
-  MUA / Oakland. Cuisine, price and distance belong in one inline metadata
-  group, wrapping only when required by a narrow phone.
+- All seven Discover sections use the selected **Field Journal** design.
+  This supersedes the contained Essential cards and Menu Slip rails on Discover.
+  Rows sit directly on Nightfall, with faint dividers, Fraunces 500 names,
+  short captions, compact glyph facts and generous vertical spacing.
+- On stage has one uncontained editorial lead: date, large artist heading,
+  brief caption and venue/time facts, with a portrait photo on the right
+  (95 × 138px; 73 × 112px on narrow phones). Current listings replace samples.
+- More on stage uses numbered vertical notes with no photo or containment.
+  For you shows two; Events exposes the remaining live calendar.
+- Find a good table uses three uncontained restaurant notes with right-side
+  thumbnails, cuisine captions and price/distance glyphs. Names wrap naturally.
+  More good tables uses three distinct numbered notes without photos.
 - **Find a good table has no See all action. More good tables keeps See all.**
-  The latter is a separate set of three compact rows with distinct venues.
-- After dinner uses the same contained Essential treatment as More on stage:
-  149/157px card widths, 111px images, 17px rounding, warm neutral fill,
-  10px / 11px / 12px body padding. Keep the original dimensions.
-- A little wandering and Rooms worth knowing use the selected **Field Notes**
-  treatment: numbered route rows, serif names, short captions and glyph facts;
-  venue rows have small portrait photos on the right. Full detail pages stay
-  linked. Rows have faint dividers and no containment.
+- After dinner uses three uncontained vertical notes with short captions,
+  street/age/hours glyphs and right-side thumbnails. Bars exposes the full pool.
+- A little wandering uses numbered route notes; Rooms worth knowing uses
+  venue notes with right-side photos. All supporting thumbnails are 59 × 82px
+  (47 × 73px on narrow phones). Full detail pages stay linked.
+- Discover keeps category pills, full search, pull-to-refresh, city-aware data,
+  See all actions and the original Vee logo. Its intro reads “A few things worth
+  going out for.” The header shows the selected city and a Vee launcher.
 - Profile follows the editorial mockup: Your Wayvee, a gradient guest avatar,
   three live count cards, Your starting point and Preferences setting rows.
   Appearance and launched-city choices open sheets. Existing authentication,
