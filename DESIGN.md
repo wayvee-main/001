@@ -42,13 +42,14 @@ inline palette and Tailwind tokens together with `npm run tokens`.
 - On stage has one uncontained editorial lead with date, a 25px artist heading,
   brief caption and venue/time facts. Its right portrait is 78 × 114px
   (65 × 96px on narrow phones). Current listings replace samples.
-- More on stage and After dinner each use one horizontal photo row: 137px
+- More on stage, More good tables and After dinner each use one horizontal photo row: 137px
   elements, 73px-high photos, 16px gaps and no containment. Long strip names
   use at most three lines; full titles stay accessible and on detail pages.
   For you shows two
   supporting events and three bars; their See all actions expose the full pools.
-- Find a good table and More good tables use three uncontained restaurant
-  notes each, with right thumbnails, cuisine captions and price/distance glyphs.
+- Find a good table uses three uncontained restaurant notes, with right
+  thumbnails, cuisine captions and price/distance glyphs. More good tables
+  shows three distinct restaurants in its photo row with the same metadata.
   Names wrap naturally. **Find a good table has no See all action;
   More good tables keeps See all.**
 - A little wandering uses numbered route notes (23px numbers, 31px columns).

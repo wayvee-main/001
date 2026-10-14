@@ -103,7 +103,7 @@ export default function DiscoverScreen() {
     {tables.slice(0,mode==='All'?3:undefined).map((x,i)=><TableNote key={x.id} restaurant={x} divider={i>0} onPress={()=>router.push(`/restaurant/${x.id}`)} />)}
     </TrailSection>
     {more.length?<TrailSection title="More good tables" onAll={()=>router.push('/featured')}>
-      {more.map((x,i)=><TableNote key={x.id} restaurant={x} divider={i>0} onPress={()=>router.push(`/restaurant/${x.id}`)} />)}
+      <HRow gap={16} bleed={false}>{more.map(x=><TableNote key={x.id} restaurant={x} strip divider={false} onPress={()=>router.push(`/restaurant/${x.id}`)} />)}</HRow>
     </TrailSection>:null}
   </>:null;
   const nightlife=bars.length?<TrailSection title="After dinner" onAll={mode==='All'?()=>choose('Nightlife'):undefined}>

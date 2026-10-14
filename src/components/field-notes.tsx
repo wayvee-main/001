@@ -66,9 +66,9 @@ export function ShowNote({event:x,onPress}:{event:ScoperEvent;onPress:()=>void})
     facts={<><Fact glyph="pin" value={shortVenue(x)} label={x.venue} /><Fact glyph="clock" value={x.time} label={`${eventDayGroupLabel(x)}, ${x.time}`} /></>} />;
 }
 
-export function TableNote({restaurant:x,index,divider,onPress}:{restaurant:Restaurant;index?:number;divider:boolean;onPress:()=>void}) {
+export function TableNote({restaurant:x,index,divider,onPress,strip=false}:{restaurant:Restaurant;index?:number;divider:boolean;onPress:()=>void;strip?:boolean}) {
   return <Note name={x.name} caption={x.cuisine==='American supper club'?'Supper club':x.cuisine} image={index===undefined?x.image:undefined} index={index}
-    divider={divider} onPress={onPress} testID={`trail-table-${x.id}`}
+    divider={divider} strip={strip} onPress={onPress} testID={`trail-table-${x.id}`}
     facts={<><Fact glyph="wallet" value={x.price} label={`Price level ${x.price}`} /><Fact glyph={/ride/i.test(x.distanceLabel)?'car':/walk/i.test(x.distanceLabel)?'walk':'pin'} value={x.distanceLabel} /></>} />;
 }
 
