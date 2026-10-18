@@ -14,9 +14,9 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   `BACKDROP_GRADIENTS` in `src/lib/tokens.ts` records the exact 230°, 121° and
   226° layers, alpha and stops. `AppBackdrop` paints them behind every screen,
   detail and onboarding page, with aspect-correct angles on web and native.
-  Cards, banners, sheets and unselected controls use off-white `#FFFCF8` in
-  light mode and charcoal `#2A232D` in dark mode, with faint edges and elevation.
-  Home tiles and Discover listings use the slightly raised dark `#302832`.
+  Cards, banners, sheets and unselected controls use muted sage `#E9EEE4` in
+  light mode and deep sage `#27342D` in dark mode, with faint edges and elevation.
+  Home tiles and Discover listings use the same sage surface pair.
   Cards stay free of gradients; the original page-wide wash remains unchanged. Manual theme changes update the
   backdrop immediately. The gradient never intercepts taps or scrolling.
   Light-mode secondary, accent, success and error inks clear AA over the wash,
@@ -28,19 +28,19 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   34px normally, 30px on phones up to 400px. Use `useAppGutter`.
 - Home keeps four tiles, ordered Eat, Bars, Routes, Events. Counts describe
   actual inventory, never unsupported opening status.
-  All four tiles share off-white `#FFFCF8` / charcoal `#302832`, a faint 1px
+  All four tiles share muted sage `#E9EEE4` / deep sage `#27342D`, a faint 1px
   edge, level-1 elevation and serif labels. Glyphs use the common orange on
   subtle `home-tile-well` fills; counts and labels retain the normal theme ink.
-  Home search and the stay chip use the same neutral surface family.
+  Home search and the stay chip use the same sage surface family.
   Chips and buttons share elevation and `edge-faint` borders. Selected choices
   use `selected-surface` / `on-selected`; primary actions use `accent-fill` /
   `on-accent`. Never hardcode white on an accent fill.
 - One contrasting orange family carries through the app: action fills and
   active navigation use `#B84624` light / `#F0835C` dark, with readable accent
-  text at `#963D24` / `#F0835C`. Legacy category and Vee tints follow neutral
+  text at `#963D24` / `#F0835C`. Legacy category and Vee tints follow sage
   surfaces and orange accents. Keep the original gradient Vee mark and the
   original page gradients intact; explicit error states retain their red.
-- “Your evening, with Vee” remains a compact neutral ribbon with orange
+- “Your evening, with Vee” remains a compact sage ribbon with orange
   `surface-accent` glyphs, a faint edge and 13px radius. Home dividers stay faint.
 - For you → Nearest is **three vertical rows**, with **See all** opening `/nearest`.
   The default pool targets 24 real results (at least 20 where the catalog has
@@ -51,8 +51,8 @@ inline palette and Tailwind tokens together with `npm run tokens`.
 - The second tab is **Discover** in both tab bars. Its glyph pills are one
   horizontal row, without hard borders, with subtle elevation and an extra
   5px gap (11.44px total).
-  Bottom navigation uses a softly raised floating pill: 97% off-white in
-  light mode, 97% charcoal in dark mode, a 7.5% ink edge and subtle shadow.
+  Bottom navigation uses a softly raised floating pill: 97% muted sage in
+  light mode, 97% deep sage in dark mode, a 7.5% ink edge and subtle shadow.
   Active tabs have an orange icon, normal foreground medium-weight label,
   a slight 1px icon lift and a 3px orange dot below the label. Inactive icons
   and labels use muted ink. No active background box or icon well.
@@ -99,7 +99,7 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   `edge-faint` border. Leave 8px between cards and remove row-divider lines.
   Find a good table keeps right-side thumbnails at 59 × 82px
   (47 × 73px on narrow phones).
-- Discover uses neutral `surface-discovery` fills on search, unselected pills and every listing
+- Discover uses sage `surface-discovery` fills on search, unselected pills and every listing
   container. Faint borders, elevation, the Evening Trail thread and page-wide
   gradient remain; selected pills keep `selected-surface` / `on-selected`.
 - Discover keeps category pills, full search, pull-to-refresh, city-aware data,
@@ -121,7 +121,7 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   we end up.” The heading is 35px (31px on narrow phones), with 24px after the
   mark and a 100px opening gap below the live city/weather header.
   The composer has an identifiable but subtle 88px textbox: a 66%-opaque
-  neutral fill, 16px radius, 12px vertical / 14px horizontal padding and a faint
+  sage fill, 16px radius, 12px vertical / 14px horizontal padding and a faint
   1px ink border (8% light / 7% dark), without a shadow. Keep 18px DM Sans and
   the small starting-point label. The border stays subtle on focus; remove the
   former line beneath Details. Keep 36px round mic/send controls, Details,

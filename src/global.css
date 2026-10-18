@@ -11,15 +11,15 @@
    for tokens with fixed baked-in opacity. */
 :root {
   --color-bg: 255 253 250;
-  --color-surface: 255 252 248;
-  --color-surface-raised: 255 252 248;
-  --color-surface-soft: 255 252 248;
+  --color-surface: 233 238 228;
+  --color-surface-raised: 233 238 228;
+  --color-surface-soft: 233 238 228;
   --color-surface-sunk: 231 224 214;
   --color-fg: 49 32 57;
   --color-fg-muted: 96 84 99;
   --color-card-ink: 45 41 38;
   --color-card-muted: 100 93 86;
-  --color-ribbon: 255 252 248;
+  --color-ribbon: 233 238 228;
   --color-surface-accent: 150 61 36;
   --color-ribbon-edge: 226 219 214;
   --color-control-edge: 226 219 214;
@@ -27,14 +27,14 @@
   --color-on-selected: 255 247 237;
   --color-selected-glyph: 245 188 167;
   --color-navigation-muted: 216 199 221;
-  --color-home-tile: 255 252 248;
-  --color-surface-discovery: 255 252 248;
+  --color-home-tile: 233 238 228;
+  --color-surface-discovery: 233 238 228;
   --color-home-tile-glyph: 150 61 36;
   --color-home-tile-well: 251 236 228;
-  --color-tile-eat: 255 252 248;
-  --color-tile-bars: 255 252 248;
-  --color-tile-routes: 255 252 248;
-  --color-tile-events: 255 252 248;
+  --color-tile-eat: 233 238 228;
+  --color-tile-bars: 233 238 228;
+  --color-tile-routes: 233 238 228;
+  --color-tile-events: 233 238 228;
   --color-fg-accent: 150 61 36;
   --color-accent: 184 70 36;
   --color-accent-fill: 184 70 36;
@@ -45,9 +45,9 @@
   --color-warm-ink: 150 61 36;
   --color-vee: 184 70 36;
   --color-vee-strong: 150 61 36;
-  --color-accent-tint: 255 252 248;
-  --color-warm-tint: 255 252 248;
-  --color-vee-tint: 255 252 248;
+  --color-accent-tint: 233 238 228;
+  --color-warm-tint: 233 238 228;
+  --color-vee-tint: 233 238 228;
   --color-danger: 160 47 56;
   --color-edge: rgba(49, 32, 57, 0.12);
   --color-edge-soft: rgba(49, 32, 57, 0.08);
@@ -56,15 +56,15 @@
 
 .dark:root {
   --color-bg: 21 17 23;
-  --color-surface: 42 35 45;
-  --color-surface-raised: 42 35 45;
-  --color-surface-soft: 42 35 45;
+  --color-surface: 39 52 45;
+  --color-surface-raised: 39 52 45;
+  --color-surface-soft: 39 52 45;
   --color-surface-sunk: 16 13 19;
   --color-fg: 250 242 232;
   --color-fg-muted: 189 175 189;
   --color-card-ink: 245 237 227;
   --color-card-muted: 195 185 175;
-  --color-ribbon: 42 35 45;
+  --color-ribbon: 39 52 45;
   --color-surface-accent: 240 131 92;
   --color-ribbon-edge: 79 68 77;
   --color-control-edge: 79 68 77;
@@ -72,14 +72,14 @@
   --color-on-selected: 255 247 237;
   --color-selected-glyph: 240 131 92;
   --color-navigation-muted: 216 199 221;
-  --color-home-tile: 48 40 50;
-  --color-surface-discovery: 48 40 50;
+  --color-home-tile: 39 52 45;
+  --color-surface-discovery: 39 52 45;
   --color-home-tile-glyph: 240 131 92;
   --color-home-tile-well: 68 48 55;
-  --color-tile-eat: 48 40 50;
-  --color-tile-bars: 48 40 50;
-  --color-tile-routes: 48 40 50;
-  --color-tile-events: 48 40 50;
+  --color-tile-eat: 39 52 45;
+  --color-tile-bars: 39 52 45;
+  --color-tile-routes: 39 52 45;
+  --color-tile-events: 39 52 45;
   --color-fg-accent: 240 131 92;
   --color-accent: 240 131 92;
   --color-accent-fill: 240 131 92;
@@ -90,9 +90,9 @@
   --color-warm-ink: 240 131 92;
   --color-vee: 240 131 92;
   --color-vee-strong: 240 131 92;
-  --color-accent-tint: 48 40 50;
-  --color-warm-tint: 48 40 50;
-  --color-vee-tint: 48 40 50;
+  --color-accent-tint: 39 52 45;
+  --color-warm-tint: 39 52 45;
+  --color-vee-tint: 39 52 45;
   --color-danger: 255 107 109;
   --color-edge: rgba(250, 242, 232, 0.12);
   --color-edge-soft: rgba(250, 242, 232, 0.08);

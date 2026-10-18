@@ -12,7 +12,7 @@
  * and src/components keep working; new code should reach for the semantic name.
  *
  * Palette: original layered peach/lilac backdrop, warm off-white in light,
- * plum-black in dark, with off-white / charcoal cards and restrained orange accents.
+ * plum-black in dark, with muted / deep sage cards and restrained orange accents.
  * Filled controls use the approved rust/light and peach/dark pairing with
  * theme-specific on-accent ink. Legacy color aliases follow the same orange
  * family; the original mark and page-wide gradient keep their brand colors.
@@ -37,33 +37,33 @@ export function withAlpha(hex: string, alpha: number): string {
  * (bg-surface/50) keeps working. */
 export const ROLES: Record<string, ThemeValue> = {
   bg: { light: '#FFFDFA', dark: '#151117' }, // original ground beneath the wash
-  // The approved neutral material carries through cards, banners, controls and
+  // The approved sage material carries through cards, banners, controls and
   // sheets. Elevation and faint edges establish hierarchy over the page wash.
-  surface: { light: '#FFFCF8', dark: '#2A232D' },
-  'surface-raised': { light: '#FFFCF8', dark: '#2A232D' },
-  'surface-soft': { light: '#FFFCF8', dark: '#2A232D' },
+  surface: { light: '#E9EEE4', dark: '#27342D' },
+  'surface-raised': { light: '#E9EEE4', dark: '#27342D' },
+  'surface-soft': { light: '#E9EEE4', dark: '#27342D' },
   'surface-sunk': { light: '#E7E0D6', dark: '#100D13' }, // input wells, sheet track
   fg: { light: '#312039', dark: '#FAF2E8' }, // Nightfall editorial ink
   'fg-muted': { light: '#605463', dark: '#BDAFBD' }, // AA across the original wash
   'card-ink': { light: '#2D2926', dark: '#F5EDE3' },
   'card-muted': { light: '#645D56', dark: '#C3B9AF' },
-  ribbon: { light: '#FFFCF8', dark: '#2A232D' },
-  'surface-accent': { light: '#963D24', dark: '#F0835C' }, // orange glyphs on neutral cards/ribbons
+  ribbon: { light: '#E9EEE4', dark: '#27342D' },
+  'surface-accent': { light: '#963D24', dark: '#F0835C' }, // orange glyphs on sage cards/ribbons
   'ribbon-edge': { light: '#E2DBD6', dark: '#4F444D' },
   'control-edge': { light: '#E2DBD6', dark: '#4F444D' },
   'selected-surface': { light: '#2B1C35', dark: '#29192E' },
   'on-selected': { light: '#FFF7ED', dark: '#FFF7ED' },
   'selected-glyph': { light: '#F5BCA7', dark: '#F0835C' },
   'navigation-muted': { light: '#D8C7DD', dark: '#D8C7DD' },
-  // Shared neutral tiles and listing surfaces; orange is reserved for accents.
-  'home-tile': { light: '#FFFCF8', dark: '#302832' },
-  'surface-discovery': { light: '#FFFCF8', dark: '#302832' }, // search and Discover notes
+  // Shared sage tiles and listing surfaces; orange is reserved for accents.
+  'home-tile': { light: '#E9EEE4', dark: '#27342D' },
+  'surface-discovery': { light: '#E9EEE4', dark: '#27342D' }, // search and Discover notes
   'home-tile-glyph': { light: '#963D24', dark: '#F0835C' },
   'home-tile-well': { light: '#FBECE4', dark: '#443037' },
-  'tile-eat': { light: '#FFFCF8', dark: '#302832' },
-  'tile-bars': { light: '#FFFCF8', dark: '#302832' },
-  'tile-routes': { light: '#FFFCF8', dark: '#302832' },
-  'tile-events': { light: '#FFFCF8', dark: '#302832' },
+  'tile-eat': { light: '#E9EEE4', dark: '#27342D' },
+  'tile-bars': { light: '#E9EEE4', dark: '#27342D' },
+  'tile-routes': { light: '#E9EEE4', dark: '#27342D' },
+  'tile-events': { light: '#E9EEE4', dark: '#27342D' },
   'fg-accent': { light: '#963D24', dark: '#F0835C' }, // readable accent text across the wash
   // One theme-specific orange for action fills, icons, rails and active tabs.
   accent: { light: '#B84624', dark: '#F0835C' }, // brand accent — icons, borders, rails
@@ -76,9 +76,9 @@ export const ROLES: Record<string, ThemeValue> = {
   'warm-ink': { light: '#963D24', dark: '#F0835C' }, // text on warm-tint
   vee: { light: '#B84624', dark: '#F0835C' }, // legacy Vee accents, now the shared orange
   'vee-strong': { light: '#963D24', dark: '#F0835C' }, // legacy Vee text, now the shared readable orange
-  'accent-tint': { light: '#FFFCF8', dark: '#302832' }, // neutral container with orange accents
-  'warm-tint': { light: '#FFFCF8', dark: '#302832' }, // legacy category container
-  'vee-tint': { light: '#FFFCF8', dark: '#302832' }, // legacy Vee container
+  'accent-tint': { light: '#E9EEE4', dark: '#27342D' }, // sage container with orange accents
+  'warm-tint': { light: '#E9EEE4', dark: '#27342D' }, // legacy category container
+  'vee-tint': { light: '#E9EEE4', dark: '#27342D' }, // legacy Vee container
   danger: { light: '#A02F38', dark: '#FF6B6D' }, // closed / sold out / error — the one functional red
 };
 
