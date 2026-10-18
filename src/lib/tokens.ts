@@ -12,10 +12,10 @@
  * and src/components keep working; new code should reach for the semantic name.
  *
  * Palette: original layered peach/lilac backdrop, warm off-white in light,
- * plum-black in dark, with warm cream/cocoa editorial cards and sage Home tiles.
+ * plum-black in dark, with off-white / charcoal cards and restrained orange accents.
  * Filled controls use the approved rust/light and peach/dark pairing with
- * theme-specific on-accent ink. Brand accent and warm fills remain distinct
- * from readable supporting text roles.
+ * theme-specific on-accent ink. Legacy color aliases follow the same orange
+ * family; the original mark and page-wide gradient keep their brand colors.
  */
 
 export type ThemeValue = { light: string; dark: string };
@@ -27,56 +27,58 @@ export function hexToRgb(hex: string): [number, number, number] {
   return [parseInt(n.slice(0, 2), 16), parseInt(n.slice(2, 4), 16), parseInt(n.slice(4, 6), 16)];
 }
 
+/** Resolve a translucent theme color for native and web surfaces. */
+export function withAlpha(hex: string, alpha: number): string {
+  return `rgba(${hexToRgb(hex).join(', ')}, ${alpha})`;
+}
+
 /** Solid, theme-varying roles. Values are hex — the generator emits them as
  * space-separated RGB triples so Tailwind's <alpha-value> opacity modifier
  * (bg-surface/50) keeps working. */
 export const ROLES: Record<string, ThemeValue> = {
   bg: { light: '#FFFDFA', dark: '#151117' }, // original ground beneath the wash
-  // The approved ribbon material carries through cards, banners, controls and
+  // The approved neutral material carries through cards, banners, controls and
   // sheets. Elevation and faint edges establish hierarchy over the page wash.
-  surface: { light: '#F5E6D7', dark: '#403029' },
-  'surface-raised': { light: '#F5E6D7', dark: '#403029' },
-  'surface-soft': { light: '#F5E6D7', dark: '#403029' },
+  surface: { light: '#FFFCF8', dark: '#2A232D' },
+  'surface-raised': { light: '#FFFCF8', dark: '#2A232D' },
+  'surface-soft': { light: '#FFFCF8', dark: '#2A232D' },
   'surface-sunk': { light: '#E7E0D6', dark: '#100D13' }, // input wells, sheet track
   fg: { light: '#312039', dark: '#FAF2E8' }, // Nightfall editorial ink
   'fg-muted': { light: '#605463', dark: '#BDAFBD' }, // AA across the original wash
   'card-ink': { light: '#2D2926', dark: '#F5EDE3' },
   'card-muted': { light: '#645D56', dark: '#C3B9AF' },
-  ribbon: { light: '#F5E6D7', dark: '#403029' },
-  'surface-accent': { light: '#995435', dark: '#EFB590' }, // glyphs on warm cards/ribbons
-  'ribbon-edge': { light: '#DBCFE0', dark: '#493C50' },
-  'control-edge': { light: '#E0D5C9', dark: '#493C50' },
+  ribbon: { light: '#FFFCF8', dark: '#2A232D' },
+  'surface-accent': { light: '#963D24', dark: '#F0835C' }, // orange glyphs on neutral cards/ribbons
+  'ribbon-edge': { light: '#E2DBD6', dark: '#4F444D' },
+  'control-edge': { light: '#E2DBD6', dark: '#4F444D' },
   'selected-surface': { light: '#2B1C35', dark: '#29192E' },
   'on-selected': { light: '#FFF7ED', dark: '#FFF7ED' },
-  'selected-glyph': { light: '#F5B494', dark: '#F5B494' },
+  'selected-glyph': { light: '#F5BCA7', dark: '#F0835C' },
   'navigation-muted': { light: '#D8C7DD', dark: '#D8C7DD' },
-  // One shared green for Home's four tiles; the stay chip keeps tile-eat.
-  'home-tile': { light: '#E9EEE4', dark: '#29362F' },
-  'home-tile-glyph': { light: '#50684D', dark: '#A9C2A3' },
-  'home-tile-well': { light: '#F6F7F1', dark: '#313E37' },
-  'tile-eat': { light: '#F2E8CA', dark: '#493E2E' },
-  'tile-bars': { light: '#F2DFDF', dark: '#493342' },
-  'tile-routes': { light: '#E6DEEF', dark: '#3A3047' },
-  'tile-events': { light: '#E2EBDF', dark: '#2C4139' },
-  'fg-accent': { light: '#963B25', dark: '#FF9271' }, // readable accent text across the wash
-  // A shade under the CTA's coral so it still clears 3:1 as an icon or border on
-  // `surface`, which the exact CTA hex does not (2.93:1). The CTA keeps the
-  // approved hex below; this is the role that has to survive being drawn small.
-  accent: { light: '#E45526', dark: '#FF9271' }, // brand accent — icons, borders, rails
+  // Shared neutral tiles and listing surfaces; orange is reserved for accents.
+  'home-tile': { light: '#FFFCF8', dark: '#302832' },
+  'surface-discovery': { light: '#FFFCF8', dark: '#302832' }, // search and Discover notes
+  'home-tile-glyph': { light: '#963D24', dark: '#F0835C' },
+  'home-tile-well': { light: '#FBECE4', dark: '#443037' },
+  'tile-eat': { light: '#FFFCF8', dark: '#302832' },
+  'tile-bars': { light: '#FFFCF8', dark: '#302832' },
+  'tile-routes': { light: '#FFFCF8', dark: '#302832' },
+  'tile-events': { light: '#FFFCF8', dark: '#302832' },
+  'fg-accent': { light: '#963D24', dark: '#F0835C' }, // readable accent text across the wash
+  // One theme-specific orange for action fills, icons, rails and active tabs.
+  accent: { light: '#B84624', dark: '#F0835C' }, // brand accent — icons, borders, rails
   'accent-fill': { light: '#B84624', dark: '#F0835C' }, // approved editorial control fill
   'on-accent': { light: '#FFFAF4', dark: '#2C1811' }, // theme-paired CTA ink
-  open: { light: '#37604B', dark: '#83D0A8' }, // open-now / confirmed / live
-  warm: { light: '#FFC757', dark: '#FFC757' }, // marigold — FILL ONLY, never text (see below)
-  'warm-strong': { light: '#543F18', dark: '#3D2D10' }, // ink on a marigold FILL — not on warm-tint
-  // The marigold family's answer to fg-accent and vee-strong: text and icons
-  // on warm-tint. warm-strong cannot do this job — it is sized for the bright
-  // fill, so in dark it is near-black on a near-black tint (1.08:1).
-  'warm-ink': { light: '#543F18', dark: '#F5C98C' }, // text on warm-tint
-  vee: { light: '#6F5BD1', dark: '#A896FF' }, // Vee's cobalt — fills, borders, icons
-  'vee-strong': { light: '#5D4BAA', dark: '#C5BAFF' }, // cobalt as text
-  'accent-tint': { light: '#FBE4DA', dark: '#4A2A25' }, // coral-tinted block
-  'warm-tint': { light: '#FFF3D8', dark: '#403321' }, // marigold-tinted block
-  'vee-tint': { light: '#E3DFF7', dark: '#352C4D' }, // cobalt-tinted block
+  open: { light: '#963D24', dark: '#F0835C' }, // open-now / confirmed / live; status stays explicit in its label
+  warm: { light: '#B84624', dark: '#F0835C' }, // legacy category fill, now the shared orange
+  'warm-strong': { light: '#FFFAF4', dark: '#2C1811' }, // ink on the legacy category fill
+  // Readable ink for legacy category tints.
+  'warm-ink': { light: '#963D24', dark: '#F0835C' }, // text on warm-tint
+  vee: { light: '#B84624', dark: '#F0835C' }, // legacy Vee accents, now the shared orange
+  'vee-strong': { light: '#963D24', dark: '#F0835C' }, // legacy Vee text, now the shared readable orange
+  'accent-tint': { light: '#FFFCF8', dark: '#302832' }, // neutral container with orange accents
+  'warm-tint': { light: '#FFFCF8', dark: '#302832' }, // legacy category container
+  'vee-tint': { light: '#FFFCF8', dark: '#302832' }, // legacy Vee container
   danger: { light: '#A02F38', dark: '#FF6B6D' }, // closed / sold out / error — the one functional red
 };
 
@@ -121,14 +123,14 @@ export const EDGE_ROLES: Record<string, { base: 'fg'; alpha: number }> = {
 /** Same value in both themes — either brand hue or a translucent tint over
  * a fixed hue that reads fine on either ground. */
 export const FIXED: Record<string, string> = {
-  forest: '#24463B', // deep verified / outdoor surface block
-  night: '#2A1B33', // culture / venue surface block — plum ink
-  blush: 'rgba(232,93,44,0.14)', // tinted accent surface
-  blush2: 'rgba(232,93,44,0.09)', // placeholder stripe B
-  sage: 'rgba(59,119,86,0.13)', // quiet confirmed tint, paired with open
-  mist: 'rgba(42,27,51,0.4)', // quiet culture tint
-  apricot: 'rgba(255,199,87,0.20)', // warm offer tint, derived from warm
-  'coral-50': 'rgba(232,93,44,0.11)', // light accent surface
+  forest: '#4C2E22', // deep verified / outdoor surface block
+  night: '#3D261F', // culture / venue surface block — plum ink
+  blush: 'rgba(184,70,36,0.14)', // tinted accent surface
+  blush2: 'rgba(184,70,36,0.09)', // placeholder stripe B
+  sage: 'rgba(184,70,36,0.13)', // quiet confirmed tint, paired with open
+  mist: 'rgba(61,38,31,0.4)', // quiet culture tint
+  apricot: 'rgba(184,70,36,0.20)', // warm offer tint, derived from warm
+  'coral-50': 'rgba(184,70,36,0.11)', // light accent surface
 };
 
 /** Non-CSS-var palette entries theme.ts also needs (Stripes placeholder). */

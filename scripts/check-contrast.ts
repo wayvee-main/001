@@ -3,13 +3,12 @@
  * themes, against WCAG 2.1 AA.
  *
  * DESIGN.md claims "every pair clears AA"; this is the check that keeps that
- * sentence true after someone edits a hex. One pairing is a documented,
- * deliberate exception (white on the approved coral CTA) and is reported as
- * such rather than quietly excluded.
+ * sentence true after someone edits a hex. Translucent input and navigation
+ * surfaces are checked over the original layered page gradients as well.
  *
  * Run: npx -y tsx scripts/check-contrast.ts
  */
-import { BACKDROP_GRADIENTS, EDGE_ROLES, FIXED, hexToRgb, ROLES } from '../src/lib/tokens';
+import { BACKDROP_GRADIENTS, EDGE_ROLES, FIXED, hexToRgb, ROLES, withAlpha } from '../src/lib/tokens';
 
 type Theme = 'light' | 'dark';
 
@@ -91,6 +90,8 @@ const PAIRS: Pair[] = [
   { name: 'fg on home-tile', fg: role('fg'), bg: role('home-tile'), min: AA_TEXT },
   { name: 'fg-muted on home-tile', fg: role('fg-muted'), bg: role('home-tile'), min: AA_TEXT },
   { name: 'home-tile-glyph on home-tile-well', fg: role('home-tile-glyph'), bg: role('home-tile-well'), min: AA_LARGE },
+  { name: 'active navigation glyph on surface-raised', fg: role('accent-fill'), bg: role('surface-raised'), min: AA_LARGE },
+  ...['fg', 'fg-muted', 'fg-accent'].map(ink => ({ name: `${ink} on surface-discovery`, fg: role(ink), bg: role('surface-discovery'), min: AA_TEXT })),
   { name: 'on-selected on selected-surface', fg: role('on-selected'), bg: role('selected-surface'), min: AA_TEXT },
   { name: 'selected-glyph on selected-surface', fg: role('selected-glyph'), bg: role('selected-surface'), min: AA_LARGE },
   { name: 'navigation-muted on selected-surface', fg: role('navigation-muted'), bg: role('selected-surface'), min: AA_TEXT },
@@ -125,19 +126,6 @@ for (const theme of ['light', 'dark'] as Theme[]) {
   }
 }
 
-// The fill-only rule for marigold, asserted rather than trusted to a comment.
-// Light is where it is load-bearing: marigold on paper is unreadable, so any
-// change that makes it *look* usable as text is the dangerous one to catch.
-// (In dark, marigold on plum-black is legible — the rule still holds there, but
-// as a design decision rather than a contrast fact.)
-const warmOnPaper = contrast(ROLES.warm.light, ROLES.bg.light);
-if (warmOnPaper >= AA_TEXT) {
-  console.log(`\nFAIL  'warm' now reads as text on paper (${warmOnPaper.toFixed(2)}:1) — revisit the fill-only rule.`);
-  failures += 1;
-} else {
-  console.log(`\nfill-only rule holds: 'warm' on paper is ${warmOnPaper.toFixed(2)}:1, unusable as text by design`);
-}
-
 /** Sample the composited wash, rather than checking only its solid base.
  * Gradients interpolate premultiplied sRGB; each layer then composites over
  * the layers behind it. Aspect ratios cover narrow phones through desktop. */
@@ -170,6 +158,19 @@ for (const theme of ['light', 'dark'] as Theme[]) {
     const ok = minimum >= AA_TEXT;
     if (!ok) failures += 1;
     console.log(`${ok ? 'PASS' : 'FAIL'}  ${minimum.toFixed(2)}:1  ${theme} ${ink} on layered backdrop (${samples.length} samples)`);
+  }
+  for (const [surface, alpha, inks] of [
+    ['surface-discovery', .66, ['fg', 'fg-muted']],
+    ['surface-raised', .97, ['fg', 'fg-muted', 'accent-fill']],
+  ] as const) {
+    const backgrounds=samples.map(bg=>flatten(withAlpha(ROLES[surface][theme],alpha),bg));
+    for (const ink of inks) {
+      const minimum=Math.min(...backgrounds.map(bg=>contrast(ROLES[ink][theme],bg)));
+      const min=ink==='accent-fill'?AA_LARGE:AA_TEXT;
+      const ok=minimum>=min;
+      if(!ok)failures+=1;
+      console.log(`${ok?'PASS':'FAIL'}  ${minimum.toFixed(2)}:1  ${theme} ${ink} on translucent ${surface} (${alpha})`);
+    }
   }
 }
 

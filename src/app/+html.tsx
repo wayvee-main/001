@@ -3,6 +3,23 @@ import type { PropsWithChildren } from 'react';
 
 import { ROLES } from '@/lib/tokens';
 
+const navigationInteractions = `
+  [data-testid="editorial-navigation"] [role="tab"] {
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  [data-testid="editorial-navigation"] [role="tab"]:focus-visible {
+    outline: 2px solid rgb(var(--color-accent-fill) / .55);
+    outline-offset: 2px;
+  }
+  [data-testid="editorial-navigation"] svg [stroke] {
+    transition: stroke 160ms ease;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-testid="editorial-navigation"] svg [stroke] { transition: none; }
+  }
+`;
+
 const serviceWorkerRegistration = `
   if ('serviceWorker' in navigator) {
     var wayveeHadController = Boolean(navigator.serviceWorker.controller);
@@ -72,6 +89,7 @@ export default function RootHtml({ children }: PropsWithChildren) {
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <ScrollViewStyleReset />
+        <style dangerouslySetInnerHTML={{ __html: navigationInteractions }} />
         <script dangerouslySetInnerHTML={{ __html: serviceWorkerRegistration }} />
       </head>
       <body>

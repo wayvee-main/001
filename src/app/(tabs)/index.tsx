@@ -46,8 +46,8 @@ export default function HomeScreen() {
       <Text className="mt-1 font-dm text-label text-taupe">A good evening is closer than you think.</Text>
     </View>
     <TouchableOpacity accessibilityRole="button" accessibilityLabel="Search places, dishes and shows" onPress={()=>s.openSheet('search')}
-      style={[control,{minHeight:52}]}
-      className="flex-row items-center gap-x-2.5 rounded-full bg-surface-raised pl-3.5 pr-[7px] py-[7px]">
+      style={[control,{minHeight:52,backgroundColor:colors['surface-discovery']}]}
+      className="flex-row items-center gap-x-2.5 rounded-full bg-surface-discovery pl-3.5 pr-[7px] py-[7px]">
       <Glyph name="search" size={17} color={colors['fg-muted']} />
       <Text numberOfLines={1} className="min-w-0 flex-1 font-dm text-label text-taupe">Places, dishes, or a little inspiration</Text>
       <View className="h-[37px] w-[37px] items-center justify-center rounded-full bg-accent-fill">

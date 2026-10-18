@@ -30,7 +30,7 @@ function Fact({glyph,value,label,compact=false,flexible=false}:{glyph:string;val
 /** Evening Trail notes and photo strips share the original detail routes. */
 function Note({name,caption,facts,image,index,divider,onPress,testID,accessibilityName,strip=false,elevated=false,compact=false}:{name:string;caption:string;facts:ReactNode;image?:string;index?:number;divider:boolean;onPress:()=>void;testID:string;accessibilityName?:string;strip?:boolean;elevated?:boolean;compact?:boolean}) {
   const {width}=useWindowDimensions(),narrow=width<=360;
-  const surface=useRaisedSurface(1);
+  const surface=useRaisedSurface(1,'discovery');
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Explore ${accessibilityName||name}`} onPress={onPress} activeOpacity={.78} testID={testID}
     className={`items-start py-3.5 ${strip?'':`flex-row ${divider&&!elevated?'border-t border-edge-soft':''}`}`}
     style={[strip?{width:137,flexShrink:0}:{gap:12},elevated?{...surface,borderWidth:0,borderRadius:12,padding:8}:null]}>
@@ -63,7 +63,7 @@ function shortVenue(x:ScoperEvent):string {
 
 export function TrailLead({event:x,onPress}:{event:ScoperEvent;onPress:()=>void}) {
   const {width}=useWindowDimensions(),narrow=width<=360;
-  const surface=useRaisedSurface(1);
+  const surface=useRaisedSurface(1,'discovery');
   const date=x.startsAt?new Date(x.startsAt).toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'America/Los_Angeles'}):eventDayGroupLabel(x);
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Explore ${x.name}, ${date}, ${x.venue}`} onPress={onPress} activeOpacity={.78}
     testID="trail-lead" className="flex-row items-start" style={{...surface,borderWidth:0,gap:12,padding:12,borderRadius:12}}>

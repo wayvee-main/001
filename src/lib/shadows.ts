@@ -17,11 +17,11 @@ export function useElevation(level: 1 | 2 | 3 | 4 = 2): { boxShadow: string } {
 
 /** Shared neutral card/panel treatment. Inputs, controls, and semantic tinted
  * blocks intentionally use their own surface roles. */
-export function useRaisedSurface(level: 1 | 2 | 3 | 4 = 1): ViewStyle {
+export function useRaisedSurface(level: 1 | 2 | 3 | 4 = 1, tone: 'neutral' | 'discovery' = 'neutral'): ViewStyle {
   const colors = useThemeColors();
   const elevation = useElevation(level);
   return {
-    backgroundColor: colors['surface-raised'],
+    backgroundColor: colors[tone === 'discovery' ? 'surface-discovery' : 'surface-raised'],
     borderWidth: 1,
     borderColor: colors['edge-faint'],
     ...elevation,

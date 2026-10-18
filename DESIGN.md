@@ -1,6 +1,6 @@
 # Wayvee design system
 
-The approved October 13, 2026 editorial iteration is the current UI contract.
+The approved October 18, 2026 editorial refinements are the current UI contract.
 Palette and dimensions come from `src/lib/tokens.ts`; regenerate the CSS,
 inline palette and Tailwind tokens together with `npm run tokens`.
 
@@ -14,9 +14,10 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   `BACKDROP_GRADIENTS` in `src/lib/tokens.ts` records the exact 230°, 121° and
   226° layers, alpha and stops. `AppBackdrop` paints them behind every screen,
   detail and onboarding page, with aspect-correct angles on web and native.
-  Cards, banners, sheets and unselected controls share the approved warm cream
-  `#F5E6D7` / cocoa `#403029` surface, faint edges and elevation. Home's four
-  sage tiles stay free of gradients. Manual theme changes update the
+  Cards, banners, sheets and unselected controls use off-white `#FFFCF8` in
+  light mode and charcoal `#2A232D` in dark mode, with faint edges and elevation.
+  Home tiles and Discover listings use the slightly raised dark `#302832`.
+  Cards stay free of gradients; the original page-wide wash remains unchanged. Manual theme changes update the
   backdrop immediately. The gradient never intercepts taps or scrolling.
   Light-mode secondary, accent, success and error inks clear AA over the wash,
   including its most saturated areas; gradient strength is preserved.
@@ -27,20 +28,20 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   34px normally, 30px on phones up to 400px. Use `useAppGutter`.
 - Home keeps four tiles, ordered Eat, Bars, Routes, Events. Counts describe
   actual inventory, never unsupported opening status.
-  All four tiles use the same solid sage `#E9EEE4` / deep green `#29362F`, a very
-  faint 1px edge, level-1 elevation and serif labels. Glyphs use `home-tile-glyph`
-  on the subtle `home-tile-well`; counts and labels keep the normal theme ink.
-  `home-tile` is separate from the legacy category tints so the stay chip
-  retains its approved color.
-  Home search has a filled round arrow; the stay chip uses the Eat tint.
-  The Home stay chip retains its existing Eat tint and control edge. Other
-  chips and buttons share the warm cream/cocoa paper, level-1 elevation and
-  `edge-faint` (4% ink) borders. Selected choices use `selected-surface` /
-  `on-selected`; primary actions use `accent-fill` / `on-accent`. Inputs retain
-  their stronger control edge and focus treatment. Never hardcode white on coral.
-- “Your evening, with Vee” is a compact warm cream/cocoa ribbon in both themes,
-  with `surface-accent` glyphs. Home's dividers are faint. The ribbon has a 1px
-  theme-aware edge and 13px radius.
+  All four tiles share off-white `#FFFCF8` / charcoal `#302832`, a faint 1px
+  edge, level-1 elevation and serif labels. Glyphs use the common orange on
+  subtle `home-tile-well` fills; counts and labels retain the normal theme ink.
+  Home search and the stay chip use the same neutral surface family.
+  Chips and buttons share elevation and `edge-faint` borders. Selected choices
+  use `selected-surface` / `on-selected`; primary actions use `accent-fill` /
+  `on-accent`. Never hardcode white on an accent fill.
+- One contrasting orange family carries through the app: action fills and
+  active navigation use `#B84624` light / `#F0835C` dark, with readable accent
+  text at `#963D24` / `#F0835C`. Legacy category and Vee tints follow neutral
+  surfaces and orange accents. Keep the original gradient Vee mark and the
+  original page gradients intact; explicit error states retain their red.
+- “Your evening, with Vee” remains a compact neutral ribbon with orange
+  `surface-accent` glyphs, a faint edge and 13px radius. Home dividers stay faint.
 - For you → Nearest is **three vertical rows**, with **See all** opening `/nearest`.
   The default pool targets 24 real results (at least 20 where the catalog has
   them) within five miles of the selected city/ZIP trip anchor. GPS reorders
@@ -50,9 +51,15 @@ inline palette and Tailwind tokens together with `npm run tokens`.
 - The second tab is **Discover** in both tab bars. Its glyph pills are one
   horizontal row, without hard borders, with subtle elevation and an extra
   5px gap (11.44px total).
-  Bottom navigation uses the reference's floating dark pill, with the same
-  gutters, rounded active glyph highlight and preserved Vee mark. Tabs and
-  detail navigation share this treatment and clear content below it.
+  Bottom navigation uses a softly raised floating pill: 97% off-white in
+  light mode, 97% charcoal in dark mode, a 7.5% ink edge and subtle shadow.
+  Active tabs have an orange icon, normal foreground medium-weight label,
+  a slight 1px icon lift and a 3px orange dot below the label. Inactive icons
+  and labels use muted ink. No active background box or icon well.
+  Tab targets are at least 48px high; selection uses a 160ms transition and
+  press feedback, respecting reduced motion. Preserve the Vee mark, selected
+  accessibility state and visible rounded keyboard focus on web. Tabs and
+  detail navigation share this treatment and keep the existing gutters.
 - Discover's default order is On stage / More on stage, Find a good table,
   More good tables, After dinner, A little wandering, Rooms worth knowing.
 - All seven Discover sections use the selected **Evening Trail** design,
@@ -92,6 +99,9 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   `edge-faint` border. Leave 8px between cards and remove row-divider lines.
   Find a good table keeps right-side thumbnails at 59 × 82px
   (47 × 73px on narrow phones).
+- Discover uses neutral `surface-discovery` fills on search, unselected pills and every listing
+  container. Faint borders, elevation, the Evening Trail thread and page-wide
+  gradient remain; selected pills keep `selected-surface` / `on-selected`.
 - Discover keeps category pills, full search, pull-to-refresh, city-aware data,
   See all actions, the original Vee logo and existing detail routes. Its intro
   reads “One good thing can lead to another.” The header shows the selected city.
@@ -110,11 +120,12 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   and left-aligned Fraunces heading lead with “Dear evening, / let’s see where /
   we end up.” The heading is 35px (31px on narrow phones), with 24px after the
   mark and a 100px opening gap below the live city/weather header.
-  The composer is open on Nightfall, without a filled container or shadow:
-  a small starting-point label, a 75px writing field in 18px DM Sans, and a
-  faint bottom underline that gains accent color on focus. No inner divider,
-  rectangular focus border or suggestion pills. Keep 36px round mic/send
-  controls, Details, live search, preferences, submission and plan refinement.
+  The composer has an identifiable but subtle 88px textbox: a 66%-opaque
+  neutral fill, 16px radius, 12px vertical / 14px horizontal padding and a faint
+  1px ink border (8% light / 7% dark), without a shadow. Keep 18px DM Sans and
+  the small starting-point label. The border stays subtle on focus; remove the
+  former line beneath Details. Keep 36px round mic/send controls, Details,
+  live search, preferences, submission and plan refinement.
   Ready-made evenings remain behind a quiet “Start from a shape” text action,
   collapsed initially so the opening retains the selected design's whitespace.
 

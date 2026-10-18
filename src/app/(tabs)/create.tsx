@@ -15,6 +15,7 @@
 // The manual pick lists and the locked/Regenerate draft timeline live one tap
 // away at /plan-draft; this screen only leads with them.
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useColorScheme } from 'nativewind';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -67,6 +68,7 @@ import { currentNightIso, isStayActive, parseDateOnly, stayArcPosition, stayProg
 import { useScoper } from '@/lib/store';
 import { tasteVocabulary } from '@/lib/taste';
 import { useThemeColors, type ThemeColors } from '@/lib/theme';
+import { withAlpha } from '@/lib/tokens';
 import { useViatorPicks } from '@/lib/viator';
 import { useWeatherNow, weatherLine } from '@/lib/weather';
 
@@ -299,6 +301,7 @@ export default function CreateScreen() {
     savedPlaceKeys,
   } = useScoper();
   const colors = useThemeColors();
+  const { colorScheme } = useColorScheme();
   const raisedSurface = useRaisedSurface(1), control = useControlSurface(), primarySurface = useControlSurface(false, true);
   const curatedCoords = useCuratedCoords();
   const curatedHours = useCuratedHours();
@@ -333,7 +336,6 @@ export default function CreateScreen() {
   // ── Composer ──────────────────────────────────────────────────────────
   const [promptText, setPromptText] = useState('');
   const [asking, setAsking] = useState(false);
-  const [composerFocused, setComposerFocused] = useState(false);
   const [showShapes, setShowShapes] = useState(false);
   const { close: closeComposerPicker } =
     useConstraintPicker<Exclude<ComposerPicker, null>>();
@@ -870,10 +872,7 @@ export default function CreateScreen() {
           <View
             testID="vee-letter-composer"
             style={{
-                borderBottomWidth: 1,
-                borderBottomColor: composerFocused ? colors['fg-accent'] : colors['edge-soft'],
                 opacity: asking ? 0.72 : 1,
-                paddingBottom: 13,
                 marginTop: showingLiveMatches ? 20 : 30,
               }}>
             <Text className="font-dm text-fine text-taupe" style={{marginBottom:15}}>Your starting point</Text>
@@ -885,16 +884,18 @@ export default function CreateScreen() {
               onChangeText={setPromptText}
               placeholder={askExampleLabel}
               placeholderTextColor={colors['fg-muted']}
+              cursorColor={colors['accent-fill']}
               multiline
               submitBehavior="submit"
-              onFocus={() => setComposerFocused(true)}
-              onBlur={() => setComposerFocused(false)}
               maxLength={500}
               editable={!asking}
               returnKeyType="send"
               onSubmitEditing={() => void submitAsk(promptReady ? promptText : askExampleLabel)}
               className="min-w-0 font-dm text-ink"
-              style={{ height:75,fontSize:18,lineHeight:26.1,padding:0,borderWidth:0,textAlignVertical:'top', ...(Platform.OS === 'web' ? { outlineWidth: 0 } as any : {}) }}
+              style={{ height:88,fontSize:18,lineHeight:26.1,paddingVertical:12,paddingHorizontal:14,
+                backgroundColor:withAlpha(colors['surface-discovery'],.66),borderRadius:16,borderWidth:1,
+                borderColor:withAlpha(colors.fg,colorScheme==='light'?.08:.07),textAlignVertical:'top',
+                ...(Platform.OS === 'web' ? { outlineWidth:0,caretColor:colors['accent-fill'] } as any : {}) }}
             />
             <View className="flex-row items-center justify-between" style={{marginTop:7}}>
               <TouchableOpacity accessibilityRole="button" accessibilityLabel="Add a preference" onPress={() => useScoper.getState().openSheet('addConstraint')} hitSlop={8}

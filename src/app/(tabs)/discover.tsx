@@ -123,14 +123,14 @@ export default function DiscoverScreen() {
         <VeeMark size={28} />
       </TouchableOpacity>
     </View>
-    <View className="flex-row items-center gap-x-2 rounded-full border border-control-edge bg-surface-raised px-3">
+    <View className="flex-row items-center gap-x-2 rounded-full border border-control-edge bg-surface-discovery px-3">
       <Glyph name="search" size={17} color={colors['fg-muted']} /><TextInput accessibilityLabel="Search Discover" value={query} onChangeText={setQuery}
         placeholder="A place, artist, or good idea" placeholderTextColor={colors['fg-muted']} className="min-w-0 flex-1 py-3 font-dm text-ink" style={{fontSize:16,lineHeight:22.4}} />
       {query?<TouchableOpacity accessibilityRole="button" accessibilityLabel="Clear search" hitSlop={10} onPress={()=>setQuery('')}><Glyph name="close" size={15} color={colors['fg-muted']} /></TouchableOpacity>:null}
     </View>
     <View className="mt-2.5 mb-[18px]"><HRow gap={11.44} bleed={false}>{MODES.map(x=><TouchableOpacity key={x.value} accessibilityRole="button" accessibilityLabel={x.label}
       accessibilityState={{selected:mode===x.value}} activeOpacity={.78} hitSlop={{top:6,bottom:6}} onPress={()=>choose(x.value)}
-      style={[mode===x.value?selectedControl:control,{minHeight:32.2,paddingVertical:6.44,paddingHorizontal:8.28,borderRadius:999,flexDirection:'row',alignItems:'center',gap:4.6}]}>
+      style={[mode===x.value?selectedControl:{...control,backgroundColor:colors['surface-discovery']},{minHeight:32.2,paddingVertical:6.44,paddingHorizontal:8.28,borderRadius:999,flexDirection:'row',alignItems:'center',gap:4.6}]}>
       {x.value==='All'?<VeeMark size={16} color={mode===x.value?colors['selected-glyph']:colors['fg-muted']} />:<Glyph name={x.glyph} size={13.8} color={mode===x.value?colors['selected-glyph']:colors['fg-muted']} />}
       <Text className="font-dm" style={{fontSize:11.04,lineHeight:15,color:mode===x.value?colors['on-selected']:colors.fg}}>{x.label}</Text>
     </TouchableOpacity>)}</HRow></View>
