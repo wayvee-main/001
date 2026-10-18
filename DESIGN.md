@@ -14,8 +14,9 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   `BACKDROP_GRADIENTS` in `src/lib/tokens.ts` records the exact 230°, 121° and
   226° layers, alpha and stops. `AppBackdrop` paints them behind every screen,
   detail and onboarding page, with aspect-correct angles on web and native.
-  Cards, chips and buttons retain neutral fills, faint edges and elevation;
-  Home's four tiles stay free of gradients. Manual theme changes update the
+  Cards, banners, sheets and unselected controls share the approved warm cream
+  `#F5E6D7` / cocoa `#403029` surface, faint edges and elevation. Home's four
+  sage tiles stay free of gradients. Manual theme changes update the
   backdrop immediately. The gradient never intercepts taps or scrolling.
   Light-mode secondary, accent, success and error inks clear AA over the wash,
   including its most saturated areas; gradient strength is preserved.
@@ -26,16 +27,20 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   34px normally, 30px on phones up to 400px. Use `useAppGutter`.
 - Home keeps four tiles, ordered Eat, Bars, Routes, Events. Counts describe
   actual inventory, never unsupported opening status.
-  Tiles use neutral raised paper without gradients or category fills, a very
-  faint 1px edge, level-1 elevation, neutral glyph discs and serif labels.
+  All four tiles use the same solid sage `#E9EEE4` / deep green `#29362F`, a very
+  faint 1px edge, level-1 elevation and serif labels. Glyphs use `home-tile-glyph`
+  on the subtle `home-tile-well`; counts and labels keep the normal theme ink.
+  `home-tile` is separate from the legacy category tints so the stay chip
+  retains its approved color.
   Home search has a filled round arrow; the stay chip uses the Eat tint.
   The Home stay chip retains its existing Eat tint and control edge. Other
-  chips and buttons share neutral raised paper, level-1 elevation and
+  chips and buttons share the warm cream/cocoa paper, level-1 elevation and
   `edge-faint` (4% ink) borders. Selected choices use `selected-surface` /
   `on-selected`; primary actions use `accent-fill` / `on-accent`. Inputs retain
   their stronger control edge and focus treatment. Never hardcode white on coral.
-- “Your evening, with Vee” is a compact neutral raised-paper ribbon in both themes.
-  Home's dividers are faint. The ribbon has a 1px theme-aware edge and 13px radius.
+- “Your evening, with Vee” is a compact warm cream/cocoa ribbon in both themes,
+  with `surface-accent` glyphs. Home's dividers are faint. The ribbon has a 1px
+  theme-aware edge and 13px radius.
 - For you → Nearest is **three vertical rows**, with **See all** opening `/nearest`.
   The default pool targets 24 real results (at least 20 where the catalog has
   them) within five miles of the selected city/ZIP trip anchor. GPS reorders

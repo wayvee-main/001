@@ -65,10 +65,10 @@ export default function HomeScreen() {
     </View>
     <TouchableOpacity accessibilityRole="button" accessibilityLabel="Open your evening with Vee" onPress={()=>router.push('/create')}
       style={[surface,{minHeight:61.2,paddingHorizontal:11,paddingVertical:8.4,borderRadius:13,flexDirection:'row',alignItems:'center',gap:7}]}>
-      <VeeMark size={28.9} color={colors['fg-muted']} />
+      <VeeMark size={28.9} color={colors['surface-accent']} />
       <View className="min-w-0 flex-1"><Text className="font-fraunces text-ink" style={{fontSize:15.3,lineHeight:18}}>Your evening, with Vee</Text>
         <Text className="mt-0.5 font-dm text-fine text-taupe">A little more city.</Text></View>
-      <Glyph name="arrow" size={16} color={colors['fg-muted']} />
+      <Glyph name="arrow" size={16} color={colors['surface-accent']} />
     </TouchableOpacity>
     <View className="gap-y-3 border-t border-edge-soft pt-4">
       <SectionHeading title="Around you" /><AroundYou tiles={tiles} />
@@ -85,7 +85,7 @@ export default function HomeScreen() {
           <Photo uri={x.image} radius={11} style={{width:58,height:58}} />
           <View className="min-w-0 flex-1"><Text numberOfLines={2} className="font-dm-medium text-card-name text-ink">{x.name}</Text>
             <Text className="mt-1 font-dm text-fine text-taupe">{[x.cuisine,x.price,x.distanceLabel].filter(Boolean).join(' · ')}</Text></View>
-          <Glyph name="chevron" size={14} color={colors['fg-muted']} />
+          <Glyph name="chevron" size={14} color={colors['surface-accent']} />
         </TouchableOpacity>)}
         {!nearest.length?<Text className="font-dm text-label text-taupe">Nearby places appear as the local catalog loads.</Text>:null}
       </View>

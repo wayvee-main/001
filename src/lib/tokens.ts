@@ -12,7 +12,7 @@
  * and src/components keep working; new code should reach for the semantic name.
  *
  * Palette: original layered peach/lilac backdrop, warm off-white in light,
- * plum-black in dark, with neutral raised editorial cards.
+ * plum-black in dark, with warm cream/cocoa editorial cards and sage Home tiles.
  * Filled controls use the approved rust/light and peach/dark pairing with
  * theme-specific on-accent ink. Brand accent and warm fills remain distinct
  * from readable supporting text roles.
@@ -32,30 +32,28 @@ export function hexToRgb(hex: string): [number, number, number] {
  * (bg-surface/50) keeps working. */
 export const ROLES: Record<string, ThemeValue> = {
   bg: { light: '#FFFDFA', dark: '#151117' }, // original ground beneath the wash
-  surface: { light: '#EFE9DF', dark: '#282625' }, // contained editorial cards
-  // Reads *above* the card in light by staying paper-white and *below* it in dark by going
-  // deeper. Both directions separate it from `surface`, which is the job — matching the
-  // direction across themes is not, and forcing that would flatten one theme or the other.
-  'surface-raised': { light: '#FFFDFA', dark: '#29222F' }, // input and sheet surfaces
-  // The lightest card tier — about a quarter of `surface`'s separation from the
-  // page. For the run of cards that opens Home (Vee's hero, its pick, the stay
-  // anchor), which lead the screen and shouldn't feel heavy before any content
-  // has appeared. Deliberately close to `bg`: these read as shaped areas of the
-  // page rather than as objects on it. Anything that needs to read as a distinct
-  // object wants `surface`.
-  'surface-soft': { light: '#FBF8F4', dark: '#372E3C' },
+  // The approved ribbon material carries through cards, banners, controls and
+  // sheets. Elevation and faint edges establish hierarchy over the page wash.
+  surface: { light: '#F5E6D7', dark: '#403029' },
+  'surface-raised': { light: '#F5E6D7', dark: '#403029' },
+  'surface-soft': { light: '#F5E6D7', dark: '#403029' },
   'surface-sunk': { light: '#E7E0D6', dark: '#100D13' }, // input wells, sheet track
   fg: { light: '#312039', dark: '#FAF2E8' }, // Nightfall editorial ink
   'fg-muted': { light: '#605463', dark: '#BDAFBD' }, // AA across the original wash
   'card-ink': { light: '#2D2926', dark: '#F5EDE3' },
   'card-muted': { light: '#645D56', dark: '#C3B9AF' },
-  ribbon: { light: '#EEE6F0', dark: '#29192E' },
+  ribbon: { light: '#F5E6D7', dark: '#403029' },
+  'surface-accent': { light: '#995435', dark: '#EFB590' }, // glyphs on warm cards/ribbons
   'ribbon-edge': { light: '#DBCFE0', dark: '#493C50' },
   'control-edge': { light: '#E0D5C9', dark: '#493C50' },
   'selected-surface': { light: '#2B1C35', dark: '#29192E' },
   'on-selected': { light: '#FFF7ED', dark: '#FFF7ED' },
   'selected-glyph': { light: '#F5B494', dark: '#F5B494' },
   'navigation-muted': { light: '#D8C7DD', dark: '#D8C7DD' },
+  // One shared green for Home's four tiles; the stay chip keeps tile-eat.
+  'home-tile': { light: '#E9EEE4', dark: '#29362F' },
+  'home-tile-glyph': { light: '#50684D', dark: '#A9C2A3' },
+  'home-tile-well': { light: '#F6F7F1', dark: '#313E37' },
   'tile-eat': { light: '#F2E8CA', dark: '#493E2E' },
   'tile-bars': { light: '#F2DFDF', dark: '#493342' },
   'tile-routes': { light: '#E6DEEF', dark: '#3A3047' },

@@ -15,7 +15,7 @@ export type CountTile = {
   tint: keyof ThemeColors;
   ink: keyof ThemeColors;
   glyph: GlyphName;
-  /** Retained for callers; the count grid uses neutral paper rather than art. */
+  /** Retained for callers; the count grid uses solid sage rather than art. */
   image?: string;
   onPress: () => void;
 };
@@ -45,13 +45,13 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
               accessibilityLabel={`${tile.count} ${tile.label}, ${tile.hint}`}
               activeOpacity={0.78}
               onPress={tile.onPress}
-              style={surface}
+              style={[surface, { backgroundColor: colors['home-tile'] }]}
               className="min-h-[100px] flex-1 rounded-panel px-3 pb-3 pt-3">
               {/* Glyph and count read as one mark, so they sit together
                * rather than at opposite corners of the tile. */}
               <View className="flex-row items-center justify-between gap-x-2">
-                <View className="h-7 w-7 items-center justify-center rounded-full bg-surface">
-                  <Glyph name={tile.glyph} size={16} color={colors.fg} strokeWidth={1.9} />
+                <View style={{ backgroundColor: colors['home-tile-well'] }} className="h-7 w-7 items-center justify-center rounded-full">
+                  <Glyph name={tile.glyph} size={16} color={colors['home-tile-glyph']} strokeWidth={1.9} />
                 </View>
                 <Text
                   style={{ color: colors.fg, fontVariant: ['tabular-nums'] }}
