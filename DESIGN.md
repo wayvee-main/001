@@ -53,7 +53,8 @@ inline palette and Tailwind tokens together with `npm run tokens`.
 - All seven Discover sections use the selected **Evening Trail** design,
   superseding Field Journal. A faint 1px thread at the left connects rust dots
   beside each section heading. Results are inset 20px, with 27px between sections.
-  Rows sit directly on Nightfall with Fraunces 500 names and compact glyph facts.
+  Listings use Fraunces 500 names and compact glyph facts over the shared
+  raised card material, with the app-wide gradient visible between elements.
 - On stage has one gently raised editorial lead with date, a 25px artist heading,
   brief caption, a source-based description of up to 20 words on one line
   with an ellipsis when needed
@@ -75,12 +76,15 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   use at most three lines. Full names and facts remain on the existing details.
   For you shows two supporting events, three bars and three rooms. See all
   exposes each full pool; More good tables keeps its existing See all destination.
-- Find a good table uses three uncontained restaurant notes, with right
+- Find a good table uses three individually contained restaurant notes, with right
   thumbnails, cuisine captions and price/distance glyphs. More good tables
   shows three distinct restaurants in its photo row with the same metadata.
   Names wrap naturally. **Find a good table has no See all action;
   More good tables keeps See all.**
-- A little wandering uses numbered route notes (23px numbers, 31px columns).
+- A little wandering uses individually contained numbered route notes
+  (23px numbers, 31px columns). Both vertical sections share the other Discover
+  cards' raised paper, level-1 shadow, 12px radius, 8px padding and faint 1px
+  `edge-faint` border. Leave 8px between cards and remove row-divider lines.
   Find a good table keeps right-side thumbnails at 59 × 82px
   (47 × 73px on narrow phones).
 - Discover keeps category pills, full search, pull-to-refresh, city-aware data,

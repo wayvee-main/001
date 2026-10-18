@@ -32,7 +32,7 @@ function Note({name,caption,facts,image,index,divider,onPress,testID,accessibili
   const {width}=useWindowDimensions(),narrow=width<=360;
   const surface=useRaisedSurface(1);
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Explore ${accessibilityName||name}`} onPress={onPress} activeOpacity={.78} testID={testID}
-    className={`items-start py-3.5 ${strip?'':`flex-row ${divider?'border-t border-edge-soft':''}`}`}
+    className={`items-start py-3.5 ${strip?'':`flex-row ${divider&&!elevated?'border-t border-edge-soft':''}`}`}
     style={[strip?{width:137,flexShrink:0}:{gap:12},elevated?{...surface,borderWidth:0,borderRadius:12,padding:8}:null]}>
     {elevated?<View pointerEvents="none" style={{position:'absolute',inset:0,borderRadius:12,borderWidth:1,borderColor:surface.borderColor}} />:null}
     {strip&&image?<Photo uri={image} radius={8} style={{width:elevated?121:137,height:73,marginBottom:11}} />:null}
@@ -88,7 +88,7 @@ export function ShowNote({event:x,onPress}:{event:ScoperEvent;onPress:()=>void})
 
 export function TableNote({restaurant:x,index,divider,onPress,strip=false}:{restaurant:Restaurant;index?:number;divider:boolean;onPress:()=>void;strip?:boolean}) {
   return <Note name={x.name} caption={x.cuisine==='American supper club'?'Supper club':x.cuisine} image={index===undefined?x.image:undefined} index={index}
-    divider={divider} strip={strip} elevated={strip} onPress={onPress} testID={`trail-table-${x.id}`}
+    divider={divider} strip={strip} elevated onPress={onPress} testID={`trail-table-${x.id}`}
     facts={<><Fact glyph="wallet" value={x.price} label={`Price level ${x.price}`} /><Fact glyph={/ride/i.test(x.distanceLabel)?'car':/walk/i.test(x.distanceLabel)?'walk':'pin'} value={x.distanceLabel} /></>} />;
 }
 
@@ -107,7 +107,7 @@ export function BarNote({spot:x,onPress}:{spot:NightlifeSpot;onPress:()=>void}) 
 const ROUTE_CAPTIONS:Record<string,string>={oldoakland:'Piano bars to the waterfront.',uptown:'Cocktails, vinyl, a late finish.',downtown:'Cocktails, a lounge, a last bite.'};
 export function RouteNote({route:x,index,divider,onPress}:{route:Crawl;index:number;divider:boolean;onPress:()=>void}) {
   const ride=/ride/i.test(x.meta),travel=ride?'Ride':x.meta.match(/(?:[<~]\s*)?[\d.]+\s*mi\b/)?.[0];
-  return <Note name={x.name} caption={ROUTE_CAPTIONS[x.id]||x.desc} index={index} divider={divider} onPress={onPress} testID={`field-route-${x.id}`}
+  return <Note name={x.name} caption={ROUTE_CAPTIONS[x.id]||x.desc} index={index} divider={divider} elevated onPress={onPress} testID={`field-route-${x.id}`}
     facts={<><Fact glyph="route" value={`${x.stops.length} stops`} />{travel?<Fact glyph={ride?'car':'walk'} value={travel} label={x.meta} />:null}</>} />;
 }
 

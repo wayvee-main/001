@@ -100,7 +100,7 @@ export default function DiscoverScreen() {
   </>:<TrailSection title="On stage"><EmptyState compact title={hydrating?'Loading the stage…':'No current shows yet'} message={hydrating?'Checking the live calendar.':'Current listings appear here as the calendar updates.'} /></TrailSection>;
   const food=tables.length?<>
     <TrailSection title="Find a good table">
-    {tables.slice(0,mode==='All'?3:undefined).map((x,i)=><TableNote key={x.id} restaurant={x} divider={i>0} onPress={()=>router.push(`/restaurant/${x.id}`)} />)}
+    <View className="gap-y-2">{tables.slice(0,mode==='All'?3:undefined).map((x,i)=><TableNote key={x.id} restaurant={x} divider={i>0} onPress={()=>router.push(`/restaurant/${x.id}`)} />)}</View>
     </TrailSection>
     {more.length?<TrailSection title="More good tables" onAll={()=>router.push('/featured')}>
       <HRow gap={16} bleed={false}>{more.map(x=><TableNote key={x.id} restaurant={x} strip divider={false} onPress={()=>router.push(`/restaurant/${x.id}`)} />)}</HRow>
@@ -110,7 +110,7 @@ export default function DiscoverScreen() {
     <HRow gap={16} bleed={false}>{bars.slice(0,mode==='All'?3:undefined).map(x=><BarNote key={x.id} spot={x} onPress={()=>router.push(`/night/${x.id}`)} />)}</HRow>
   </TrailSection>:null;
   const wander=routes.length?<TrailSection title="A little wandering" onAll={mode==='All'?()=>choose('Routes'):undefined}>
-    {routes.slice(0,mode==='All'?2:undefined).map((x,i)=><RouteNote key={x.id} route={x} index={i} divider={i>0} onPress={()=>router.push(`/crawl/${x.id}`)} />)}
+    <View className="gap-y-2">{routes.slice(0,mode==='All'?2:undefined).map((x,i)=><RouteNote key={x.id} route={x} index={i} divider={i>0} onPress={()=>router.push(`/crawl/${x.id}`)} />)}</View>
   </TrailSection>:null;
   const rooms=venues.length?<TrailSection title="Rooms worth knowing" onAll={mode==='All'?()=>choose('Venues'):undefined}>
     <HRow gap={16} bleed={false}>{venues.slice(0,mode==='All'?3:undefined).map(x=><RoomNote key={x.id} venue={x} onPress={()=>router.push(`/venue/${x.id}`)} />)}</HRow>
