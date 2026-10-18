@@ -1,8 +1,11 @@
 import { LinearGradient } from 'expo-linear-gradient';
+import { useColorScheme } from 'nativewind';
 import { useState, type ReactNode } from 'react';
 import {
+  Platform,
   RefreshControl,
   ScrollView,
+  StyleSheet,
   Text,
   View,
   useWindowDimensions,
@@ -15,14 +18,43 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BackButton } from '@/components/ui';
 import { Glyph } from '@/components/glyph';
 import { useThemeColors } from '@/lib/theme';
+import { BACKDROP_GRADIENTS } from '@/lib/tokens';
 
 const EDGE_FADE_WIDTH = 28;
 
-/** Flat Nightfall paper/plum ground shared by screens, details and onboarding. */
+/** Match the original CSS angle at every aspect ratio. The projected diagonal
+ * also gives native gradients the same stop positions as CSS's magic corners. */
+function gradientLine(angle: number, width: number, height: number) {
+  width = Math.max(1, width);
+  height = Math.max(1, height);
+  const radians = angle * Math.PI / 180;
+  const dx = Math.sin(radians), dy = -Math.cos(radians);
+  const length = Math.abs(width * dx) + Math.abs(height * dy);
+  return {
+    start: { x: 0.5 - dx * length / (2 * width), y: 0.5 - dy * length / (2 * height) },
+    end: { x: 0.5 + dx * length / (2 * width), y: 0.5 + dy * length / (2 * height) },
+  };
+}
+
+/** Original layered wash shared by screens, details and onboarding. The wash
+ * stays behind content, never intercepts touches, and follows manual themes. */
 export function AppBackdrop({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const colors = useThemeColors();
+  const { colorScheme } = useColorScheme();
+  const theme = colorScheme === 'light' ? 'light' : 'dark';
+  const viewport = useWindowDimensions();
+  const [size, setSize] = useState({ width: viewport.width, height: viewport.height });
   return (
-    <View style={[{ flex: 1, backgroundColor: colors.bg, overflow: 'hidden' }, style]}>
+    <View style={[{ flex: 1, backgroundColor: colors.bg, overflow: 'hidden' }, style]}
+      onLayout={({ nativeEvent: { layout } }) => {
+        if (layout.width > 0 && layout.height > 0) setSize(current => current.width === layout.width && current.height === layout.height ? current : { width: layout.width, height: layout.height });
+      }}>
+      <View testID="app-background-gradient" pointerEvents="none" accessible={false} style={StyleSheet.absoluteFill}>
+        {BACKDROP_GRADIENTS.map(layer => <LinearGradient key={layer.angle} pointerEvents="none"
+          colors={layer.colors[theme]} locations={layer.locations}
+          {...gradientLine(layer.angle, size.width, size.height)}
+          style={StyleSheet.absoluteFill} />)}
+      </View>
       {children}
     </View>
   );
@@ -144,38 +176,28 @@ export function HeaderRow({
   );
 }
 
-/** Horizontal carousel that bleeds to the screen edges (gutter-to-gutter). Fades
- * the trailing edge into the background so a partially-scrolled card reads as
- * "more to scroll" rather than a hard, clipped-off cut. */
+/** Horizontal carousel with a trailing peek. Web fades content with an alpha
+ * mask so the layered page wash remains continuous underneath. Native keeps
+ * the peek without painting a mismatched flat strip over the backdrop. */
 export function HRow({ children, gap = 8, bleed = true }: { children: ReactNode; gap?: number; bleed?: boolean }) {
-  const colors = useThemeColors();
   const gutter = useAppGutter();
   const [viewport, setViewport] = useState(0);
   const [content, setContent] = useState(0);
-  // The fade means "there's more this way". A row that fits has no more, and
-  // painting it anyway leaves a pale block over the page background — visible
-  // as soon as a caller renders a short row, which the food hub's
-  // result-derived category chips now do.
   const overflows = viewport > 0 && content > viewport + 1;
+  const edgeMask: (ViewStyle & { maskImage?: string }) | undefined = Platform.OS === 'web' && overflows
+    ? { maskImage: `linear-gradient(to right, #000 calc(100% - ${EDGE_FADE_WIDTH}px), transparent)` }
+    : undefined;
   return (
     <View style={{ marginHorizontal: bleed ? -gutter : 0, marginVertical: -6 }}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
+        style={edgeMask}
         onLayout={(event) => setViewport(event.nativeEvent.layout.width)}
         onContentSizeChange={(width) => setContent(width)}
         contentContainerStyle={{ paddingHorizontal: bleed ? gutter : 0, paddingVertical: 6, gap }}>
         {children}
       </ScrollView>
-      {overflows ? (
-        <LinearGradient
-          pointerEvents="none"
-          colors={[`${colors.cream}00`, colors.cream]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: EDGE_FADE_WIDTH }}
-        />
-      ) : null}
     </View>
   );
 }

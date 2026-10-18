@@ -29,7 +29,7 @@ function normalizeMode(raw?:string):Mode {return MODES.find(x=>x.value.toLowerCa
 function Heading({title,onAll,trail=false}:{title:string;onAll?:()=>void;trail?:boolean}) {
   const colors=useThemeColors();
   return <View className="flex-row items-center justify-between gap-x-2.5">
-    {trail?<View pointerEvents="none" style={{position:'absolute',left:-26,top:3,width:18,height:18,borderRadius:9,backgroundColor:colors.bg,alignItems:'center',justifyContent:'center'}}>
+    {trail?<View pointerEvents="none" style={{position:'absolute',left:-26,top:3,width:18,height:18,borderRadius:9,alignItems:'center',justifyContent:'center'}}>
       <View testID="trail-section-dot" style={{width:8,height:8,borderRadius:4,backgroundColor:colors['fg-accent']}} />
     </View>:null}
     <Text className="min-w-0 flex-1 font-fraunces text-ink" style={{fontSize:trail?20:21,lineHeight:trail?24:25.2,letterSpacing:-.35}}>{title}</Text>

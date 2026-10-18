@@ -9,7 +9,19 @@ inline palette and Tailwind tokens together with `npm run tokens`.
 - Keep the original Vee mark and Fraunces / DM Sans typography.
   Editorial serif headings use the reference's Fraunces 500 weight; explicit
   bold variants remain available for emphasis.
-- Nightfall stays in both themes: light `#FBF7F0`, dark `#17121C`.
+- Restore the original page-wide gradient in both themes: light `#FFFDFA`,
+  dark `#151117`, beneath the original three peach/coral/lilac washes.
+  `BACKDROP_GRADIENTS` in `src/lib/tokens.ts` records the exact 230°, 121° and
+  226° layers, alpha and stops. `AppBackdrop` paints them behind every screen,
+  detail and onboarding page, with aspect-correct angles on web and native.
+  Cards, chips and buttons retain neutral fills, faint edges and elevation;
+  Home's four tiles stay free of gradients. Manual theme changes update the
+  backdrop immediately. The gradient never intercepts taps or scrolling.
+  Light-mode secondary, accent, success and error inks clear AA over the wash,
+  including its most saturated areas; gradient strength is preserved.
+  Horizontal rows use an alpha edge fade on web and a trailing peek on native;
+  never paint a flat background-colored fade over the wash. Discover's trail
+  dots have transparent surrounds so the gradient stays continuous.
 - Add 14px to the previous horizontal gutters throughout screens and layers:
   34px normally, 30px on phones up to 400px. Use `useAppGutter`.
 - Home keeps four tiles, ordered Eat, Bars, Routes, Events. Counts describe
@@ -101,7 +113,8 @@ inline palette and Tailwind tokens together with `npm run tokens`.
 
 Run typecheck, lint, the relevant Jest suites, `tokens:contrast`, and the
 production web export. Inspect phone layouts in both themes. Contrast covers
-Nightfall cards, the ribbon, selected controls and all four tile surfaces.
+cards, the ribbon, selected controls and all four tile surfaces, plus 1,764
+composited backdrop samples per theme across phone, tablet and desktop ratios.
 The restored editorial CTA pairs clear AA in both themes.
 
 ## Previous palette reference

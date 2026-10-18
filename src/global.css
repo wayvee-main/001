@@ -10,13 +10,13 @@
    go through Tailwind's <alpha-value> opacity modifier; full rgba() strings
    for tokens with fixed baked-in opacity. */
 :root {
-  --color-bg: 251 247 240;
+  --color-bg: 255 253 250;
   --color-surface: 239 233 223;
   --color-surface-raised: 255 253 250;
   --color-surface-soft: 251 248 244;
   --color-surface-sunk: 231 224 214;
   --color-fg: 49 32 57;
-  --color-fg-muted: 106 95 107;
+  --color-fg-muted: 96 84 99;
   --color-card-ink: 45 41 38;
   --color-card-muted: 100 93 86;
   --color-ribbon: 238 230 240;
@@ -30,11 +30,11 @@
   --color-tile-bars: 242 223 223;
   --color-tile-routes: 230 222 239;
   --color-tile-events: 226 235 223;
-  --color-fg-accent: 158 61 35;
+  --color-fg-accent: 150 59 37;
   --color-accent: 228 85 38;
   --color-accent-fill: 184 70 36;
   --color-on-accent: 255 250 244;
-  --color-open: 56 113 79;
+  --color-open: 55 96 75;
   --color-warm: 255 199 87;
   --color-warm-strong: 84 63 24;
   --color-warm-ink: 84 63 24;
@@ -43,14 +43,14 @@
   --color-accent-tint: 251 228 218;
   --color-warm-tint: 255 243 216;
   --color-vee-tint: 227 223 247;
-  --color-danger: 201 53 55;
+  --color-danger: 160 47 56;
   --color-edge: rgba(49, 32, 57, 0.12);
   --color-edge-soft: rgba(49, 32, 57, 0.08);
   --color-edge-faint: rgba(49, 32, 57, 0.04);
 }
 
 .dark:root {
-  --color-bg: 23 18 28;
+  --color-bg: 21 17 23;
   --color-surface: 40 38 37;
   --color-surface-raised: 41 34 47;
   --color-surface-soft: 55 46 60;

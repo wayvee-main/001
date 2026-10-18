@@ -11,8 +11,8 @@
  * aliases are kept pointing at the same hex so existing className strings in src/app
  * and src/components keep working; new code should reach for the semantic name.
  *
- * Palette: approved Nightfall editorial system. Warm paper in light, plum
- * ground in dark, paper-to-category gradients, warm neutral discovery cards.
+ * Palette: original layered peach/lilac backdrop, warm off-white in light,
+ * plum-black in dark, with neutral raised editorial cards.
  * Filled controls use the approved rust/light and peach/dark pairing with
  * theme-specific on-accent ink. Brand accent and warm fills remain distinct
  * from readable supporting text roles.
@@ -31,7 +31,7 @@ export function hexToRgb(hex: string): [number, number, number] {
  * space-separated RGB triples so Tailwind's <alpha-value> opacity modifier
  * (bg-surface/50) keeps working. */
 export const ROLES: Record<string, ThemeValue> = {
-  bg: { light: '#FBF7F0', dark: '#17121C' }, // approved Nightfall ground
+  bg: { light: '#FFFDFA', dark: '#151117' }, // original ground beneath the wash
   surface: { light: '#EFE9DF', dark: '#282625' }, // contained editorial cards
   // Reads *above* the card in light by staying paper-white and *below* it in dark by going
   // deeper. Both directions separate it from `surface`, which is the job — matching the
@@ -46,7 +46,7 @@ export const ROLES: Record<string, ThemeValue> = {
   'surface-soft': { light: '#FBF8F4', dark: '#372E3C' },
   'surface-sunk': { light: '#E7E0D6', dark: '#100D13' }, // input wells, sheet track
   fg: { light: '#312039', dark: '#FAF2E8' }, // Nightfall editorial ink
-  'fg-muted': { light: '#6A5F6B', dark: '#BDAFBD' },
+  'fg-muted': { light: '#605463', dark: '#BDAFBD' }, // AA across the original wash
   'card-ink': { light: '#2D2926', dark: '#F5EDE3' },
   'card-muted': { light: '#645D56', dark: '#C3B9AF' },
   ribbon: { light: '#EEE6F0', dark: '#29192E' },
@@ -60,14 +60,14 @@ export const ROLES: Record<string, ThemeValue> = {
   'tile-bars': { light: '#F2DFDF', dark: '#493342' },
   'tile-routes': { light: '#E6DEEF', dark: '#3A3047' },
   'tile-events': { light: '#E2EBDF', dark: '#2C4139' },
-  'fg-accent': { light: '#9E3D23', dark: '#FF9271' }, // readable accent text on Nightfall surfaces
+  'fg-accent': { light: '#963B25', dark: '#FF9271' }, // readable accent text across the wash
   // A shade under the CTA's coral so it still clears 3:1 as an icon or border on
   // `surface`, which the exact CTA hex does not (2.93:1). The CTA keeps the
   // approved hex below; this is the role that has to survive being drawn small.
   accent: { light: '#E45526', dark: '#FF9271' }, // brand accent — icons, borders, rails
   'accent-fill': { light: '#B84624', dark: '#F0835C' }, // approved editorial control fill
   'on-accent': { light: '#FFFAF4', dark: '#2C1811' }, // theme-paired CTA ink
-  open: { light: '#38714F', dark: '#83D0A8' }, // open-now / confirmed / live
+  open: { light: '#37604B', dark: '#83D0A8' }, // open-now / confirmed / live
   warm: { light: '#FFC757', dark: '#FFC757' }, // marigold — FILL ONLY, never text (see below)
   'warm-strong': { light: '#543F18', dark: '#3D2D10' }, // ink on a marigold FILL — not on warm-tint
   // The marigold family's answer to fg-accent and vee-strong: text and icons
@@ -79,8 +79,38 @@ export const ROLES: Record<string, ThemeValue> = {
   'accent-tint': { light: '#FBE4DA', dark: '#4A2A25' }, // coral-tinted block
   'warm-tint': { light: '#FFF3D8', dark: '#403321' }, // marigold-tinted block
   'vee-tint': { light: '#E3DFF7', dark: '#352C4D' }, // cobalt-tinted block
-  danger: { light: '#C93537', dark: '#FF6B6D' }, // closed / sold out / error — the one functional red
+  danger: { light: '#A02F38', dark: '#FF6B6D' }, // closed / sold out / error — the one functional red
 };
+
+/** Original app-wide wash from the earlier preview's --wf-wash. Paint in this
+ * back-to-front order. Angles are CSS angles; stops include their original
+ * alpha, with hue-matched transparent endpoints to avoid muddy native fades. */
+export const BACKDROP_GRADIENTS = [
+  {
+    angle: 230,
+    locations: [0, 0.42, 1],
+    colors: {
+      light: ['#FCBA7875', '#FAC8A633', '#FFFDFA00'],
+      dark: ['#E85D2C1C', '#E85D2C09', '#E85D2C00'],
+    },
+  },
+  {
+    angle: 121,
+    locations: [0.16, 0.52, 0.9],
+    colors: {
+      light: ['#6F5BD100', '#806CD82B', '#6F5BD100'],
+      dark: ['#6F5BD100', '#6F5BD11B', '#6F5BD100'],
+    },
+  },
+  {
+    angle: 226,
+    locations: [0.08, 0.48, 0.88],
+    colors: {
+      light: ['#FFC75700', '#FA8E6621', '#FFC75700'],
+      dark: ['#FFC75700', '#FF92710E', '#FFC75700'],
+    },
+  },
+] as const;
 
 /** Roles with fixed opacity baked in (not run through <alpha-value>). Base
  * hue is fg, since edge = "a hairline of ink/paper", not its own color. */

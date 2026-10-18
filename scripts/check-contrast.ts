@@ -9,7 +9,7 @@
  *
  * Run: npx -y tsx scripts/check-contrast.ts
  */
-import { EDGE_ROLES, FIXED, hexToRgb, ROLES } from '../src/lib/tokens';
+import { BACKDROP_GRADIENTS, EDGE_ROLES, FIXED, hexToRgb, ROLES } from '../src/lib/tokens';
 
 type Theme = 'light' | 'dark';
 
@@ -132,6 +132,41 @@ if (warmOnPaper >= AA_TEXT) {
   failures += 1;
 } else {
   console.log(`\nfill-only rule holds: 'warm' on paper is ${warmOnPaper.toFixed(2)}:1, unusable as text by design`);
+}
+
+/** Sample the composited wash, rather than checking only its solid base.
+ * Gradients interpolate premultiplied sRGB; each layer then composites over
+ * the layers behind it. Aspect ratios cover narrow phones through desktop. */
+function backdropAt(theme: Theme, width: number, height: number, x: number, y: number): string {
+  let ground = hexToRgb(ROLES.bg[theme]);
+  for (const layer of BACKDROP_GRADIENTS) {
+    const radians = layer.angle * Math.PI / 180;
+    const dx = Math.sin(radians), dy = -Math.cos(radians);
+    const span = Math.abs(width * dx) + Math.abs(height * dy);
+    const position = 0.5 + ((x - 0.5) * width * dx + (y - 0.5) * height * dy) / span;
+    const at = Math.max(layer.locations[0], Math.min(layer.locations[2], position));
+    const index = at <= layer.locations[1] ? 0 : 1;
+    const amount = (at - layer.locations[index]) / (layer.locations[index + 1] - layer.locations[index]);
+    const a = layer.colors[theme][index], b = layer.colors[theme][index + 1];
+    const aa = parseInt(a.slice(7, 9), 16) / 255, ba = parseInt(b.slice(7, 9), 16) / 255;
+    const alpha = aa * (1 - amount) + ba * amount;
+    const ar = hexToRgb(a.slice(0, 7)), br = hexToRgb(b.slice(0, 7));
+    ground = ground.map((channel, i) => channel * (1 - alpha) + ar[i] * aa * (1 - amount) + br[i] * ba * amount) as [number, number, number];
+  }
+  return `#${ground.map(c => Math.round(c).toString(16).padStart(2, '0')).join('')}`;
+}
+
+for (const theme of ['light', 'dark'] as Theme[]) {
+  const samples: string[] = [];
+  for (const [width, height] of [[320, 740], [390, 844], [736, 1100], [1280, 800]]) {
+    for (let x = 0; x <= 20; x++) for (let y = 0; y <= 20; y++) samples.push(backdropAt(theme, width, height, x / 20, y / 20));
+  }
+  for (const ink of ['fg', 'fg-muted', 'fg-accent', 'open', 'danger', 'vee-strong']) {
+    const minimum = Math.min(...samples.map(bg => contrast(ROLES[ink][theme], bg)));
+    const ok = minimum >= AA_TEXT;
+    if (!ok) failures += 1;
+    console.log(`${ok ? 'PASS' : 'FAIL'}  ${minimum.toFixed(2)}:1  ${theme} ${ink} on layered backdrop (${samples.length} samples)`);
+  }
 }
 
 console.log(`\nedge tokens: ${Object.keys(EDGE_ROLES).join(', ')} (opacity-based, not contrast-checked)`);
