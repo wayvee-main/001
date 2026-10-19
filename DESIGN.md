@@ -49,7 +49,8 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   surfaces and orange accents. Keep the original gradient Vee mark and the
   original page gradients intact; explicit error states retain their red.
 - “Your evening, with Vee” and Link your stay use the approved burgundy
-  `#280003` in both themes, with warm light `on-ribbon` / `on-ribbon-muted`
+  `#8E000B` in both themes, four 5-point HSL lightness steps above the original
+  `#280003`, with warm light `on-ribbon` / `on-ribbon-muted`
   lettering and coral `ribbon-glyph` icons. The ribbon has a 44px arrow stub,
   a faint dotted vertical perforation, two 4.5px edge notches,
   a faint edge and 13px radius. The notches are genuinely transparent so the

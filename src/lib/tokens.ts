@@ -49,7 +49,7 @@ export const ROLES: Record<string, ThemeValue> = {
   'fg-muted': { light: '#605463', dark: '#BDAFBD' }, // AA across the original wash
   'card-ink': { light: '#2D2926', dark: '#F5EDE3' },
   'card-muted': { light: '#645D56', dark: '#C3B9AF' },
-  ribbon: { light: '#280003', dark: '#280003' }, // approved burgundy ticket and stay chip
+  ribbon: { light: '#8E000B', dark: '#8E000B' }, // #280003 lifted by four 5-point HSL lightness steps
   'on-ribbon': { light: '#FFF7ED', dark: '#FFF7ED' },
   'on-ribbon-muted': { light: '#DDC7C2', dark: '#DDC7C2' },
   'ribbon-glyph': { light: '#F0835C', dark: '#F0835C' },
