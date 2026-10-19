@@ -46,12 +46,12 @@ export default function HomeScreen() {
       <Text className="font-fraunces text-ink" style={{fontSize:25,lineHeight:29,letterSpacing:-.8}}>Shall we wander?</Text>
       <Text className="mt-1 font-dm text-label text-taupe">A good evening is closer than you think.</Text>
     </View>
-    <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Search places, dishes and shows in ${city}`} onPress={()=>s.openSheet('search')}
+    <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Search in ${city}`} onPress={()=>s.openSheet('search')}
       style={[control,{minHeight:52,backgroundColor:colors['surface-search']}]}
       className="flex-row items-center gap-x-2.5 rounded-full bg-surface-search pl-3.5 pr-[7px] py-[7px]">
       <Glyph name="search" size={17} color={colors['fg-muted']} />
       <View className="min-w-0 flex-1">
-        <Text numberOfLines={1} className="font-dm text-label text-taupe">Places, dishes, or a little inspiration</Text>
+        <Text numberOfLines={1} className="font-dm text-label text-taupe">Search the city</Text>
         <Text testID="home-search-city" numberOfLines={1} className="font-dm text-fine text-taupe">{city}</Text>
       </View>
       <View className="h-[37px] w-[37px] items-center justify-center rounded-full bg-accent-fill">
@@ -62,9 +62,9 @@ export default function HomeScreen() {
       {[{name:s.stay?'Update your stay':'Link your stay',glyph:'briefcase',press:()=>s.openStaySheet()},
         {name:'Late bites',glyph:'food',press:()=>router.push('/featured?q=late%20bites')},
         {name:'Open late',glyph:'clock',press:()=>router.push('/featured?q=open%20late')}].map(x=><TouchableOpacity key={x.name} accessibilityRole="button" onPress={x.press}
-          style={x.glyph==='briefcase'?{backgroundColor:light?colors.ribbon:colors['tile-eat'],borderColor:colors['control-edge'],borderWidth:1}:{...control,backgroundColor:light?colors['surface-search']:colors['surface-raised']}}
+          style={x.glyph==='briefcase'?{backgroundColor:colors.ribbon,borderColor:colors['ribbon-edge'],borderWidth:1}:{...control,backgroundColor:light?colors['surface-search']:colors['surface-raised']}}
           className="flex-row items-center gap-x-1.5 rounded-full px-2.5 py-[7px]" hitSlop={{top:5,bottom:5}}>
-          <Glyph name={x.glyph} size={13} color={colors['fg-muted']} /><Text className="font-dm text-fine text-ink">{x.name}</Text>
+          <Glyph name={x.glyph} size={13} color={x.glyph==='briefcase'?colors['ribbon-glyph']:colors['fg-muted']} /><Text className={x.glyph==='briefcase'?'font-dm text-fine text-on-ribbon':'font-dm text-fine text-ink'}>{x.name}</Text>
         </TouchableOpacity>)}
     </View>
     <HomeEveningRibbon onPress={()=>router.push('/create')} />

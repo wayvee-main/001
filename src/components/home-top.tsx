@@ -109,15 +109,15 @@ export function HomeEveningRibbon({onPress}:{onPress:()=>void}) {
         <Rect width={size.width} height={size.height} fill="white" />
         <Circle cx={seam} cy={0} r={4.5} fill="black" /><Circle cx={seam} cy={size.height} r={4.5} fill="black" />
       </Mask></Defs>
-      <Rect x={.5} y={.5} width={size.width-1} height={size.height-1} rx={12.5} fill={colors.ribbon} stroke={colors['edge-faint']} mask={`url(#${maskId})`} />
-      <Line x1={seam} y1={9} x2={seam} y2={size.height-9} stroke={colors['edge']} strokeWidth={1} strokeDasharray="2 3" strokeLinecap="round" />
+      <Rect x={.5} y={.5} width={size.width-1} height={size.height-1} rx={12.5} fill={colors.ribbon} stroke={colors['ribbon-edge']} mask={`url(#${maskId})`} />
+      <Line x1={seam} y1={9} x2={seam} y2={size.height-9} stroke={colors['on-ribbon-muted']} strokeOpacity={.28} strokeWidth={1} strokeDasharray="2 3" strokeLinecap="round" />
     </Svg>:null}
     <View className="min-w-0 flex-1 flex-row items-center" style={{paddingHorizontal:11,paddingVertical:8.4,gap:7}}>
-      <VeeMark size={28.9} color={colors['surface-accent']} />
-      <View className="min-w-0 flex-1"><Text numberOfLines={1} className="font-fraunces text-ink" style={{fontSize:15.3,lineHeight:18}}>Your evening, with Vee</Text>
-        <Text className="mt-0.5 font-dm text-fine text-taupe">A little more city.</Text></View>
+      <VeeMark size={28.9} color={colors['ribbon-glyph']} />
+      <View className="min-w-0 flex-1"><Text numberOfLines={1} className="font-fraunces text-on-ribbon" style={{fontSize:15.3,lineHeight:18}}>Your evening, with Vee</Text>
+        <Text className="mt-0.5 font-dm text-fine text-on-ribbon-muted">A little more city.</Text></View>
     </View>
-    <View className="items-center justify-center" style={{width:44}}><Glyph name="arrow" size={16} color={colors['surface-accent']} /></View>
+    <View className="items-center justify-center" style={{width:44}}><Glyph name="arrow" size={16} color={colors['ribbon-glyph']} /></View>
   </TouchableOpacity>;
 }
 

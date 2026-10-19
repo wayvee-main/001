@@ -37,8 +37,9 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   edge, level-1 elevation and serif labels. Glyphs use the common orange on
   subtle `home-tile-well` fills; counts and labels retain the normal theme ink.
   In light mode, Late bites and Open late share search's off-white fill;
-  Link your stay shares the evening ribbon's darker linen fill. Dark-mode chips
-  retain the Oyster paper/charcoal fills.
+  dark mode retains their Oyster charcoal fill. Link your stay shares the
+  evening ribbon's burgundy fill and warm light ink in both themes.
+  Home search says “Search the city,” with the selected city subtly below it.
   Chips and buttons share elevation and `edge-faint` borders. Selected choices
   use `selected-surface` / `on-selected`; primary actions use `accent-fill` /
   `on-accent`. Never hardcode white on an accent fill.
@@ -47,9 +48,10 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   text at `#963D24` / `#F0835C`. Legacy category and Vee tints follow Oyster
   surfaces and orange accents. Keep the original gradient Vee mark and the
   original page gradients intact; explicit error states retain their red.
-- “Your evening, with Vee” uses darker linen `#E2D0BC` in light mode and the
-  Oyster brown `#3B302C` in dark mode. It has a 44px arrow stub, a faint dotted
-  vertical perforation, two 4.5px edge notches, orange `surface-accent` glyphs,
+- “Your evening, with Vee” and Link your stay use the approved burgundy
+  `#280003` in both themes, with warm light `on-ribbon` / `on-ribbon-muted`
+  lettering and coral `ribbon-glyph` icons. The ribbon has a 44px arrow stub,
+  a faint dotted vertical perforation, two 4.5px edge notches,
   a faint edge and 13px radius. The notches are genuinely transparent so the
   page wash remains visible through them. Keep its compact 61.2px minimum height.
   Home dividers stay faint.
