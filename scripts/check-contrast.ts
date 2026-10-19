@@ -90,7 +90,9 @@ const PAIRS: Pair[] = [
   { name: 'fg on home-tile', fg: role('fg'), bg: role('home-tile'), min: AA_TEXT },
   { name: 'fg-muted on home-tile', fg: role('fg-muted'), bg: role('home-tile'), min: AA_TEXT },
   { name: 'home-tile-glyph on home-tile-well', fg: role('home-tile-glyph'), bg: role('home-tile-well'), min: AA_LARGE },
-  { name: 'active navigation glyph on surface-raised', fg: role('accent-fill'), bg: role('surface-raised'), min: AA_LARGE },
+  { name: 'active navigation glyph on surface-navigation', fg: role('accent-fill'), bg: role('surface-navigation'), min: AA_LARGE },
+  ...['surface-search', 'surface-navigation'].flatMap(surface => ['fg', 'fg-muted', 'fg-accent'].map(ink => ({ name: `${ink} on ${surface}`, fg: role(ink), bg: role(surface), min: AA_TEXT }))),
+  { name: 'surface-accent on ribbon (glyph)', fg: role('surface-accent'), bg: role('ribbon'), min: AA_LARGE },
   ...['fg', 'fg-muted', 'fg-accent'].map(ink => ({ name: `${ink} on surface-discovery`, fg: role(ink), bg: role('surface-discovery'), min: AA_TEXT })),
   { name: 'on-selected on selected-surface', fg: role('on-selected'), bg: role('selected-surface'), min: AA_TEXT },
   { name: 'selected-glyph on selected-surface', fg: role('selected-glyph'), bg: role('selected-surface'), min: AA_LARGE },
@@ -161,7 +163,7 @@ for (const theme of ['light', 'dark'] as Theme[]) {
   }
   for (const [surface, alpha, inks] of [
     ['surface-discovery', .66, ['fg', 'fg-muted']],
-    ['surface-raised', .97, ['fg', 'fg-muted', 'accent-fill']],
+    ['surface-navigation', .97, ['fg', 'fg-muted', 'accent-fill']],
   ] as const) {
     const backgrounds=samples.map(bg=>flatten(withAlpha(ROLES[surface][theme],alpha),bg));
     for (const ink of inks) {

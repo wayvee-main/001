@@ -15,7 +15,7 @@ export type CountTile = {
   tint: keyof ThemeColors;
   ink: keyof ThemeColors;
   glyph: GlyphName;
-  /** Retained for callers; the count grid uses solid sage rather than art. */
+  /** Retained for callers; the count grid uses the shared Oyster material. */
   image?: string;
   onPress: () => void;
 };

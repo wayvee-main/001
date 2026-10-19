@@ -1009,12 +1009,13 @@ function SearchOverlay() {
         opacity: anim,
       }}>
       <View className="flex-row items-center gap-x-2.5">
-        <View className="flex-1 flex-row items-center gap-x-2.5 rounded-full border border-edge-faint bg-blush px-4 py-1">
+        <View className="flex-1 flex-row items-center gap-x-2.5 rounded-full border border-edge-faint bg-surface-search px-4 py-1">
           <SearchIcon size={15} />
           <TextInput
             autoFocus
             value={query}
             onChangeText={setQuery}
+            accessibilityLabel="Search Wayvee"
             placeholder="Places, dishes, shows…"
             placeholderTextColor={colors.taupe}
             returnKeyType="search"

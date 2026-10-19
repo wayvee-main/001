@@ -123,7 +123,7 @@ export default function DiscoverScreen() {
         <VeeMark size={28} />
       </TouchableOpacity>
     </View>
-    <View className="flex-row items-center gap-x-2 rounded-full border border-control-edge bg-surface-discovery px-3">
+    <View className="flex-row items-center gap-x-2 rounded-full border border-control-edge bg-surface-search px-3">
       <Glyph name="search" size={17} color={colors['fg-muted']} /><TextInput accessibilityLabel="Search Discover" value={query} onChangeText={setQuery}
         placeholder="A place, artist, or good idea" placeholderTextColor={colors['fg-muted']} className="min-w-0 flex-1 py-3 font-dm text-ink" style={{fontSize:16,lineHeight:22.4}} />
       {query?<TouchableOpacity accessibilityRole="button" accessibilityLabel="Clear search" hitSlop={10} onPress={()=>setQuery('')}><Glyph name="close" size={15} color={colors['fg-muted']} /></TouchableOpacity>:null}

@@ -377,11 +377,12 @@ export default function FeaturedDirectoryScreen() {
         <FactStrip facts={showHub ? hubFacts : pageFacts} pullUp />
 
         <View className="gap-y-2.5">
-          <View className="flex-row items-center gap-x-2.5 rounded-full border border-edge-faint bg-shell px-3.5 py-0.5">
+          <View className="flex-row items-center gap-x-2.5 rounded-full border border-edge-faint bg-surface-search px-3.5 py-0.5">
             <SearchIcon size={15} />
             <TextInput
               value={query}
               onChangeText={setQuery}
+              accessibilityLabel="Search places"
               placeholder="Dish, cuisine, or place"
               placeholderTextColor={colors.taupe}
               returnKeyType="search"

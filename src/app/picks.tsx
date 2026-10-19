@@ -186,11 +186,12 @@ export default function PicksScreen() {
 
         {hasAnyPicks ? (
           <>
-            <View className="flex-row items-center gap-x-2.5 rounded-card border border-edge-faint bg-shell px-4 py-2.5 shadow-soft-light dark:shadow-soft-dark">
+            <View className="flex-row items-center gap-x-2.5 rounded-card border border-edge-faint bg-surface-search px-4 py-2.5 shadow-soft-light dark:shadow-soft-dark">
               <SearchIcon size={15} />
               <TextInput
                 value={query}
                 onChangeText={setQuery}
+                accessibilityLabel="Search picks"
                 placeholder="Search picks"
                 placeholderTextColor={colors.taupe}
                 className="min-w-0 flex-1 font-dm text-[13px] text-ink"
