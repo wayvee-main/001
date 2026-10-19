@@ -36,7 +36,9 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   All four tiles share off-white `#FFFCF8` / charcoal `#302A2F`, a faint 1px
   edge, level-1 elevation and serif labels. Glyphs use the common orange on
   subtle `home-tile-well` fills; counts and labels retain the normal theme ink.
-  Home search and the stay chip use the same off-white surface in light mode.
+  In light mode, Late bites and Open late share search's off-white fill;
+  Link your stay shares the evening ribbon's darker linen fill. Dark-mode chips
+  retain the Oyster paper/charcoal fills.
   Chips and buttons share elevation and `edge-faint` borders. Selected choices
   use `selected-surface` / `on-selected`; primary actions use `accent-fill` /
   `on-accent`. Never hardcode white on an accent fill.
@@ -45,15 +47,22 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   text at `#963D24` / `#F0835C`. Legacy category and Vee tints follow Oyster
   surfaces and orange accents. Keep the original gradient Vee mark and the
   original page gradients intact; explicit error states retain their red.
-- “Your evening, with Vee” uses the Oyster linen `#EDE0D2` / brown `#3B302C`
-  ribbon with orange
-  `surface-accent` glyphs, a faint edge and 13px radius. Home dividers stay faint.
+- “Your evening, with Vee” uses darker linen `#E2D0BC` in light mode and the
+  Oyster brown `#3B302C` in dark mode. It has a 44px arrow stub, a faint dotted
+  vertical perforation, two 4.5px edge notches, orange `surface-accent` glyphs,
+  a faint edge and 13px radius. The notches are genuinely transparent so the
+  page wash remains visible through them. Keep its compact 61.2px minimum height.
+  Home dividers stay faint.
 - For you → Nearest is **three vertical rows**, with **See all** opening `/nearest`.
   The default pool targets 24 real results (at least 20 where the catalog has
   them) within five miles of the selected city/ZIP trip anchor. GPS reorders
   that same pool. It must populate without GPS. Never use Oakland's curated
   distances for another city; backend city anchors and local places vary.
   A tilde identifies a curated distance estimate.
+  Keep the nearest ordering independent of photo availability. Verified venue
+  photos supplement missing source fields by exact place ID and survive live
+  and cached hydration; supplied catalog photos take priority. Missing or failed
+  nearest photos use a clear coffee/food glyph, without unrelated stock imagery.
 - The second tab is **Discover** in both tab bars. Its glyph pills are one
   horizontal row, without hard borders, with subtle elevation and an extra
   5px gap (11.44px total).
@@ -111,8 +120,10 @@ inline palette and Tailwind tokens together with `npm run tokens`.
 - Discover keeps category pills, full search, pull-to-refresh, city-aware data,
   See all actions, the original Vee logo and existing detail routes. Its intro
   reads “One good thing can lead to another.” The header shows the selected city.
-- Home greets with “Shall we wander?”; the city appears only in its location
-  and weather header, without repetition in the greeting.
+- Home opens with the original Wayvee mark and Fraunces wordmark at top left,
+  live weather beneath, and notification/profile actions at right. It greets
+  with “Shall we wander?”. Show only the selected city name as a quiet second
+  line inside search; omit the old city/state header and greeting repetition.
 - Profile opens without a page heading, with a notification button, a 44px
   avatar and a compact serif greeting above the city name. Guest sign-in is a
   quiet inline row; three live counts use faint dividers without card fills.

@@ -1,13 +1,13 @@
 import { useRouter } from 'expo-router';
+import { useColorScheme } from 'nativewind';
 import { useMemo, useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
-import { HomeHeader } from '@/components/home-top';
+import { HomeEveningRibbon, HomeHeader } from '@/components/home-top';
 import { AroundYou, RailCard, type CountTile } from '@/components/home-tiles';
 import { HRow, Screen, ScreenScroll } from '@/components/layout';
 import { Glyph } from '@/components/glyph';
 import { Photo } from '@/components/photo';
 import { SectionHeading } from '@/components/section-heading';
-import { VeeMark } from '@/components/vee-mark';
 import { useActiveCityName } from '@/lib/city';
 import { useNow } from '@/lib/clock';
 import { CRAWLS, CURATED_COLLECTION_ORDER, CURATED_COLLECTIONS, NIGHTLIFE_SPOTS, activeCollectionItems, currentEventListings } from '@/lib/data';
@@ -24,6 +24,7 @@ export default function HomeScreen() {
   const router = useRouter(), colors = useThemeColors(), s = useScoper();
   const city = useActiveCityName(), nearest = useNearestPool();
   const surface = useRaisedSurface(1), control = useControlSurface();
+  const {colorScheme}=useColorScheme(),light=colorScheme==='light';
   const now = useNow();
   const [refreshing, setRefreshing] = useState(false);
   const collections = useMemo(() => CURATED_COLLECTION_ORDER.map(id => CURATED_COLLECTIONS[id]).filter(x => activeCollectionItems(x,now).length), [now]);
@@ -39,17 +40,20 @@ export default function HomeScreen() {
     { key:'events', count:String(currentEventListings(now).length), glyph:'ticket', label:'Events', hint:'Find your next show', tint:'tile-events', ink:'fg', onPress:()=>router.push('/discover?mode=Events') },
   ];
   return <Screen><ScreenScroll gap={18} clearsTabBar refreshing={refreshing} onRefresh={onRefresh}>
-    <HomeHeader locationLabel={`${city}, CA`} hasReminders={activeReminders(s.plans,s.stay).length>0}
+    <HomeHeader hasReminders={activeReminders(s.plans,s.stay).length>0}
       onNotifications={()=>router.push('/notifications')} onProfile={()=>router.push('/profile')} />
     <View>
       <Text className="font-fraunces text-ink" style={{fontSize:25,lineHeight:29,letterSpacing:-.8}}>Shall we wander?</Text>
       <Text className="mt-1 font-dm text-label text-taupe">A good evening is closer than you think.</Text>
     </View>
-    <TouchableOpacity accessibilityRole="button" accessibilityLabel="Search places, dishes and shows" onPress={()=>s.openSheet('search')}
+    <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Search places, dishes and shows in ${city}`} onPress={()=>s.openSheet('search')}
       style={[control,{minHeight:52,backgroundColor:colors['surface-search']}]}
       className="flex-row items-center gap-x-2.5 rounded-full bg-surface-search pl-3.5 pr-[7px] py-[7px]">
       <Glyph name="search" size={17} color={colors['fg-muted']} />
-      <Text numberOfLines={1} className="min-w-0 flex-1 font-dm text-label text-taupe">Places, dishes, or a little inspiration</Text>
+      <View className="min-w-0 flex-1">
+        <Text numberOfLines={1} className="font-dm text-label text-taupe">Places, dishes, or a little inspiration</Text>
+        <Text testID="home-search-city" numberOfLines={1} className="font-dm text-fine text-taupe">{city}</Text>
+      </View>
       <View className="h-[37px] w-[37px] items-center justify-center rounded-full bg-accent-fill">
         <Glyph name="arrow" size={17} color={colors['on-accent']} />
       </View>
@@ -58,18 +62,12 @@ export default function HomeScreen() {
       {[{name:s.stay?'Update your stay':'Link your stay',glyph:'briefcase',press:()=>s.openStaySheet()},
         {name:'Late bites',glyph:'food',press:()=>router.push('/featured?q=late%20bites')},
         {name:'Open late',glyph:'clock',press:()=>router.push('/featured?q=open%20late')}].map(x=><TouchableOpacity key={x.name} accessibilityRole="button" onPress={x.press}
-          style={x.glyph==='briefcase'?{backgroundColor:colors['tile-eat'],borderColor:colors['control-edge'],borderWidth:1}:control}
+          style={x.glyph==='briefcase'?{backgroundColor:light?colors.ribbon:colors['tile-eat'],borderColor:colors['control-edge'],borderWidth:1}:{...control,backgroundColor:light?colors['surface-search']:colors['surface-raised']}}
           className="flex-row items-center gap-x-1.5 rounded-full px-2.5 py-[7px]" hitSlop={{top:5,bottom:5}}>
           <Glyph name={x.glyph} size={13} color={colors['fg-muted']} /><Text className="font-dm text-fine text-ink">{x.name}</Text>
         </TouchableOpacity>)}
     </View>
-    <TouchableOpacity accessibilityRole="button" accessibilityLabel="Open your evening with Vee" onPress={()=>router.push('/create')}
-      style={[surface,{backgroundColor:colors.ribbon,minHeight:61.2,paddingHorizontal:11,paddingVertical:8.4,borderRadius:13,flexDirection:'row',alignItems:'center',gap:7}]}>
-      <VeeMark size={28.9} color={colors['surface-accent']} />
-      <View className="min-w-0 flex-1"><Text className="font-fraunces text-ink" style={{fontSize:15.3,lineHeight:18}}>Your evening, with Vee</Text>
-        <Text className="mt-0.5 font-dm text-fine text-taupe">A little more city.</Text></View>
-      <Glyph name="arrow" size={16} color={colors['surface-accent']} />
-    </TouchableOpacity>
+    <HomeEveningRibbon onPress={()=>router.push('/create')} />
     <View className="gap-y-3 border-t border-edge-soft pt-4">
       <SectionHeading title="Around you" /><AroundYou tiles={tiles} />
     </View>
@@ -82,7 +80,7 @@ export default function HomeScreen() {
         {nearest.slice(0,3).map(x=><TouchableOpacity key={x.href} accessibilityRole="button" accessibilityLabel={`View ${x.name}`} onPress={()=>router.push(x.href)}
           style={[surface,{minHeight:83}]}
           className="flex-row items-center gap-x-3 rounded-setting bg-surface-raised px-[11px] py-[11px]">
-          <Photo uri={x.image} radius={11} style={{width:58,height:58}} />
+          <Photo uri={x.image} fallbackGlyph={x.thumbnailGlyph} fallbackLabel={`Photo unavailable for ${x.name}`} radius={11} style={{width:58,height:58}} />
           <View className="min-w-0 flex-1"><Text numberOfLines={2} className="font-dm-medium text-card-name text-ink">{x.name}</Text>
             <Text className="mt-1 font-dm text-fine text-taupe">{[x.cuisine,x.price,x.distanceLabel].filter(Boolean).join(' · ')}</Text></View>
           <Glyph name="chevron" size={14} color={colors['surface-accent']} />

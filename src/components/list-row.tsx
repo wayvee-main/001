@@ -16,6 +16,7 @@ import { useThemeColors } from '@/lib/theme';
  * the card edge and had its corners sliced off by the card's own radius. */
 export function ListRow({
   image,
+  fallbackGlyph,
   title,
   badge,
   badgeTone = 'sage',
@@ -26,6 +27,7 @@ export function ListRow({
   onPress,
 }: {
   image?: string;
+  fallbackGlyph?: string;
   title: string;
   badge?: string;
   badgeTone?: 'sage' | 'accent';
@@ -49,7 +51,7 @@ export function ListRow({
       activeOpacity={0.72}
       onPress={onPress}
       className={`flex-row items-center gap-x-3 px-3.5 py-3 ${divider ? 'border-b border-edge-faint' : ''}`}>
-      <Photo uri={image} radius={14} style={{ width: 60, height: 60, ...elevation }} />
+      <Photo uri={image} fallbackGlyph={fallbackGlyph} fallbackLabel={`Photo unavailable for ${title}`} radius={14} style={{ width: 60, height: 60, ...elevation }} />
       <View className="min-w-0 flex-1">
         <Text numberOfLines={1} ellipsizeMode="tail" className="font-dm-bold text-[14px] text-ink">
           {title}

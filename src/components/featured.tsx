@@ -13,6 +13,7 @@ export { FactStrip, type HubFact } from '@/components/fact-strip';
 export function FoodHubRow({
   name,
   image,
+  fallbackGlyph,
   cue,
   meta,
   tasteTag,
@@ -21,13 +22,14 @@ export function FoodHubRow({
 }: {
   name: string;
   image?: string;
+  fallbackGlyph?: string;
   cue?: string;
   meta?: string;
   tasteTag?: string;
   last?: boolean;
   onPress: () => void;
 }) {
-  return <ListRow image={image} title={name} badge={cue} meta={meta} tasteTag={tasteTag} divider={!last} onPress={onPress} />;
+  return <ListRow image={image} fallbackGlyph={fallbackGlyph} title={name} badge={cue} meta={meta} tasteTag={tasteTag} divider={!last} onPress={onPress} />;
 }
 
 /** A pick-one control wearing Home's "Link your stay" chip: marigold tint under

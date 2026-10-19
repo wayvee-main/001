@@ -1,7 +1,10 @@
-import { type ReactNode } from 'react';
-import { ScrollView, Text, TouchableOpacity, View, type ViewStyle } from 'react-native';
+import { useId, useState, type ReactNode } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, type ViewStyle } from 'react-native';
+import Svg, { Circle, Defs, Line, Mask, Rect } from 'react-native-svg';
 
 import { Glyph } from '@/components/glyph';
+import { VeeMark } from '@/components/vee-mark';
+import { WayveeWordmark } from '@/components/wayvee-wordmark';
 import type { HomeSuggestion } from '@/lib/daypart';
 import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
@@ -33,23 +36,12 @@ export function HomeVeePanel({ children }: { children: ReactNode }) {
   return <View className="gap-y-3">{children}</View>;
 }
 
-/** Where you are, what it is doing outside, and app-level actions.
- *
- * The mark stands alone here without the word beside it. At this size the
- * lockup was mostly lettering, and the app's name is not what a guest opening
- * Home needs to read — where they are and what the weather is doing are.
- *
- * Weather is read here rather than passed in, so both screens that mount this
- * header get it without threading a prop through either. It renders only when
- * a period actually covers now: weatherAt returns null otherwise, and a stale
- * reading is worse than none (see lib/weather.ts). */
+/** Brand and live weather above Home. The selected city lives inside search. */
 export function HomeHeader({
-  locationLabel,
   hasReminders,
   onNotifications,
   onProfile,
 }: {
-  locationLabel: string;
   hasReminders: boolean;
   onNotifications: () => void;
   onProfile: () => void;
@@ -57,14 +49,9 @@ export function HomeHeader({
   const colors = useThemeColors(), control = useControlSurface();
   const weather = useWeatherNow();
   return (
-    <View style={{ paddingTop: 10 }} className="flex-row items-start justify-between gap-x-3">
+    <View testID="home-header" style={{ paddingTop: 10 }} className="flex-row items-start justify-between gap-x-3">
       <View className="min-w-0 flex-1">
-        <Text numberOfLines={1} className="font-dm text-body text-taupe">
-          {locationLabel}
-        </Text>
-        {/* Its own line rather than appended to the location: at 360dp the two
-            together overflow once the forecast adds a rain chance, and a single
-            clipped line would drop the weather entirely. */}
+        <WayveeWordmark size={26} />
         {weather ? (
           <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">
             {weatherLine(weather)}
@@ -105,6 +92,35 @@ export function HomeHeader({
   );
 }
 
+/** A compact ticket with a tear-off stub. Masked notches reveal the page wash
+ * itself, so they stay correct while scrolling or switching appearance. */
+export function HomeEveningRibbon({onPress}:{onPress:()=>void}) {
+  const colors=useThemeColors(),surface=useRaisedSurface(1);
+  const [size,setSize]=useState({width:0,height:0});
+  const maskId='homeTicket'+useId().replace(/[^a-z0-9]/gi,'');
+  const seam=size.width-44;
+  return <TouchableOpacity accessibilityRole="button" accessibilityLabel="Open your evening with Vee" activeOpacity={.78}
+    onPress={onPress} testID="home-evening-ribbon"
+    onLayout={({nativeEvent:{layout}})=>setSize(current=>current.width===layout.width&&current.height===layout.height?current:{width:layout.width,height:layout.height})}
+    style={[surface,{backgroundColor:'transparent',borderWidth:0,minHeight:61.2,borderRadius:13,flexDirection:'row',alignItems:'stretch'}]}>
+    {size.width>0&&size.height>0?<Svg testID="home-ticket-perforation" pointerEvents="none" accessible={false}
+      width="100%" height="100%" viewBox={`0 0 ${size.width} ${size.height}`} style={StyleSheet.absoluteFill}>
+      <Defs><Mask id={maskId} maskUnits="userSpaceOnUse" x={0} y={0} width={size.width} height={size.height}>
+        <Rect width={size.width} height={size.height} fill="white" />
+        <Circle cx={seam} cy={0} r={4.5} fill="black" /><Circle cx={seam} cy={size.height} r={4.5} fill="black" />
+      </Mask></Defs>
+      <Rect x={.5} y={.5} width={size.width-1} height={size.height-1} rx={12.5} fill={colors.ribbon} stroke={colors['edge-faint']} mask={`url(#${maskId})`} />
+      <Line x1={seam} y1={9} x2={seam} y2={size.height-9} stroke={colors['edge']} strokeWidth={1} strokeDasharray="2 3" strokeLinecap="round" />
+    </Svg>:null}
+    <View className="min-w-0 flex-1 flex-row items-center" style={{paddingHorizontal:11,paddingVertical:8.4,gap:7}}>
+      <VeeMark size={28.9} color={colors['surface-accent']} />
+      <View className="min-w-0 flex-1"><Text numberOfLines={1} className="font-fraunces text-ink" style={{fontSize:15.3,lineHeight:18}}>Your evening, with Vee</Text>
+        <Text className="mt-0.5 font-dm text-fine text-taupe">A little more city.</Text></View>
+    </View>
+    <View className="items-center justify-center" style={{width:44}}><Glyph name="arrow" size={16} color={colors['surface-accent']} /></View>
+  </TouchableOpacity>;
+}
+
 /** Vee's own block: one question, a stable launcher, and time-aware discovery
  * suggestions. The launcher deliberately does not cycle: changing copy under
  * a guest's finger made the primary action feel unsettled. */
@@ -118,7 +134,7 @@ export function VeeHero({
   onAsk,
   embedded = false,
 }: {
-  /** Omitted on Home, which names the city in its own header and opens
+  /** Omitted on Home, which names the city in search and opens
    * straight into the ask bar. */
   title?: string;
   suggestions: HomeSuggestion[];

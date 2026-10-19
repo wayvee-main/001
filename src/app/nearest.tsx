@@ -28,6 +28,7 @@ export default function NearestScreen() {
                 key={entry.href}
                 name={entry.name}
                 image={entry.image}
+                fallbackGlyph={entry.thumbnailGlyph}
                 meta={[entry.cuisine, entry.price, entry.distanceLabel].filter(Boolean).join(' · ')}
                 last={index === ranked.length - 1}
                 onPress={() => router.push(entry.href)}

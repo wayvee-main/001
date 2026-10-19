@@ -11,6 +11,7 @@ import { useCallback, useSyncExternalStore } from 'react';
 
 import { activeCity, BUNDLE_CITY, cityCacheKey } from '@/lib/city';
 import { NEARBY_OAKLAND } from '@/lib/nearby-oakland';
+import { imageForPlace } from '@/lib/place-images';
 import type { GeoPoint } from '@/lib/geo';
 import { getStoredItem, setStoredItem } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
@@ -61,7 +62,7 @@ function rowToPlace(row: PlaceRow): Place {
     lon: row.lon,
     website: row.website,
     phone: row.phone,
-    image: row.image,
+    image: imageForPlace(row) ?? null,
     // A row synced before the opening_hours column existed simply has none.
     openingHours: row.opening_hours ?? null,
     confidence: row.confidence === 'cross_confirmed' || row.confidence === 'overture_only' || row.confidence === 'osm_only'
@@ -94,7 +95,7 @@ export function placeMetaLine(place: Place): string {
   return [place.cuisine, placeCategoryLabel(place)].filter(Boolean).join(' · ');
 }
 
-const PLACES: Record<string, Place> = Object.fromEntries(NEARBY_OAKLAND.map((place) => [place.id, place]));
+const PLACES: Record<string, Place> = Object.fromEntries(NEARBY_OAKLAND.map((place) => [place.id, {...place,image:imageForPlace(place)??null}]));
 let snapshotCity = BUNDLE_CITY;
 
 type Listener = () => void;
@@ -258,7 +259,7 @@ async function loadPlacesFromCache(): Promise<void> {
       if (!place?.id || !place.name || place.lat == null || place.lon == null) continue;
       // A cache written before opening_hours existed has no such field; normalize
       // it to null so a stale cache reads as "hours unknown", not as undefined.
-      PLACES[place.id] = { ...place, openingHours: place.openingHours ?? null };
+      PLACES[place.id] = { ...place, image: imageForPlace(place) ?? null, openingHours: place.openingHours ?? null };
     }
     notify();
   } catch {
@@ -281,7 +282,7 @@ export async function hydratePlacesFromBackend(force = false): Promise<boolean> 
     // so the two are never on screen together.
     for (const id of Object.keys(PLACES)) delete PLACES[id];
     snapshotCity = city;
-    if (city === BUNDLE_CITY) for (const place of NEARBY_OAKLAND) PLACES[place.id] = place;
+    if (city === BUNDLE_CITY) for (const place of NEARBY_OAKLAND) PLACES[place.id] = {...place,image:imageForPlace(place)??null};
     notify();
   }
   if (!supabase) {

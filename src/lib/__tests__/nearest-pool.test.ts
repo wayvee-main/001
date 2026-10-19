@@ -10,6 +10,8 @@ describe('the shared Home / Nearest pool', () => {
     expect(pool.every(x=>x.miles<=5)).toBe(true);
     expect(pool.filter(x=>!x.estimated).length).toBeGreaterThanOrEqual(20);
     expect(pool[0].miles).toBeLessThanOrEqual(pool.at(-1)!.miles);
+    expect(pool.slice(0,3).map(x=>x.name)).toEqual(['Broken Dreams','Highwire Coffee Roasters','Golden Lotus Vegetarian']);
+    expect(pool.slice(0,3).every(x=>Boolean(x.image))).toBe(true);
   });
   it('uses GPS to reorder the same anchor-defined pool, excluding distant candidates', () => {
     const restaurants=Object.values(RESTAURANTS).slice(0,25);

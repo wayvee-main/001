@@ -1,8 +1,9 @@
 import { Image } from 'expo-image';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { Stripes } from '@/components/ui';
+import { Glyph, type GlyphName } from '@/components/glyph';
 import { useThemeColors } from '@/lib/theme';
 
 /**
@@ -14,6 +15,8 @@ export function Photo({
   radius = 9,
   fit = 'cover',
   stripedPlaceholder = true,
+  fallbackGlyph,
+  fallbackLabel = 'Photo unavailable',
   style,
   children,
 }: {
@@ -21,11 +24,19 @@ export function Photo({
   radius?: number;
   fit?: 'cover' | 'contain';
   stripedPlaceholder?: boolean;
+  /** Explicit non-photo placeholder for listings whose source has no image. */
+  fallbackGlyph?: GlyphName;
+  fallbackLabel?: string;
   style?: StyleProp<ViewStyle>;
   children?: ReactNode;
 }) {
   const colors = useThemeColors();
-  if (!uri) {
+  const [failedUri,setFailedUri]=useState<string|null>(null);
+  if (!uri || failedUri===uri) {
+    if(fallbackGlyph)return <View accessible accessibilityRole="image" accessibilityLabel={fallbackLabel} testID="place-photo-fallback"
+      style={[{borderRadius:radius,overflow:'hidden',backgroundColor:colors['surface-soft'],alignItems:'center',justifyContent:'center'},style]}>
+      <Glyph name={fallbackGlyph} size={23} color={colors['fg-muted']} />{children}
+    </View>;
     if (!stripedPlaceholder) {
       return <View style={[{ borderRadius: radius, overflow: 'hidden', backgroundColor: colors.shell }, style]}>{children}</View>;
     }
@@ -46,6 +57,7 @@ export function Photo({
         contentFit={fit}
         transition={200}
         cachePolicy="memory-disk"
+        onError={fallbackGlyph?()=>setFailedUri(uri):undefined}
       />
       {children}
     </View>

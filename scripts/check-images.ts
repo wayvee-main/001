@@ -1,6 +1,7 @@
 // Image liveness check: verifies every image URL in the catalog actually serves
 // an image. Network-bound — run separately from audit:data (npm run audit:images).
 import { EVENTS, NIGHTLIFE_SPOTS, RESTAURANTS, VENUES } from '../src/lib/data';
+import { VERIFIED_PLACE_PHOTOS } from '../src/lib/place-images';
 
 interface Target {
   owner: string;
@@ -8,6 +9,7 @@ interface Target {
 }
 
 const targets: Target[] = [];
+for (const [id,photo] of Object.entries(VERIFIED_PLACE_PHOTOS)) targets.push({owner:`place ${id}`,url:photo.image});
 for (const r of Object.values(RESTAURANTS)) {
   targets.push({ owner: `restaurant ${r.id} image`, url: r.image });
   if (r.dishImage && r.dishImage !== r.image) targets.push({ owner: `restaurant ${r.id} dishImage`, url: r.dishImage });

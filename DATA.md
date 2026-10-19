@@ -49,6 +49,12 @@ populate the backend immediately, ahead of the next deploy.
 ## Image policy
 
 Photos must come from the establishment itself (its site or official listing).
+Nearby place photos are supplemented in `src/lib/place-images.ts` using exact
+map IDs and venue-owned source pages. Supplied photos take precedence; null
+live/cache fields retain verified enrichment. Home and Nearest keep their real
+distance order and use a non-photo category glyph when a venue image is absent
+or fails to load.
+
 **No generic or stock stand-ins.** A menu item without a native photo renders
 the app's neutral striped placeholder until one is sourced; the audit prints
 running coverage (`native menu photos: N/M`). The same rule applies to venue,

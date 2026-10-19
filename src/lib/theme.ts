@@ -20,7 +20,7 @@ const PALETTE = {
     "fg-muted": "#605463",
     "card-ink": "#2D2926",
     "card-muted": "#645D56",
-    ribbon: "#EDE0D2",
+    ribbon: "#E2D0BC",
     "surface-accent": "#963D24",
     "ribbon-edge": "#E2DBD6",
     "control-edge": "#E2DBD6",

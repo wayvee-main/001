@@ -1,6 +1,7 @@
 import type { Restaurant } from '@/lib/data';
 import { formatMiles, milesBetween, type GeoPoint } from '@/lib/geo';
 import type { Place } from '@/lib/places';
+import { imageForPlace } from '@/lib/place-images';
 
 export interface NearestPick {
   id: string;
@@ -8,6 +9,7 @@ export interface NearestPick {
   cuisine: string;
   price?: string;
   image?: string;
+  thumbnailGlyph: 'coffee' | 'food';
   href: `/restaurant/${string}` | `/place/${string}`;
   miles: number;
   estimated: boolean;
@@ -38,7 +40,7 @@ export function buildNearestPool({ restaurants, places, center, device, coordsFo
     if (centerMiles == null || centerMiles > 5) continue;
     seen.add(keyFor(restaurant.name));
     candidates.push({ id: restaurant.id, name: restaurant.name, cuisine: restaurant.cuisine,
-      price: restaurant.price, image: restaurant.image, href: `/restaurant/${restaurant.id}`,
+      price: restaurant.price, image: restaurant.image, thumbnailGlyph:'food', href: `/restaurant/${restaurant.id}`,
       miles: centerMiles, centerMiles, point, estimated: !point, distanceLabel: restaurant.distanceLabel });
   }
   for (const place of places) {
@@ -48,7 +50,7 @@ export function buildNearestPool({ restaurants, places, center, device, coordsFo
     if (centerMiles > 5) continue;
     seen.add(keyFor(place.name));
     candidates.push({ id: place.id, name: place.name, cuisine: place.cuisine || place.category,
-      image: place.image || undefined, href: `/place/${place.id}`, miles: centerMiles,
+      image: imageForPlace(place), thumbnailGlyph:place.category==='cafe'?'coffee':'food', href: `/place/${place.id}`, miles: centerMiles,
       centerMiles, point, estimated: false, distanceLabel: formatMiles(centerMiles) });
   }
   const pool = candidates.sort((a,b) => a.centerMiles-b.centerMiles || a.name.localeCompare(b.name)).slice(0,limit);
