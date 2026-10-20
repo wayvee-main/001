@@ -48,6 +48,13 @@ populate the backend immediately, ahead of the next deploy.
 
 ## Image policy
 
+Home's four **Window Cards** bundle venue-owned category photos for Oakland
+from `assets/images/home-windows/README.md`. They retain the complete source
+frame and use contain fit, avoiding arbitrary crops and remote-load failures.
+They represent categories rather than current dishes, artists or availability.
+Oakland's photos are not reused for another city. A missing or failed photo
+keeps its category glyph while the real inventory count and action remain.
+
 Photos must come from the establishment itself (its site or official listing).
 Nearby place photos are supplemented in `src/lib/place-images.ts` using exact
 map IDs and venue-owned source pages. Supplied photos take precedence; null

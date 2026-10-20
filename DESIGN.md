@@ -34,8 +34,16 @@ inline palette and Tailwind tokens together with `npm run tokens`.
 - Home keeps four tiles, ordered Eat, Bars, Routes, Events. Counts describe
   actual inventory, never unsupported opening status.
   All four tiles share off-white `#FFFCF8` / charcoal `#302A2F`, a faint 1px
-  edge, level-1 elevation and serif labels. Glyphs use the common orange on
-  subtle `home-tile-well` fills; counts and labels retain the normal theme ink.
+  edge, level-1 elevation and serif labels. The approved **Window Cards** use
+  9px padding, a 70px-high photo window with 13px corners, and a 146px minimum
+  height. Counts sit beside the names; supporting captions use one line.
+  Photos preserve the complete frame with contain fit, without zooming,
+  stretching or cropping subjects. A theme-colored fade covers only the lower
+  18px, rising from transparent to 5.9% opacity; the card itself stays flat.
+  The bundled Oakland set uses complete venue-owned table/interior/landmark
+  compositions, not tight dish details or expiring artist posters. It is not
+  reused for another city. Missing/failed photos show the category glyph in
+  the common orange; counts, labels and actions remain available.
   In light mode, quick venue chips share search's off-white fill;
   dark mode retains their Oyster charcoal fill. Link your stay and the evening
   ribbon share Collections' `surface-raised` fill, normal theme ink and faint edge.
@@ -135,8 +143,8 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   reads “One good thing can lead to another.” The header shows the selected city.
 - Home opens with the original Wayvee mark and Fraunces wordmark at top left,
   live weather beneath, and notification/profile actions at right. It greets
-  with “Shall we wander?”. Show only the selected city name as a quiet second
-  line inside search; omit the old city/state header and greeting repetition.
+  with “Shall we wander?”. Search uses the compact city label specified above;
+  omit the old city/state header and greeting repetition.
 - Profile opens without a page heading, with a notification button, a 44px
   avatar and a compact serif greeting above the city name. Guest sign-in is a
   quiet inline row; three live counts use faint dividers without card fills.

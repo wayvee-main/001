@@ -18,6 +18,7 @@ import { useScoper } from '@/lib/store';
 import { useThemeColors } from '@/lib/theme';
 import { useNearestPool } from '@/lib/use-nearest-pool';
 import { useHomeQuickActions } from '@/lib/use-home-quick-actions';
+import { OAKLAND_HOME_TILE_PHOTOS } from '@/lib/home-tile-photos';
 import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
 import { hydrateWeatherFromBackend } from '@/lib/weather';
 
@@ -37,12 +38,17 @@ export default function HomeScreen() {
     try { await Promise.all([hydrateEventsFromBackend(true), hydratePlacesFromBackend(true), hydrateWeatherFromBackend(true), s.refreshLocation()]); }
     finally { setRefreshing(false); }
   };
-  const tiles: CountTile[] = [
+  const tilePhotos = citySlug === BUNDLE_CITY ? OAKLAND_HOME_TILE_PHOTOS : undefined;
+  const tileDefinitions: CountTile[] = [
     { key:'eat', count:String(nearest.length), glyph:'food', label:'Eat', hint:'Nearby places', tint:'tile-eat', ink:'fg', onPress:()=>router.push('/featured') },
     { key:'bars', count:String(NIGHTLIFE_SPOTS.length), glyph:'drink', label:'Bars', hint:'After dinner', tint:'tile-bars', ink:'fg', onPress:()=>router.push('/discover?mode=Nightlife') },
     { key:'routes', count:String(Object.keys(CRAWLS).length), glyph:'route', label:'Routes', hint:'A few good stops', tint:'tile-routes', ink:'fg', onPress:()=>router.push('/discover?mode=Routes') },
     { key:'events', count:String(currentEventListings(now).length), glyph:'ticket', label:'Events', hint:'Find your next show', tint:'tile-events', ink:'fg', onPress:()=>router.push('/discover?mode=Events') },
   ];
+  const tiles = tileDefinitions.map(tile => {
+    const photo = tilePhotos?.[tile.key as keyof typeof OAKLAND_HOME_TILE_PHOTOS];
+    return { ...tile, image: photo?.source, imageLabel: photo?.label, imageAspectRatio: photo?.aspectRatio };
+  });
   return <Screen><ScreenScroll gap={18} clearsTabBar refreshing={refreshing} onRefresh={onRefresh}>
     <HomeHeader hasReminders={activeReminders(s.plans,s.stay).length>0}
       onNotifications={()=>router.push('/notifications')} onProfile={()=>router.push('/profile')} />

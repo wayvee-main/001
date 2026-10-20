@@ -1,3 +1,6 @@
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Glyph, type GlyphName } from '@/components/glyph';
@@ -15,10 +18,58 @@ export type CountTile = {
   tint: keyof ThemeColors;
   ink: keyof ThemeColors;
   glyph: GlyphName;
-  /** Retained for callers; the count grid uses the shared Oyster material. */
-  image?: string;
+  /** Bundled, full-frame category photo, or a photo from the active catalog. */
+  image?: string | number;
+  imageLabel?: string;
+  imageAspectRatio?: number;
   onPress: () => void;
 };
+
+/** Preserve the complete photo instead of zooming into an arbitrary crop.
+ * A quiet theme-colored mat accommodates different source proportions. */
+function TileWindow({ tile }: { tile: CountTile }) {
+  const colors = useThemeColors();
+  const [failedImage, setFailedImage] = useState<string | number>();
+  const showImage = tile.image !== undefined && failedImage !== tile.image;
+  const paper = colors['home-tile'];
+  const ratio = tile.imageAspectRatio ?? 2;
+
+  return (
+    <View testID={`home-tile-window-${tile.key}`} style={styles.window}>
+      {showImage ? (
+        <View testID={`home-tile-photo-frame-${tile.key}`}
+          style={{ width: '100%', maxWidth: 70 * ratio, aspectRatio: ratio, borderRadius: 13, overflow: 'hidden' }}>
+        <Image
+          testID={`home-tile-image-${tile.key}`}
+          source={tile.image}
+          accessibilityLabel={tile.imageLabel}
+          accessible={false}
+          style={StyleSheet.absoluteFill}
+          contentFit="contain"
+          contentPosition="center"
+          cachePolicy="memory-disk"
+          transition={120}
+          recyclingKey={String(tile.image)}
+          onError={() => setFailedImage(tile.image)}
+        />
+        <LinearGradient
+          testID={`home-tile-fade-${tile.key}`}
+          pointerEvents="none"
+          accessible={false}
+          colors={[`${paper}00`, `${paper}0F`]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={styles.fade}
+        />
+        </View>
+      ) : (
+        <View testID={`home-tile-fallback-${tile.key}`} style={styles.fallback}>
+          <Glyph name={tile.glyph} size={25} color={colors['home-tile-glyph']} strokeWidth={1.7} />
+        </View>
+      )}
+    </View>
+  );
+}
 
 /** Home's "Around you" grid.
  *
@@ -46,21 +97,17 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
               activeOpacity={0.78}
               onPress={tile.onPress}
               style={[surface, { backgroundColor: colors['home-tile'] }]}
-              className="min-h-[100px] flex-1 rounded-panel px-3 pb-3 pt-3">
-              {/* Glyph and count read as one mark, so they sit together
-               * rather than at opposite corners of the tile. */}
-              <View className="flex-row items-center justify-between gap-x-2">
-                <View style={{ backgroundColor: colors['home-tile-well'] }} className="h-7 w-7 items-center justify-center rounded-full">
-                  <Glyph name={tile.glyph} size={16} color={colors['home-tile-glyph']} strokeWidth={1.9} />
-                </View>
+              className="min-h-[146px] min-w-0 flex-1 rounded-panel p-[9px]">
+              <TileWindow tile={tile} />
+              <View className="mt-1.5 flex-row items-baseline justify-between gap-x-1.5">
+                <Text numberOfLines={1} className="min-w-0 shrink font-fraunces text-[20px] leading-[24px] text-ink">{tile.label}</Text>
                 <Text
                   style={{ color: colors.fg, fontVariant: ['tabular-nums'] }}
-                  className="font-dm-medium text-[18px] leading-[22px]">
+                  className="shrink-0 font-dm text-[15px] leading-[20px]">
                   {tile.count}
                 </Text>
               </View>
-              <Text numberOfLines={1} className="mt-2 font-fraunces text-[20px] leading-[23px] text-ink">{tile.label}</Text>
-              <Text numberOfLines={2} className="mt-0.5 font-dm text-fine text-taupe">{tile.hint}</Text>
+              <Text numberOfLines={1} className="mt-0.5 font-dm text-[10px] leading-[14px] text-taupe">{tile.hint}</Text>
             </TouchableOpacity>
           ))}
           {/* An odd count would otherwise stretch the last tile to full width. */}
@@ -70,6 +117,12 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  window: { height: 70, width: '100%', borderRadius: 13, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
+  fallback: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  fade: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 18 },
+});
 
 /** The screen's second-level heading: a named group of sections. Sits a step
  * below the page title (19px) and well under the 26–28px heroes Home used to
