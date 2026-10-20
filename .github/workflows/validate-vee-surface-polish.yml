@@ -38,9 +38,11 @@ jobs:
       - run: npm run build:web
       - name: Install browser preview tools
         run: |
-          npm install --no-save --package-lock=false --ignore-scripts playwright
-          npx playwright install --with-deps chromium
+          npm install --prefix /tmp/wayvee-polish-tools --no-package-lock --ignore-scripts playwright
+          node /tmp/wayvee-polish-tools/node_modules/playwright/cli.js install --with-deps chromium
       - name: Check both themes and composer interactions
+        env:
+          NODE_PATH: /tmp/wayvee-polish-tools/node_modules
         run: node scripts/validate-vee-surface-polish.cjs
       - uses: actions/upload-artifact@v4
         if: always()
