@@ -174,107 +174,6 @@ async function main(){
   assert.ok(navigation.shadow.includes('24.2px'),'navigation elevation +10%');
   report.geometry.push({screen:'Navigation',theme,...navigation});
   await screenshot(page,'home',theme,true);
-  await tab(page,'Vee');
-  await page.getByText('Where to?',{exact:true}).waitFor();
-  await page.waitForTimeout(600);
-  const composer=page.getByTestId('vee-composer-box');
-  const box=await dimensions(composer);
-  const input=page.getByTestId('vee-text-input');
-  const field=await dimensions(input);
-  near(field.height,105.6,'Vee input +20%',.5);
-  assert.equal(field.borderWidth,'0px');
-  assert.equal(box.borderWidth,'1px');
-  for(const key of ['details','mic','send']){
-    const control=await dimensions(page.getByTestId('vee-composer-'+key));
-    assert.ok(control.x>=box.x&&control.x+control.width<=box.x+box.width+1,key+' inside horizontally');
-    assert.ok(control.y>=box.y&&control.y+control.height<=box.y+box.height+1,key+' inside vertically');
-    const floorClearance=box.y+box.height-(control.y+control.height);
-    assert.ok(floorClearance>=12,key+' has at least 12px bottom breathing room: '+floorClearance);
-    report.geometry.push({screen:'Vee '+key,theme,...control,floorClearance});
-  }
-  assert.equal(await page.getByTestId('vee-open-letter').getByText('Vee',{exact:true}).count(),0,'no redundant Vee text in hero');
-  await checkOverflow(page,'Vee '+theme);
-  await checkGradients(page,'Vee '+theme);
-  const first=await spin(page);
-  await page.waitForTimeout(650);
-  const second=await spin(page);
-  assert.notEqual(first,second,'Vee mark rotates on focused tab');
-  report.checks.push(theme+': Vee focused spiral rotates');
-  await page.getByTestId('vee-composer-mic').click();
-  await input.evaluate(el=>{if(document.activeElement!==el)throw new Error('mic must focus input');});
-  assert.equal(await input.evaluate(el=>getComputedStyle(el).outlineWidth),'0px','no rectangular focus border');
-  await input.blur();
-  await screenshot(page,'vee',theme,true);
-  await page.getByTestId('vee-composer-details').click();
-  await page.getByText('Add a constraint',{exact:true}).waitFor();
-  await page.getByRole('button').filter({has:page.getByText('Nightcap',{exact:true})}).last().click();
-  await page.getByText('Add a constraint',{exact:true}).waitFor({state:'hidden'});
-  report.checks.push(theme+': Details opens working preference sheet');
-  assert.equal(await page.getByTestId('vee-shapes-toggle').getAttribute('aria-expanded'),'true','shapes open by default');
-  await page.getByTestId('vee-shape-card').first().waitFor();
-  await page.getByTestId('vee-shapes-toggle').click();
-  assert.equal(await page.getByTestId('vee-shapes-toggle').getAttribute('aria-expanded'),'false','shapes still collapse');
-  assert.equal(await page.getByTestId('vee-shape-card').count(),0);
-  await page.getByTestId('vee-shapes-toggle').click();
-  assert.equal(await page.getByTestId('vee-shapes-toggle').getAttribute('aria-expanded'),'true');
-  const shapes=page.getByTestId('vee-shape-card');
-  await shapes.first().waitFor();
-  const titles=await page.getByTestId('vee-shape-title').allTextContents();
-  assert.ok(titles.length>0&&titles.length<=3,'actual available shape count');
-  for(const title of titles){
-    assert.ok(title.trim().length>0,'actual starting place named');
-    assert.ok(!title.includes(' · '),'ingredient list replaced by actual anchor');
-  }
-  for(const shape of await shapes.all()){
-    const title=shape.getByTestId('vee-shape-title');
-    const facts=shape.getByTestId('vee-shape-facts');
-    const text=await facts.innerText();
-    assert.match(text,/\d+ stops?/,'actual stop count remains');
-    assert.ok(!text.includes('→')&&!text.includes('$')&&!text.includes('walk'),'only essential facts visible');
-    const direct=await shape.evaluate(el=>el.querySelector('[data-testid="vee-shape-title"]').parentElement.children.length);
-    assert.equal(direct,2,'two lines per shape');
-    const factCount=await facts.evaluate(el=>el.children.length);
-    assert.ok(factCount>=1&&factCount<=2,'at most two glyph facts');
-    const label=await shape.getAttribute('aria-label');
-    assert.ok(label.includes('→'),'full route retained for accessibility');
-    const geometry=await dimensions(shape);
-    assert.ok(geometry.height<=74,'shape fits compact 72px row');
-    report.geometry.push({screen:'Vee shape',theme,title:await title.innerText(),facts:text,...geometry});
-  }
-  report.checks.push(theme+': shapes open on entry, collapse normally and show two simple lines');
-  for(const old of ['Low-key & walkable','Big night out','Late & loud'])assert.equal(await page.getByText(old,{exact:true}).count(),0,'old playful title absent');
-  await page.getByRole('button',{name:'Other plan options',exact:true}).waitFor();
-  await shapes.first().scrollIntoViewIfNeeded();
-  await screenshot(page,'vee-shapes',theme,true);
-  const firstStop=titles[0];
-  await shapes.first().click();
-  await page.waitForURL(/\/plan(?:[?#]|$)/,{timeout:15000});
-  await page.getByText(firstStop,{exact:true}).first().waitFor({timeout:15000});
-  report.checks.push(theme+': plain shape selection opens the real plan with its chosen stops');
-  await page.goBack();
-  await page.getByTestId('vee-text-input').waitFor();
-  if(await page.getByTestId('vee-shapes-toggle').getAttribute('aria-expanded')==='true')await page.getByTestId('vee-shapes-toggle').click();
-  await input.fill('Fox Theater');
-  await page.getByText('Ask Vee to plan around this',{exact:true}).waitFor();
-  report.checks.push(theme+': live place search responds to typing');
-  await input.fill('');
-  await page.getByText('What should change?',{exact:true}).waitFor();
-  await tab(page,'Home');
-  const offscreen=page.getByTestId('vee-open-letter').getByTestId('vee-spin');
-  if(await offscreen.count()){
-    const off1=await offscreen.evaluate(el=>getComputedStyle(el).transform);
-    await page.waitForTimeout(350);
-    const off2=await offscreen.evaluate(el=>getComputedStyle(el).transform);
-    assert.equal(off1,off2,'Vee rotation stops on tab blur');
-  }
-  await page.emulateMedia({reducedMotion:'reduce'});
-  await tab(page,'Vee');
-  await page.waitForTimeout(500);
-  const still1=await spin(page);
-  await page.waitForTimeout(500);
-  const still2=await spin(page);
-  assert.equal(still1,still2,'reduced motion stops Vee rotation');
-  report.checks.push(theme+': tab blur and reduced motion stop rotation');
   for(const name of ['Discover','You']){
     await tab(page,name);
     await page.waitForTimeout(500);
@@ -357,6 +256,107 @@ async function main(){
     }
     await screenshot(page,name==='You'?'profile':'discover',theme,name==='Discover');
   }
+  await tab(page,'Vee');
+  await page.getByText('Where to?',{exact:true}).waitFor();
+  await page.waitForTimeout(600);
+  const composer=page.getByTestId('vee-composer-box');
+  const box=await dimensions(composer);
+  const input=page.getByTestId('vee-text-input');
+  const field=await dimensions(input);
+  near(field.height,105.6,'Vee input +20%',.5);
+  assert.equal(field.borderWidth,'0px');
+  assert.equal(box.borderWidth,'1px');
+  for(const key of ['details','mic','send']){
+    const control=await dimensions(page.getByTestId('vee-composer-'+key));
+    assert.ok(control.x>=box.x&&control.x+control.width<=box.x+box.width+1,key+' inside horizontally');
+    assert.ok(control.y>=box.y&&control.y+control.height<=box.y+box.height+1,key+' inside vertically');
+    const floorClearance=box.y+box.height-(control.y+control.height);
+    assert.ok(floorClearance>=12,key+' has at least 12px bottom breathing room: '+floorClearance);
+    report.geometry.push({screen:'Vee '+key,theme,...control,floorClearance});
+  }
+  assert.equal(await page.getByTestId('vee-open-letter').getByText('Vee',{exact:true}).count(),0,'no redundant Vee text in hero');
+  await checkOverflow(page,'Vee '+theme);
+  await checkGradients(page,'Vee '+theme);
+  const first=await spin(page);
+  await page.waitForTimeout(650);
+  const second=await spin(page);
+  assert.notEqual(first,second,'Vee mark rotates on focused tab');
+  report.checks.push(theme+': Vee focused spiral rotates');
+  await page.getByTestId('vee-composer-mic').click();
+  await input.evaluate(el=>{if(document.activeElement!==el)throw new Error('mic must focus input');});
+  assert.equal(await input.evaluate(el=>getComputedStyle(el).outlineWidth),'0px','no rectangular focus border');
+  await input.blur();
+  await screenshot(page,'vee',theme,true);
+  await page.getByTestId('vee-composer-details').click();
+  await page.getByText('Add a constraint',{exact:true}).waitFor();
+  await page.getByRole('button').filter({has:page.getByText('Nightcap',{exact:true})}).last().click();
+  await page.getByText('Add a constraint',{exact:true}).waitFor({state:'hidden'});
+  report.checks.push(theme+': Details opens working preference sheet');
+  assert.equal(await page.getByTestId('vee-shapes-toggle').getAttribute('aria-expanded'),'true','shapes open by default');
+  await page.getByTestId('vee-shape-card').first().waitFor();
+  await page.getByTestId('vee-shapes-toggle').click();
+  assert.equal(await page.getByTestId('vee-shapes-toggle').getAttribute('aria-expanded'),'false','shapes still collapse');
+  assert.equal(await page.getByTestId('vee-shape-card').count(),0);
+  await page.getByTestId('vee-shapes-toggle').click();
+  assert.equal(await page.getByTestId('vee-shapes-toggle').getAttribute('aria-expanded'),'true');
+  const shapes=page.getByTestId('vee-shape-card');
+  await shapes.first().waitFor();
+  const titles=await page.getByTestId('vee-shape-title').allTextContents();
+  assert.ok(titles.length>0&&titles.length<=3,'actual available shape count');
+  for(const title of titles){
+    assert.ok(title.trim().length>0,'actual starting place named');
+    assert.ok(!title.includes(' · '),'ingredient list replaced by actual anchor');
+  }
+  for(const shape of await shapes.all()){
+    const title=shape.getByTestId('vee-shape-title');
+    const facts=shape.getByTestId('vee-shape-facts');
+    const text=await facts.innerText();
+    assert.match(text,/\d+ stops?/,'actual stop count remains');
+    assert.ok(!text.includes('→')&&!text.includes('$')&&!text.includes('walk'),'only essential facts visible');
+    const direct=await shape.evaluate(el=>el.querySelector('[data-testid="vee-shape-title"]').parentElement.children.length);
+    assert.equal(direct,2,'two lines per shape');
+    const factCount=await facts.evaluate(el=>el.children.length);
+    assert.ok(factCount>=1&&factCount<=2,'at most two glyph facts');
+    const label=await shape.getAttribute('aria-label');
+    assert.ok(label.includes('→'),'full route retained for accessibility');
+    const geometry=await dimensions(shape);
+    assert.ok(geometry.height<=74,'shape fits compact 72px row');
+    report.geometry.push({screen:'Vee shape',theme,title:await title.innerText(),facts:text,...geometry});
+  }
+  report.checks.push(theme+': shapes open on entry, collapse normally and show two simple lines');
+  for(const old of ['Low-key & walkable','Big night out','Late & loud'])assert.equal(await page.getByText(old,{exact:true}).count(),0,'old playful title absent');
+  await page.getByRole('button',{name:'Other plan options',exact:true}).waitFor();
+  await shapes.first().scrollIntoViewIfNeeded();
+  await screenshot(page,'vee-shapes',theme,true);
+  const firstStop=titles[0];
+  await shapes.first().click();
+  await page.waitForURL(/\/plan(?:[?#]|$)/,{timeout:15000});
+  await page.getByText(firstStop,{exact:true}).filter({visible:true}).first().waitFor({timeout:15000});
+  report.checks.push(theme+': plain shape selection opens the real plan with its chosen stops');
+  await page.goBack();
+  await page.getByTestId('vee-text-input').waitFor();
+  if(await page.getByTestId('vee-shapes-toggle').getAttribute('aria-expanded')==='true')await page.getByTestId('vee-shapes-toggle').click();
+  await input.fill('Fox Theater');
+  await page.getByText('Ask Vee to plan around this',{exact:true}).waitFor();
+  report.checks.push(theme+': live place search responds to typing');
+  await input.fill('');
+  await page.getByText('What should change?',{exact:true}).waitFor();
+  await tab(page,'Home');
+  const offscreen=page.getByTestId('vee-open-letter').getByTestId('vee-spin');
+  if(await offscreen.count()){
+    const off1=await offscreen.evaluate(el=>getComputedStyle(el).transform);
+    await page.waitForTimeout(350);
+    const off2=await offscreen.evaluate(el=>getComputedStyle(el).transform);
+    assert.equal(off1,off2,'Vee rotation stops on tab blur');
+  }
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await tab(page,'Vee');
+  await page.waitForTimeout(500);
+  const still1=await spin(page);
+  await page.waitForTimeout(500);
+  const still2=await spin(page);
+  assert.equal(still1,still2,'reduced motion stops Vee rotation');
+  report.checks.push(theme+': tab blur and reduced motion stop rotation');
   await context.close();
  }
  assert.deepEqual(report.errors,[],'no browser runtime exceptions');
