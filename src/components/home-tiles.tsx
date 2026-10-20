@@ -1,9 +1,11 @@
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 
 import { Glyph, type GlyphName } from '@/components/glyph';
+import { NoteCard, NoteFact, PHOTO_NOTE } from '@/components/field-notes';
+import { useAppGutter } from '@/components/layout';
 import { MiniChevron } from '@/components/ui';
 import { Photo } from '@/components/photo';
 import { useRaisedSurface } from '@/lib/shadows';
@@ -24,15 +26,15 @@ export type CountTile = {
   onPress: () => void;
 };
 
-/** Square thumbnail windows keep the previous widths, including the 168px cap. */
-function TileWindow({ tile }: { tile: CountTile }) {
+/** The exact More on stage photo proportions, scaled only on narrow phones. */
+function TileWindow({ tile, width }: { tile: CountTile; width: number }) {
   const colors = useThemeColors();
   const [failedImage, setFailedImage] = useState<string | number>();
   const showImage = tile.image !== undefined && failedImage !== tile.image;
   const paper = colors['home-tile'];
 
   return (
-    <View testID={`home-tile-window-${tile.key}`} style={styles.window}>
+    <View testID={`home-tile-window-${tile.key}`} style={[styles.window,{width,height:width*PHOTO_NOTE.photoHeight/PHOTO_NOTE.photoWidth}]}>
       {showImage ? (
         <View testID={`home-tile-photo-frame-${tile.key}`}
           style={[styles.photoFrame,{borderWidth:1,borderColor:colors['edge-faint']}]}>
@@ -77,38 +79,38 @@ function TileWindow({ tile }: { tile: CountTile }) {
  * cannot follow is decoration (CLAUDE.md #3).
  */
 export function AroundYou({ tiles }: { tiles: CountTile[] }) {
-  const colors = useThemeColors();
-  const surface = useRaisedSurface(1);
+  const { width } = useWindowDimensions();
+  const gutter = useAppGutter();
+  const gap = 16;
+  const availableWidth = Math.min(width, 720) - gutter * 2;
+  const cardWidth = Math.min(PHOTO_NOTE.width, (availableWidth - gap) / 2);
   const rows: CountTile[][] = [];
   for (let i = 0; i < tiles.length; i += 2) rows.push(tiles.slice(i, i + 2));
 
   return (
-    <View testID="around-you-grid" className="gap-y-2.5">
-      {rows.map((row) => (
-        <View key={row.map((tile) => tile.key).join('-')} className="flex-row gap-x-2.5">
-          {row.map((tile) => (
-            <TouchableOpacity
+    <View testID="around-you-grid" style={{width:cardWidth*2+gap,alignSelf:'center',gap}}>
+      {rows.map(row => (
+        <View key={row.map(tile => tile.key).join('-')} style={{flexDirection:'row',gap}}>
+          {row.map(tile => (
+            <NoteCard
               key={tile.key}
-              accessibilityRole="button"
-              accessibilityLabel={`${tile.count} ${tile.label}, ${tile.hint}`}
-              activeOpacity={0.78}
+              testID={`home-count-tile-${tile.key}`}
+              titleTestID={`home-tile-title-${tile.key}`}
+              accessibilityName={`${tile.count} ${tile.label}, ${tile.hint}`}
+              name={tile.label}
+              caption={tile.hint}
+              facts={<NoteFact glyph={tile.glyph} value={tile.count} label={`${tile.count} ${tile.label}`} compact />}
+              photo={<TileWindow tile={tile} width={cardWidth-PHOTO_NOTE.padding*2} />}
+              cardWidth={cardWidth}
+              tone="neutral"
+              strip
+              elevated
+              compact
+              divider={false}
               onPress={tile.onPress}
-              style={[surface, { backgroundColor: colors['home-tile'] }]}
-              className="min-h-[146px] min-w-0 flex-1 rounded-panel p-[9px] border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
-              <TileWindow tile={tile} />
-              <View className="mt-1.5 flex-row items-baseline justify-between gap-x-1.5">
-                <Text numberOfLines={1} className="min-w-0 shrink font-fraunces text-[20px] leading-[24px] text-ink">{tile.label}</Text>
-                <Text
-                  style={{ color: colors.fg, fontVariant: ['tabular-nums'] }}
-                  className="shrink-0 font-dm text-[15px] leading-[20px]">
-                  {tile.count}
-                </Text>
-              </View>
-              <Text numberOfLines={1} className="mt-0.5 font-dm text-[10px] leading-[14px] text-taupe">{tile.hint}</Text>
-            </TouchableOpacity>
+            />
           ))}
-          {/* An odd count would otherwise stretch the last tile to full width. */}
-          {row.length === 1 ? <View className="flex-1" /> : null}
+          {row.length===1 ? <View style={{width:cardWidth}} /> : null}
         </View>
       ))}
     </View>
@@ -116,8 +118,8 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
 }
 
 const styles = StyleSheet.create({
-  window: { width: '100%', maxWidth: 168, aspectRatio: 1, alignSelf: 'center', borderRadius: 13, overflow: 'hidden' },
-  photoFrame: { width: '100%', height: '100%', borderRadius: 13, overflow: 'hidden' },
+  window: { borderRadius: PHOTO_NOTE.photoRadius, overflow: 'hidden', marginBottom: PHOTO_NOTE.photoGap },
+  photoFrame: { width: '100%', height: '100%', borderRadius: PHOTO_NOTE.photoRadius, overflow: 'hidden' },
   fallback: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   fade: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 18 },
 });

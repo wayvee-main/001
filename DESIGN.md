@@ -34,12 +34,16 @@ inline palette and Tailwind tokens together with `npm run tokens`.
 - Home keeps four tiles, ordered Eat, Bars, Routes, Events. Counts describe
   actual inventory, never unsupported opening status.
   All four tiles share Collections' paper `#F5F0E9` / charcoal `#29252A`, a faint 1px
-  edge, level-1 elevation and serif labels. The approved **Window Cards** use
-  9px padding, square photo windows with 13px corners, and a 146px minimum
-  height that grows with the image and copy. Keep the previous image widths:
-  105px at a 320px viewport, 140px at 390px, capped at 168px on wider layouts.
-  Match height to width on every tile, using cover fit without stretching.
-  Counts sit beside the names; supporting captions use one line.
+  edge and level-1 elevation. Use the actual **More on stage** card component:
+  137px width, 8px padding, 12px corners, and 121 × 73px photos with 8px corners.
+  Keep the two-by-two grid centered with 16px gaps. On narrow phones, shrink
+  both columns to fit the existing gutter and scale photos proportionally.
+  Metadata follows Discover exactly: a single 17px Fraunces title, one muted
+  caption, then a compact inline category glyph and the real inventory count.
+  Keep the shared card's 11px photo gap, 5px caption gap and 8px fact-row gap.
+  Heights fit content; remove the old minimum height and oversized count row.
+  Home and Discover share `NoteCard`, `NoteFact` and `PHOTO_NOTE` so their
+  typography, geometry and metadata spacing stay aligned.
   A theme-colored fade covers only the lower 18px, rising from transparent to
   5.9% opacity; the card itself stays flat.
   The bundled Oakland set uses complete venue-owned table/interior/landmark

@@ -4,8 +4,9 @@ Venue-owned photography, checked October 20, 2026. These are category images,
 not claims that a specific dish or performance is currently available.
 The files retain each complete source frame, with orientation corrected and
 size reduced for the app. The bundled files are uncropped. All four displayed
-photos use square frames at their previous widths (up to 168 × 168px), using cover fit without
-stretching and 13px corners. The component retains a lower-edge theme fade of
+photos use the More on stage card geometry: 121 × 73px, cover fit without
+stretching, and 8px corners. On narrow phones the photos scale proportionally
+so the two-column grid fits the existing app gutters. The component retains a lower-edge theme fade of
 at most 15/255 (5.9%) opacity. The four JPEGs total under 300KB.
 
 | File | Subject | Official source | Original image |
