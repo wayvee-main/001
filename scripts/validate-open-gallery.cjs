@@ -83,6 +83,7 @@ async function main(){
     return img?.complete&&img.naturalWidth>0;
   }),null,{timeout:30000});
 
+  const ribbonAccent=await page.getByTestId('home-evening-ribbon').evaluate(el=>getComputedStyle(el.lastElementChild.querySelector('svg')).stroke);
   for(const width of [320,390,430,736]){
     await page.setViewportSize({width,height:844});
     await page.waitForTimeout(160);
@@ -135,7 +136,7 @@ async function main(){
       assert.match(tile.value,/^\d+$/,'count remains real inventory');
       assert.match(tile.label,new RegExp('^Explore '+tile.value+' '),'accessible count and category');
       assert.equal(tile.icon.fill,'none','outline chevrons retained');
-      assert.equal(tile.icon.stroke,theme==='light'?'rgb(184, 70, 36)':'rgb(240, 131, 92)','shared orange accent');
+      assert.equal(tile.icon.stroke,ribbonAccent,'same orange as the Home ribbon');
       near(tile.chevron.x+tile.chevron.width,tile.root.x+tile.root.width-8,'chevron right alignment',.4);
       assert.ok(tile.count.x+tile.count.width<=tile.chevron.x-7,'text does not collide with chevron');
       near(tile.root.height,tile.mount.height+7+tile.caption.height,'content-fit compact tile',.6);
