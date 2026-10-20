@@ -60,7 +60,7 @@ function DisclosureRow({
         activeOpacity={0.7}
         onPress={() => setOpen((was) => !was)}
         className="flex-row items-center gap-x-3 py-3">
-        <View className="h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface">
+        <View className="h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
           <Glyph name={row.glyph} size={15} color={colors.peach} strokeWidth={1.8} />
         </View>
         <View className="min-w-0 flex-1">

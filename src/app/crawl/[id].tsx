@@ -40,7 +40,7 @@ export default function CrawlScreen() {
         <HeaderRow title={crawl.name} />
         <Text className="font-dm text-[13px] text-taupe">{crawl.meta}</Text>
 
-        <View className="rounded-card border border-edge-faint bg-coral-50 px-4 py-3.5">
+        <View className="rounded-card border border-edge-faint bg-coral-50 px-4 py-3.5 shadow-soft-light dark:shadow-soft-dark">
           <Text className="font-dm text-[13.5px] italic leading-5 text-ink">{crawl.desc}</Text>
           <Text className="mt-2 font-dm text-label text-taupe">— Wayvee local team</Text>
         </View>
@@ -49,7 +49,7 @@ export default function CrawlScreen() {
           {crawl.stops.map((st, i) => (
             <View key={st.name} className="flex-row gap-x-3.5">
               <View className="w-[26px] items-center">
-                <View className="h-[26px] w-[26px] items-center justify-center rounded-full bg-ember">
+                <View className="h-[26px] w-[26px] items-center justify-center rounded-full bg-ember border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
                   <Text className="font-dm-bold text-label text-on-accent">{i + 1}</Text>
                 </View>
                 {i < crawl.stops.length - 1 ? <View className="my-1 w-0.5 flex-1 bg-sand" /> : null}

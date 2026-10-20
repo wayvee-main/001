@@ -4,7 +4,7 @@ Venue-owned photography, checked October 20, 2026. These are category images,
 not claims that a specific dish or performance is currently available.
 The files retain each complete source frame, with orientation corrected and
 size reduced for the app. The bundled files are uncropped. All four displayed
-photos match Events' 2.4:1 frame (up to 168 × 70px), using cover fit without
+photos use square frames at their previous widths (up to 168 × 168px), using cover fit without
 stretching and 13px corners. The component retains a lower-edge theme fade of
 at most 15/255 (5.9%) opacity. The four JPEGs total under 300KB.
 

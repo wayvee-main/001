@@ -53,8 +53,8 @@ export function EditorialNav({items,reserveSpace=false}:{items:NavigationItem[];
   return <View pointerEvents="box-none" style={reserveSpace?{height:bottom+76}:{position:'absolute',left:0,right:0,bottom:0,height:bottom+76}}>
     <View testID="editorial-navigation" accessibilityRole="tablist" className="flex-row items-center rounded-full"
       style={{position:'absolute',left:gutter,right:gutter,bottom,paddingTop:9,paddingBottom:8,paddingHorizontal:10,
-        backgroundColor:withAlpha(colors['surface-navigation'],.97),borderWidth:1,borderColor:withAlpha(colors.fg,.075),
-        boxShadow:light?`0 6px 22px ${withAlpha(colors.fg,.095)}`:'0 6px 22px rgba(0,0,0,.32)',
+        backgroundColor:withAlpha(colors['surface-navigation'],.97),borderWidth:1,borderColor:colors['edge-faint'],
+        boxShadow:light?`0 6.6px 24.2px ${withAlpha(colors.fg,.1045)}`:'0 6.6px 24.2px rgba(0,0,0,.352)',
         ...(Platform.OS==='web'?{backdropFilter:'blur(18px)'}:{})}}>
       {items.map(item=><EditorialTab key={item.key} item={item} reduceMotion={reduceMotion} />)}
     </View>

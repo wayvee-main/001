@@ -111,12 +111,12 @@ export default function PickScreen() {
             {pick.freeCancellation || flagLabels.length ? (
               <View className="mt-1 flex-row flex-wrap gap-2">
                 {pick.freeCancellation ? (
-                  <View className="rounded-full bg-blush px-3 py-[7px]">
+                  <View className="rounded-full bg-blush px-3 py-[7px] border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
                     <Text className="font-dm-medium text-meta text-peach">Free cancellation</Text>
                   </View>
                 ) : null}
                 {flagLabels.map((label) => (
-                  <View key={label} className="rounded-full bg-shell px-3 py-[7px]">
+                  <View key={label} className="rounded-full bg-shell px-3 py-[7px] border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
                     <Text className="font-dm-medium text-meta text-ink">{label}</Text>
                   </View>
                 ))}
@@ -201,7 +201,7 @@ export default function PickScreen() {
               <Text numberOfLines={1} className="font-dm text-meta text-taupe">{summaryLine}</Text>
               <Text numberOfLines={1} className="font-dm-bold text-[18px] text-ink">{total ?? 'See price on Viator'}</Text>
             </View>
-            <TouchableOpacity activeOpacity={0.85} onPress={bookOnViator} className="h-12 items-center justify-center rounded-full bg-accent-fill px-6">
+            <TouchableOpacity activeOpacity={0.85} onPress={bookOnViator} className="h-12 items-center justify-center rounded-full bg-accent-fill px-6 border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
               <Text className="font-dm-medium text-[13.5px] text-on-accent">Book now</Text>
             </TouchableOpacity>
           </View>

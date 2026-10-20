@@ -31,23 +31,24 @@ export function Photo({
   children?: ReactNode;
 }) {
   const colors = useThemeColors();
+  const frame = radius > 0 ? {borderWidth:1,borderColor:colors['edge-faint']} : {};
   const [failedUri,setFailedUri]=useState<string|null>(null);
   if (!uri || failedUri===uri) {
     if(fallbackGlyph)return <View accessible accessibilityRole="image" accessibilityLabel={fallbackLabel} testID="place-photo-fallback"
-      style={[{borderRadius:radius,overflow:'hidden',backgroundColor:colors['surface-soft'],alignItems:'center',justifyContent:'center'},style]}>
+      style={[frame,{borderRadius:radius,overflow:'hidden',backgroundColor:colors['surface-soft'],alignItems:'center',justifyContent:'center'},style]}>
       <Glyph name={fallbackGlyph} size={23} color={colors['fg-muted']} />{children}
     </View>;
     if (!stripedPlaceholder) {
-      return <View style={[{ borderRadius: radius, overflow: 'hidden', backgroundColor: colors.shell }, style]}>{children}</View>;
+      return <View style={[frame,{ borderRadius: radius, overflow: 'hidden', backgroundColor: colors.shell }, style]}>{children}</View>;
     }
     return (
-      <Stripes radius={radius} style={style}>
+      <Stripes radius={radius} style={[frame,style]}>
         {children}
       </Stripes>
     );
   }
   return (
-    <View style={[{ position: 'relative', borderRadius: radius, overflow: 'hidden', backgroundColor: colors.shell }, style]}>
+    <View style={[frame,{ position: 'relative', borderRadius: radius, overflow: 'hidden', backgroundColor: colors.shell }, style]}>
       {stripedPlaceholder ? (
         <Stripes radius={radius} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
       ) : null}

@@ -16,8 +16,8 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   detail and onboarding page, with aspect-correct angles on web and native.
   Oyster cards, sheets and unselected controls use warm paper `#F5F0E9` in
   light mode and charcoal `#29252A` in dark mode, with faint edges and elevation.
-  Discover listings use `#F7F2EC` / `#302A2F`. Light-mode search, Home tiles and
-  navigation share plain off-white `#FFFCF8`. Search uses its own `surface-search`
+  Discover listings use `#F7F2EC` / `#302A2F`. Light-mode search and navigation share plain off-white `#FFFCF8`.
+  Home tiles use Collections' `#F5F0E9` / `#29252A` material. Search uses its own `surface-search`
   role everywhere: Home, Discover, the search overlay, food hub and stay picks.
   Dark search retains Oyster's muted green `#28372F`; dark navigation uses
   `#29252A`. Keep these roles separate from cards so changing search never
@@ -33,15 +33,15 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   34px normally, 30px on phones up to 400px. Use `useAppGutter`.
 - Home keeps four tiles, ordered Eat, Bars, Routes, Events. Counts describe
   actual inventory, never unsupported opening status.
-  All four tiles share off-white `#FFFCF8` / charcoal `#302A2F`, a faint 1px
+  All four tiles share Collections' paper `#F5F0E9` / charcoal `#29252A`, a faint 1px
   edge, level-1 elevation and serif labels. The approved **Window Cards** use
-  9px padding, a 70px-high photo window with 13px corners, and a 146px minimum
-  height. Counts sit beside the names; supporting captions use one line.
-  All four photo frames match Events: a shared 2.4:1 ratio, full available
-  width up to 168px, centered within the 70px image area, with 13px corners.
-  Use cover fit without stretching; inspect the composition at narrow and wide
-  phone sizes so the subject remains clear. A theme-colored fade covers only the lower
-  18px, rising from transparent to 5.9% opacity; the card itself stays flat.
+  9px padding, square photo windows with 13px corners, and a 146px minimum
+  height that grows with the image and copy. Keep the previous image widths:
+  105px at a 320px viewport, 140px at 390px, capped at 168px on wider layouts.
+  Match height to width on every tile, using cover fit without stretching.
+  Counts sit beside the names; supporting captions use one line.
+  A theme-colored fade covers only the lower 18px, rising from transparent to
+  5.9% opacity; the card itself stays flat.
   The bundled Oakland set uses complete venue-owned table/interior/landmark
   compositions, not tight dish details or expiring artist posters. It is not
   reused for another city. Missing/failed photos show the category glyph in
@@ -62,7 +62,12 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   known-open venues; exclude known closures, deduplicate names and avoid
   generic placeholders when the catalog has no suitable match. Missing hours
   never imply “Open now.” The divider is omitted when there are no venue chips.
-  Chips and buttons share elevation and `edge-faint` borders. Selected choices
+  Cards, tiles, containers, chips, buttons and rounded photo frames use a 1px
+  `edge-faint` outline at 4% theme-ink opacity. Apply it to filled controls,
+  including selected and primary controls, without boxing transparent layout
+  groups or text-only links. Every elevation tier and the custom navigation
+  shadow is 10% stronger in lift, blur and opacity. Chips and buttons share
+  that material. Selected choices
   use `selected-surface` / `on-selected`; primary actions use `accent-fill` /
   `on-accent`. Never hardcode white on an accent fill.
 - One contrasting orange family carries through the app: action fills and
@@ -90,8 +95,9 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   horizontal row, without hard borders, with subtle elevation and an extra
   5px gap (11.44px total).
   Bottom navigation uses a softly raised floating pill: 97% off-white in
-  light mode, 97% charcoal in dark mode (`surface-navigation`), a 7.5% ink edge and subtle shadow.
-  Active tabs have an orange icon, normal foreground medium-weight label,
+  light mode, 97% charcoal in dark mode (`surface-navigation`), a 4% ink edge and the common 10% elevation increase.
+  Active tabs have an orange icon (the Vee spiral retains its gradient),
+  normal foreground medium-weight label,
   a slight 1px icon lift and a 3px orange dot below the label. Inactive icons
   and labels use muted ink. No active background box or icon well.
   Tab targets are at least 48px high; selection uses a 160ms transition and
@@ -156,18 +162,25 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   Manual Light/Dark choices override the OS in both CSS and inline colors;
   System follows OS changes. Tailwind uses class-based dark mode and the token
   generator emits the matching dark root variables.
-- Vee uses the selected **Open Letter** design. The 47px original gradient mark
-  and left-aligned Fraunces heading lead with “Dear evening, / let’s see where /
-  we end up.” The heading is 35px (31px on narrow phones), with 24px after the
-  mark and a 100px opening gap below the live city/weather header.
-  The composer has an identifiable but subtle 88px textbox: a 66%-opaque
-  Oyster paper fill, 16px radius, 12px vertical / 14px horizontal padding and a faint
-  1px ink border (8% light / 7% dark), without a shadow. Keep 18px DM Sans and
-  the small starting-point label. The border stays subtle on focus; remove the
-  former line beneath Details. Keep 36px round mic/send controls, Details,
-  live search, preferences, submission and plan refinement.
-  Ready-made evenings remain behind a quiet “Start from a shape” text action,
-  collapsed initially so the opening retains the selected design's whitespace.
+- Every in-app Wayvee spiral uses the original three-color/four-stop gradient:
+  marigold `#FFC757`, coral `#E85D2C`, cobalt `#6F5BD1`, marigold.
+  Solid color props cannot override the mark. Keep its geometry and typography.
+  Gradient IDs must remain unique and stable through web hydration.
+- Vee keeps the Open Letter's quiet layout, simplified to a 47px gradient spiral
+  and “Where to?” at 28px (26px on narrow phones). Remove the top-left Vee name,
+  city and weather display; weather still informs real recommendations.
+  The hero has a 56px opening gap and 18px between mark and heading.
+  Only the focused Vee screen rotates its hero: one smooth seven-second turn.
+  Stop on tab blur, app backgrounding and reduced motion. Other marks are static.
+  Refine keeps “What should change?” and the real plan context.
+- Vee's typing area is 105.6px high, 20% taller than 88px. Details, mic/focus
+  and Send sit inside one 18px rounded composer boundary, using the shared faint
+  edge, level-1 elevation and 80% Oyster paper. Use 10px horizontal / 5px vertical
+  outer padding. The inner input stays transparent and borderless on focus.
+  Preserve live search, constraints, empty-field submission and plan refinement.
+  “Start from a shape” is a neutral raised control. Expanded options use the
+  same contained rows, serif titles, muted glyphs and compact factual metadata
+  as Discover; choices and Reshuffle remain functional.
 
 ## Validation
 

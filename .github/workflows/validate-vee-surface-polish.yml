@@ -1,0 +1,50 @@
+name: Validate Vee surface polish
+
+on:
+  push:
+    branches: ['codex/vee-surface-polish-2026-10-20']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vee-surface-polish-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      TZ: UTC
+      EXPO_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Verify generated tokens
+        run: |
+          npm run tokens
+          git diff --exit-code -- src/global.css src/lib/theme.ts src/lib/tailwind-tokens.generated.js
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test -- --runInBand
+      - run: npm run tokens:contrast
+      - run: npm run build:web
+      - name: Install browser preview tools
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright
+          npx playwright install --with-deps chromium
+      - name: Check both themes and composer interactions
+        run: node scripts/validate-vee-surface-polish.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vee-surface-polish-preview
+          path: polish-preview/
+          retention-days: 14

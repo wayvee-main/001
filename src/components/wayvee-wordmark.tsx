@@ -20,11 +20,11 @@ import { useThemeColors } from '@/lib/theme';
 export function WayveeWordmark({
   size = 20,
   color,
-  /** Vee's own state. The brand lockup is solid; the launch screen is not. */
-  gradient = false,
+  /** Backward-compatible prop; every spiral uses the brand gradient. */
+  gradient = true,
 }: {
   size?: number;
-  /** Colour of the word. The mark keeps the accent unless this is given. */
+  /** Colour of the lettering; the spiral keeps its gradient. */
   color?: string;
   gradient?: boolean;
 }) {

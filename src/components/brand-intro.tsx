@@ -9,7 +9,7 @@ import { useThemeColors } from '@/lib/theme';
  * Wayvee's opening motion: the mark resolves, the word rises beneath it, and
  * the pair hands off to whatever is already mounted underneath.
  *
- * The mark carries the gradient here and only here at rest — the opening is
+ * The mark carries the same gradient used throughout the app — the opening is
  * Vee starting up, the same reading the launch screen's breathing mark has, so
  * the two frames are one continuous thought rather than a cut.
  *

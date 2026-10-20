@@ -65,7 +65,7 @@ export function HomeHeader({
           activeOpacity={0.72}
           style={control}
           onPress={onNotifications}
-          className="h-9 w-9 items-center justify-center rounded-full bg-surface-raised">
+          className="h-9 w-9 items-center justify-center rounded-full bg-surface-raised border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
           <Glyph name="bell" size={18} color={colors.fg} strokeWidth={1.55} />
           {hasReminders ? (
             <View
@@ -83,7 +83,7 @@ export function HomeHeader({
           activeOpacity={0.78}
           style={control}
           onPress={onProfile}
-          className="h-9 w-9 items-center justify-center rounded-full bg-surface-raised">
+          className="h-9 w-9 items-center justify-center rounded-full bg-surface-raised border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
           <Glyph name="user" size={19} color={colors.fg} strokeWidth={1.55} />
         </TouchableOpacity>
       </View>
@@ -214,7 +214,7 @@ export function VeeHero({
             // ink for a marigold *fill*, so it darkens in dark mode exactly as
             // warm-tint does, and the two collapsed to 1.08:1 against each other.
             style={{ backgroundColor: colors['warm-tint'] }}
-            className="h-9 shrink-0 flex-row items-center gap-x-1.5 rounded-full border border-dashed border-fg-muted px-3">
+            className="h-9 shrink-0 flex-row items-center gap-x-1.5 rounded-full border border-dashed border-fg-muted px-3 shadow-soft-light dark:shadow-soft-dark">
             <Glyph name="luggage" size={13} color={colors['fg-muted']} strokeWidth={1.9} />
             <Text numberOfLines={1} className="font-dm-medium text-label text-ink">
               {stayLabel}
@@ -228,8 +228,8 @@ export function VeeHero({
               activeOpacity={0.72}
               hitSlop={{ top: 4, bottom: 4 }}
               onPress={() => onSuggestion(suggestion)}
-              style={[launcherSurface, { backgroundColor: colors['surface-raised'], borderColor: colors['edge-soft'] }]}
-              className="h-9 shrink-0 flex-row items-center gap-x-1.5 rounded-full border px-3">
+              style={[launcherSurface, { backgroundColor: colors['surface-raised'], borderColor: colors['edge-faint'] }]}
+              className="h-9 shrink-0 flex-row items-center gap-x-1.5 rounded-full border px-3 border-edge-faint shadow-soft-light dark:shadow-soft-dark">
               <Glyph name={suggestion.glyph} size={13} color={colors['fg-muted']} strokeWidth={1.8} />
               <Text numberOfLines={1} className="font-dm-medium text-label text-ink">{suggestion.label}</Text>
             </TouchableOpacity>

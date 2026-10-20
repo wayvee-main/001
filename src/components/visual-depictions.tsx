@@ -157,7 +157,7 @@ export function LiveStatusRow({
 }) {
   const open = tone === 'open';
   return (
-    <View className={`rounded-card border px-3.5 py-2.5 ${open ? 'border-pine/40 bg-sage' : 'border-danger/40 bg-shell'}`}>
+    <View className={`rounded-card border px-3.5 py-2.5 ${open ? 'border-pine/40 bg-sage' : 'border-danger/40 bg-shell'} shadow-soft-light dark:shadow-soft-dark`}>
       <View className="flex-row items-center gap-x-2">
         <View className={`h-2 w-2 rounded-full ${open ? 'bg-pine' : 'bg-danger'}`} />
         <Text className={`min-w-0 flex-1 font-dm-bold text-label ${open ? 'text-pine' : 'text-danger'}`}>{label}</Text>

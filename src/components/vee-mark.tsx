@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
-import { AccessibilityInfo, Animated, Easing, View } from 'react-native';
+import { useEffect, useId, useState } from 'react';
+import { AppState, Animated, Easing, View } from 'react-native';
 import Svg, { Defs, LinearGradient, Path, Stop } from 'react-native-svg';
 
-import { useThemeColors } from '@/lib/theme';
+import { useReducedMotionPreference } from '@/lib/motion';
 
 /**
  * Wayvee's mark: a wave seen end on, drawn as the spiral a breaking wave makes.
@@ -17,12 +17,10 @@ import { useThemeColors } from '@/lib/theme';
  * being shrunk: the relationship between turns is fixed, so the whole thing
  * scales as one object rather than drifting out of proportion.
  *
- * One shape, two states, and the state is the whole convention:
- *   solid accent   — the app being itself. Icon, header, tab bar, plan stops.
- *   gradient       — Vee. Static where Vee is speaking, turning where Vee is
- *                    working. Fixed hexes rather than theme tokens, because the
- *                    gradient is a mark and must read the same on paper and on
- *                    plum-black, the way an app icon does.
+ * The three-color, four-stop gradient is the mark everywhere in the app.
+ * Rotation is opt-in and used only for the focused Vee screen; all other
+ * instances stay still. Fixed brand colors keep the mark consistent in both
+ * themes.
  *
  * scripts/generate-icons.mjs restates this geometry, because the PNGs are
  * rasterised by a browser rather than by React Native. Change the path here and
@@ -65,41 +63,33 @@ const DEFAULT_STROKE: Record<VeeVariant, number> = {
   compact: 3,
 };
 
-let gradientSeq = 0;
-
 export function VeeMark({
   size = 24,
   variant = 'primary',
-  color,
-  gradient = false,
   strokeWidth,
 }: {
   size?: number;
   variant?: VeeVariant;
-  /** Ignored when `gradient` is set. Defaults to the theme's accent. */
+  /** Retained for callers; the spiral always uses the brand gradient. */
   color?: string;
-  /** Vee's own state — see the header note. */
+  /** Retained for callers; even false cannot turn the mark monochrome. */
   gradient?: boolean;
   strokeWidth?: number;
 }) {
-  const colors = useThemeColors();
-  // One id per mounted mark: two gradients sharing an id in the same tree
-  // resolve to whichever rendered first, which silently blanks the second.
-  const [gradientId] = useState(() => `veeGradient${(gradientSeq += 1)}`);
-  const paint = gradient ? `url(#${gradientId})` : (color ?? colors.accent);
+  // React's instance id is stable across web hydration and unique per mark.
+  const gradientId = 'veeGradient' + useId().replace(/[^a-zA-Z0-9]/g, '');
+  const paint = `url(#${gradientId})`;
   const sw = strokeWidth ?? DEFAULT_STROKE[variant];
 
   return (
     <Svg width={size} height={size} viewBox="0 0 40 40" fill="none">
-      {gradient ? (
-        <Defs>
+      <Defs>
           <LinearGradient id={gradientId} x1="0" y1="1" x2="1" y2="0">
             {GRADIENT_STOPS.map((stop, index) => (
               <Stop key={stop + String(index)} offset={GRADIENT_OFFSETS[index]} stopColor={stop} />
             ))}
           </LinearGradient>
-        </Defs>
-      ) : null}
+      </Defs>
       <Path
         d={variant === 'compact' ? SPIRAL_COMPACT : SPIRAL}
         stroke={paint}
@@ -111,53 +101,44 @@ export function VeeMark({
   );
 }
 
-/**
- * The mark while Vee is working: the spiral in gradient, turning.
- *
- * It used to breathe — scale and opacity — because a fork has no direction to
- * move in. A spiral does, and turning is the only motion it can make that is
- * about the shape rather than applied to it. One revolution every seven
- * seconds: present enough to read as working, slow enough not to nag.
- *
- * Honours the OS reduce-motion setting by simply holding still, the same
- * contract the orb it replaces had.
- */
-export function WorkingVee({ size = 66 }: { size?: number }) {
-  // useState rather than useRef: an Animated.Value read during render is a ref
-  // access, and this one is read straight into the style below.
+/** Static unless explicitly animated by the focused Vee screen. Reduced
+ * motion, tab blur and app backgrounding stop the loop immediately. */
+export function WorkingVee({
+  size = 66,
+  animate = false,
+  label = 'Vee is working',
+}: {
+  size?: number;
+  animate?: boolean;
+  label?: string;
+}) {
   const [turn] = useState(() => new Animated.Value(0));
+  const [appActive, setAppActive] = useState(AppState.currentState !== 'background' && AppState.currentState !== 'inactive');
+  const reduceMotion = useReducedMotionPreference();
 
   useEffect(() => {
-    let mounted = true;
-    let loop: Animated.CompositeAnimation | undefined;
+    const subscription = AppState.addEventListener('change', state => setAppActive(state === 'active'));
+    return () => subscription.remove();
+  }, []);
 
-    void AccessibilityInfo.isReduceMotionEnabled().then((reduceMotion) => {
-      if (!mounted || reduceMotion) return;
-      loop = Animated.loop(
-        Animated.timing(turn, {
-          toValue: 1,
-          duration: 7000,
-          // Linear: an eased revolution reads as hesitating, and this one never
-          // arrives anywhere, so there is nothing for an ease to express.
-          easing: Easing.linear,
-          useNativeDriver: true,
-        }),
-      );
-      loop.start();
-    });
-
-    return () => {
-      mounted = false;
-      loop?.stop();
-    };
-  }, [turn]);
+  useEffect(() => {
+    turn.setValue(0);
+    if (!animate || !appActive || reduceMotion) return;
+    const loop = Animated.loop(Animated.timing(turn, {
+      toValue: 1,
+      duration: 7000,
+      easing: Easing.linear,
+      useNativeDriver: true,
+    }));
+    loop.start();
+    return () => loop.stop();
+  }, [animate, appActive, reduceMotion, turn]);
 
   const rotate = turn.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
-
   return (
-    <View accessibilityRole="image" accessibilityLabel="Vee is working" style={{ width: size, height: size }}>
-      <Animated.View style={{ transform: [{ rotate }] }}>
-        <VeeMark size={size} variant="primary" gradient />
+    <View testID="vee-motion-mark" accessibilityRole="image" accessibilityLabel={label} style={{ width: size, height: size }}>
+      <Animated.View testID="vee-spin" style={{ transform: [{ rotate }] }}>
+        <VeeMark size={size} variant="primary" />
       </Animated.View>
     </View>
   );

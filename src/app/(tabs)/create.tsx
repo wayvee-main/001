@@ -14,9 +14,8 @@
 //
 // The manual pick lists and the locked/Regenerate draft timeline live one tap
 // away at /plan-draft; this screen only leads with them.
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useColorScheme } from 'nativewind';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Animated,
@@ -33,19 +32,18 @@ import {
 } from 'react-native';
 import { useConstraintPicker } from '@/components/constraint-picker';
 import { Glyph, type GlyphName } from '@/components/glyph';
-import { VeeMark } from '@/components/vee-mark';
+import { WorkingVee } from '@/components/vee-mark';
 import { Screen, ScreenScroll } from '@/components/layout';
 import { EmptyState } from '@/components/ui';
 import { buildPlan, mergeRefineRequest, resolveAskNow } from '@/lib/concierge/adapter';
 import { requestConciergeRequest } from '@/lib/concierge/client';
 import { applyFreshness, readSyncStatus } from '@/lib/concierge/freshness';
 import { routeForRequest } from '@/lib/concierge/router';
-import { CRAWLS, GUEST, NIGHTLIFE_SPOTS, RESTAURANTS, VENUES, currentEventListings, isEventToday, type ScoperEvent } from '@/lib/data';
+import { CRAWLS, NIGHTLIFE_SPOTS, RESTAURANTS, VENUES, currentEventListings, isEventToday, type ScoperEvent } from '@/lib/data';
 import { loadDinnerHistory } from '@/lib/dinner-history';
 import type { GeoPoint } from '@/lib/geo';
 import { saveNightDraft } from '@/lib/itinerary';
 import { defaultDinnerMinutes } from '@/lib/arrival';
-import { cityStateDisplayLabel } from '@/lib/location';
 import { useReducedMotionPreference } from '@/lib/motion';
 import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
 import { useAllPlaces, useCuratedCoords, useCuratedHours } from '@/lib/places';
@@ -67,10 +65,10 @@ import { planFromShape } from '@/lib/plan-from-shape';
 import { currentNightIso, isStayActive, parseDateOnly, stayArcPosition, stayProgress } from '@/lib/stay';
 import { useScoper } from '@/lib/store';
 import { tasteVocabulary } from '@/lib/taste';
-import { useThemeColors, type ThemeColors } from '@/lib/theme';
+import { useThemeColors } from '@/lib/theme';
 import { withAlpha } from '@/lib/tokens';
 import { useViatorPicks } from '@/lib/viator';
-import { useWeatherNow, weatherLine } from '@/lib/weather';
+import { useWeatherNow } from '@/lib/weather';
 
 /** How many distinct sets of shapes the regenerate button cycles through before
  * it comes back to the first. Three is the cycle length, not a claim that only
@@ -214,22 +212,12 @@ function shapeFactLine(solved: SolvedNight, dinnerTimeLabel: string, walkMinutes
   return [startsAt ? `from ${startsAt}` : null, walk, solved.restaurant?.price].filter(Boolean).join(' · ');
 }
 
-type ShapeChip = { glyph: GlyphName; tint: keyof ThemeColors; ink: keyof ThemeColors };
-
-/** One mark per shape, keyed to the theme rather than to a stop kind. Three
- * options read as three choices only if they look like three, and stop kind
- * could not do that: nearly every shape opens on dinner, so two of the three
- * rows came out identical. The themes are a closed set — readyMadeCards builds
- * exactly these — and each glyph is true of the shape it marks: the primary is
- * the walkable one, the nightcap always carries a nightlife stop. */
-const SHAPE_CHIP: Record<string, ShapeChip> = {
-  'Low-key & walkable': { glyph: 'walk', tint: 'vee-tint', ink: 'vee-strong' },
-  'Big night out': { glyph: 'music', tint: 'accent-tint', ink: 'fg-accent' },
-  'Late & loud': { glyph: 'drink', tint: 'warm-tint', ink: 'warm-ink' },
+/** Restrained glyphs mirror Discover's listing rows. */
+const SHAPE_GLYPHS: Record<string, GlyphName> = {
+  'Low-key & walkable': 'walk',
+  'Big night out': 'music',
+  'Late & loud': 'drink',
 };
-
-/** Only reachable if a new theme is added above without a mark to go with it. */
-const FALLBACK_CHIP: ShapeChip = { glyph: 'food', tint: 'accent-tint', ink: 'fg-accent' };
 
 /** A solved shape as one comparable row. The picker shows every shape the
  * engine returned rather than one card and a dice button. */
@@ -244,13 +232,12 @@ function ShapeTile({
   selectedDateAt: Date;
   onPress: () => void;
 }) {
-  const colors = useThemeColors();
+  const colors = useThemeColors(), surface = useRaisedSurface(1);
   const { order, dinnerTimeLabel, walkMinutes } = useShapeFacts(solved, selectedDateAt);
   const route = shapeRoute(solved, order);
   const facts = shapeFactLine(solved, dinnerTimeLabel, walkMinutes);
   // Swatch-per-stop used to sit here, and also said how many stops there were;
   // the route line names every one of them, so the count survives in words.
-  const chip = SHAPE_CHIP[theme] ?? FALLBACK_CHIP;
 
   return (
     <TouchableOpacity
@@ -258,16 +245,15 @@ function ShapeTile({
       accessibilityLabel={`Use ${theme}. ${route}${facts ? `. ${facts}` : ''}`}
       activeOpacity={0.78}
       onPress={onPress}
-      style={{ borderTopColor: colors['edge-soft'], borderTopWidth: StyleSheet.hairlineWidth }}
-      className="min-h-[56px] flex-row items-center gap-x-3 py-3.5">
-      <View
-        style={{ backgroundColor: colors[chip.tint] }}
-        className="h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full">
-        <Glyph name={chip.glyph} size={15} color={colors[chip.ink]} strokeWidth={1.9} />
+      style={surface}
+      className="min-h-[72px] flex-row items-center gap-x-3 rounded-setting px-3 py-3">
+      <View className="h-7 w-7 shrink-0 items-center justify-center">
+        <Glyph name={SHAPE_GLYPHS[theme] ?? 'route'} size={17} color={colors['fg-muted']} strokeWidth={1.7} />
       </View>
       <View className="min-w-0 flex-1">
-        <Text numberOfLines={1} className="font-dm-medium text-[14px] leading-[18px] text-ink">{theme}</Text>
+        <Text numberOfLines={1} className="font-fraunces text-[17px] leading-[21px] text-ink">{theme}</Text>
         <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">{route}</Text>
+        {facts ? <Text numberOfLines={1} className="mt-0.5 font-dm text-fine text-taupe">{facts}</Text> : null}
       </View>
       <Glyph name="chevron" size={16} color={colors['fg-muted']} strokeWidth={1.8} />
     </TouchableOpacity>
@@ -301,7 +287,6 @@ export default function CreateScreen() {
     savedPlaceKeys,
   } = useScoper();
   const colors = useThemeColors();
-  const { colorScheme } = useColorScheme();
   const raisedSurface = useRaisedSurface(1), control = useControlSurface(), primarySurface = useControlSurface(false, true);
   const curatedCoords = useCuratedCoords();
   const curatedHours = useCuratedHours();
@@ -320,19 +305,12 @@ export default function CreateScreen() {
     return at;
   }, [currentDateIso]);
   const headerContextLabel = stayActive ? `Night ${stayProgress(stay!).currentNight}` : 'Tonight';
-  const cityLabel = cityStateDisplayLabel(deviceLocation, GUEST.city, 'CA');
-  /** Proof that the list is about tonight rather than any night: the weekday
-   * plus whatever the forecast actually says right now.
-   *
-   * No sunset time. The app holds no sunset — daylightRemaining is hour-granular
-   * and its own contract is to return a boundary "never as a guessed sunset" —
-   * so printing one would be inventing the most checkable number on the screen.
-   * Weather is omitted entirely when no forecast covers now. */
-  const headerLocationLabel = useMemo(() => {
-    const weekday = new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: 'America/Los_Angeles' }).format(new Date());
-    return [cityLabel, weekday, weatherNow ? weatherLine(weatherNow) : null].filter(Boolean).join(' \u00b7 ');
-  }, [cityLabel, weatherNow]);
   const reduceMotion = useReducedMotionPreference();
+  const [screenFocused, setScreenFocused] = useState(false);
+  useFocusEffect(useCallback(() => {
+    setScreenFocused(true);
+    return () => setScreenFocused(false);
+  }, []));
   // ── Composer ──────────────────────────────────────────────────────────
   const [promptText, setPromptText] = useState('');
   const [asking, setAsking] = useState(false);
@@ -798,18 +776,6 @@ export default function CreateScreen() {
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
           automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}>
-          {/* The page says its own name, then where you are and what it is
-           * doing out there. Home's header carries notifications and the
-           * profile; repeating them here made the quiet screen the busiest.
-           * One subtitle line rather than Home's two: the weather is context
-           * on this screen, not its subject. */}
-          <View style={{ paddingTop: 16 }}>
-            <Text className="font-fraunces text-ink" style={{fontSize:21,lineHeight:25.2}}>Vee</Text>
-            <Text numberOfLines={1} className="mt-1 font-dm text-fine text-taupe">
-              {headerLocationLabel}
-            </Text>
-          </View>
-
           {/* The plan being refined, kept on the screen you refine it from.
             * Refine used to land here with nothing on it, so a guest described
             * a change to something they could no longer see — and the merge
@@ -847,6 +813,7 @@ export default function CreateScreen() {
                 activeOpacity={0.7}
                 hitSlop={8}
                 onPress={() => setAskPlan(null)}
+                style={control}
                 className="h-8 w-8 shrink-0 items-center justify-center rounded-full">
                 <Glyph name="close" size={15} color={colors['fg-muted']} strokeWidth={1.9} />
               </TouchableOpacity>
@@ -861,10 +828,10 @@ export default function CreateScreen() {
             * controls restating defaults made the assumptions look like the
             * point of the screen. */}
           {!showingLiveMatches ? (
-            <View testID="vee-open-letter" style={{marginTop:askPlan?32:100,alignItems:'flex-start'}}>
-              <VeeMark size={47} gradient />
-              <Text className="font-fraunces text-ink" style={{marginTop:24,fontSize:screenWidth<=360?31:35,lineHeight:(screenWidth<=360?31:35)*1.13,letterSpacing:-.65}}>
-                {askPlan ? 'What should change?' : 'Dear evening,\nlet’s see where\nwe end up.'}
+            <View testID="vee-open-letter" style={{marginTop:askPlan?28:56,alignItems:'flex-start'}}>
+              <WorkingVee size={47} animate={screenFocused} label="Vee" />
+              <Text className="font-fraunces text-ink" style={{marginTop:18,fontSize:screenWidth<=360?26:28,lineHeight:34,letterSpacing:-.45}}>
+                {askPlan ? 'What should change?' : 'Where to?'}
               </Text>
             </View>
           ) : null}
@@ -875,8 +842,12 @@ export default function CreateScreen() {
                 opacity: asking ? 0.72 : 1,
                 marginTop: showingLiveMatches ? 20 : 30,
               }}>
-            <Text className="font-dm text-fine text-taupe" style={{marginBottom:15}}>Your starting point</Text>
+            <Text className="font-dm text-fine text-taupe" style={{marginBottom:12}}>Your starting point</Text>
+            <View testID="vee-composer-box" style={[raisedSurface,{
+              backgroundColor:withAlpha(colors['surface-raised'],.8),borderRadius:18,paddingHorizontal:10,paddingVertical:5,
+            }]}>
             <TextInput
+              testID="vee-text-input"
               ref={focusedInputRef}
               accessibilityLabel="Ask Vee"
               accessibilityHint={`For example: ${askExampleLabel}`}
@@ -892,18 +863,17 @@ export default function CreateScreen() {
               returnKeyType="send"
               onSubmitEditing={() => void submitAsk(promptReady ? promptText : askExampleLabel)}
               className="min-w-0 font-dm text-ink"
-              style={{ height:88,fontSize:18,lineHeight:26.1,paddingVertical:12,paddingHorizontal:14,
-                backgroundColor:withAlpha(colors['surface-discovery'],.66),borderRadius:16,borderWidth:1,
-                borderColor:withAlpha(colors.fg,colorScheme==='light'?.08:.07),textAlignVertical:'top',
+              style={{ height:105.6,fontSize:18,lineHeight:26.1,paddingVertical:8,paddingHorizontal:4,
+                backgroundColor:'transparent',borderWidth:0,textAlignVertical:'top',
                 ...(Platform.OS === 'web' ? { outlineWidth:0,caretColor:colors['accent-fill'] } as any : {}) }}
             />
-            <View className="flex-row items-center justify-between" style={{marginTop:7}}>
-              <TouchableOpacity accessibilityRole="button" accessibilityLabel="Add a preference" onPress={() => useScoper.getState().openSheet('addConstraint')} hitSlop={8}
-                className="h-9 flex-row items-center gap-x-1.5">
+            <View testID="vee-composer-actions" className="flex-row items-center justify-between" style={{marginTop:6}}>
+              <TouchableOpacity testID="vee-composer-details" accessibilityRole="button" accessibilityLabel="Add a preference" onPress={() => useScoper.getState().openSheet('addConstraint')} hitSlop={4}
+                style={control} className="h-9 flex-row items-center gap-x-1.5 rounded-full px-2.5">
                 <Glyph name="plus" size={14} color={colors['fg-muted']} /><Text className="font-dm text-fine text-taupe">Details</Text>
               </TouchableOpacity>
               <View className="flex-row items-center" style={{gap:9}}>
-                <TouchableOpacity accessibilityRole="button" accessibilityLabel="Focus the Vee composer" onPress={() => focusedInputRef.current?.focus()} hitSlop={4}
+                <TouchableOpacity testID="vee-composer-mic" accessibilityRole="button" accessibilityLabel="Focus the Vee composer" onPress={() => focusedInputRef.current?.focus()} hitSlop={4}
                   style={control} className="h-9 w-9 items-center justify-center rounded-full">
                   <Glyph name="mic" size={16} color={colors.fg} />
                 </TouchableOpacity>
@@ -914,6 +884,7 @@ export default function CreateScreen() {
                 * night rather than a dead button. Anything typed wins. */}
               <TouchableOpacity
                 accessibilityRole="button"
+                testID="vee-composer-send"
                 accessibilityLabel={promptReady ? 'Send' : `Ask Vee: ${askExampleLabel}`}
                 accessibilityState={{ disabled: asking }}
                 activeOpacity={0.82}
@@ -921,7 +892,7 @@ export default function CreateScreen() {
                 disabled={asking}
                 onPress={() => void submitAsk(promptReady ? promptText : askExampleLabel)}
                 style={[primarySurface,{ opacity: asking ? 0.48 : 1 }]}
-                className="h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ember">
+                className="h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ember border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
                 {asking ? (
                   <ActivityIndicator size="small" color={colors['on-accent']} />
                 ) : (
@@ -930,6 +901,7 @@ export default function CreateScreen() {
               </TouchableOpacity>
             </Animated.View>
               </View>
+            </View>
             </View>
           </View>
 
@@ -943,7 +915,7 @@ export default function CreateScreen() {
                 disabled={asking}
                 onPress={() => void submitAsk(promptText)}
                 style={{ backgroundColor: colors['vee-tint'] }}
-                className="flex-row items-center gap-x-2.5 rounded-card px-3 py-3">
+                className="flex-row items-center gap-x-2.5 rounded-card px-3 py-3 border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
                 <Glyph name="spark" size={15} color={colors['vee-strong']} strokeWidth={1.8} />
                 <Text numberOfLines={1} style={{ color: colors['vee-strong'] }} className="min-w-0 flex-1 font-dm-bold text-label">
                   Ask Vee to plan around this
@@ -963,10 +935,10 @@ export default function CreateScreen() {
                   <View
                     style={{
                       backgroundColor: colors['surface-raised'],
-                      borderColor: colors['edge-soft'],
+                      borderColor: colors['edge-faint'],
                       borderWidth: StyleSheet.hairlineWidth,
                     }}
-                    className="mt-2 overflow-hidden rounded-card">
+                    className="mt-2 overflow-hidden rounded-card border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
                     {liveMatches.map((match, index) => (
                       <TouchableOpacity
                         key={`${match.kind}-${match.id}`}
@@ -979,10 +951,10 @@ export default function CreateScreen() {
                           router.push(match.href as never);
                         }}
                         style={{ backgroundColor: index === 0 ? colors['surface-soft'] : colors['surface-raised'] }}
-                        className={`min-h-[64px] flex-row items-center gap-x-3 px-3 py-2.5 ${index === 0 ? 'rounded-card' : 'border-t border-edge-faint2'}`}>
+                        className={`min-h-[64px] flex-row items-center gap-x-3 px-3 py-2.5 ${index === 0 ? 'rounded-card' : 'border-t border-edge-faint'} border shadow-soft-light dark:shadow-soft-dark`}>
                         <View
                           style={{ backgroundColor: colors['vee-tint'] }}
-                          className="h-10 w-10 shrink-0 items-center justify-center rounded-full">
+                          className="h-10 w-10 shrink-0 items-center justify-center rounded-full border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
                           <Glyph name={SEARCH_RESULT_GLYPHS[match.kind]} size={18} color={colors['vee-strong']} strokeWidth={1.65} />
                         </View>
 
@@ -1011,9 +983,11 @@ export default function CreateScreen() {
            * computed on every render, and three comparable options read as a
            * choice rather than a verdict. */}
           <View className="mt-4">
-            <TouchableOpacity accessibilityRole="button" accessibilityLabel="Start from a shape" accessibilityState={{expanded:showShapes}}
-              onPress={()=>setShowShapes(value=>!value)} activeOpacity={.78} className="min-h-[36px] flex-row items-center justify-between">
-              <Text className="font-dm text-fine text-taupe">Start from a shape</Text>
+            <TouchableOpacity testID="vee-shapes-toggle" accessibilityRole="button" accessibilityLabel="Start from a shape" accessibilityState={{expanded:showShapes}}
+              onPress={()=>setShowShapes(value=>!value)} style={raisedSurface} activeOpacity={.78}
+              className="min-h-[52px] flex-row items-center justify-between gap-x-3 rounded-setting px-3 py-2.5">
+              <Glyph name="route" size={17} color={colors['fg-muted']} />
+              <Text className="min-w-0 flex-1 font-dm-medium text-label text-ink">Start from a shape</Text>
               <View style={{transform:[{rotate:showShapes?'270deg':'90deg'}]}}><Glyph name="chevron" size={13} color={colors['fg-muted']} /></View>
             </TouchableOpacity>
             {showShapes?<View className="mt-2">
@@ -1034,8 +1008,8 @@ export default function CreateScreen() {
                   </Text>
                 </View>
 
-                <View className="mt-2">
-                  {readyMadeCards.map((card, index) => (
+                <View className="mt-2 gap-y-2">
+                  {readyMadeCards.map((card) => (
                     <ShapeTile
                       key={`${card.theme}-${card.solved.restaurant?.id ?? ''}-${card.solved.event?.id ?? ''}`}
                       theme={card.theme}
@@ -1057,8 +1031,8 @@ export default function CreateScreen() {
                   accessibilityLabel={`Reshuffle, ${readyMadeCards.length} new shapes`}
                   activeOpacity={0.72}
                   onPress={cycleSet}
-                  style={{ borderTopColor: colors['edge-soft'], borderTopWidth: StyleSheet.hairlineWidth }}
-                  className="h-12 flex-row items-center justify-center gap-x-2">
+                  style={control}
+                  className="mt-3 h-11 flex-row items-center justify-center gap-x-2 rounded-full">
                   <Glyph name="refresh" size={16} color={colors['fg-muted']} strokeWidth={1.7} />
                   <Text className="font-dm-medium text-meta text-taupe">
                     Reshuffle · {readyMadeCards.length} new shapes
