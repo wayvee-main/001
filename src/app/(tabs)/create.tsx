@@ -983,7 +983,7 @@ export default function CreateScreen() {
            * computed on every render, and three comparable options read as a
            * choice rather than a verdict. */}
           <View className="mt-4">
-            <TouchableOpacity testID="vee-shapes-toggle" accessibilityRole="button" accessibilityLabel="Start from a shape" accessibilityState={{expanded:showShapes}}
+            <TouchableOpacity testID="vee-shapes-toggle" accessibilityRole="button" accessibilityLabel="Start from a shape" accessibilityState={{expanded:showShapes}} aria-expanded={showShapes}
               onPress={()=>setShowShapes(value=>!value)} style={raisedSurface} activeOpacity={.78}
               className="min-h-[52px] flex-row items-center justify-between gap-x-3 rounded-setting px-3 py-2.5">
               <Glyph name="route" size={17} color={colors['fg-muted']} />

@@ -35,7 +35,20 @@ jobs:
       - run: npm run lint
       - run: npm test -- --runInBand
       - run: npm run tokens:contrast
+      - name: Restore this app build
+        id: web-build-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: dist
+          key: vee-polish-2026-10-20-web-${{ hashFiles('src/**', 'assets/**', 'package*.json', 'app.json', 'tailwind.config.js', 'babel.config.js', 'metro.config.js', 'tsconfig.json') }}
       - run: npm run build:web
+        if: steps.web-build-cache.outputs.cache-hit != 'true'
+      - name: Keep the verified app build for browser checks
+        if: steps.web-build-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: dist
+          key: ${{ steps.web-build-cache.outputs.cache-primary-key }}
       - name: Install browser preview tools
         run: |
           npm install --prefix /tmp/wayvee-polish-tools --no-package-lock --ignore-scripts playwright

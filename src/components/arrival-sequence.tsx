@@ -535,7 +535,6 @@ function ConfirmStep({
   onChangeNote: (value: string) => void;
   onWalkBudget: (value: WalkBudget) => void;
 }) {
-  const colors = useThemeColors();
   const ink = useWashInk();
   const [expandedGroup, setExpandedGroup] = useState<'food' | 'comfort' | null>(null);
   const otherSelected = chips.includes(OTHER_RESTRICTION);

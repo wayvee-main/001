@@ -103,12 +103,12 @@ async function main(){
   await page.waitForFunction(()=>![...document.querySelectorAll('div')].some(el=>{
     const s=getComputedStyle(el),r=el.getBoundingClientRect();
     return s.zIndex==='20'&&s.position==='absolute'&&r.width>100&&r.height>100&&s.display!=='none';
-  }),{timeout:15000});
+  }),null,{timeout:15000});
   await page.waitForFunction(()=>['eat','bars','routes','events'].every(k=>{
     const frame=document.querySelector('[data-testid="home-tile-image-'+k+'"]');
     const img=frame?.tagName==='IMG'?frame:frame?.querySelector('img');
     return img?.complete&&img.naturalWidth>0;
-  }),{timeout:30000});
+  }),null,{timeout:30000});
   for(const width of [320,390,736]){
     await page.setViewportSize({width,height:844});
     await page.waitForTimeout(180);
