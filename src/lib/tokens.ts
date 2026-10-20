@@ -55,15 +55,15 @@ export const ROLES: Record<string, ThemeValue> = {
   'on-selected': { light: '#FFF7ED', dark: '#FFF7ED' },
   'selected-glyph': { light: '#F5BCA7', dark: '#F0835C' },
   'navigation-muted': { light: '#D8C7DD', dark: '#D8C7DD' },
-  // Light tiles match search/navigation; Discover keeps the Oyster paper.
-  'home-tile': { light: '#FFFCF8', dark: '#302A2F' },
+  // Home tiles share Collections' Oyster paper; search/navigation stay separate.
+  'home-tile': { light: '#F5F0E9', dark: '#29252A' },
   'surface-discovery': { light: '#F7F2EC', dark: '#302A2F' }, // Discover notes and Vee composer
   'home-tile-glyph': { light: '#963D24', dark: '#F0835C' },
   'home-tile-well': { light: '#F9E5D8', dark: '#48312E' },
-  'tile-eat': { light: '#FFFCF8', dark: '#302A2F' },
-  'tile-bars': { light: '#FFFCF8', dark: '#302A2F' },
-  'tile-routes': { light: '#FFFCF8', dark: '#302A2F' },
-  'tile-events': { light: '#FFFCF8', dark: '#302A2F' },
+  'tile-eat': { light: '#F5F0E9', dark: '#29252A' },
+  'tile-bars': { light: '#F5F0E9', dark: '#29252A' },
+  'tile-routes': { light: '#F5F0E9', dark: '#29252A' },
+  'tile-events': { light: '#F5F0E9', dark: '#29252A' },
   'fg-accent': { light: '#963D24', dark: '#F0835C' }, // readable accent text across the wash
   // One theme-specific orange for action fills, icons, rails and active tabs.
   accent: { light: '#B84624', dark: '#F0835C' }, // brand accent — icons, borders, rails
@@ -194,9 +194,10 @@ export const RADIUS: Record<string, string> = {
  * dark shadows don't separate from an already-dark background). Tint is
  * resolved from semantic roles at render time (see src/lib/shadows.ts): ink
  * in light mode and the deepest surface in dark, preventing a bright halo. */
+/** All four elevation levels are 10% stronger: lift, blur and opacity. */
 export const ELEVATION: Record<number, { blur: number; y: number; opacity: ThemeValue }> = {
-  1: { blur: 8, y: 2, opacity: { light: '0.06', dark: '0.30' } }, // thumbnails, list rows
-  2: { blur: 12, y: 3, opacity: { light: '0.07', dark: '0.38' } }, // default card
-  3: { blur: 16, y: 4, opacity: { light: '0.09', dark: '0.42' } }, // hero/detail image
-  4: { blur: 24, y: 8, opacity: { light: '0.12', dark: '0.50' } }, // sheet, modal, floating
+  1: { blur: 8.8, y: 2.2, opacity: { light: '0.066', dark: '0.33' } },
+  2: { blur: 13.2, y: 3.3, opacity: { light: '0.077', dark: '0.418' } },
+  3: { blur: 17.6, y: 4.4, opacity: { light: '0.099', dark: '0.462' } },
+  4: { blur: 26.4, y: 8.8, opacity: { light: '0.132', dark: '0.55' } },
 };

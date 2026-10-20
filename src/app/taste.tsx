@@ -106,7 +106,7 @@ export default function TasteScreen() {
                   accessibilityLabel={`Remove ${tag} from your taste profile`}
                   activeOpacity={0.7}
                   onPress={() => removeTasteTag(tag)}
-                  className="flex-row items-center gap-x-1.5 rounded-full bg-ember px-3 py-[7px] shadow-soft-light dark:shadow-soft-dark">
+                  className="flex-row items-center gap-x-1.5 rounded-full bg-ember px-3 py-[7px] shadow-soft-light dark:shadow-soft-dark border border-edge-faint">
                   <Text className="font-dm-medium text-label text-on-accent">{tag}</Text>
                   <Cross />
                 </TouchableOpacity>
@@ -128,7 +128,7 @@ export default function TasteScreen() {
                 onSubmitEditing={submitCustomTag}
                 maxLength={40}
                 accessibilityLabel="New taste tag"
-                className="flex-1 rounded-full border border-edge-faint bg-cream px-3.5 py-2 font-dm text-label text-ink"
+                className="flex-1 rounded-full border border-edge-faint bg-cream px-3.5 py-2 font-dm text-label text-ink shadow-soft-light dark:shadow-soft-dark"
               />
               <TouchableOpacity
                 accessibilityRole="button"
@@ -137,7 +137,7 @@ export default function TasteScreen() {
                 disabled={!customTag.trim()}
                 onPress={submitCustomTag}
                 style={!customTag.trim() ? { opacity: 0.5 } : undefined}
-                className="rounded-full bg-ember px-4 py-2 shadow-soft-light dark:shadow-soft-dark">
+                className="rounded-full bg-ember px-4 py-2 shadow-soft-light dark:shadow-soft-dark border border-edge-faint">
                 <Text className="font-dm-medium text-label text-on-accent">Add</Text>
               </TouchableOpacity>
             </View>
@@ -154,7 +154,7 @@ export default function TasteScreen() {
                     accessibilityLabel={`Add ${tag} to your taste profile`}
                     activeOpacity={0.7}
                     onPress={() => addTasteTag(tag)}
-                    className="rounded-full border border-edge-faint bg-shell px-3 py-[7px]">
+                    className="rounded-full border border-edge-faint bg-shell px-3 py-[7px] shadow-soft-light dark:shadow-soft-dark">
                     <Text className="font-dm-medium text-label text-ink">+ {tag}</Text>
                   </TouchableOpacity>
                 ))}
@@ -239,7 +239,7 @@ export default function TasteScreen() {
               setConfirmBeforeLearning(next);
               void saveConfirmBeforeLearning(next);
             }}
-            className={`h-6 w-12 justify-center rounded-full p-0.5 ${confirmBeforeLearning ? 'items-end bg-ember' : 'items-start bg-sand'}`}>
+            className={`h-6 w-12 justify-center rounded-full p-0.5 ${confirmBeforeLearning ? 'items-end bg-ember' : 'items-start bg-sand'} border border-edge-faint shadow-soft-light dark:shadow-soft-dark`}>
             <View className="h-5 w-5 rounded-full bg-white" />
           </TouchableOpacity>
         </RaisedView>

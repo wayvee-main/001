@@ -1,4 +1,5 @@
 import { useColorScheme } from 'nativewind';
+import { useThemeColors } from '@/lib/theme';
 
 /**
  * The arrival sequence's own warmer ink and translucent-control ramp. Its
@@ -134,5 +135,11 @@ export type WashInk = WashRamp;
 
 export function useWashInk(): WashInk {
   const { colorScheme } = useColorScheme();
-  return colorScheme === 'light' ? WASH.light : WASH.dark;
+  const colors = useThemeColors();
+  const ramp = colorScheme === 'light' ? WASH.light : WASH.dark;
+  return { ...ramp, cardBorder: colors['edge-faint'], cardDivider: colors['edge-faint'],
+    chipBorder: colors['edge-faint'], chipSelectedBorder: colors['edge-faint'],
+    optionSelectedBorder: colors['edge-faint'], stateSelectedBorder: colors['edge-faint'],
+    walkSelectedBorder: colors['edge-faint'], fieldActiveBorder: colors['edge-faint'] };
+
 }

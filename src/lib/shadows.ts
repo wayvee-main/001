@@ -34,5 +34,5 @@ export function useControlSurface(selected = false, primary = false): ViewStyle 
   const colors = useThemeColors();
   const surface = useRaisedSurface(1);
   const fill = primary ? colors['accent-fill'] : selected ? colors['selected-surface'] : colors['surface-raised'];
-  return { ...surface, backgroundColor: fill, borderColor: primary || selected ? fill : colors['edge-faint'] };
+  return { ...surface, backgroundColor: fill, borderColor: colors['edge-faint'] };
 }

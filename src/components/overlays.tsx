@@ -209,7 +209,7 @@ function SheetBase({ children, scrollable = false }: { children: ReactNode; scro
         }}>
         <View
           style={{ width: '100%', maxWidth: 720, maxHeight: '100%', paddingBottom: 28 + insets.bottom }}
-          className="rounded-t-sheet bg-shell pt-2.5">
+          className="rounded-t-sheet bg-shell pt-2.5 border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
           {scrollable ? (
             <ScrollView
               showsVerticalScrollIndicator={false}
@@ -534,7 +534,7 @@ export function AuthForm({
         disabled={busy}
         activeOpacity={0.75}
         onPress={googleAccess}
-        className={`mt-4 h-[48px] flex-row items-center justify-center gap-x-2.5 rounded-full border border-edge-faint bg-cream ${busy ? 'opacity-60' : ''}`}>
+        className={`mt-4 h-[48px] flex-row items-center justify-center gap-x-2.5 rounded-full border border-edge-faint bg-cream ${busy ? 'opacity-60' : ''} shadow-soft-light dark:shadow-soft-dark`}>
         {busyAction === 'google' ? <ActivityIndicator color={colors.fg} /> : <GoogleLogo size={17} />}
         <Text className="font-dm-medium text-[13.5px] text-ink">Continue with Google</Text>
       </TouchableOpacity>
@@ -562,7 +562,7 @@ export function AuthForm({
       </View>
 
       {error || authError ? (
-        <View className="mt-3 rounded-control border border-edge-faint bg-coral-50 px-3.5 py-2.5">
+        <View className="mt-3 rounded-control border border-edge-faint bg-coral-50 px-3.5 py-2.5 shadow-soft-light dark:shadow-soft-dark">
           <Text accessibilityLiveRegion="polite" className="font-dm text-[12px] leading-[17px] text-peach">{error || authError}</Text>
         </View>
       ) : null}
@@ -579,7 +579,7 @@ export function AuthForm({
         disabled={busy}
         activeOpacity={0.82}
         onPress={submit}
-        className={`mt-4 h-[48px] items-center justify-center rounded-full bg-ember shadow-soft-light dark:shadow-soft-dark ${busy ? 'opacity-60' : ''}`}>
+        className={`mt-4 h-[48px] items-center justify-center rounded-full bg-ember shadow-soft-light dark:shadow-soft-dark ${busy ? 'opacity-60' : ''} border border-edge-faint`}>
         {busyAction === 'email' ? <ActivityIndicator color={colors['on-accent']} /> : <Text className="font-dm-bold text-[14px] text-on-accent">{submitLabel}</Text>}
       </TouchableOpacity>
 
@@ -630,7 +630,7 @@ function PostVisitSheet() {
             accessibilityRole="button"
             activeOpacity={0.8}
             onPress={() => void rateVisit(option.rating)}
-            className="flex-1 items-center gap-y-1.5 rounded-card border border-edge-faint bg-cream py-3.5">
+            className="flex-1 items-center gap-y-1.5 rounded-card border border-edge-faint bg-cream py-3.5 shadow-soft-light dark:shadow-soft-dark">
             <Text style={{ fontSize: 24 }}>{option.emoji}</Text>
             <Text className="font-dm-medium text-label text-ink">{option.label}</Text>
           </TouchableOpacity>
@@ -670,7 +670,7 @@ function LogoutSheet() {
           activeOpacity={0.8}
           disabled={signingOut}
           onPress={confirmLogout}
-          className="items-center rounded-full bg-ember py-[15px] shadow-soft-light dark:shadow-soft-dark" style={{ opacity: signingOut ? 0.6 : 1 }}>
+          className="items-center rounded-full bg-ember py-[15px] shadow-soft-light dark:shadow-soft-dark border border-edge-faint" style={{ opacity: signingOut ? 0.6 : 1 }}>
           <Text className="font-dm-medium text-[14.5px] text-on-accent">{signingOut ? 'Logging out…' : 'Log out'}</Text>
         </TouchableOpacity>
         <TouchableOpacity accessibilityRole="button" activeOpacity={0.8} disabled={signingOut} onPress={closeSheet} className="items-center rounded-full border border-edge-faint bg-surface-raised py-[15px] shadow-soft-light dark:shadow-soft-dark">
@@ -869,7 +869,7 @@ function StaySheet() {
           disabled={busy !== null}
           activeOpacity={0.82}
           onPress={save}
-          className={`flex-row items-center justify-center gap-x-2 rounded-full bg-accent-fill py-[15px] ${busy ? 'opacity-60' : ''}`}>
+          className={`flex-row items-center justify-center gap-x-2 rounded-full bg-accent-fill py-[15px] ${busy ? 'opacity-60' : ''} border border-edge-faint shadow-soft-light dark:shadow-soft-dark`}>
           {busy === 'save' ? <ActivityIndicator size="small" color={c['on-accent']} /> : null}
           <Text className="font-dm-bold text-[14px] text-on-accent">{stay ? 'Save changes' : 'Link my stay'}</Text>
         </TouchableOpacity>
@@ -1009,7 +1009,7 @@ function SearchOverlay() {
         opacity: anim,
       }}>
       <View className="flex-row items-center gap-x-2.5">
-        <View className="flex-1 flex-row items-center gap-x-2.5 rounded-full border border-edge-faint bg-surface-search px-4 py-1">
+        <View className="flex-1 flex-row items-center gap-x-2.5 rounded-full border border-edge-faint bg-surface-search px-4 py-1 shadow-soft-light dark:shadow-soft-dark">
           <SearchIcon size={15} />
           <TextInput
             autoFocus
@@ -1109,7 +1109,7 @@ function SearchOverlay() {
                       accessibilityRole="button"
                       activeOpacity={0.7}
                       onPress={() => goRecent(entry)}
-                      className="rounded-full border border-edge-faint bg-shell px-3.5 py-1.5">
+                      className="rounded-full border border-edge-faint bg-shell px-3.5 py-1.5 shadow-soft-light dark:shadow-soft-dark">
                       <Text numberOfLines={1} className="font-dm-medium text-label text-ink">{entry.label}</Text>
                     </TouchableOpacity>
                   ))}
@@ -1237,7 +1237,7 @@ function AskSheet() {
           onChangeText={setText}
           placeholder="Dinner and something with live music, walking distance, back by 10:30"
           placeholderTextColor="#9C9086"
-          className="min-h-[64px] rounded-card border border-edge-faint bg-shell px-3.5 py-3 font-dm text-[14px] text-ink"
+          className="min-h-[64px] rounded-card border border-edge-faint bg-shell px-3.5 py-3 font-dm text-[14px] text-ink shadow-soft-light dark:shadow-soft-dark"
         />
         {moodVocabulary.length > 0 ? (
           <View className="flex-row flex-wrap gap-2">
@@ -1251,7 +1251,7 @@ function AskSheet() {
           activeOpacity={0.85}
           disabled={busy || !text.trim()}
           onPress={submit}
-          className={`items-center rounded-full py-[15px] ${busy || !text.trim() ? 'bg-sand' : 'bg-accent-fill'}`}>
+          className={`items-center rounded-full py-[15px] ${busy || !text.trim() ? 'bg-sand' : 'bg-accent-fill'} border border-edge-faint shadow-soft-light dark:shadow-soft-dark`}>
           {busy ? <ActivityIndicator color={colors['on-accent']} /> : <Text className="font-dm-bold text-[14.5px] text-on-accent">Plan it</Text>}
         </TouchableOpacity>
       </View>

@@ -87,7 +87,7 @@ module.exports = {
   sheet: "25px",
   },
   boxShadow: {
-    'soft-light': '0 2px 8px rgba(49, 32, 57, 0.06)',
-    'soft-dark': '0 2px 8px rgba(16, 13, 19, 0.3)',
+    'soft-light': '0 2.2px 8.8px rgba(49, 32, 57, 0.066)',
+    'soft-dark': '0 2.2px 8.8px rgba(16, 13, 19, 0.33)',
   },
 };

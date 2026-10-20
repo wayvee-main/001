@@ -32,7 +32,7 @@ function Note({name,caption,facts,image,index,divider,onPress,testID,accessibili
   const {width}=useWindowDimensions(),narrow=width<=360;
   const surface=useRaisedSurface(1,'discovery');
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Explore ${accessibilityName||name}`} onPress={onPress} activeOpacity={.78} testID={testID}
-    className={`items-start py-3.5 ${strip?'':`flex-row ${divider&&!elevated?'border-t border-edge-soft':''}`}`}
+    className={`items-start py-3.5 ${strip?'':`flex-row ${divider&&!elevated?'border-t border-edge-faint':''}`}`}
     style={[strip?{width:137,flexShrink:0}:{gap:12},elevated?{...surface,borderWidth:0,borderRadius:12,padding:8}:null]}>
     {elevated?<View pointerEvents="none" style={{position:'absolute',inset:0,borderRadius:12,borderWidth:1,borderColor:surface.borderColor}} />:null}
     {strip&&image?<Photo uri={image} radius={8} style={{width:elevated?121:137,height:73,marginBottom:11}} />:null}

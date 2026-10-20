@@ -91,7 +91,7 @@ export default function SavedPlacesScreen() {
                             event.stopPropagation();
                             toggleSaved(place.kind, place.id, place.name);
                           }}
-                          className="rounded-full bg-blush px-3 py-2">
+                          className="rounded-full bg-blush px-3 py-2 border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
                           <Text className="font-dm-medium text-meta text-peach">Remove</Text>
                         </TouchableOpacity>
                         <ChevronRight />

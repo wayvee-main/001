@@ -100,7 +100,7 @@ export function StopRow({
           accessibilityLabel={locked ? `Unlock ${title}` : `Lock ${title} so Regenerate skips it`}
           activeOpacity={0.72}
           onPress={onToggleLock}
-          className={`h-8 w-8 shrink-0 items-center justify-center rounded-full ${locked ? 'bg-blush' : 'bg-surface'}`}>
+          className={`h-8 w-8 shrink-0 items-center justify-center rounded-full ${locked ? 'bg-blush' : 'bg-surface'} border border-edge-faint shadow-soft-light dark:shadow-soft-dark`}>
           <Icon d={locked ? ICON_PATHS.lock : ICON_PATHS.lockOpen} size={13} color={locked ? colors.rust : colors.taupe} strokeWidth={1.9} />
         </TouchableOpacity>
       ) : null}

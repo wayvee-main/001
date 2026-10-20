@@ -55,10 +55,10 @@ export default function HomeScreen() {
     <Text className="font-fraunces text-ink" style={{fontSize:25,lineHeight:29,letterSpacing:-.8}}>Shall we wander?</Text>
     <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Search the city of ${city}`} onPress={()=>s.openSheet('search')}
       style={[control,{minHeight:52,backgroundColor:colors['surface-search']}]}
-      className="flex-row items-center gap-x-2.5 rounded-full bg-surface-search pl-3.5 pr-[7px] py-[7px]">
+      className="flex-row items-center gap-x-2.5 rounded-full bg-surface-search pl-3.5 pr-[7px] py-[7px] border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
       <Glyph name="search" size={17} color={colors['fg-muted']} />
       <Text testID="home-search-label" numberOfLines={1} className="min-w-0 flex-1 font-dm text-label text-taupe">{searchLabel}</Text>
-      <View className="h-[37px] w-[37px] items-center justify-center rounded-full bg-accent-fill">
+      <View className="h-[37px] w-[37px] items-center justify-center rounded-full bg-accent-fill border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
         <Glyph name="arrow" size={17} color={colors['on-accent']} />
       </View>
     </TouchableOpacity>
@@ -76,7 +76,7 @@ export default function HomeScreen() {
           {quickActions.map((action)=><TouchableOpacity key={action.id} accessibilityRole="button"
             accessibilityLabel={`${action.intent}: ${action.name}`} activeOpacity={.72} onPress={()=>router.push(action.href)}
             style={[control,{backgroundColor:light?colors['surface-search']:colors['surface-raised'],maxWidth:190}]}
-            className="min-h-[34px] flex-row items-center gap-x-1.5 rounded-full px-2.5 py-[7px]" hitSlop={{top:6,bottom:6}}>
+            className="min-h-[34px] flex-row items-center gap-x-1.5 rounded-full px-2.5 py-[7px] border border-edge-faint shadow-soft-light dark:shadow-soft-dark" hitSlop={{top:6,bottom:6}}>
             <Glyph name={action.glyph} size={13} color={colors['fg-muted']} />
             <Text numberOfLines={1} className="min-w-0 shrink font-dm text-fine text-ink">{action.name}</Text>
           </TouchableOpacity>)}
@@ -84,10 +84,10 @@ export default function HomeScreen() {
       </>:null}
     </View>
     <HomeEveningRibbon onPress={()=>router.push('/create')} />
-    <View className="gap-y-3 border-t border-edge-soft pt-4">
+    <View className="gap-y-3 border-t border-edge-faint pt-4">
       <SectionHeading title="Around you" /><AroundYou tiles={tiles} />
     </View>
-    <View className="gap-y-3 border-t border-edge-soft pt-4">
+    <View className="gap-y-3 border-t border-edge-faint pt-4">
       <SectionHeading title="For you" />
       <View className="flex-row items-center justify-between"><Text className="font-dm-medium text-body text-ink">Nearest</Text>
         <TouchableOpacity accessibilityRole="button" accessibilityLabel="See all nearest places" onPress={()=>router.push('/nearest')} hitSlop={10}>
@@ -95,7 +95,7 @@ export default function HomeScreen() {
       <View testID="nearest-preview" className="gap-y-2">
         {nearest.slice(0,3).map(x=><TouchableOpacity key={x.href} accessibilityRole="button" accessibilityLabel={`View ${x.name}`} onPress={()=>router.push(x.href)}
           style={[surface,{minHeight:83}]}
-          className="flex-row items-center gap-x-3 rounded-setting bg-surface-raised px-[11px] py-[11px]">
+          className="flex-row items-center gap-x-3 rounded-setting bg-surface-raised px-[11px] py-[11px] border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
           <Photo uri={x.image} fallbackGlyph={x.thumbnailGlyph} fallbackLabel={`Photo unavailable for ${x.name}`} radius={11} style={{width:58,height:58}} />
           <View className="min-w-0 flex-1"><Text numberOfLines={2} className="font-dm-medium text-card-name text-ink">{x.name}</Text>
             <Text className="mt-1 font-dm text-fine text-taupe">{[x.cuisine,x.price,x.distanceLabel].filter(Boolean).join(' · ')}</Text></View>

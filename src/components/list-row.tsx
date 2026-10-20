@@ -57,7 +57,7 @@ export function ListRow({
           {title}
         </Text>
         {badge ? (
-          <View className={`mt-1 self-start rounded-full px-2 py-[2px] ${badgeTone === 'accent' ? 'bg-blush' : 'bg-sage'}`}>
+          <View className={`mt-1 self-start rounded-full px-2 py-[2px] ${badgeTone === 'accent' ? 'bg-blush' : 'bg-sage'} border border-edge-faint shadow-soft-light dark:shadow-soft-dark`}>
             <Text numberOfLines={1} ellipsizeMode="tail" className={`font-dm-medium text-[10px] ${badgeTone === 'accent' ? 'text-peach' : 'text-pine'}`}>
               {badge}
             </Text>

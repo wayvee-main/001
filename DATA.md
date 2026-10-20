@@ -51,7 +51,8 @@ populate the backend immediately, ahead of the next deploy.
 Home's four **Window Cards** bundle venue-owned category photos for Oakland
 from `assets/images/home-windows/README.md`. They retain the complete source
 frame in the bundled files, avoiding remote-load failures. Home displays every
-category in the same Events-sized 2.4:1 frame, using cover fit without stretching.
+category in a square frame, retaining the previous Events-sized width (up to
+168px) and matching height to width, using cover fit without stretching.
 They represent categories rather than current dishes, artists or availability.
 Oakland's photos are not reused for another city. A missing or failed photo
 keeps its category glyph while the real inventory count and action remain.

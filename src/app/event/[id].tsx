@@ -205,7 +205,7 @@ export default function EventScreen() {
       children: (
         <View className="flex-row flex-wrap gap-1.5">
           {(ev.vibeTags ?? []).map((tag) => (
-            <View key={tag} className="rounded-full border border-edge-faint bg-shell px-[11px] py-1.5">
+            <View key={tag} className="rounded-full border border-edge-faint bg-shell px-[11px] py-1.5 shadow-soft-light dark:shadow-soft-dark">
               <Text className="font-dm text-meta text-ink">{tag}</Text>
             </View>
           ))}

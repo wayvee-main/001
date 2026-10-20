@@ -75,7 +75,7 @@ export function PlanFooter({
           onPress={leading.onPress}
           className={`h-11 flex-row items-center justify-center gap-x-2 rounded-full border border-edge-faint bg-shell ${
             actions.length ? 'shrink-0 px-4' : 'flex-1'
-          }`}>
+          } shadow-soft-light dark:shadow-soft-dark`}>
           <Icon d={leading.icon} size={15} color={colors['fg-muted']} strokeWidth={2} />
           <Text numberOfLines={1} className="font-dm-bold text-label text-ink">{leading.label}</Text>
         </TouchableOpacity>

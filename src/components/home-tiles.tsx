@@ -24,7 +24,7 @@ export type CountTile = {
   onPress: () => void;
 };
 
-/** All four photos share Events' landscape frame, regardless of source size. */
+/** Square thumbnail windows keep the previous widths, including the 168px cap. */
 function TileWindow({ tile }: { tile: CountTile }) {
   const colors = useThemeColors();
   const [failedImage, setFailedImage] = useState<string | number>();
@@ -35,7 +35,7 @@ function TileWindow({ tile }: { tile: CountTile }) {
     <View testID={`home-tile-window-${tile.key}`} style={styles.window}>
       {showImage ? (
         <View testID={`home-tile-photo-frame-${tile.key}`}
-          style={styles.photoFrame}>
+          style={[styles.photoFrame,{borderWidth:1,borderColor:colors['edge-faint']}]}>
           <Image
             testID={`home-tile-image-${tile.key}`}
             source={tile.image}
@@ -94,7 +94,7 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
               activeOpacity={0.78}
               onPress={tile.onPress}
               style={[surface, { backgroundColor: colors['home-tile'] }]}
-              className="min-h-[146px] min-w-0 flex-1 rounded-panel p-[9px]">
+              className="min-h-[146px] min-w-0 flex-1 rounded-panel p-[9px] border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
               <TileWindow tile={tile} />
               <View className="mt-1.5 flex-row items-baseline justify-between gap-x-1.5">
                 <Text numberOfLines={1} className="min-w-0 shrink font-fraunces text-[20px] leading-[24px] text-ink">{tile.label}</Text>
@@ -116,8 +116,8 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
 }
 
 const styles = StyleSheet.create({
-  window: { height: 70, width: '100%', borderRadius: 13, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
-  photoFrame: { width: '100%', maxWidth: 168, aspectRatio: 2.4, borderRadius: 13, overflow: 'hidden' },
+  window: { width: '100%', maxWidth: 168, aspectRatio: 1, alignSelf: 'center', borderRadius: 13, overflow: 'hidden' },
+  photoFrame: { width: '100%', height: '100%', borderRadius: 13, overflow: 'hidden' },
   fallback: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   fade: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 18 },
 });
