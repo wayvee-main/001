@@ -35,14 +35,14 @@ async function tab(page,name){
 async function checkFilled(page,label){
   const glyphs=page.locator('[data-testid^="filled-glyph-"]').filter({visible:true});
   const items=await glyphs.evaluateAll(nodes=>nodes.map(n=>{
-    const s=getComputedStyle(n),b=n.getBBox();
-    return {id:n.getAttribute('data-testid'),fill:s.fill,stroke:s.strokeWidth,paths:n.querySelectorAll('path').length,width:b.width,height:b.height};
+    const s=getComputedStyle(n),b=n.getBoundingClientRect();
+    return {id:n.getAttribute('data-testid'),fill:s.fill,stroke:s.strokeWidth,paths:n.querySelectorAll('path,rect,circle,ellipse,polygon,polyline,use').length,width:b.width,height:b.height};
   }));
   assert.ok(items.length>4,label+' shared glyphs rendered');
   for(const item of items){
     assert.ok(item.fill!=='none'&&item.fill!=='rgba(0, 0, 0, 0)',item.id+' has solid theme fill');
     assert.equal(Number.parseFloat(item.stroke),0,item.id+' has no outline');
-    assert.ok(item.paths>0&&item.width>0&&item.height>0,item.id+' non-empty geometry');
+    assert.ok(item.paths>0&&item.width>0&&item.height>0,item.id+' non-empty geometry '+JSON.stringify(item));
   }
   report.checks.push(label+': '+items.length+' official filled glyphs rendered without outlines');
 }
