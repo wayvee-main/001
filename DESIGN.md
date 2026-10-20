@@ -177,11 +177,11 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   Manual Light/Dark choices override the OS in both CSS and inline colors;
   System follows OS changes. Tailwind uses class-based dark mode and the token
   generator emits the matching dark root variables.
-- Shared app glyphs use the official Tabler filled family through `Glyph`.
-  Use a related official filled symbol for subjects without a filled counterpart;
-  keep their existing accessible labels. Legacy path-based icons, search, stars,
-  checks, chevrons and back controls share this treatment. Brand logos keep their
-  own geometry and colors. Filled glyphs use the theme color with no outline.
+- Shared app glyphs use the official Tabler outline family through `Glyph`,
+  with theme-colored strokes and the existing per-control stroke weights.
+  Legacy path-based icons, search, checks, chevrons and back controls retain
+  their original outline treatment. Brand marks and rating stars keep their
+  established geometry and colors.
 - Every in-app Wayvee spiral uses the original three-color/four-stop gradient:
   marigold `#FFC757`, coral `#E85D2C`, cobalt `#6F5BD1`, marigold.
   Solid color props cannot override the mark. Keep its geometry and typography.
