@@ -1,6 +1,5 @@
-import { useId, useState, type ReactNode } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View, type ViewStyle } from 'react-native';
-import Svg, { Circle, Defs, Line, Mask, Rect } from 'react-native-svg';
+import type { ReactNode } from 'react';
+import { ScrollView, Text, TouchableOpacity, View, type ViewStyle } from 'react-native';
 
 import { Glyph } from '@/components/glyph';
 import { VeeMark } from '@/components/vee-mark';
@@ -92,32 +91,18 @@ export function HomeHeader({
   );
 }
 
-/** A compact ticket with a tear-off stub. Masked notches reveal the page wash
- * itself, so they stay correct while scrolling or switching appearance. */
+/** A softly rounded ribbon in the same raised paper as Collections. */
 export function HomeEveningRibbon({onPress}:{onPress:()=>void}) {
   const colors=useThemeColors(),surface=useRaisedSurface(1);
-  const [size,setSize]=useState({width:0,height:0});
-  const maskId='homeTicket'+useId().replace(/[^a-z0-9]/gi,'');
-  const seam=size.width-44;
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel="Open your evening with Vee" activeOpacity={.78}
     onPress={onPress} testID="home-evening-ribbon"
-    onLayout={({nativeEvent:{layout}})=>setSize(current=>current.width===layout.width&&current.height===layout.height?current:{width:layout.width,height:layout.height})}
-    style={[surface,{backgroundColor:'transparent',borderWidth:0,minHeight:61.2,borderRadius:13,flexDirection:'row',alignItems:'stretch'}]}>
-    {size.width>0&&size.height>0?<Svg testID="home-ticket-perforation" pointerEvents="none" accessible={false}
-      width="100%" height="100%" viewBox={`0 0 ${size.width} ${size.height}`} style={StyleSheet.absoluteFill}>
-      <Defs><Mask id={maskId} maskUnits="userSpaceOnUse" x={0} y={0} width={size.width} height={size.height}>
-        <Rect width={size.width} height={size.height} fill="white" />
-        <Circle cx={seam} cy={0} r={4.5} fill="black" /><Circle cx={seam} cy={size.height} r={4.5} fill="black" />
-      </Mask></Defs>
-      <Rect x={.5} y={.5} width={size.width-1} height={size.height-1} rx={12.5} fill={colors.ribbon} stroke={colors['ribbon-edge']} mask={`url(#${maskId})`} />
-      <Line x1={seam} y1={9} x2={seam} y2={size.height-9} stroke={colors['on-ribbon-muted']} strokeOpacity={.28} strokeWidth={1} strokeDasharray="2 3" strokeLinecap="round" />
-    </Svg>:null}
+    style={[surface,{minHeight:61.2,borderRadius:22,flexDirection:'row',alignItems:'stretch'}]}>
     <View className="min-w-0 flex-1 flex-row items-center" style={{paddingHorizontal:11,paddingVertical:8.4,gap:7}}>
-      <VeeMark size={28.9} color={colors['ribbon-glyph']} />
-      <View className="min-w-0 flex-1"><Text numberOfLines={1} className="font-fraunces text-on-ribbon" style={{fontSize:15.3,lineHeight:18}}>Your evening, with Vee</Text>
-        <Text className="mt-0.5 font-dm text-fine text-on-ribbon-muted">A little more city.</Text></View>
+      <VeeMark size={28.9} color={colors['surface-accent']} />
+      <View className="min-w-0 flex-1"><Text numberOfLines={1} className="font-fraunces text-ink" style={{fontSize:15.3,lineHeight:18}}>Your evening, with Vee</Text>
+        <Text className="mt-0.5 font-dm text-fine text-taupe">A little more city.</Text></View>
     </View>
-    <View className="items-center justify-center" style={{width:44}}><Glyph name="arrow" size={16} color={colors['ribbon-glyph']} /></View>
+    <View className="items-center justify-center" style={{width:44}}><Glyph name="arrow" size={16} color={colors['surface-accent']} /></View>
   </TouchableOpacity>;
 }
 

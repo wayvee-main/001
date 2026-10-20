@@ -1,14 +1,14 @@
 import { useRouter } from 'expo-router';
 import { useColorScheme } from 'nativewind';
 import { useMemo, useState } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { HomeEveningRibbon, HomeHeader } from '@/components/home-top';
 import { AroundYou, RailCard, type CountTile } from '@/components/home-tiles';
 import { HRow, Screen, ScreenScroll } from '@/components/layout';
 import { Glyph } from '@/components/glyph';
 import { Photo } from '@/components/photo';
 import { SectionHeading } from '@/components/section-heading';
-import { useActiveCityName } from '@/lib/city';
+import { BUNDLE_CITY, useActiveCity, useActiveCityName } from '@/lib/city';
 import { useNow } from '@/lib/clock';
 import { CRAWLS, CURATED_COLLECTION_ORDER, CURATED_COLLECTIONS, NIGHTLIFE_SPOTS, activeCollectionItems, currentEventListings } from '@/lib/data';
 import { hydrateEventsFromBackend } from '@/lib/events-remote';
@@ -17,17 +17,21 @@ import { activeReminders } from '@/lib/reminders';
 import { useScoper } from '@/lib/store';
 import { useThemeColors } from '@/lib/theme';
 import { useNearestPool } from '@/lib/use-nearest-pool';
+import { useHomeQuickActions } from '@/lib/use-home-quick-actions';
 import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
 import { hydrateWeatherFromBackend } from '@/lib/weather';
 
 export default function HomeScreen() {
   const router = useRouter(), colors = useThemeColors(), s = useScoper();
-  const city = useActiveCityName(), nearest = useNearestPool();
+  const city = useActiveCityName(), citySlug = useActiveCity(), nearest = useNearestPool();
   const surface = useRaisedSurface(1), control = useControlSurface();
   const {colorScheme}=useColorScheme(),light=colorScheme==='light';
   const now = useNow();
+  const quickActions = useHomeQuickActions(now);
+  const searchLabel = `Search the city of ${/^san francisco$/i.test(city) ? 'SF' : city}`;
   const [refreshing, setRefreshing] = useState(false);
-  const collections = useMemo(() => CURATED_COLLECTION_ORDER.map(id => CURATED_COLLECTIONS[id]).filter(x => activeCollectionItems(x,now).length), [now]);
+  const collections = useMemo(() => citySlug===BUNDLE_CITY
+    ? CURATED_COLLECTION_ORDER.map(id => CURATED_COLLECTIONS[id]).filter(x => activeCollectionItems(x,now).length) : [], [now,citySlug]);
   const onRefresh = async () => {
     setRefreshing(true);
     try { await Promise.all([hydrateEventsFromBackend(true), hydratePlacesFromBackend(true), hydrateWeatherFromBackend(true), s.refreshLocation()]); }
@@ -42,30 +46,36 @@ export default function HomeScreen() {
   return <Screen><ScreenScroll gap={18} clearsTabBar refreshing={refreshing} onRefresh={onRefresh}>
     <HomeHeader hasReminders={activeReminders(s.plans,s.stay).length>0}
       onNotifications={()=>router.push('/notifications')} onProfile={()=>router.push('/profile')} />
-    <View>
-      <Text className="font-fraunces text-ink" style={{fontSize:25,lineHeight:29,letterSpacing:-.8}}>Shall we wander?</Text>
-      <Text className="mt-1 font-dm text-label text-taupe">A good evening is closer than you think.</Text>
-    </View>
-    <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Search in ${city}`} onPress={()=>s.openSheet('search')}
+    <Text className="font-fraunces text-ink" style={{fontSize:25,lineHeight:29,letterSpacing:-.8}}>Shall we wander?</Text>
+    <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Search the city of ${city}`} onPress={()=>s.openSheet('search')}
       style={[control,{minHeight:52,backgroundColor:colors['surface-search']}]}
       className="flex-row items-center gap-x-2.5 rounded-full bg-surface-search pl-3.5 pr-[7px] py-[7px]">
       <Glyph name="search" size={17} color={colors['fg-muted']} />
-      <View className="min-w-0 flex-1">
-        <Text numberOfLines={1} className="font-dm text-label text-taupe">Search the city</Text>
-        <Text testID="home-search-city" numberOfLines={1} className="font-dm text-fine text-taupe">{city}</Text>
-      </View>
+      <Text testID="home-search-label" numberOfLines={1} className="min-w-0 flex-1 font-dm text-label text-taupe">{searchLabel}</Text>
       <View className="h-[37px] w-[37px] items-center justify-center rounded-full bg-accent-fill">
         <Glyph name="arrow" size={17} color={colors['on-accent']} />
       </View>
     </TouchableOpacity>
-    <View className="flex-row flex-wrap" style={{gap:6}}>
-      {[{name:s.stay?'Update your stay':'Link your stay',glyph:'briefcase',press:()=>s.openStaySheet()},
-        {name:'Late bites',glyph:'food',press:()=>router.push('/featured?q=late%20bites')},
-        {name:'Open late',glyph:'clock',press:()=>router.push('/featured?q=open%20late')}].map(x=><TouchableOpacity key={x.name} accessibilityRole="button" onPress={x.press}
-          style={x.glyph==='briefcase'?{backgroundColor:colors.ribbon,borderColor:colors['ribbon-edge'],borderWidth:1}:{...control,backgroundColor:light?colors['surface-search']:colors['surface-raised']}}
-          className="flex-row items-center gap-x-1.5 rounded-full px-2.5 py-[7px]" hitSlop={{top:5,bottom:5}}>
-          <Glyph name={x.glyph} size={13} color={x.glyph==='briefcase'?colors['ribbon-glyph']:colors['fg-muted']} /><Text className={x.glyph==='briefcase'?'font-dm text-fine text-on-ribbon':'font-dm text-fine text-ink'}>{x.name}</Text>
-        </TouchableOpacity>)}
+    <View testID="home-quick-actions" className="flex-row items-center gap-x-2">
+      <TouchableOpacity accessibilityRole="button" accessibilityLabel={s.stay?'Update your stay':'Link your stay'} activeOpacity={.74} onPress={()=>s.openStaySheet()} style={control}
+        className="min-h-[34px] shrink-0 flex-row items-center gap-x-1.5 rounded-full px-2.5 py-[7px]" hitSlop={{top:6,bottom:6}}>
+        <Glyph name="briefcase" size={13} color={colors['fg-muted']} />
+        <Text className="font-dm text-fine text-ink">{s.stay?'Update your stay':'Link your stay'}</Text>
+      </TouchableOpacity>
+      {quickActions.length?<>
+        <View testID="home-quick-action-divider" accessibilityElementsHidden importantForAccessibility="no-hide-descendants"
+          style={{width:1,height:20,backgroundColor:colors.edge}} />
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="min-w-0 flex-1"
+          contentContainerStyle={{gap:6,paddingVertical:3,paddingRight:2}}>
+          {quickActions.map((action)=><TouchableOpacity key={action.id} accessibilityRole="button"
+            accessibilityLabel={`${action.intent}: ${action.name}`} activeOpacity={.72} onPress={()=>router.push(action.href)}
+            style={[control,{backgroundColor:light?colors['surface-search']:colors['surface-raised'],maxWidth:190}]}
+            className="min-h-[34px] flex-row items-center gap-x-1.5 rounded-full px-2.5 py-[7px]" hitSlop={{top:6,bottom:6}}>
+            <Glyph name={action.glyph} size={13} color={colors['fg-muted']} />
+            <Text numberOfLines={1} className="min-w-0 shrink font-dm text-fine text-ink">{action.name}</Text>
+          </TouchableOpacity>)}
+        </ScrollView>
+      </>:null}
     </View>
     <HomeEveningRibbon onPress={()=>router.push('/create')} />
     <View className="gap-y-3 border-t border-edge-soft pt-4">

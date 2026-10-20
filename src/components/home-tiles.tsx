@@ -35,7 +35,7 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
   for (let i = 0; i < tiles.length; i += 2) rows.push(tiles.slice(i, i + 2));
 
   return (
-    <View className="gap-y-2.5">
+    <View testID="around-you-grid" className="gap-y-2.5">
       {rows.map((row) => (
         <View key={row.map((tile) => tile.key).join('-')} className="flex-row gap-x-2.5">
           {row.map((tile) => (

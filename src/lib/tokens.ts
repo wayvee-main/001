@@ -49,12 +49,7 @@ export const ROLES: Record<string, ThemeValue> = {
   'fg-muted': { light: '#605463', dark: '#BDAFBD' }, // AA across the original wash
   'card-ink': { light: '#2D2926', dark: '#F5EDE3' },
   'card-muted': { light: '#645D56', dark: '#C3B9AF' },
-  ribbon: { light: '#8E000B', dark: '#8E000B' }, // #280003 lifted by four 5-point HSL lightness steps
-  'on-ribbon': { light: '#FFF7ED', dark: '#FFF7ED' },
-  'on-ribbon-muted': { light: '#DDC7C2', dark: '#DDC7C2' },
-  'ribbon-glyph': { light: '#F0835C', dark: '#F0835C' },
   'surface-accent': { light: '#963D24', dark: '#F0835C' }, // orange glyphs on Oyster cards
-  'ribbon-edge': { light: '#5C3235', dark: '#5C3235' },
   'control-edge': { light: '#E2DBD6', dark: '#4F444D' },
   'selected-surface': { light: '#2B1C35', dark: '#29192E' },
   'on-selected': { light: '#FFF7ED', dark: '#FFF7ED' },

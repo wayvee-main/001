@@ -1,6 +1,6 @@
 # Wayvee design system
 
-The approved October 19, 2026 Oyster palette and editorial refinements are the current UI contract.
+The approved October 20, 2026 Oyster palette and editorial refinements are the current UI contract.
 Palette and dimensions come from `src/lib/tokens.ts`; regenerate the CSS,
 inline palette and Tailwind tokens together with `npm run tokens`.
 
@@ -36,10 +36,22 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   All four tiles share off-white `#FFFCF8` / charcoal `#302A2F`, a faint 1px
   edge, level-1 elevation and serif labels. Glyphs use the common orange on
   subtle `home-tile-well` fills; counts and labels retain the normal theme ink.
-  In light mode, Late bites and Open late share search's off-white fill;
-  dark mode retains their Oyster charcoal fill. Link your stay shares the
-  evening ribbon's burgundy fill and warm light ink in both themes.
-  Home search says “Search the city,” with the selected city subtly below it.
+  In light mode, quick venue chips share search's off-white fill;
+  dark mode retains their Oyster charcoal fill. Link your stay and the evening
+  ribbon share Collections' `surface-raised` fill, normal theme ink and faint edge.
+  Home keeps “Shall we wander?” without supporting subtext. Its one-line search
+  label reads “Search the city of Oakland” for Oakland and uses the active city;
+  San Francisco is shortened to “SF” in the visible label, with the full name
+  retained for accessibility.
+  Link your stay is followed by a faint vertical divider and a horizontal row
+  of two actual local venue chips, opening each venue's existing detail page.
+  They follow the device-local daypart: cafés/breakfast 5–11, lunch 11–14,
+  coffee/a bite 14–17, dinner 17–23, late bites 23–5. Recompute on the live
+  minute clock and on city, location or catalog updates. Use the same trip's
+  five-mile catalog, without changing Nearest's first-24 pool. Favor matching
+  known-open venues; exclude known closures, deduplicate names and avoid
+  generic placeholders when the catalog has no suitable match. Missing hours
+  never imply “Open now.” The divider is omitted when there are no venue chips.
   Chips and buttons share elevation and `edge-faint` borders. Selected choices
   use `selected-surface` / `on-selected`; primary actions use `accent-fill` /
   `on-accent`. Never hardcode white on an accent fill.
@@ -48,13 +60,11 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   text at `#963D24` / `#F0835C`. Legacy category and Vee tints follow Oyster
   surfaces and orange accents. Keep the original gradient Vee mark and the
   original page gradients intact; explicit error states retain their red.
-- “Your evening, with Vee” and Link your stay use the approved burgundy
-  `#8E000B` in both themes, four 5-point HSL lightness steps above the original
-  `#280003`, with warm light `on-ribbon` / `on-ribbon-muted`
-  lettering and coral `ribbon-glyph` icons. The ribbon has a 44px arrow stub,
-  a faint dotted vertical perforation, two 4.5px edge notches,
-  a faint edge and 13px radius. The notches are genuinely transparent so the
-  page wash remains visible through them. Keep its compact 61.2px minimum height.
+- “Your evening, with Vee” uses Collections' raised paper `#F5F0E9` in light
+  mode / charcoal `#29252A` in dark mode, with standard theme lettering and
+  orange `surface-accent` icons. Its smooth 22px corners, faint edge and
+  level-1 elevation match the shared card material. The ticket notches and
+  perforated seam are removed. Keep its compact 61.2px minimum height.
   Home dividers stay faint.
 - For you → Nearest is **three vertical rows**, with **See all** opening `/nearest`.
   The default pool targets 24 real results (at least 20 where the catalog has

@@ -170,6 +170,15 @@ expire, and without a scheduled run the backend keeps serving them.
 
 ## Honesty rules (inherited from the data file header)
 
+Home's quick-action row uses actual venue names from the active trip's
+five-mile place/restaurant catalog. Its live minute clock selects cafés and
+breakfast places in the morning, restaurants at lunch and dinner, coffee/a bite
+in the afternoon, and sourced late-hours venues at night. Known closures are
+excluded and matching known-open places are preferred. Unknown hours remain
+unknown; the chips do not claim “Open now.” Each chip opens the venue's detail
+page. Oakland's curated records are only mixed in for Oakland; other cities
+use their own hydrated place pool. For you → Nearest keeps its existing pool.
+
 - Nothing is invented. Entries without verified depth say so plainly
   (e.g. seeds list "See official site for today's hours").
 - Ratings appear only where a licensed/attributable source is represented —
