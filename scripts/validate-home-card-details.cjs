@@ -231,7 +231,7 @@ async function main(){
   await page.getByText('Ask Vee to plan around this',{exact:true}).waitFor();
   report.checks.push(theme+': live place search responds to typing');
   await input.fill('');
-  await page.getByText('Where to?',{exact:true}).waitFor();
+  await page.getByText('What should change?',{exact:true}).waitFor();
   await tab(page,'Home');
   const offscreen=page.getByTestId('vee-open-letter').getByTestId('vee-spin');
   if(await offscreen.count()){
