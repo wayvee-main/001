@@ -40,28 +40,30 @@ export const PHOTO_NOTE = {
 
 /** Evening Trail notes and Home categories share the same card layout. */
 export function NoteCard({
-  name,caption,facts,image,photo,index,divider,onPress,testID,accessibilityName,
+  name,caption,facts,titleAccessory,image,photo,index,divider,onPress,testID,accessibilityName,
   strip=false,elevated=false,compact=false,cardWidth=PHOTO_NOTE.width,
   tone='discovery',titleTestID='discover-listing-title',
 }: {
-  name:string;caption?:string;facts:ReactNode;image?:string;photo?:ReactNode;index?:number;
+  name:string;caption?:string;facts?:ReactNode;titleAccessory?:ReactNode;image?:string;photo?:ReactNode;index?:number;
   divider:boolean;onPress:()=>void;testID:string;accessibilityName?:string;
   strip?:boolean;elevated?:boolean;compact?:boolean;cardWidth?:number;
   tone?:'neutral'|'discovery';titleTestID?:string;
 }) {
   const {width}=useWindowDimensions(),narrow=width<=360;
   const surface=useRaisedSurface(1,tone);
+  const title=<Text testID={titleTestID} numberOfLines={compact?1:strip?3:undefined} className="font-fraunces text-ink"
+    style={{fontSize:strip?17:18,lineHeight:strip?19.55:20.7,letterSpacing:-.2,...(titleAccessory?{flex:1,minWidth:0}:null)}}>{briefWords(name,5)}</Text>;
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Explore ${accessibilityName||name}`} onPress={onPress} activeOpacity={.78} testID={testID}
-    className={`items-start py-3.5 ${strip?'':`flex-row ${divider&&!elevated?'border-t border-edge-faint':''}`}`}
-    style={[strip?{width:cardWidth,flexShrink:0}:{gap:12},elevated?{...surface,borderWidth:0,borderRadius:PHOTO_NOTE.radius,padding:PHOTO_NOTE.padding}:null]}>
+    className={`items-start ${elevated?'':'py-3.5'} ${strip?'':`flex-row ${divider&&!elevated?'border-t border-edge-faint':''}`}`}
+    style={[strip?{width:cardWidth,flexShrink:0}:{gap:12},elevated?{...surface,borderWidth:0,borderRadius:PHOTO_NOTE.radius,paddingTop:PHOTO_NOTE.padding,paddingRight:PHOTO_NOTE.padding,paddingBottom:PHOTO_NOTE.padding,paddingLeft:PHOTO_NOTE.padding}:null]}>
     {elevated?<View pointerEvents="none" style={{position:'absolute',inset:0,borderRadius:12,borderWidth:1,borderColor:surface.borderColor}} />:null}
     {strip?(photo??(image?<Photo uri={image} radius={PHOTO_NOTE.photoRadius} style={{width:cardWidth-(elevated?PHOTO_NOTE.padding*2:0),height:PHOTO_NOTE.photoHeight,marginBottom:PHOTO_NOTE.photoGap}} />:null)):null}
     {index!==undefined?<Text accessible={false} numberOfLines={1} className="font-fraunces text-peach"
       style={{width:31,flexShrink:0,fontSize:23,lineHeight:25.3}}>{String(index+1).padStart(2,'0')}</Text>:null}
     <View className={`min-w-0 ${strip?'w-full':'flex-1'}`}>
-      <Text testID={titleTestID} numberOfLines={compact?1:strip?3:undefined} className="font-fraunces text-ink" style={{fontSize:strip?17:18,lineHeight:strip?19.55:20.7,letterSpacing:-.2}}>{briefWords(name,5)}</Text>
+      {titleAccessory?<View testID={`note-heading-${testID}`} className="w-full flex-row items-baseline gap-x-2">{title}{titleAccessory}</View>:title}
       {caption?<Text numberOfLines={compact?1:undefined} className="font-dm text-fine text-taupe" style={{marginTop:strip?5:7}}>{caption}</Text>:null}
-      <View testID={`note-facts-${testID}`} className="flex-row" style={{marginTop:strip?8:11,flexWrap:compact?'nowrap':'wrap',columnGap:compact?8:11,rowGap:4}}>{facts}</View>
+      {facts?<View testID={`note-facts-${testID}`} className="flex-row" style={{marginTop:strip?8:11,flexWrap:compact?'nowrap':'wrap',columnGap:compact?8:11,rowGap:4}}>{facts}</View>:null}
     </View>
     {!strip&&image?<Photo uri={image} radius={9} style={{width:narrow?47:59,height:narrow?73:82}} />:null}
   </TouchableOpacity>;

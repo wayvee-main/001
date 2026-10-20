@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 
 import { Glyph, type GlyphName } from '@/components/glyph';
-import { NoteCard, NoteFact, PHOTO_NOTE } from '@/components/field-notes';
+import { NoteCard, PHOTO_NOTE } from '@/components/field-notes';
 import { useAppGutter } from '@/components/layout';
 import { MiniChevron } from '@/components/ui';
 import { Photo } from '@/components/photo';
@@ -16,12 +16,9 @@ export type CountTile = {
   /** Already formatted: some counts are exact, others are a catalog size. */
   count: string;
   label: string;
-  hint: string;
   tint: keyof ThemeColors;
   ink: keyof ThemeColors;
   glyph: GlyphName;
-  /** A sourced secondary fact, displayed at the right of the inventory row. */
-  metadata?: { glyph: GlyphName; value: string; label: string };
   /** Bundled, full-frame category photo, or a photo from the active catalog. */
   image?: string | number;
   imageLabel?: string;
@@ -98,16 +95,10 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
               key={tile.key}
               testID={`home-count-tile-${tile.key}`}
               titleTestID={`home-tile-title-${tile.key}`}
-              accessibilityName={`${tile.count} ${tile.label}, ${tile.hint}${tile.metadata ? `. ${tile.metadata.label}` : ''}`}
+              accessibilityName={`${tile.count} ${tile.label}`}
               name={tile.label}
-              facts={<>
-                <View testID={`home-tile-count-${tile.key}`} style={{flexShrink:0}}>
-                  <NoteFact glyph={tile.glyph} value={tile.count} label={`${tile.count} ${tile.label}`} compact />
-                </View>
-                {tile.metadata ? <View testID={`home-tile-metadata-${tile.key}`} style={{marginLeft:'auto',minWidth:0,flexShrink:1}}>
-                  <NoteFact glyph={tile.metadata.glyph} value={tile.metadata.value} label={tile.metadata.label} compact flexible />
-                </View> : null}
-              </>}
+              titleAccessory={<Text testID={`home-tile-count-${tile.key}`} numberOfLines={1}
+                className="shrink-0 font-dm-medium text-taupe" style={{fontSize:13,lineHeight:19.55}}>{tile.count}</Text>}
               photo={<TileWindow tile={tile} width={cardWidth-PHOTO_NOTE.padding*2} />}
               cardWidth={cardWidth}
               tone="neutral"

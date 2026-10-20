@@ -37,17 +37,17 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   actual inventory, never unsupported opening status.
   All four tiles share Collections' paper `#F5F0E9` / charcoal `#29252A`, a faint 1px
   edge and level-1 elevation. Use the actual **More on stage** card component:
-  8px padding, 12px corners, and 8px photo corners. Home's two columns fill
+  Explicit 8px top, right, bottom and left padding, 12px corners, and 8px photo corners.
+  Elevated photo cards omit vertical utility padding: the image inset must be
+  exactly 8px at the top and both sides on web and native. Home's two columns fill
   the entire content width inside the existing app gutters, with 16px gaps;
   do not cap Home cards at the horizontal Discover row's 137px width.
   Scale each photo with the shared 121:73 aspect ratio at every viewport width.
-  Home tiles show a single 17px Fraunces title followed directly by the compact
-  category glyph/count on the left and a sourced secondary fact on the right.
-  Omit the subtle Eat/Bars/Routes/Events descriptions and their vertical space.
-  Eat shows the closest place's distance (including any estimate marker); Bars
-  shows the number of music/DJ/hi-fi spots; Routes shows the actual stop-count range;
-  Events shows today's count. Keep facts on one line, ellipsizing when needed.
-  Keep the shared card's 11px photo gap and 8px gap from the title to the fact row.
+  Home tiles show the 17px Fraunces category title and its real inventory count
+  on one baseline, with the count at the right in muted 13px DM Sans.
+  Remove every description and metadata/footer row, including their margins.
+  Keep the 11px photo-to-heading gap and 8px card padding; height fits the photo
+  and single heading row. Counts remain exact and each tile opens its counted pool.
   Heights fit content; remove the old minimum height and oversized count row.
   Home and Discover share `NoteCard`, `NoteFact` and `PHOTO_NOTE` so their
   typography, photo proportions and metadata spacing stay aligned.
@@ -177,6 +177,11 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   Manual Light/Dark choices override the OS in both CSS and inline colors;
   System follows OS changes. Tailwind uses class-based dark mode and the token
   generator emits the matching dark root variables.
+- Shared app glyphs use the official Tabler filled family through `Glyph`.
+  Use a related official filled symbol for subjects without a filled counterpart;
+  keep their existing accessible labels. Legacy path-based icons, search, stars,
+  checks, chevrons and back controls share this treatment. Brand logos keep their
+  own geometry and colors. Filled glyphs use the theme color with no outline.
 - Every in-app Wayvee spiral uses the original three-color/four-stop gradient:
   marigold `#FFC757`, coral `#E85D2C`, cobalt `#6F5BD1`, marigold.
   Solid color props cannot override the mark. Keep its geometry and typography.
@@ -192,16 +197,22 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   and Send sit inside one 18px rounded composer boundary, using the shared faint
   edge, level-1 elevation and 80% Oyster paper. Use 10px horizontal, 5px top
   and 12px bottom padding so Details and the action buttons clear the textbox floor. The inner input stays transparent and borderless on focus.
-  Preserve live search, constraints, empty-field submission and plan refinement.
+  The textbox placeholder and accessible label read “Describe your ideal night.”
+  Preserve the real, generated example for empty-field submission and accessibility
+  hints, alongside live search, constraints and plan refinement.
   “Start from a shape” is open by default and remains collapsible. Options use
-  the same contained rows, serif titles and muted glyphs as Discover. Each card
-  names its actual first place/show, followed by only a start-time glyph and a
-  stop-count glyph. The start is the first stop's time, not always the show's time.
-  Remove the long venue trail, extra price/walk line and redundant option-count
-  header from the cards; full stops stay on the plan and in the accessibility
-  label. Keep at least 72px per row, one-line titles and a little space around
-  the two facts. The refresh action reads “Other options.” Selection, collapse
-  and refresh remain functional.
+  Home evening ribbon's exact material, faint edge, elevation, 22px corners,
+  61.2px minimum height and 11px horizontal / 8.4px vertical inner padding.
+  Keep its 28.9px leading slot, 7px content gap and 44px trailing action slot.
+  Titles use the ribbon's 15.3/18px Fraunces; metadata uses its muted 11px DM Sans
+  subtext styling with a 2px top gap. The 16px chevron uses the same orange
+  `surface-accent` as Home's ribbon arrow. Each card names its actual first
+  place/show, followed by only a start-time glyph and a stop-count glyph.
+  The start is the first stop's time, not always the show's time. Remove the
+  long venue trail, extra price/walk line and redundant option-count header;
+  full stops stay on the plan and in the accessibility label. Keep one-line
+  titles. The refresh action reads “Other options.” Selection, collapse and
+  refresh remain functional.
 
 ## Validation
 
