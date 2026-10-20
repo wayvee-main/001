@@ -35,24 +35,26 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   34px normally, 30px on phones up to 400px. Use `useAppGutter`.
 - Home keeps four tiles, ordered Eat, Bars, Routes, Events. Counts describe
   actual inventory, never unsupported opening status.
-  All four tiles share Collections' paper `#F5F0E9` / charcoal `#29252A`, a faint 1px
-  edge and level-1 elevation. Use the actual **More on stage** card component:
-  Explicit 8px top, right, bottom and left padding, 12px corners, and 8px photo corners.
-  Elevated photo cards omit vertical utility padding: the image inset must be
-  exactly 8px at the top and both sides on web and native. Home's two columns fill
-  the entire content width inside the existing app gutters, with 16px gaps;
-  do not cap Home cards at the horizontal Discover row's 137px width.
-  Scale each photo with the shared 121:73 aspect ratio at every viewport width.
-  Home tiles show the 17px Fraunces category title and its real inventory count
-  on one baseline, with the count at the right in muted 13px DM Sans.
-  Remove every description and metadata/footer row, including their margins.
-  Keep the 11px photo-to-heading gap and 8px card padding; height fits the photo
-  and single heading row. Counts remain exact and each tile opens its counted pool.
-  Heights fit content; remove the old minimum height and oversized count row.
-  Home and Discover share `NoteCard`, `NoteFact` and `PHOTO_NOTE` so their
-  typography, photo proportions and metadata spacing stay aligned.
-  A theme-colored fade covers only the lower 18px, rising from transparent to
-  5.9% opacity; the card itself stays flat.
+  Use the approved **Open Gallery** treatment: only each photo has a raised
+  paper `#F5F0E9` / charcoal `#29252A` frame, faint 1px edge and level-1
+  elevation. Photo frames use explicit 8px padding on all four sides, 12px
+  outer corners and 8px photo corners. The entire tile remains one accessible
+  button covering both its photo and caption.
+  Home's two columns fill the content width inside the existing app gutters,
+  with 16px horizontal and vertical gaps. Scale photos with the shared 121:73
+  aspect ratio at every viewport width; never cap Home tiles at Discover's 137px.
+  Captions sit directly on the page gradient, 7px below the photo frame, with
+  8px horizontal inset. They have no opaque background, border or shadow.
+  Keep the 17px Fraunces category and its real inventory count together on one
+  baseline, separated by 6px; counts use muted 13px DM Sans. A 16px outline
+  chevron at the far right uses the ribbon's orange `surface-accent`.
+  Remove all descriptions, secondary metadata, footer rows and fixed/minimum
+  heights. Allow the category to ellipsize on narrow screens while keeping
+  the count and chevron visible. Counts stay exact; every tile opens its pool.
+  Reuse `TileWindow` and `PHOTO_NOTE` for the established photos and geometry;
+  Discover's contained `NoteCard` listings retain their own treatment.
+  A theme-colored image fade covers only the lower 18px, rising from
+  transparent to 5.9% opacity; photo frames stay flat.
   The bundled Oakland set uses complete venue-owned table/interior/landmark
   compositions, not tight dish details or expiring artist posters. It is not
   reused for another city. Missing/failed photos show the category glyph in
