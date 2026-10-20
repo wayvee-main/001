@@ -230,7 +230,18 @@ async function main(){
     const facts=shape.getByTestId('vee-shape-facts');
     const text=await facts.innerText();
     assert.match(text,/\d+ stops?/,'actual stop count remains');
-    assert.ok(!text.includes('→')&&!text.includes('
+    assert.ok(!text.includes('→')&&!text.includes('$')&&!text.includes('walk'),'only essential facts visible');
+    const direct=await shape.evaluate(el=>el.querySelector('[data-testid="vee-shape-title"]').parentElement.children.length);
+    assert.equal(direct,2,'two lines per shape');
+    const factCount=await facts.evaluate(el=>el.children.length);
+    assert.ok(factCount>=1&&factCount<=2,'at most two glyph facts');
+    const label=await shape.getAttribute('aria-label');
+    assert.ok(label.includes('→'),'full route retained for accessibility');
+    const geometry=await dimensions(shape);
+    assert.ok(geometry.height<=74,'shape fits compact 72px row');
+    report.geometry.push({screen:'Vee shape',theme,title:await title.innerText(),facts:text,...geometry});
+  }
+  report.checks.push(theme+': shapes open on entry, collapse normally and show two simple lines');
   for(const old of ['Low-key & walkable','Big night out','Late & loud'])assert.equal(await page.getByText(old,{exact:true}).count(),0,'old playful title absent');
   await page.getByRole('button',{name:'Other plan options',exact:true}).waitFor();
   await shapes.first().scrollIntoViewIfNeeded();
@@ -350,114 +361,6 @@ async function main(){
  }
  assert.deepEqual(report.errors,[],'no browser runtime exceptions');
  report.checks.push('Both themes, shorter Home tiles, aligned mobile Discover rows, concise open Vee shapes and real plan selection passed');
- console.log('POLISH_QA_REPORT '+JSON.stringify(report));
-}
-main().catch(async err=>{
- report.failure=err.stack;
- if(activePage&&!activePage.isClosed()){
-  try{
-    await activePage.screenshot({path:path.join(OUT,'failure.png'),fullPage:true});
-    const jpeg=await activePage.screenshot({type:'jpeg',quality:65,fullPage:true});
-    console.log('POLISH_QA_IMAGE failure unknown '+jpeg.toString('base64'));
-    console.log('POLISH_QA_DOM '+(await activePage.locator('body').innerText()).slice(0,12000));
-  }catch{}
- }
- console.error(err);
- process.exitCode=1;
-}).finally(async()=>{
- fs.writeFileSync(path.join(OUT,'report.json'),JSON.stringify(report,null,2));
- if(browser)await browser.close();
- server.close();
-});
-)&&!text.includes('walk'),'only essential facts visible');
-    const direct=await shape.evaluate(el=>el.querySelector('[data-testid="vee-shape-title"]').parentElement.children.length);
-    assert.equal(direct,2,'two lines per shape');
-    const factCount=await facts.evaluate(el=>el.children.length);
-    assert.ok(factCount>=1&&factCount<=2,'at most two glyph facts');
-    const label=await shape.getAttribute('aria-label');
-    assert.ok(label.includes('→'),'full route retained for accessibility');
-    const geometry=await dimensions(shape);
-    assert.ok(geometry.height<=74,'shape fits compact 72px row');
-    report.geometry.push({screen:'Vee shape',theme,title:await title.innerText(),facts:text,...geometry});
-  }
-  report.checks.push(theme+': shapes open on entry, collapse normally and show two simple lines');
-  for(const old of ['Low-key & walkable','Big night out','Late & loud'])assert.equal(await page.getByText(old,{exact:true}).count(),0,'old playful title absent');
-  await page.getByRole('button',{name:'Other plan options',exact:true}).waitFor();
-  await screenshot(page,'vee-shapes',theme,true);
-  const selectedRoute=await shapes.first().evaluate(el=>el.querySelector('[data-testid="vee-shape-title"]').nextElementSibling.textContent);
-  const firstStop=selectedRoute.split(' → ')[0].trim();
-  await shapes.first().click();
-  await page.waitForURL(/\/plan(?:[?#]|$)/,{timeout:15000});
-  await page.getByText(firstStop,{exact:true}).first().waitFor({timeout:15000});
-  report.checks.push(theme+': plain shape selection opens the real plan with its chosen stops');
-  await page.goBack();
-  await page.getByTestId('vee-text-input').waitFor();
-  if(await page.getByTestId('vee-shapes-toggle').getAttribute('aria-expanded')==='true')await page.getByTestId('vee-shapes-toggle').click();
-  await input.fill('Fox Theater');
-  await page.getByText('Ask Vee to plan around this',{exact:true}).waitFor();
-  report.checks.push(theme+': live place search responds to typing');
-  await input.fill('');
-  await page.getByText('What should change?',{exact:true}).waitFor();
-  await tab(page,'Home');
-  const offscreen=page.getByTestId('vee-open-letter').getByTestId('vee-spin');
-  if(await offscreen.count()){
-    const off1=await offscreen.evaluate(el=>getComputedStyle(el).transform);
-    await page.waitForTimeout(350);
-    const off2=await offscreen.evaluate(el=>getComputedStyle(el).transform);
-    assert.equal(off1,off2,'Vee rotation stops on tab blur');
-  }
-  await page.emulateMedia({reducedMotion:'reduce'});
-  await tab(page,'Vee');
-  await page.waitForTimeout(500);
-  const still1=await spin(page);
-  await page.waitForTimeout(500);
-  const still2=await spin(page);
-  assert.equal(still1,still2,'reduced motion stops Vee rotation');
-  report.checks.push(theme+': tab blur and reduced motion stop rotation');
-  for(const name of ['Discover','You']){
-    await tab(page,name);
-    await page.waitForTimeout(500);
-    await checkOverflow(page,name+' '+theme);
-    await checkGradients(page,name+' '+theme);
-
-    if(name==='Discover'){
-      const reference=page.locator('[data-testid^="trail-show-"]').first();
-      await reference.waitFor();
-      await reference.scrollIntoViewIfNeeded();
-      const card=await reference.evaluate(button=>{
-        const title=button.querySelector('[data-testid="discover-listing-title"]');
-        const caption=title.nextElementSibling,facts=caption.nextElementSibling;
-        const br=button.getBoundingClientRect(),style=getComputedStyle(button);
-        const metric=node=>{const r=node.getBoundingClientRect(),s=getComputedStyle(node);return {x:r.x-br.x,y:r.y-br.y,width:r.width,height:r.height,font:s.fontFamily,size:s.fontSize,line:s.lineHeight};};
-        return {width:br.width,height:br.height,radius:style.borderRadius,title:metric(title),caption:metric(caption),facts:metric(facts)};
-      });
-      const home=report.geometry.find(row=>row.screen==='Home'&&row.theme===theme&&row.width===390);
-      for(const tile of home.tiles){
-        assert.equal(tile.tile.radius,card.radius,'shared card radius');
-        near(tile.tile.title.x,card.title.x,'shared card inset',.5);
-        near(tile.tile.caption.y-tile.tile.title.y-tile.tile.title.height,5,'Home caption gap',.6);
-        near(tile.tile.facts.y-tile.tile.caption.y-tile.tile.caption.height,8,'Home fact gap',.6);
-        for(const part of ['title','caption','facts']){
-          near(tile.tile[part].height,card[part].height,tile.key+' '+part+' height',.6);
-          assert.equal(tile.tile[part].size,card[part].size,tile.key+' '+part+' font size');
-          assert.equal(tile.tile[part].font,card[part].font,tile.key+' '+part+' font family');
-          assert.equal(tile.tile[part].line,card[part].line,tile.key+' '+part+' line height');
-        }
-      }
-      const cards=page.locator('[data-testid="trail-lead"],[data-testid^="trail-show-"],[data-testid^="trail-table-"],[data-testid^="trail-bar-"],[data-testid^="field-route-"],[data-testid^="field-room-"]');
-      const fills=await cards.evaluateAll(nodes=>nodes.map(n=>({id:n.getAttribute('data-testid'),bg:getComputedStyle(n).backgroundColor})));
-      assert.ok(fills.length>10,'Discover containers audited across sections');
-      for(const fill of fills)assert.equal(fill.bg,theme==='dark'?ribbon.bg:'rgb(247, 242, 236)',fill.id+' correct default card fill');
-      report.checks.push(theme+': '+fills.length+' Discover containers use the shared default card background');
-      report.geometry.push({screen:'More on stage reference',theme,...card});
-      report.checks.push(theme+': all Home tiles fill both rows and retain More on stage typography, photo proportions and metadata spacing');
-    }
-    await screenshot(page,name==='You'?'profile':'discover',theme,name==='Discover');
-  }
-  await context.close();
- }
- assert.deepEqual(report.errors,[],'no browser runtime exceptions');
- report.checks.push('Both themes, three viewport widths, useful inline tile facts, Vee floor spacing and real shape selection passed');
  console.log('POLISH_QA_REPORT '+JSON.stringify(report));
 }
 main().catch(async err=>{
