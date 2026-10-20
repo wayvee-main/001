@@ -841,7 +841,6 @@ export default function CreateScreen() {
                 opacity: asking ? 0.72 : 1,
                 marginTop: showingLiveMatches ? 20 : 30,
               }}>
-            <Text className="font-dm text-fine text-taupe" style={{marginBottom:12}}>Your starting point</Text>
             <View testID="vee-composer-box" style={[raisedSurface,{
               backgroundColor:withAlpha(colors['surface-raised'],.8),borderRadius:18,paddingHorizontal:10,paddingTop:5,paddingBottom:12,
             }]}>

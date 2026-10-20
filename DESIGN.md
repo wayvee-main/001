@@ -198,6 +198,7 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   edge, level-1 elevation and 80% Oyster paper. Use 10px horizontal, 5px top
   and 12px bottom padding so Details and the action buttons clear the textbox floor. The inner input stays transparent and borderless on focus.
   The textbox placeholder and accessible label read “Describe your ideal night.”
+  Omit the “Your starting point” label and its margin above the composer.
   Preserve the real, generated example for empty-field submission and accessibility
   hints, alongside live search, constraints and plan refinement.
   “Start from a shape” is open by default and remains collapsible. Options use
