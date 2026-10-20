@@ -44,7 +44,7 @@ export function NoteCard({
   strip=false,elevated=false,compact=false,cardWidth=PHOTO_NOTE.width,
   tone='discovery',titleTestID='discover-listing-title',
 }: {
-  name:string;caption:string;facts:ReactNode;image?:string;photo?:ReactNode;index?:number;
+  name:string;caption?:string;facts:ReactNode;image?:string;photo?:ReactNode;index?:number;
   divider:boolean;onPress:()=>void;testID:string;accessibilityName?:string;
   strip?:boolean;elevated?:boolean;compact?:boolean;cardWidth?:number;
   tone?:'neutral'|'discovery';titleTestID?:string;
@@ -55,12 +55,12 @@ export function NoteCard({
     className={`items-start py-3.5 ${strip?'':`flex-row ${divider&&!elevated?'border-t border-edge-faint':''}`}`}
     style={[strip?{width:cardWidth,flexShrink:0}:{gap:12},elevated?{...surface,borderWidth:0,borderRadius:PHOTO_NOTE.radius,padding:PHOTO_NOTE.padding}:null]}>
     {elevated?<View pointerEvents="none" style={{position:'absolute',inset:0,borderRadius:12,borderWidth:1,borderColor:surface.borderColor}} />:null}
-    {strip?(photo??(image?<Photo uri={image} radius={PHOTO_NOTE.photoRadius} style={{width:elevated?PHOTO_NOTE.photoWidth:PHOTO_NOTE.width,height:PHOTO_NOTE.photoHeight,marginBottom:PHOTO_NOTE.photoGap}} />:null)):null}
+    {strip?(photo??(image?<Photo uri={image} radius={PHOTO_NOTE.photoRadius} style={{width:cardWidth-(elevated?PHOTO_NOTE.padding*2:0),height:PHOTO_NOTE.photoHeight,marginBottom:PHOTO_NOTE.photoGap}} />:null)):null}
     {index!==undefined?<Text accessible={false} numberOfLines={1} className="font-fraunces text-peach"
       style={{width:31,flexShrink:0,fontSize:23,lineHeight:25.3}}>{String(index+1).padStart(2,'0')}</Text>:null}
     <View className={`min-w-0 ${strip?'w-full':'flex-1'}`}>
       <Text testID={titleTestID} numberOfLines={compact?1:strip?3:undefined} className="font-fraunces text-ink" style={{fontSize:strip?17:18,lineHeight:strip?19.55:20.7,letterSpacing:-.2}}>{briefWords(name,5)}</Text>
-      <Text numberOfLines={compact?1:undefined} className="font-dm text-fine text-taupe" style={{marginTop:strip?5:7}}>{caption}</Text>
+      {caption?<Text numberOfLines={compact?1:undefined} className="font-dm text-fine text-taupe" style={{marginTop:strip?5:7}}>{caption}</Text>:null}
       <View testID={`note-facts-${testID}`} className="flex-row" style={{marginTop:strip?8:11,flexWrap:compact?'nowrap':'wrap',columnGap:compact?8:11,rowGap:4}}>{facts}</View>
     </View>
     {!strip&&image?<Photo uri={image} radius={9} style={{width:narrow?47:59,height:narrow?73:82}} />:null}
@@ -101,14 +101,14 @@ export function TrailLead({event:x,onPress}:{event:ScoperEvent;onPress:()=>void}
   </TouchableOpacity>;
 }
 
-export function ShowNote({event:x,onPress}:{event:ScoperEvent;onPress:()=>void}) {
-  return <NoteCard accessibilityName={x.name} name={eventName(x)} caption={eventCaption(x)} image={x.image} strip elevated compact divider={false} onPress={onPress} testID={`trail-show-${x.id}`}
+export function ShowNote({event:x,onPress,cardWidth}:{event:ScoperEvent;onPress:()=>void;cardWidth?:number}) {
+  return <NoteCard accessibilityName={x.name} name={eventName(x)} caption={eventCaption(x)} image={x.image} cardWidth={cardWidth} strip elevated compact divider={false} onPress={onPress} testID={`trail-show-${x.id}`}
     facts={<><NoteFact glyph="pin" value={shortVenue(x)} label={x.venue} compact flexible /><NoteFact glyph="clock" value={x.time} label={`${eventDayGroupLabel(x)}, ${x.time}`} compact /></>} />;
 }
 
-export function TableNote({restaurant:x,index,divider,onPress,strip=false}:{restaurant:Restaurant;index?:number;divider:boolean;onPress:()=>void;strip?:boolean}) {
+export function TableNote({restaurant:x,index,divider,onPress,strip=false,cardWidth}:{restaurant:Restaurant;index?:number;divider:boolean;onPress:()=>void;strip?:boolean;cardWidth?:number}) {
   return <NoteCard name={x.name} caption={x.cuisine==='American supper club'?'Supper club':x.cuisine} image={index===undefined?x.image:undefined} index={index}
-    divider={divider} strip={strip} elevated onPress={onPress} testID={`trail-table-${x.id}`}
+    divider={divider} strip={strip} cardWidth={cardWidth} elevated onPress={onPress} testID={`trail-table-${x.id}`}
     facts={<><NoteFact glyph="wallet" value={x.price} label={`Price level ${x.price}`} /><NoteFact glyph={/ride/i.test(x.distanceLabel)?'car':/walk/i.test(x.distanceLabel)?'walk':'pin'} value={x.distanceLabel} /></>} />;
 }
 
@@ -117,10 +117,10 @@ const NIGHT_NOTES:Record<string,[string,string,string]>={
   crybaby:['Live music room','calendar','Shows'],'night-heron':['Music & art','clock','Hours'],
   penelope:['Cocktails & bites','clock','Hours'],'hello-stranger':['DJ bar','clock','Hours'],
 };
-export function BarNote({spot:x,onPress}:{spot:NightlifeSpot;onPress:()=>void}) {
+export function BarNote({spot:x,onPress,cardWidth}:{spot:NightlifeSpot;onPress:()=>void;cardWidth?:number}) {
   const note=NIGHT_NOTES[x.id]||[x.kind,'clock','Hours'];
   const street=x.address.split(',')[0].replace(/^\d+\s+/,'');
-  return <NoteCard name={x.name} caption={note[0]} image={x.image} strip elevated divider={false} onPress={onPress} testID={`trail-bar-${x.id}`}
+  return <NoteCard name={x.name} caption={note[0]} image={x.image} cardWidth={cardWidth} strip elevated divider={false} onPress={onPress} testID={`trail-bar-${x.id}`}
     facts={<><NoteFact glyph="pin" value={street} label={x.address} /><NoteFact glyph={note[1]} value={note[2]} label={x.hours} /></>} />;
 }
 
@@ -132,11 +132,11 @@ export function RouteNote({route:x,index,divider,onPress}:{route:Crawl;index:num
 }
 
 const ROOM_CAPTIONS:Record<string,string>={yoshis:'Live music & dining',fox:'1928 movie palace',paramount:'Art Deco theatre',elis:'Blues, food & drinks'};
-export function RoomNote({venue:x,onPress}:{venue:Venue;onPress:()=>void}) {
+export function RoomNote({venue:x,onPress,cardWidth}:{venue:Venue;onPress:()=>void;cardWidth?:number}) {
   const fact=x.detailFacts.find(f=>f.label==='Venue')?.value||x.sub1;
   const capacity=fact.match(/([\d,]+)-seat/i)?.[1]||fact.match(/capacity\s+(?:up to\s+)?([\d,]+)/i)?.[1];
   const primary=capacity||(/21\+/.test(fact)?'21+':/Art Deco/i.test(fact)?'Art Deco':null),travel=x.detailMeta.match(/(\d+)\s*min\s*(ride|walk)/i);
-  return <NoteCard name={x.name} caption={ROOM_CAPTIONS[x.id]||x.sub1} image={x.image} strip elevated divider={false} onPress={onPress} testID={`field-room-${x.id}`}
+  return <NoteCard name={x.name} caption={ROOM_CAPTIONS[x.id]||x.sub1} image={x.image} cardWidth={cardWidth} strip elevated divider={false} onPress={onPress} testID={`field-room-${x.id}`}
     facts={<>{primary?<NoteFact glyph={capacity?'seat':primary==='21+'?'user':'landmark'} value={primary} label={fact} />:null}
       {travel?<NoteFact glyph={travel[2].toLowerCase()==='ride'?'car':'walk'} value={`${travel[1]} min`} label={travel[0]} />:null}</>} />;
 }

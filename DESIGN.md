@@ -41,12 +41,13 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   the entire content width inside the existing app gutters, with 16px gaps;
   do not cap Home cards at the horizontal Discover row's 137px width.
   Scale each photo with the shared 121:73 aspect ratio at every viewport width.
-  Metadata uses a single 17px Fraunces title, one muted caption, then a compact
-  inline category glyph/count on the left and a sourced secondary fact on the right.
+  Home tiles show a single 17px Fraunces title followed directly by the compact
+  category glyph/count on the left and a sourced secondary fact on the right.
+  Omit the subtle Eat/Bars/Routes/Events descriptions and their vertical space.
   Eat shows the closest place's distance (including any estimate marker); Bars
   shows the number of music/DJ/hi-fi spots; Routes shows the actual stop-count range;
   Events shows today's count. Keep facts on one line, ellipsizing when needed.
-  Keep the shared card's 11px photo gap, 5px caption gap and 8px fact-row gap.
+  Keep the shared card's 11px photo gap and 8px gap from the title to the fact row.
   Heights fit content; remove the old minimum height and oversized count row.
   Home and Discover share `NoteCard`, `NoteFact` and `PHOTO_NOTE` so their
   typography, photo proportions and metadata spacing stay aligned.
@@ -131,11 +132,15 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   and More on stage have a very faint 1px tonal border at roughly 4% ink opacity
   (`edge-faint`), without affecting text or image contrast.
 - More on stage, More good tables, After dinner and Rooms worth knowing use
-  single horizontal photo rows: 137px elements, 73px-high photos and 16px gaps.
+  single horizontal photo rows with 16px gaps. On phones up to 600px wide, two
+  complete cards fill the measured section width and line up with both edges of
+  the On stage hero; a one-card pool fills that width on its own. Extra items
+  remain swipeable with card-width snapping. Leave the closing edge unfaded so
+  the second card's border remains visible. Wider screens retain 137px cards.
   All four have the same raised paper surface, 8px padding, 12px radius,
   level-1 shadow and very faint 1px border (`edge-faint`).
-  Inset photos are 121px wide. Heights fit content; the previous 195px minimum
-  is removed to avoid wasted space.
+  Photos fill the card's inner width and stay 73px high. Heights fit content;
+  the previous 195px minimum is removed to avoid wasted space.
 - More on stage titles, captions and venue/time metadata each use one line.
   Venue text shrinks with ellipses while time remains visible on that same row.
   All Discover listing titles retain the five-word cap; other photo-row titles
@@ -188,11 +193,15 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   edge, level-1 elevation and 80% Oyster paper. Use 10px horizontal, 5px top
   and 12px bottom padding so Details and the action buttons clear the textbox floor. The inner input stays transparent and borderless on focus.
   Preserve live search, constraints, empty-field submission and plan refinement.
-  “Start from a shape” is a neutral raised control. Expanded options use the
-  same contained rows, serif titles, muted glyphs and compact factual metadata
-  as Discover. Titles name only the actual stop types (Dinner, Show, Drinks),
-  followed by venue names and compact time/walk/price facts; avoid playful theme
-  slogans. The refresh action reads “Other options.” Selection and refresh remain functional.
+  “Start from a shape” is open by default and remains collapsible. Options use
+  the same contained rows, serif titles and muted glyphs as Discover. Each card
+  names its actual first place/show, followed by only a start-time glyph and a
+  stop-count glyph. The start is the first stop's time, not always the show's time.
+  Remove the long venue trail, extra price/walk line and redundant option-count
+  header from the cards; full stops stay on the plan and in the accessibility
+  label. Keep at least 72px per row, one-line titles and a little space around
+  the two facts. The refresh action reads “Other options.” Selection, collapse
+  and refresh remain functional.
 
 ## Validation
 

@@ -1,8 +1,8 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useRef, useState, type ReactNode } from 'react';
-import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, TextInput, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { Glyph } from '@/components/glyph';
-import { BarNote, TrailLead, RoomNote, RouteNote, ShowNote, TableNote } from '@/components/field-notes';
+import { BarNote, TrailLead, RoomNote, RouteNote, ShowNote, TableNote, PHOTO_NOTE } from '@/components/field-notes';
 import { HRow, Screen, ScreenScroll } from '@/components/layout';
 import { ListRow } from '@/components/list-row';
 import { VeeMark } from '@/components/vee-mark';
@@ -42,6 +42,22 @@ function TrailSection({title,children,onAll}:{title:string;children:ReactNode;on
   return <View className="mt-[27px]" testID={`trail-section-${title.toLowerCase().replace(/\s+/g,'-')}`}>
     <Heading title={title} onAll={onAll} trail /><View className="mt-2">{children}</View>
   </View>;
+}
+
+/** Two complete cards meet the hero's edges on phones; extra items swipe into
+ * view. Keep wide-screen card dimensions and leave the final edge unfaded. */
+function PhotoRow({children,count}:{children:(cardWidth:number)=>ReactNode;count:number}) {
+  const {width:screenWidth}=useWindowDimensions();
+  const [width,setWidth]=useState(0);
+  const gap=16,columns=Math.min(count,2);
+  const cardWidth=screenWidth<=600&&width>0&&columns>0
+    ? (width-gap*(columns-1))/columns : PHOTO_NOTE.width;
+  return <ScrollView testID="discover-photo-row" horizontal showsHorizontalScrollIndicator={false}
+    onLayout={e=>setWidth(e.nativeEvent.layout.width)}
+    style={{marginVertical:-6}} contentContainerStyle={{gap,paddingVertical:6}}
+    snapToInterval={cardWidth+gap} decelerationRate="fast" disableIntervalMomentum>
+    {children(cardWidth)}
+  </ScrollView>;
 }
 
 function Shelf({title,children,onAll,fullWidth=false}:{title:string;children:ReactNode|((width:number)=>ReactNode);onAll?:()=>void;fullWidth?:boolean}) {
@@ -92,10 +108,13 @@ export default function DiscoverScreen() {
   const routes=local?Object.values(CRAWLS):[],venues=local?Object.values(VENUES):[];
   const onRefresh=async()=>{setRefreshing(true);try{await Promise.all([hydrateEventsFromBackend(true),hydratePlacesFromBackend(true),hydrateViatorPicksFromBackend(true)]);}finally{setRefreshing(false);}};
   const choose=(value:Mode)=>setMode(value);
+  const supportingShows=shows.slice(1,mode==='All'?3:undefined);
+  const afterDinner=bars.slice(0,mode==='All'?3:undefined);
+  const roomPicks=venues.slice(0,mode==='All'?3:undefined);
   const stage=shows.length?<>
     <TrailSection title="On stage"><TrailLead event={shows[0]} onPress={()=>router.push(`/event/${shows[0].id}`)} /></TrailSection>
     {shows.length>1?<TrailSection title="More on stage" onAll={mode==='All'?()=>choose('Events'):undefined}>
-      <HRow gap={16} bleed={false}>{shows.slice(1,mode==='All'?3:undefined).map(x=><ShowNote key={x.id} event={x} onPress={()=>router.push(`/event/${x.id}`)} />)}</HRow>
+      <PhotoRow count={supportingShows.length}>{cardWidth=>supportingShows.map(x=><ShowNote key={x.id} event={x} cardWidth={cardWidth} onPress={()=>router.push(`/event/${x.id}`)} />)}</PhotoRow>
     </TrailSection>:null}
   </>:<TrailSection title="On stage"><EmptyState compact title={hydrating?'Loading the stage…':'No current shows yet'} message={hydrating?'Checking the live calendar.':'Current listings appear here as the calendar updates.'} /></TrailSection>;
   const food=tables.length?<>
@@ -103,17 +122,17 @@ export default function DiscoverScreen() {
     <View className="gap-y-2">{tables.slice(0,mode==='All'?3:undefined).map((x,i)=><TableNote key={x.id} restaurant={x} divider={i>0} onPress={()=>router.push(`/restaurant/${x.id}`)} />)}</View>
     </TrailSection>
     {more.length?<TrailSection title="More good tables" onAll={()=>router.push('/featured')}>
-      <HRow gap={16} bleed={false}>{more.map(x=><TableNote key={x.id} restaurant={x} strip divider={false} onPress={()=>router.push(`/restaurant/${x.id}`)} />)}</HRow>
+      <PhotoRow count={more.length}>{cardWidth=>more.map(x=><TableNote key={x.id} restaurant={x} strip cardWidth={cardWidth} divider={false} onPress={()=>router.push(`/restaurant/${x.id}`)} />)}</PhotoRow>
     </TrailSection>:null}
   </>:null;
   const nightlife=bars.length?<TrailSection title="After dinner" onAll={mode==='All'?()=>choose('Nightlife'):undefined}>
-    <HRow gap={16} bleed={false}>{bars.slice(0,mode==='All'?3:undefined).map(x=><BarNote key={x.id} spot={x} onPress={()=>router.push(`/night/${x.id}`)} />)}</HRow>
+    <PhotoRow count={afterDinner.length}>{cardWidth=>afterDinner.map(x=><BarNote key={x.id} spot={x} cardWidth={cardWidth} onPress={()=>router.push(`/night/${x.id}`)} />)}</PhotoRow>
   </TrailSection>:null;
   const wander=routes.length?<TrailSection title="A little wandering" onAll={mode==='All'?()=>choose('Routes'):undefined}>
     <View className="gap-y-2">{routes.slice(0,mode==='All'?2:undefined).map((x,i)=><RouteNote key={x.id} route={x} index={i} divider={i>0} onPress={()=>router.push(`/crawl/${x.id}`)} />)}</View>
   </TrailSection>:null;
   const rooms=venues.length?<TrailSection title="Rooms worth knowing" onAll={mode==='All'?()=>choose('Venues'):undefined}>
-    <HRow gap={16} bleed={false}>{venues.slice(0,mode==='All'?3:undefined).map(x=><RoomNote key={x.id} venue={x} onPress={()=>router.push(`/venue/${x.id}`)} />)}</HRow>
+    <PhotoRow count={roomPicks.length}>{cardWidth=>roomPicks.map(x=><RoomNote key={x.id} venue={x} cardWidth={cardWidth} onPress={()=>router.push(`/venue/${x.id}`)} />)}</PhotoRow>
   </TrailSection>:null;
   return <Screen><ScreenScroll gap={0} clearsTabBar refreshing={refreshing} onRefresh={onRefresh} keyboardShouldPersistTaps="handled">
     <View className="mb-5 flex-row items-center justify-between gap-x-3 pt-4">
