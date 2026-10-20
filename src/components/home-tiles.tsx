@@ -20,13 +20,15 @@ export type CountTile = {
   tint: keyof ThemeColors;
   ink: keyof ThemeColors;
   glyph: GlyphName;
+  /** A sourced secondary fact, displayed at the right of the inventory row. */
+  metadata?: { glyph: GlyphName; value: string; label: string };
   /** Bundled, full-frame category photo, or a photo from the active catalog. */
   image?: string | number;
   imageLabel?: string;
   onPress: () => void;
 };
 
-/** The exact More on stage photo proportions, scaled only on narrow phones. */
+/** More on stage photo proportions, scaled to fill each Home column. */
 function TileWindow({ tile, width }: { tile: CountTile; width: number }) {
   const colors = useThemeColors();
   const [failedImage, setFailedImage] = useState<string | number>();
@@ -83,7 +85,7 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
   const gutter = useAppGutter();
   const gap = 16;
   const availableWidth = Math.min(width, 720) - gutter * 2;
-  const cardWidth = Math.min(PHOTO_NOTE.width, (availableWidth - gap) / 2);
+  const cardWidth = (availableWidth - gap) / 2;
   const rows: CountTile[][] = [];
   for (let i = 0; i < tiles.length; i += 2) rows.push(tiles.slice(i, i + 2));
 
@@ -96,10 +98,17 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
               key={tile.key}
               testID={`home-count-tile-${tile.key}`}
               titleTestID={`home-tile-title-${tile.key}`}
-              accessibilityName={`${tile.count} ${tile.label}, ${tile.hint}`}
+              accessibilityName={`${tile.count} ${tile.label}, ${tile.hint}${tile.metadata ? `. ${tile.metadata.label}` : ''}`}
               name={tile.label}
               caption={tile.hint}
-              facts={<NoteFact glyph={tile.glyph} value={tile.count} label={`${tile.count} ${tile.label}`} compact />}
+              facts={<>
+                <View testID={`home-tile-count-${tile.key}`} style={{flexShrink:0}}>
+                  <NoteFact glyph={tile.glyph} value={tile.count} label={`${tile.count} ${tile.label}`} compact />
+                </View>
+                {tile.metadata ? <View testID={`home-tile-metadata-${tile.key}`} style={{marginLeft:'auto',minWidth:0,flexShrink:1}}>
+                  <NoteFact glyph={tile.metadata.glyph} value={tile.metadata.value} label={tile.metadata.label} compact flexible />
+                </View> : null}
+              </>}
               photo={<TileWindow tile={tile} width={cardWidth-PHOTO_NOTE.padding*2} />}
               cardWidth={cardWidth}
               tone="neutral"

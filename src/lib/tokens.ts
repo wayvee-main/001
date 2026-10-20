@@ -57,7 +57,7 @@ export const ROLES: Record<string, ThemeValue> = {
   'navigation-muted': { light: '#D8C7DD', dark: '#D8C7DD' },
   // Home tiles share Collections' Oyster paper; search/navigation stay separate.
   'home-tile': { light: '#F5F0E9', dark: '#29252A' },
-  'surface-discovery': { light: '#F7F2EC', dark: '#302A2F' }, // Discover notes and Vee composer
+  'surface-discovery': { light: '#F7F2EC', dark: '#29252A' }, // Dark cards share the evening ribbon's default surface
   'home-tile-glyph': { light: '#963D24', dark: '#F0835C' },
   'home-tile-well': { light: '#F9E5D8', dark: '#48312E' },
   'tile-eat': { light: '#F5F0E9', dark: '#29252A' },
