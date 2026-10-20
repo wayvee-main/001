@@ -10,7 +10,7 @@ import { Photo } from '@/components/photo';
 import { SectionHeading } from '@/components/section-heading';
 import { BUNDLE_CITY, useActiveCity, useActiveCityName } from '@/lib/city';
 import { useNow } from '@/lib/clock';
-import { CRAWLS, CURATED_COLLECTION_ORDER, CURATED_COLLECTIONS, NIGHTLIFE_SPOTS, activeCollectionItems, currentEventListings } from '@/lib/data';
+import { CRAWLS, CURATED_COLLECTION_ORDER, CURATED_COLLECTIONS, NIGHTLIFE_SPOTS, activeCollectionItems, currentEventListings, isEventToday } from '@/lib/data';
 import { hydrateEventsFromBackend } from '@/lib/events-remote';
 import { hydratePlacesFromBackend } from '@/lib/places';
 import { activeReminders } from '@/lib/reminders';
@@ -39,11 +39,19 @@ export default function HomeScreen() {
     finally { setRefreshing(false); }
   };
   const tilePhotos = citySlug === BUNDLE_CITY ? OAKLAND_HOME_TILE_PHOTOS : undefined;
+  const events = currentEventListings(now);
+  const todayCount = events.filter(event => isEventToday(event, now)).length;
+  const musicBarCount = NIGHTLIFE_SPOTS.filter(spot => /music|dj|hi-fi/i.test(spot.kind)).length;
+  const routeStops = Object.values(CRAWLS).map(route => route.stops.length);
+  const fewestStops = routeStops.length ? Math.min(...routeStops) : 0;
+  const mostStops = routeStops.length ? Math.max(...routeStops) : 0;
+  const stopRange = fewestStops === mostStops ? String(fewestStops) : `${fewestStops}–${mostStops}`;
+  const nearestDistance = nearest[0]?.distanceLabel;
   const tileDefinitions: CountTile[] = [
-    { key:'eat', count:String(nearest.length), glyph:'food', label:'Eat', hint:'Nearby places', tint:'tile-eat', ink:'fg', onPress:()=>router.push('/featured') },
-    { key:'bars', count:String(NIGHTLIFE_SPOTS.length), glyph:'drink', label:'Bars', hint:'After dinner', tint:'tile-bars', ink:'fg', onPress:()=>router.push('/discover?mode=Nightlife') },
-    { key:'routes', count:String(Object.keys(CRAWLS).length), glyph:'route', label:'Routes', hint:'A few good stops', tint:'tile-routes', ink:'fg', onPress:()=>router.push('/discover?mode=Routes') },
-    { key:'events', count:String(currentEventListings(now).length), glyph:'ticket', label:'Events', hint:'Find your next show', tint:'tile-events', ink:'fg', onPress:()=>router.push('/discover?mode=Events') },
+    { key:'eat', count:String(nearest.length), glyph:'food', label:'Eat', hint:'Nearby places', metadata:{glyph:'pin',value:nearestDistance ?? '5 mi',label:nearestDistance ? `Closest place: ${nearestDistance}` : 'Search radius: 5 miles'}, tint:'tile-eat', ink:'fg', onPress:()=>router.push('/featured') },
+    { key:'bars', count:String(NIGHTLIFE_SPOTS.length), glyph:'drink', label:'Bars', hint:'After dinner', metadata:{glyph:'music',value:`${musicBarCount} music`,label:`${musicBarCount} bars with music, DJs or hi-fi listening`}, tint:'tile-bars', ink:'fg', onPress:()=>router.push('/discover?mode=Nightlife') },
+    { key:'routes', count:String(Object.keys(CRAWLS).length), glyph:'route', label:'Routes', hint:'A few good stops', metadata:{glyph:'pin',value:`${stopRange} stops`,label:`${stopRange} stops per route`}, tint:'tile-routes', ink:'fg', onPress:()=>router.push('/discover?mode=Routes') },
+    { key:'events', count:String(events.length), glyph:'ticket', label:'Events', hint:'Find your next show', metadata:{glyph:'clock',value:`${todayCount} today`,label:`${todayCount} events today`}, tint:'tile-events', ink:'fg', onPress:()=>router.push('/discover?mode=Events') },
   ];
   const tiles = tileDefinitions.map(tile => {
     const photo = tilePhotos?.[tile.key as keyof typeof OAKLAND_HOME_TILE_PHOTOS];

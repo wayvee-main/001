@@ -16,7 +16,9 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   detail and onboarding page, with aspect-correct angles on web and native.
   Oyster cards, sheets and unselected controls use warm paper `#F5F0E9` in
   light mode and charcoal `#29252A` in dark mode, with faint edges and elevation.
-  Discover listings use `#F7F2EC` / `#302A2F`. Light-mode search and navigation share plain off-white `#FFFCF8`.
+  Discover listings use `#F7F2EC` / `#29252A`. In dark mode, the evening ribbon's
+  `#29252A` is the default background for every card container, including Home tiles
+  and every Discover listing. Light-mode search and navigation share plain off-white `#FFFCF8`.
   Home tiles use Collections' `#F5F0E9` / `#29252A` material. Search uses its own `surface-search`
   role everywhere: Home, Discover, the search overlay, food hub and stay picks.
   Dark search retains Oyster's muted green `#28372F`; dark navigation uses
@@ -35,15 +37,19 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   actual inventory, never unsupported opening status.
   All four tiles share Collections' paper `#F5F0E9` / charcoal `#29252A`, a faint 1px
   edge and level-1 elevation. Use the actual **More on stage** card component:
-  137px width, 8px padding, 12px corners, and 121 × 73px photos with 8px corners.
-  Keep the two-by-two grid centered with 16px gaps. On narrow phones, shrink
-  both columns to fit the existing gutter and scale photos proportionally.
-  Metadata follows Discover exactly: a single 17px Fraunces title, one muted
-  caption, then a compact inline category glyph and the real inventory count.
+  8px padding, 12px corners, and 8px photo corners. Home's two columns fill
+  the entire content width inside the existing app gutters, with 16px gaps;
+  do not cap Home cards at the horizontal Discover row's 137px width.
+  Scale each photo with the shared 121:73 aspect ratio at every viewport width.
+  Metadata uses a single 17px Fraunces title, one muted caption, then a compact
+  inline category glyph/count on the left and a sourced secondary fact on the right.
+  Eat shows the closest place's distance (including any estimate marker); Bars
+  shows the number of music/DJ/hi-fi spots; Routes shows the actual stop-count range;
+  Events shows today's count. Keep facts on one line, ellipsizing when needed.
   Keep the shared card's 11px photo gap, 5px caption gap and 8px fact-row gap.
   Heights fit content; remove the old minimum height and oversized count row.
   Home and Discover share `NoteCard`, `NoteFact` and `PHOTO_NOTE` so their
-  typography, geometry and metadata spacing stay aligned.
+  typography, photo proportions and metadata spacing stay aligned.
   A theme-colored fade covers only the lower 18px, rising from transparent to
   5.9% opacity; the card itself stays flat.
   The bundled Oakland set uses complete venue-owned table/interior/landmark
@@ -179,12 +185,14 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   Refine keeps “What should change?” and the real plan context.
 - Vee's typing area is 105.6px high, 20% taller than 88px. Details, mic/focus
   and Send sit inside one 18px rounded composer boundary, using the shared faint
-  edge, level-1 elevation and 80% Oyster paper. Use 10px horizontal / 5px vertical
-  outer padding. The inner input stays transparent and borderless on focus.
+  edge, level-1 elevation and 80% Oyster paper. Use 10px horizontal, 5px top
+  and 12px bottom padding so Details and the action buttons clear the textbox floor. The inner input stays transparent and borderless on focus.
   Preserve live search, constraints, empty-field submission and plan refinement.
   “Start from a shape” is a neutral raised control. Expanded options use the
   same contained rows, serif titles, muted glyphs and compact factual metadata
-  as Discover; choices and Reshuffle remain functional.
+  as Discover. Titles name only the actual stop types (Dinner, Show, Drinks),
+  followed by venue names and compact time/walk/price facts; avoid playful theme
+  slogans. The refresh action reads “Other options.” Selection and refresh remain functional.
 
 ## Validation
 

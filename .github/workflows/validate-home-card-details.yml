@@ -1,0 +1,65 @@
+name: Validate full-width Home and Vee
+
+on:
+  push:
+    branches: ['codex/home-card-details-2026-10-20']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: home-card-details-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      TZ: UTC
+      EXPO_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Verify generated tokens
+        run: |
+          npm run tokens
+          git diff --exit-code -- src/global.css src/lib/theme.ts src/lib/tailwind-tokens.generated.js
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test -- --runInBand
+      - run: npm run tokens:contrast
+      - name: Restore this app build
+        id: web-build-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: dist
+          key: vee-polish-2026-10-20-web-${{ hashFiles('src/**', 'assets/**', 'package*.json', 'app.json', 'tailwind.config.js', 'babel.config.js', 'metro.config.js', 'tsconfig.json') }}
+      - run: npm run build:web
+        if: steps.web-build-cache.outputs.cache-hit != 'true'
+      - name: Keep the verified app build for browser checks
+        if: steps.web-build-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: dist
+          key: ${{ steps.web-build-cache.outputs.cache-primary-key }}
+      - name: Install browser preview tools
+        run: |
+          npm install --prefix /tmp/wayvee-polish-tools --no-package-lock --ignore-scripts playwright
+          node /tmp/wayvee-polish-tools/node_modules/playwright/cli.js install --with-deps chromium
+      - name: Check both themes and composer interactions
+        env:
+          NODE_PATH: /tmp/wayvee-polish-tools/node_modules
+        run: node scripts/validate-home-card-details.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: home-card-details-preview
+          path: polish-preview/
+          retention-days: 14

@@ -209,7 +209,7 @@ function shapeRoute(solved: SolvedNight, order: StopKind[]): string {
 function shapeFactLine(solved: SolvedNight, dinnerTimeLabel: string, walkMinutes: number | null): string {
   const startsAt = solved.event?.time ?? (solved.restaurant ? dinnerTimeLabel : null);
   const walk = walkMinutes === null ? null : walkMinutes === 0 ? 'no walking' : `${walkMinutes} min walk`;
-  return [startsAt ? `from ${startsAt}` : null, walk, solved.restaurant?.price].filter(Boolean).join(' · ');
+  return [startsAt, walk, solved.restaurant?.price].filter(Boolean).join(' · ');
 }
 
 /** Restrained glyphs mirror Discover's listing rows. */
@@ -230,28 +230,29 @@ function ShapeTile({
   theme: string;
   solved: SolvedNight;
   selectedDateAt: Date;
-  onPress: () => void;
+  onPress: (title: string) => void;
 }) {
   const colors = useThemeColors(), surface = useRaisedSurface(1);
   const { order, dinnerTimeLabel, walkMinutes } = useShapeFacts(solved, selectedDateAt);
   const route = shapeRoute(solved, order);
+  const title = order.map(kind => kind === 'dinner' ? 'Dinner' : kind === 'event' ? 'Show' : 'Drinks').join(' · ');
   const facts = shapeFactLine(solved, dinnerTimeLabel, walkMinutes);
-  // Swatch-per-stop used to sit here, and also said how many stops there were;
-  // the route line names every one of them, so the count survives in words.
+  // Plain stop types describe the actual plan; full venue names remain below.
 
   return (
     <TouchableOpacity
       accessibilityRole="button"
-      accessibilityLabel={`Use ${theme}. ${route}${facts ? `. ${facts}` : ''}`}
+      testID="vee-shape-card"
+      accessibilityLabel={`Use ${title}. ${route}${facts ? `. ${facts}` : ''}`}
       activeOpacity={0.78}
-      onPress={onPress}
+      onPress={() => onPress(title)}
       style={surface}
       className="min-h-[72px] flex-row items-center gap-x-3 rounded-setting px-3 py-3">
       <View className="h-7 w-7 shrink-0 items-center justify-center">
         <Glyph name={SHAPE_GLYPHS[theme] ?? 'route'} size={17} color={colors['fg-muted']} strokeWidth={1.7} />
       </View>
       <View className="min-w-0 flex-1">
-        <Text numberOfLines={1} className="font-fraunces text-[17px] leading-[21px] text-ink">{theme}</Text>
+        <Text testID="vee-shape-title" numberOfLines={1} className="font-fraunces text-[17px] leading-[21px] text-ink">{title}</Text>
         <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">{route}</Text>
         {facts ? <Text numberOfLines={1} className="mt-0.5 font-dm text-fine text-taupe">{facts}</Text> : null}
       </View>
@@ -844,7 +845,7 @@ export default function CreateScreen() {
               }}>
             <Text className="font-dm text-fine text-taupe" style={{marginBottom:12}}>Your starting point</Text>
             <View testID="vee-composer-box" style={[raisedSurface,{
-              backgroundColor:withAlpha(colors['surface-raised'],.8),borderRadius:18,paddingHorizontal:10,paddingVertical:5,
+              backgroundColor:withAlpha(colors['surface-raised'],.8),borderRadius:18,paddingHorizontal:10,paddingTop:5,paddingBottom:12,
             }]}>
             <TextInput
               testID="vee-text-input"
@@ -1015,7 +1016,7 @@ export default function CreateScreen() {
                       theme={card.theme}
                       solved={card.solved}
                       selectedDateAt={selectedDateAt}
-                      onPress={() => chooseReadyMade(card.solved, card.theme)}
+                      onPress={(title) => chooseReadyMade(card.solved, title)}
                     />
                   ))}
                 </View>
@@ -1028,14 +1029,14 @@ export default function CreateScreen() {
                  * list instead of floating loose under the last one. */}
                 <TouchableOpacity
                   accessibilityRole="button"
-                  accessibilityLabel={`Reshuffle, ${readyMadeCards.length} new shapes`}
+                  accessibilityLabel="Other plan options"
                   activeOpacity={0.72}
                   onPress={cycleSet}
                   style={control}
                   className="mt-3 h-11 flex-row items-center justify-center gap-x-2 rounded-full">
                   <Glyph name="refresh" size={16} color={colors['fg-muted']} strokeWidth={1.7} />
                   <Text className="font-dm-medium text-meta text-taupe">
-                    Reshuffle · {readyMadeCards.length} new shapes
+                    Other options
                   </Text>
                 </TouchableOpacity>
               </Animated.View>

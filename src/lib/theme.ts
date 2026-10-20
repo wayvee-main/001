@@ -85,7 +85,7 @@ const PALETTE = {
     "selected-glyph": "#F0835C",
     "navigation-muted": "#D8C7DD",
     "home-tile": "#29252A",
-    "surface-discovery": "#302A2F",
+    "surface-discovery": "#29252A",
     "home-tile-glyph": "#F0835C",
     "home-tile-well": "#48312E",
     "tile-eat": "#29252A",
