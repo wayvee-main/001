@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 
 import { Glyph, type GlyphName } from '@/components/glyph';
-import { NoteCard, PHOTO_NOTE } from '@/components/field-notes';
+import { PHOTO_NOTE } from '@/components/field-notes';
 import { useAppGutter } from '@/components/layout';
 import { MiniChevron } from '@/components/ui';
 import { Photo } from '@/components/photo';
@@ -69,6 +69,53 @@ function TileWindow({ tile, width }: { tile: CountTile; width: number }) {
   );
 }
 
+/** Open Gallery keeps the raised material around the photo, with its caption on the page. */
+function GalleryTile({ tile, width }: { tile: CountTile; width: number }) {
+  const colors = useThemeColors();
+  const surface = useRaisedSurface(1);
+
+  return (
+    <TouchableOpacity
+      accessibilityRole="button"
+      accessibilityLabel={`Explore ${tile.count} ${tile.label}`}
+      activeOpacity={0.78}
+      onPress={tile.onPress}
+      testID={`home-count-tile-${tile.key}`}
+      style={{ width, flexShrink: 0 }}>
+      <View testID={`home-tile-mount-${tile.key}`}
+        style={[surface, {
+          borderWidth: 0,
+          borderRadius: PHOTO_NOTE.radius,
+          paddingTop: PHOTO_NOTE.padding,
+          paddingRight: PHOTO_NOTE.padding,
+          paddingBottom: PHOTO_NOTE.padding,
+          paddingLeft: PHOTO_NOTE.padding,
+        }]}>
+        <View pointerEvents="none" style={{
+          position: 'absolute', inset: 0, borderRadius: PHOTO_NOTE.radius,
+          borderWidth: 1, borderColor: surface.borderColor,
+        }} />
+        <TileWindow tile={tile} width={width - PHOTO_NOTE.padding * 2} />
+      </View>
+      <View testID={`home-tile-caption-${tile.key}`}
+        style={{ marginTop: 7, paddingHorizontal: PHOTO_NOTE.padding, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <View className="min-w-0 flex-1 flex-row items-baseline" style={{ gap: 6 }}>
+          <Text testID={`home-tile-title-${tile.key}`} numberOfLines={1}
+            className="shrink font-fraunces text-ink"
+            style={{ fontSize: 17, lineHeight: 19.55, letterSpacing: -0.2 }}>{tile.label}</Text>
+          <Text testID={`home-tile-count-${tile.key}`} numberOfLines={1}
+            className="shrink-0 font-dm-medium text-taupe"
+            style={{ fontSize: 13, lineHeight: 19.55 }}>{tile.count}</Text>
+        </View>
+        <View testID={`home-tile-chevron-${tile.key}`} accessible={false} pointerEvents="none"
+          style={{ width: 16, height: 16, alignItems: 'center', justifyContent: 'center' }}>
+          <Glyph name="chevron" size={16} color={colors['surface-accent']} />
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+}
+
 /** Home's "Around you" grid.
  *
  * Four counts off the four pools the rest of Home is drawn from — kitchens,
@@ -91,23 +138,7 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
       {rows.map(row => (
         <View key={row.map(tile => tile.key).join('-')} style={{flexDirection:'row',gap}}>
           {row.map(tile => (
-            <NoteCard
-              key={tile.key}
-              testID={`home-count-tile-${tile.key}`}
-              titleTestID={`home-tile-title-${tile.key}`}
-              accessibilityName={`${tile.count} ${tile.label}`}
-              name={tile.label}
-              titleAccessory={<Text testID={`home-tile-count-${tile.key}`} numberOfLines={1}
-                className="shrink-0 font-dm-medium text-taupe" style={{fontSize:13,lineHeight:19.55}}>{tile.count}</Text>}
-              photo={<TileWindow tile={tile} width={cardWidth-PHOTO_NOTE.padding*2} />}
-              cardWidth={cardWidth}
-              tone="neutral"
-              strip
-              elevated
-              compact
-              divider={false}
-              onPress={tile.onPress}
-            />
+            <GalleryTile key={tile.key} tile={tile} width={cardWidth} />
           ))}
           {row.length===1 ? <View style={{width:cardWidth}} /> : null}
         </View>
@@ -117,7 +148,7 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
 }
 
 const styles = StyleSheet.create({
-  window: { borderRadius: PHOTO_NOTE.photoRadius, overflow: 'hidden', marginBottom: PHOTO_NOTE.photoGap },
+  window: { borderRadius: PHOTO_NOTE.photoRadius, overflow: 'hidden' },
   photoFrame: { width: '100%', height: '100%', borderRadius: PHOTO_NOTE.photoRadius, overflow: 'hidden' },
   fallback: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   fade: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 18 },
