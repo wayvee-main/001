@@ -4,8 +4,8 @@
  * Original sources and subject descriptions: assets/images/home-windows/README.md.
  */
 export const OAKLAND_HOME_TILE_PHOTOS = {
-  eat: { source: require('../../assets/images/home-windows/eat.jpg'), aspectRatio: 1.5, label: 'A complete table setting at Mägo in Oakland' },
-  bars: { source: require('../../assets/images/home-windows/bars.jpg'), aspectRatio: 1.5, label: 'The full bar at Bar Shiru in Oakland' },
-  routes: { source: require('../../assets/images/home-windows/routes.jpg'), aspectRatio: 1.5, label: 'The Fox Theater exterior in Uptown Oakland' },
-  events: { source: require('../../assets/images/home-windows/events.jpg'), aspectRatio: 2.4, label: 'The stage and auditorium at Oakland’s Paramount Theatre' },
-} satisfies Record<string, { source: number; aspectRatio: number; label: string }>;
+  eat: { source: require('../../assets/images/home-windows/eat.jpg'), label: 'A table setting at Mägo in Oakland' },
+  bars: { source: require('../../assets/images/home-windows/bars.jpg'), label: 'The bar at Bar Shiru in Oakland' },
+  routes: { source: require('../../assets/images/home-windows/routes.jpg'), label: 'The Fox Theater exterior in Uptown Oakland' },
+  events: { source: require('../../assets/images/home-windows/events.jpg'), label: 'The stage and auditorium at Oakland’s Paramount Theatre' },
+} satisfies Record<string, { source: number; label: string }>;

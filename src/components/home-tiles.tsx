@@ -21,46 +21,43 @@ export type CountTile = {
   /** Bundled, full-frame category photo, or a photo from the active catalog. */
   image?: string | number;
   imageLabel?: string;
-  imageAspectRatio?: number;
   onPress: () => void;
 };
 
-/** Preserve the complete photo instead of zooming into an arbitrary crop.
- * A quiet theme-colored mat accommodates different source proportions. */
+/** All four photos share Events' landscape frame, regardless of source size. */
 function TileWindow({ tile }: { tile: CountTile }) {
   const colors = useThemeColors();
   const [failedImage, setFailedImage] = useState<string | number>();
   const showImage = tile.image !== undefined && failedImage !== tile.image;
   const paper = colors['home-tile'];
-  const ratio = tile.imageAspectRatio ?? 2;
 
   return (
     <View testID={`home-tile-window-${tile.key}`} style={styles.window}>
       {showImage ? (
         <View testID={`home-tile-photo-frame-${tile.key}`}
-          style={{ width: '100%', maxWidth: 70 * ratio, aspectRatio: ratio, borderRadius: 13, overflow: 'hidden' }}>
-        <Image
-          testID={`home-tile-image-${tile.key}`}
-          source={tile.image}
-          accessibilityLabel={tile.imageLabel}
-          accessible={false}
-          style={StyleSheet.absoluteFill}
-          contentFit="contain"
-          contentPosition="center"
-          cachePolicy="memory-disk"
-          transition={120}
-          recyclingKey={String(tile.image)}
-          onError={() => setFailedImage(tile.image)}
-        />
-        <LinearGradient
-          testID={`home-tile-fade-${tile.key}`}
-          pointerEvents="none"
-          accessible={false}
-          colors={[`${paper}00`, `${paper}0F`]}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-          style={styles.fade}
-        />
+          style={styles.photoFrame}>
+          <Image
+            testID={`home-tile-image-${tile.key}`}
+            source={tile.image}
+            accessibilityLabel={tile.imageLabel}
+            accessible={false}
+            style={StyleSheet.absoluteFill}
+            contentFit="cover"
+            contentPosition="center"
+            cachePolicy="memory-disk"
+            transition={120}
+            recyclingKey={String(tile.image)}
+            onError={() => setFailedImage(tile.image)}
+          />
+          <LinearGradient
+            testID={`home-tile-fade-${tile.key}`}
+            pointerEvents="none"
+            accessible={false}
+            colors={[`${paper}00`, `${paper}0F`]}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+            style={styles.fade}
+          />
         </View>
       ) : (
         <View testID={`home-tile-fallback-${tile.key}`} style={styles.fallback}>
@@ -120,6 +117,7 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
 
 const styles = StyleSheet.create({
   window: { height: 70, width: '100%', borderRadius: 13, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
+  photoFrame: { width: '100%', maxWidth: 168, aspectRatio: 2.4, borderRadius: 13, overflow: 'hidden' },
   fallback: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   fade: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 18 },
 });

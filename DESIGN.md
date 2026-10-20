@@ -37,8 +37,10 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   edge, level-1 elevation and serif labels. The approved **Window Cards** use
   9px padding, a 70px-high photo window with 13px corners, and a 146px minimum
   height. Counts sit beside the names; supporting captions use one line.
-  Photos preserve the complete frame with contain fit, without zooming,
-  stretching or cropping subjects. A theme-colored fade covers only the lower
+  All four photo frames match Events: a shared 2.4:1 ratio, full available
+  width up to 168px, centered within the 70px image area, with 13px corners.
+  Use cover fit without stretching; inspect the composition at narrow and wide
+  phone sizes so the subject remains clear. A theme-colored fade covers only the lower
   18px, rising from transparent to 5.9% opacity; the card itself stays flat.
   The bundled Oakland set uses complete venue-owned table/interior/landmark
   compositions, not tight dish details or expiring artist posters. It is not

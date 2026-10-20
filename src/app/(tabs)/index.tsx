@@ -47,7 +47,7 @@ export default function HomeScreen() {
   ];
   const tiles = tileDefinitions.map(tile => {
     const photo = tilePhotos?.[tile.key as keyof typeof OAKLAND_HOME_TILE_PHOTOS];
-    return { ...tile, image: photo?.source, imageLabel: photo?.label, imageAspectRatio: photo?.aspectRatio };
+    return { ...tile, image: photo?.source, imageLabel: photo?.label };
   });
   return <Screen><ScreenScroll gap={18} clearsTabBar refreshing={refreshing} onRefresh={onRefresh}>
     <HomeHeader hasReminders={activeReminders(s.plans,s.stay).length>0}
