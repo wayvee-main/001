@@ -46,15 +46,12 @@ populate the backend immediately, ahead of the next deploy.
 4. Run `npm run sync:events` to populate the backend table right away.
 5. Commit and push `main` — Vercel deploys automatically.
 
-## Home tile facts
+## Home tile counts
 
-Each tile retains its real inventory count and shows one sourced fact at the
-right: the closest food place's distance (preserving estimate markers), music/DJ/
-hi-fi venue count from the nightlife catalog, the route stop-count range, or the
-number of current events occurring today. The food tile falls back to the pool's
-five-mile search radius when empty. Today's event count follows the live minute
-clock and the same Oakland-date helper as Discover; hours and ratings are never
-inferred to fill space.
+Each tile shows its real inventory count beside its category name: the nearest
+food pool, nightlife catalog, route catalog, or current event listings. No
+secondary facts or descriptions are rendered. Existing pools, location ordering,
+event freshness and tap destinations remain authoritative.
 
 ## Image policy
 

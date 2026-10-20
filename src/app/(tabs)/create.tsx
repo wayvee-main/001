@@ -845,11 +845,11 @@ export default function CreateScreen() {
             <TextInput
               testID="vee-text-input"
               ref={focusedInputRef}
-              accessibilityLabel="Ask Vee"
+              accessibilityLabel="Describe your ideal night"
               accessibilityHint={`For example: ${askExampleLabel}`}
               value={promptText}
               onChangeText={setPromptText}
-              placeholder={askExampleLabel}
+              placeholder="Describe your ideal night"
               placeholderTextColor={colors['fg-muted']}
               cursorColor={colors['accent-fill']}
               multiline

@@ -3,18 +3,44 @@ import { Text, TouchableOpacity, View, type StyleProp, type ViewStyle } from 're
 import { useRouter } from 'expo-router';
 import Svg, { Defs, Path, Pattern, Rect } from 'react-native-svg';
 
+import { Glyph } from '@/components/glyph';
+import { ICON_PATHS } from '@/lib/icons';
 import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
 
 // ── Icons ───────────────────────────────────────────────────────────────────
-// Tabler (tabler.io/icons, raw source at github.com/tabler/tabler-icons) is
-// the exclusive glyph source for this app — permanent policy, not a one-off
-// pass. Every icon path anywhere in the codebase, including the small
-// component-local ones below, is copied from a real icon there (outline
-// set unless noted) and verified against the actual SVG, not guessed or
-// hand-drawn. Adding a new glyph means finding its real Tabler path first.
+// Existing Tabler path IDs resolve through the shared filled-glyph registry.
+const LEGACY_GLYPHS = {
+  "ticket": "ticket",
+  "cutlery": "food",
+  "martini": "drink",
+  "trendUp": "trendUp",
+  "heart": "heart",
+  "sparkles": "spark",
+  "luggage": "luggage",
+  "card": "wallet",
+  "gear": "settings",
+  "help": "help",
+  "qr": "qr",
+  "play": "play",
+  "compass": "compass",
+  "lock": "lock",
+  "lockOpen": "lockOpen",
+  "microphone": "mic",
+  "clock": "clock",
+  "chevronDown": "chevronDown",
+  "chevronUp": "chevronUp",
+  "close": "close",
+  "plus": "plus",
+  "refresh": "refresh",
+  "edit": "edit",
+  "walk": "walk",
+  "arrowUp": "arrowUp"
+} as const;
+const FILLED_GLYPH_FOR_PATH = new Map<string,string>(Object.entries(ICON_PATHS).map(([key,path])=>
+  [path,LEGACY_GLYPHS[key as keyof typeof LEGACY_GLYPHS]]));
 
-/** Tabler-style stroke icon: one or more subpaths in a 24×24 viewBox. */
+/** Filled glyph adapter for the established path-based API. */
 export function Icon({
   d,
   size = 24,
@@ -29,6 +55,8 @@ export function Icon({
   fill?: string;
 }) {
   const colors = useThemeColors();
+  const glyph=FILLED_GLYPH_FOR_PATH.get(d);
+  if(glyph)return <Glyph name={glyph} size={size} color={color ?? (fill==='none'?colors.ink:fill)} />;
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
       <Path d={d} stroke={color ?? colors.ink} strokeWidth={strokeWidth} fill={fill} strokeLinecap="round" strokeLinejoin="round" />
@@ -36,70 +64,38 @@ export function Icon({
   );
 }
 
-// Tabler's chevron-right (icons/outline/chevron-right.svg), path "M9 6l6 6l-6 6",
-// cropped to its own bounding box (x 9-15, y 6-18) so it still fills a compact,
-// non-square render area exactly like it always has at every call site.
-export function ChevronRight({ color, strokeWidth = 1.6 }: { color?: string; strokeWidth?: number }) {
-  const colors = useThemeColors();
-  return (
-    <Svg width={7} height={12} viewBox="9 6 6 12">
-      <Path d="M9 6l6 6l-6 6" stroke={color ?? colors.taupe} strokeWidth={strokeWidth} fill="none" strokeLinecap="round" strokeLinejoin="round" />
-    </Svg>
-  );
+/** Compact filled chevrons keep the existing control dimensions. */
+function FilledChevron({color,width=7,height=12,size=20,back=false}:{color:string;width?:number;height?:number;size?:number;back?:boolean}) {
+  return <View style={{width,height,alignItems:'center',justifyContent:'center',transform:back?[{rotate:'180deg'}]:undefined}}>
+    <Glyph name="chevron" color={color} size={size} />
+  </View>;
 }
 
-export function MiniChevron({ color }: { color?: string }) {
-  const colors = useThemeColors();
-  return (
-    <Svg width={5} height={9} viewBox="9 6 6 12">
-      <Path d="M9 6l6 6l-6 6" stroke={color ?? colors.peach} strokeWidth={1.4} fill="none" strokeLinecap="round" strokeLinejoin="round" />
-    </Svg>
-  );
+export function ChevronRight({color}:{color?:string;strokeWidth?:number}) {
+  const colors=useThemeColors();
+  return <FilledChevron color={color ?? colors.taupe} />;
 }
 
-// Tabler's search (icons/outline/search.svg): circle + handle, cropped to its
-// bounding box (x 3-21, y 3-21) instead of the hand-drawn circle/line it replaces.
-export function SearchIcon({ size = 16, color }: { size?: number; color?: string }) {
-  const colors = useThemeColors();
-  return (
-    <Svg width={size} height={size} viewBox="2 2 20 20">
-      <Path
-        d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0 M21 21l-6 -6"
-        stroke={color ?? colors.taupe}
-        strokeWidth={1.6}
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
+export function MiniChevron({color}:{color?:string}) {
+  const colors=useThemeColors();
+  return <FilledChevron color={color ?? colors.peach} width={5} height={9} size={15} />;
 }
 
-export function Star({ size = 12, color }: { size?: number; color?: string }) {
-  const colors = useThemeColors();
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24">
-      <Path
-        d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"
-        fill={color ?? colors.rust}
-        stroke={color ?? colors.rust}
-        strokeWidth={1}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
+export function SearchIcon({size=16,color}:{size?:number;color?:string}) {
+  const colors=useThemeColors();
+  return <Glyph name="search" size={size} color={color ?? colors.taupe} />;
 }
 
-// Tabler's check (icons/outline/check.svg), path "M5 12l5 5l10 -10",
-// cropped to its bounding box (x 5-20, y 7-17).
-export function Check({ size = 24, color }: { size?: number; color?: string }) {
-  const colors = useThemeColors();
-  return (
-    <Svg width={size} height={(size * 2) / 3} viewBox="5 7 15 10">
-      <Path d="M5 12l5 5l10 -10" stroke={color ?? colors['on-accent']} strokeWidth={3} fill="none" strokeLinecap="round" strokeLinejoin="round" />
-    </Svg>
-  );
+export function Star({size=12,color}:{size?:number;color?:string}) {
+  const colors=useThemeColors();
+  return <Glyph name="star" size={size} color={color ?? colors.rust} />;
+}
+
+export function Check({size=24,color}:{size?:number;color?:string}) {
+  const colors=useThemeColors();
+  return <View style={{width:size,height:size*2/3,alignItems:'center',justifyContent:'center'}}>
+    <Glyph name="check" size={size} color={color ?? colors['on-accent']} />
+  </View>;
 }
 
 export function GoogleLogo({ size = 16 }: { size?: number }) {
@@ -332,9 +328,7 @@ export function BackButton({ label, onPress }: { label?: string; onPress?: () =>
         accessibilityLabel={`Go back, ${label}`}
         style={surface}
         className="flex-row items-center gap-x-2 rounded-full border border-edge-faint bg-shell px-3.5 py-2 shadow-soft-light dark:shadow-soft-dark">
-        <Svg width={7} height={12} viewBox="0 0 8 14">
-          <Path d="M7 1L1 7l6 6" stroke={colors.ink} strokeWidth={2.2} fill="none" strokeLinecap="round" strokeLinejoin="round" />
-        </Svg>
+        <FilledChevron color={colors.ink} back />
         <Text className="font-dm-medium text-label text-ink">{label}</Text>
       </TouchableOpacity>
     );
@@ -348,9 +342,7 @@ export function BackButton({ label, onPress }: { label?: string; onPress?: () =>
       accessibilityLabel="Go back"
       style={surface}
       className="h-10 w-10 shrink-0 items-center justify-center rounded-full border border-edge-faint bg-shell shadow-soft-light dark:shadow-soft-dark">
-      <Svg width={8} height={14} viewBox="0 0 8 14">
-        <Path d="M7 1L1 7l6 6" stroke={colors.ink} strokeWidth={2.2} fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      </Svg>
+      <FilledChevron color={colors.ink} width={8} height={14} size={22} back />
     </TouchableOpacity>
   );
 }
