@@ -1571,6 +1571,8 @@ export const CURATED_COLLECTION_ORDER: CuratedCollection['id'][] = [
 
 /** Prevent a dated collection from retaining an event after its Oakland calendar day passes. */
 export function activeCollectionItems(collection: CuratedCollection, now = new Date()): CuratedCollectionItem[] {
-  return collection.items.filter((item) => item.type === 'restaurant' || isCurrentEvent(EVENTS[item.id], now));
+  return collection.items.filter((item) => item.type === 'restaurant'
+    ? Boolean(RESTAURANTS[item.id])
+    : Boolean(EVENTS[item.id]) && isCurrentEvent(EVENTS[item.id], now));
 }
 
