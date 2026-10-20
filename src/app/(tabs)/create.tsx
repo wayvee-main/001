@@ -31,7 +31,8 @@ import {
   View,
 } from 'react-native';
 import { useConstraintPicker } from '@/components/constraint-picker';
-import { Glyph, type GlyphName } from '@/components/glyph';
+import { Glyph } from '@/components/glyph';
+import { NoteFact } from '@/components/field-notes';
 import { WorkingVee } from '@/components/vee-mark';
 import { Screen, ScreenScroll } from '@/components/layout';
 import { EmptyState } from '@/components/ui';
@@ -62,7 +63,7 @@ import {
   type StopKind,
 } from '@/lib/plan-engine';
 import { planFromShape } from '@/lib/plan-from-shape';
-import { currentNightIso, isStayActive, parseDateOnly, stayArcPosition, stayProgress } from '@/lib/stay';
+import { currentNightIso, isStayActive, parseDateOnly, stayArcPosition } from '@/lib/stay';
 import { useScoper } from '@/lib/store';
 import { tasteVocabulary } from '@/lib/taste';
 import { useThemeColors } from '@/lib/theme';
@@ -212,49 +213,44 @@ function shapeFactLine(solved: SolvedNight, dinnerTimeLabel: string, walkMinutes
   return [startsAt, walk, solved.restaurant?.price].filter(Boolean).join(' · ');
 }
 
-/** Restrained glyphs mirror Discover's listing rows. */
-const SHAPE_GLYPHS: Record<string, GlyphName> = {
-  'Low-key & walkable': 'walk',
-  'Big night out': 'music',
-  'Late & loud': 'drink',
-};
-
-/** A solved shape as one comparable row. The picker shows every shape the
- * engine returned rather than one card and a dice button. */
+/** A shape shows its starting place and two practical facts. The full route
+ * stays available to screen readers and on the plan opened by the card. */
 function ShapeTile({
-  theme,
   solved,
   selectedDateAt,
   onPress,
 }: {
-  theme: string;
   solved: SolvedNight;
   selectedDateAt: Date;
   onPress: (title: string) => void;
 }) {
   const colors = useThemeColors(), surface = useRaisedSurface(1);
-  const { order, dinnerTimeLabel, walkMinutes } = useShapeFacts(solved, selectedDateAt);
+  const { order, dinnerTimeLabel, stopCount } = useShapeFacts(solved, selectedDateAt);
   const route = shapeRoute(solved, order);
   const title = order.map(kind => kind === 'dinner' ? 'Dinner' : kind === 'event' ? 'Show' : 'Drinks').join(' · ');
-  const facts = shapeFactLine(solved, dinnerTimeLabel, walkMinutes);
-  // Plain stop types describe the actual plan; full venue names remain below.
+  const first = order[0];
+  const name = (first === 'dinner' ? solved.restaurant?.name : first === 'event' ? solved.event?.name : solved.nightlifeSpot?.name) || title;
+  const startsAt = first === 'event' ? solved.event?.time : solved.restaurant ? dinnerTimeLabel : null;
+  const stops = `${stopCount} ${stopCount === 1 ? 'stop' : 'stops'}`;
 
   return (
     <TouchableOpacity
       accessibilityRole="button"
       testID="vee-shape-card"
-      accessibilityLabel={`Use ${title}. ${route}${facts ? `. ${facts}` : ''}`}
+      accessibilityLabel={`Use ${title}. ${route}${startsAt ? `. Starts at ${startsAt}` : ''}. ${stops}`}
       activeOpacity={0.78}
       onPress={() => onPress(title)}
       style={surface}
       className="min-h-[72px] flex-row items-center gap-x-3 rounded-setting px-3 py-3">
       <View className="h-7 w-7 shrink-0 items-center justify-center">
-        <Glyph name={SHAPE_GLYPHS[theme] ?? 'route'} size={17} color={colors['fg-muted']} strokeWidth={1.7} />
+        <Glyph name={first === 'dinner' ? 'food' : first === 'event' ? 'ticket' : 'drink'} size={17} color={colors['fg-muted']} strokeWidth={1.7} />
       </View>
       <View className="min-w-0 flex-1">
-        <Text testID="vee-shape-title" numberOfLines={1} className="font-fraunces text-[17px] leading-[21px] text-ink">{title}</Text>
-        <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">{route}</Text>
-        {facts ? <Text numberOfLines={1} className="mt-0.5 font-dm text-fine text-taupe">{facts}</Text> : null}
+        <Text testID="vee-shape-title" numberOfLines={1} className="font-fraunces text-[17px] leading-[21px] text-ink">{name}</Text>
+        <View testID="vee-shape-facts" className="mt-1 flex-row items-center gap-x-3">
+          {startsAt ? <NoteFact glyph="clock" value={startsAt} label={`Starts at ${startsAt}`} compact /> : null}
+          <NoteFact glyph="route" value={stops} compact />
+        </View>
       </View>
       <Glyph name="chevron" size={16} color={colors['fg-muted']} strokeWidth={1.8} />
     </TouchableOpacity>
@@ -305,7 +301,6 @@ export default function CreateScreen() {
     at.setHours(12);
     return at;
   }, [currentDateIso]);
-  const headerContextLabel = stayActive ? `Night ${stayProgress(stay!).currentNight}` : 'Tonight';
   const reduceMotion = useReducedMotionPreference();
   const [screenFocused, setScreenFocused] = useState(false);
   useFocusEffect(useCallback(() => {
@@ -315,7 +310,7 @@ export default function CreateScreen() {
   // ── Composer ──────────────────────────────────────────────────────────
   const [promptText, setPromptText] = useState('');
   const [asking, setAsking] = useState(false);
-  const [showShapes, setShowShapes] = useState(false);
+  const [showShapes, setShowShapes] = useState(true);
   const { close: closeComposerPicker } =
     useConstraintPicker<Exclude<ComposerPicker, null>>();
   const focusedInputRef = useRef<TextInput>(null);
@@ -1003,17 +998,10 @@ export default function CreateScreen() {
                   opacity: planMotion,
                   transform: [{ translateY: planMotion.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) }],
                 }}>
-                <View className="flex-row items-baseline justify-end">
-                  <Text className="font-dm text-meta text-taupe">
-                    {readyMadeCards.length} for {headerContextLabel.toLowerCase()}
-                  </Text>
-                </View>
-
-                <View className="mt-2 gap-y-2">
+                <View className="gap-y-2">
                   {readyMadeCards.map((card) => (
                     <ShapeTile
                       key={`${card.theme}-${card.solved.restaurant?.id ?? ''}-${card.solved.event?.id ?? ''}`}
-                      theme={card.theme}
                       solved={card.solved}
                       selectedDateAt={selectedDateAt}
                       onPress={(title) => chooseReadyMade(card.solved, title)}
@@ -1021,12 +1009,6 @@ export default function CreateScreen() {
                   ))}
                 </View>
 
-                {/* "Show 3 more · 1 of 3" contradicted the "3 for tonight" above
-                 * it — one count promising more, the other saying these are all
-                 * of them. Reshuffle replaces the set, so it claims nothing the
-                 * header disagrees with. */}
-                {/* Carries the same rule as the rows above it, so it closes the
-                 * list instead of floating loose under the last one. */}
                 <TouchableOpacity
                   accessibilityRole="button"
                   accessibilityLabel="Other plan options"

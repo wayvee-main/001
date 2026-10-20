@@ -100,7 +100,6 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
               titleTestID={`home-tile-title-${tile.key}`}
               accessibilityName={`${tile.count} ${tile.label}, ${tile.hint}${tile.metadata ? `. ${tile.metadata.label}` : ''}`}
               name={tile.label}
-              caption={tile.hint}
               facts={<>
                 <View testID={`home-tile-count-${tile.key}`} style={{flexShrink:0}}>
                   <NoteFact glyph={tile.glyph} value={tile.count} label={`${tile.count} ${tile.label}`} compact />
