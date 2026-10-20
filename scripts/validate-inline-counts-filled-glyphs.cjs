@@ -33,7 +33,7 @@ async function tab(page,name){
 }
 
 async function checkFilled(page,label){
-  const glyphs=page.locator('[data-testid^="filled-glyph-"]').filter({visible:true});
+  const glyphs=page.locator('svg[data-testid^="filled-glyph-"]').filter({visible:true});
   const items=await glyphs.evaluateAll(nodes=>nodes.map(n=>{
     const s=getComputedStyle(n),b=n.getBoundingClientRect();
     return {id:n.getAttribute('data-testid'),fill:s.fill,stroke:s.strokeWidth,paths:n.querySelectorAll('path,rect,circle,ellipse,polygon,polyline,use').length,width:b.width,height:b.height};
@@ -151,12 +151,16 @@ async function main(){
         const metric=node=>{const r=node.getBoundingClientRect(),c=getComputedStyle(node);return {x:r.x-br.x,y:r.y-br.y,width:r.width,height:r.height,font:c.fontFamily,size:c.fontSize,line:c.lineHeight}};
         return {bg:s.backgroundColor,border:s.borderColor,borderWidth:s.borderWidth,shadow:s.boxShadow,
           width:br.width,height:br.height,radius:s.borderRadius,outline:getComputedStyle(outline).borderWidth,
-          title:metric(title),heading:metric(heading),count:metric(count),bodyChildren,label:button.getAttribute('aria-label')};
+          title:metric(title),heading:metric(heading),count:metric(count),photo:metric(el),padding:{top:s.paddingTop,right:s.paddingRight,left:s.paddingLeft},bodyChildren,label:button.getAttribute('aria-label')};
       });
       assert.equal(tile.bg,theme==='light'?'rgb(245, 240, 233)':'rgb(41, 37, 42)','tile matches Collections');
       assert.equal(tile.borderWidth,'0px');
       assert.equal(tile.outline,'1px');
       assert.equal(tile.radius,'12px');
+      for(const edge of ['top','left','right'])assert.equal(tile.padding[edge],'8px','Home '+key+' explicit '+edge+' inset');
+      near(tile.photo.y,8,'Home '+key+' photo top inset',.4);
+      near(tile.photo.x,8,'Home '+key+' photo left inset',.4);
+      near(tile.width-tile.photo.x-tile.photo.width,8,'Home '+key+' photo right inset',.4);
       near(tile.width,expectedCardWidth,'Home card fills half the row',.5);
       assert.equal(tile.title.size,'17px');
       assert.equal(tile.bodyChildren,1,'Home tile contains only the heading row');
@@ -180,6 +184,12 @@ async function main(){
   await page.setViewportSize({width:390,height:844});
   const ribbon=await dimensions(page.getByTestId('home-evening-ribbon'));
   assert.equal(ribbon.bg,theme==='light'?'rgb(245, 240, 233)':'rgb(41, 37, 42)');
+  const ribbonType=await page.getByTestId('home-evening-ribbon').evaluate(el=>{
+    const metric=n=>{const s=getComputedStyle(n);return {font:s.fontFamily,size:s.fontSize,line:s.lineHeight,color:s.color};};
+    const content=el.children[0],text=content.children[1],arrow=el.querySelector('svg[data-testid="filled-glyph-arrow"]');
+    const cs=getComputedStyle(content),rs=getComputedStyle(el);
+    return {title:metric(text.children[0]),meta:metric(text.children[1]),radius:rs.borderRadius,innerPaddingX:cs.paddingLeft,innerPaddingY:cs.paddingTop,gap:cs.gap,actionWidth:el.children[1].getBoundingClientRect().width,accent:getComputedStyle(arrow).fill};
+  });
   assert.equal(await page.getByTestId('home-tile-count-bars').innerText(),'10');
   assert.equal(await page.getByTestId('home-tile-count-routes').innerText(),'3');
   await checkGradients(page,'Home '+theme);
@@ -235,11 +245,15 @@ async function main(){
           }else near(first.width,137,slug+' retains wide-screen size',.8);
           near(second.x-first.x-first.width,16,slug+' shared gap',.8);
           const picture=await cards.first().evaluate(el=>{
-            const photo=el.children[1],r=photo.getBoundingClientRect();
-            return {width:r.width,height:r.height};
+            const photo=el.children[1],r=photo.getBoundingClientRect(),b=el.getBoundingClientRect(),s=getComputedStyle(el);
+            return {width:r.width,height:r.height,top:r.y-b.y,left:r.x-b.x,right:b.right-r.right,padding:{top:s.paddingTop,left:s.paddingLeft,right:s.paddingRight}};
           });
           near(picture.width,first.width-16,slug+' photo fills inner card',.8);
           near(picture.height,73,slug+' photo height stays compact',.5);
+          for(const edge of ['top','left','right']){
+            near(picture[edge],8,slug+' '+edge+' image inset equals side spacing',.4);
+            assert.equal(picture.padding[edge],'8px',slug+' explicit '+edge+' padding');
+          }
           const scroll=await row.evaluate(el=>{
             const style=getComputedStyle(el);
             el.scrollLeft=el.scrollWidth;
@@ -338,7 +352,16 @@ async function main(){
     const label=await shape.getAttribute('aria-label');
     assert.ok(label.includes('→'),'full route retained for accessibility');
     const geometry=await dimensions(shape);
-    assert.ok(geometry.height<=74,'shape fits compact 72px row');
+    near(geometry.height,ribbon.height,'shape uses Home ribbon height',.6);
+    for(const prop of ['bg','border','borderWidth','shadow'])assert.equal(geometry[prop],ribbon[prop],'shape matches Home ribbon '+prop);
+    const shapeType=await shape.evaluate(el=>{
+      const metric=n=>{const s=getComputedStyle(n);return {font:s.fontFamily,size:s.fontSize,line:s.lineHeight,color:s.color};};
+      const content=el.children[0],title=el.querySelector('[data-testid="vee-shape-title"]'),facts=el.querySelector('[data-testid="vee-shape-facts"]');
+      const chevron=el.querySelector('[data-testid="vee-shape-chevron"]'),svg=chevron.querySelector('svg');
+      const cs=getComputedStyle(content),rs=getComputedStyle(el);
+      return {title:metric(title),meta:metric(facts.children[0].lastElementChild),radius:rs.borderRadius,innerPaddingX:cs.paddingLeft,innerPaddingY:cs.paddingTop,gap:cs.gap,actionWidth:chevron.getBoundingClientRect().width,accent:getComputedStyle(svg).fill};
+    });
+    assert.deepEqual(shapeType,ribbonType,'shape typography, insets, corners and orange chevron match Home ribbon');
     report.geometry.push({screen:'Vee shape',theme,title:await title.innerText(),facts:text,...geometry});
   }
   report.checks.push(theme+': shapes open on entry, collapse normally and show two simple lines');
@@ -389,7 +412,7 @@ async function main(){
   await context.close();
  }
  assert.deepEqual(report.errors,[],'no browser runtime exceptions');
- report.checks.push('Both themes, inline inventory counts, filled icons, the new Vee prompt, mobile rows and real plan selection passed');
+ report.checks.push('Both themes, inline inventory counts, filled icons, the new Vee prompt, equal photo insets, ribbon-matched shapes, mobile rows and real plan selection passed');
  console.log('POLISH_QA_REPORT '+JSON.stringify(report));
 }
 main().catch(async err=>{

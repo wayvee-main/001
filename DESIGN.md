@@ -37,7 +37,9 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   actual inventory, never unsupported opening status.
   All four tiles share Collections' paper `#F5F0E9` / charcoal `#29252A`, a faint 1px
   edge and level-1 elevation. Use the actual **More on stage** card component:
-  8px padding, 12px corners, and 8px photo corners. Home's two columns fill
+  Explicit 8px top, right, bottom and left padding, 12px corners, and 8px photo corners.
+  Elevated photo cards omit vertical utility padding: the image inset must be
+  exactly 8px at the top and both sides on web and native. Home's two columns fill
   the entire content width inside the existing app gutters, with 16px gaps;
   do not cap Home cards at the horizontal Discover row's 137px width.
   Scale each photo with the shared 121:73 aspect ratio at every viewport width.
@@ -199,14 +201,18 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   Preserve the real, generated example for empty-field submission and accessibility
   hints, alongside live search, constraints and plan refinement.
   “Start from a shape” is open by default and remains collapsible. Options use
-  the same contained rows, serif titles and muted glyphs as Discover. Each card
-  names its actual first place/show, followed by only a start-time glyph and a
-  stop-count glyph. The start is the first stop's time, not always the show's time.
-  Remove the long venue trail, extra price/walk line and redundant option-count
-  header from the cards; full stops stay on the plan and in the accessibility
-  label. Keep at least 72px per row, one-line titles and a little space around
-  the two facts. The refresh action reads “Other options.” Selection, collapse
-  and refresh remain functional.
+  Home evening ribbon's exact material, faint edge, elevation, 22px corners,
+  61.2px minimum height and 11px horizontal / 8.4px vertical inner padding.
+  Keep its 28.9px leading slot, 7px content gap and 44px trailing action slot.
+  Titles use the ribbon's 15.3/18px Fraunces; metadata uses its muted 11px DM Sans
+  subtext styling with a 2px top gap. The 16px chevron uses the same orange
+  `surface-accent` as Home's ribbon arrow. Each card names its actual first
+  place/show, followed by only a start-time glyph and a stop-count glyph.
+  The start is the first stop's time, not always the show's time. Remove the
+  long venue trail, extra price/walk line and redundant option-count header;
+  full stops stay on the plan and in the accessibility label. Keep one-line
+  titles. The refresh action reads “Other options.” Selection, collapse and
+  refresh remain functional.
 
 ## Validation
 

@@ -240,19 +240,22 @@ function ShapeTile({
       accessibilityLabel={`Use ${title}. ${route}${startsAt ? `. Starts at ${startsAt}` : ''}. ${stops}`}
       activeOpacity={0.78}
       onPress={() => onPress(title)}
-      style={surface}
-      className="min-h-[72px] flex-row items-center gap-x-3 rounded-setting px-3 py-3">
-      <View className="h-7 w-7 shrink-0 items-center justify-center">
-        <Glyph name={first === 'dinner' ? 'food' : first === 'event' ? 'ticket' : 'drink'} size={17} color={colors['fg-muted']} strokeWidth={1.7} />
-      </View>
-      <View className="min-w-0 flex-1">
-        <Text testID="vee-shape-title" numberOfLines={1} className="font-fraunces text-[17px] leading-[21px] text-ink">{name}</Text>
-        <View testID="vee-shape-facts" className="mt-1 flex-row items-center gap-x-3">
-          {startsAt ? <NoteFact glyph="clock" value={startsAt} label={`Starts at ${startsAt}`} compact /> : null}
-          <NoteFact glyph="route" value={stops} compact />
+      style={[surface, { minHeight: 61.2, borderRadius: 22, flexDirection: 'row', alignItems: 'stretch' }]}>
+      <View className="min-w-0 flex-1 flex-row items-center" style={{ paddingHorizontal: 11, paddingVertical: 8.4, gap: 7 }}>
+        <View className="shrink-0 items-center justify-center" style={{ width: 28.9, height: 28.9 }}>
+          <Glyph name={first === 'dinner' ? 'food' : first === 'event' ? 'ticket' : 'drink'} size={17} color={colors['fg-muted']} />
+        </View>
+        <View className="min-w-0 flex-1">
+          <Text testID="vee-shape-title" numberOfLines={1} className="font-fraunces text-ink" style={{ fontSize: 15.3, lineHeight: 18 }}>{name}</Text>
+          <View testID="vee-shape-facts" className="mt-0.5 flex-row items-center gap-x-3">
+            {startsAt ? <NoteFact glyph="clock" value={startsAt} label={`Starts at ${startsAt}`} compact /> : null}
+            <NoteFact glyph="route" value={stops} compact />
+          </View>
         </View>
       </View>
-      <Glyph name="chevron" size={16} color={colors['fg-muted']} strokeWidth={1.8} />
+      <View testID="vee-shape-chevron" className="items-center justify-center" style={{ width: 44 }}>
+        <Glyph name="chevron" size={16} color={colors['surface-accent']} />
+      </View>
     </TouchableOpacity>
   );
 }
