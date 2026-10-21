@@ -73,7 +73,7 @@ async function main(){
   await goto(page,'/home/collections');await guideReady(page);const shortlist=page.getByRole('button').filter({hasText:hour===8?'Worth getting up for':'Dinner before the show'}).first();await shortlist.click();await page.waitForURL(/\/home\/collection\?/);await guideReady(page);assert.ok(await page.getByTestId('home-guide-lead').count()>0);await shot(page,'collection-'+hour,theme);
   for(const category of ['eat','bars','routes','events']){
    await goto(page,'/');await page.getByTestId('home-count-tile-'+category).click();await page.waitForURL(url=>url.pathname==='/home/browse'&&url.searchParams.get('category')===category);await guideReady(page);
-   await page.getByRole('header',{name:{eat:'Eat',bars:'Bars',routes:'Routes',events:'Events'}[category],exact:true}).waitFor();
+   await page.getByRole('heading',{name:{eat:'Eat',bars:'Bars',routes:'Routes',events:'Events'}[category],exact:true}).waitFor();
    if(category!=='events')assert.ok(await page.getByTestId('home-guide-lead').count()>0);
   }
   await goto(page,'/home/ideas?idea=fresh-air');await guideReady(page);await page.getByRole('button',{name:/Take a closer look at/}).click();await page.waitForURL(/\/home\/detail\?/);await page.getByRole('link',{name:'Park information & updates'}).waitFor();assert.equal(await page.getByTestId('home-guide-save').count(),0);
