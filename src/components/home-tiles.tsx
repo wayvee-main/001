@@ -1,18 +1,15 @@
-import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 
 import { Glyph, type GlyphName } from '@/components/glyph';
 import { PHOTO_NOTE } from '@/components/field-notes';
-import type { HomeTilePreview } from '@/lib/home-tile-previews';
 import { useAppGutter } from '@/components/layout';
 import { MiniChevron } from '@/components/ui';
 import { Photo } from '@/components/photo';
 import { useElevation, useRaisedSurface } from '@/lib/shadows';
 import { useThemeColors, type ThemeColors } from '@/lib/theme';
 
-export type CountTile = HomeTilePreview & {
+export type CountTile = {
   key: string;
   /** Already formatted: some counts are exact, others are a catalog size. */
   count: string;
@@ -23,83 +20,10 @@ export type CountTile = HomeTilePreview & {
   onPress: () => void;
 };
 
-/** More on stage photo proportions, scaled to fill each Home column.
- *
- * `bleed` makes the photograph the card itself rather than a picture mounted
- * inside one: it fills its parent, which does the clipping, so there is no
- * inner radius or border to read as a second frame. */
-function TileWindow({ tile, width, height, bleed = false }: {
-  tile: CountTile; width: number; height: number; bleed?: boolean;
-}) {
-  const colors = useThemeColors();
-  const [failedImage, setFailedImage] = useState<string | number>();
-  const showImage = tile.image !== undefined && failedImage !== tile.image;
-  const paper = colors['home-tile'];
-
-  return (
-    <View
-      testID={`home-tile-window-${tile.key}`}
-      style={bleed
-        ? [StyleSheet.absoluteFill, { backgroundColor: colors['home-tile-well'] }]
-        : [styles.window, { width, height }]}>
-      {showImage ? (
-        <View testID={`home-tile-photo-frame-${tile.key}`}
-          style={bleed
-            ? StyleSheet.absoluteFill
-            : [styles.photoFrame, { borderWidth: 1, borderColor: colors['edge-faint'] }]}>
-          <Image
-            testID={`home-tile-image-${tile.key}`}
-            source={tile.image}
-            accessibilityLabel={tile.imageLabel}
-            accessible={false}
-            style={StyleSheet.absoluteFill}
-            contentFit="cover"
-            contentPosition="center"
-            cachePolicy="memory-disk"
-            transition={120}
-            recyclingKey={String(tile.image)}
-            onError={() => setFailedImage(tile.image)}
-          />
-          {bleed ? null : (
-            <LinearGradient
-              testID={`home-tile-fade-${tile.key}`}
-              pointerEvents="none"
-              accessible={false}
-              colors={[`${paper}00`, `${paper}0F`]}
-              start={{ x: 0.5, y: 0 }}
-              end={{ x: 0.5, y: 1 }}
-              style={styles.fade}
-            />
-          )}
-        </View>
-      ) : (
-        <View testID={`home-tile-fallback-${tile.key}`}
-          style={bleed ? [StyleSheet.absoluteFill, styles.fallback] : styles.fallback}>
-          <Glyph name={tile.glyph} size={25} color={colors['home-tile-glyph']} strokeWidth={1.7} />
-        </View>
-      )}
-    </View>
-  );
-}
-
-/** The photograph is the tile; the place and its facts sit beneath it.
- *
- * Every tile is the same rectangle whatever its picture, which is what the
- * previous arrangement could not promise: a pool with no photograph rendered a
- * glyph floating in an empty box, so one tile in four was a different object.
- * The tile is the photograph and nothing else: the category and count ride a
- * scrim over the bottom of the image, and there is no text beneath it. A
- * caption naming one venue, and a row of facts about that venue, both sat here
- * and both described whichever record happened to sort first rather than the
- * category the tile opens.
- *
- * The scrim is built from `selected-surface` under `on-selected` — the pair the
- * contrast gate already verifies — so the heading is legible over a bright
- * photograph and a near-black one alike, rather than depending on the picture. */
+/** Quiet outline illustrations in the existing tile frame. The heading, count,
+ * chevron, grid geometry and elevation retain their existing treatment. */
 function GalleryTile({ tile, width }: { tile: CountTile; width: number }) {
   const colors = useThemeColors();
-  // Level 3 rather than the cards' level 1: a tile has no border and no
-  // surface of its own, so the shadow is doing all of the separating.
   const elevation = useElevation(3);
   const photoHeight = Math.round(width * PHOTO_NOTE.photoHeight / PHOTO_NOTE.photoWidth);
   const scrim = colors['selected-surface'];
@@ -107,25 +31,21 @@ function GalleryTile({ tile, width }: { tile: CountTile; width: number }) {
   return (
     <TouchableOpacity
       accessibilityRole="button"
-      accessibilityLabel={`Explore ${tile.count} ${tile.label}. Preview: ${tile.accessibilityDetail}`}
+      accessibilityLabel={`Explore ${tile.count} ${tile.label}`}
       activeOpacity={0.78}
       onPress={tile.onPress}
       testID={`home-count-tile-${tile.key}`}
       style={{ width, flexShrink: 0 }}>
-      {/* Elevation rather than a border: the tile has no surface of its own —
-        * the photograph is the surface — so a shadow is the only thing that
-        * can lift it off the wash. useElevation gives the shadow without
-        * useRaisedSurface's background and edge, which would sit behind an
-        * image that already covers them. */}
       <View testID={`home-tile-mount-${tile.key}`}
-        style={[elevation, { height: photoHeight, borderRadius: PHOTO_NOTE.radius, overflow: 'hidden' }]}>
-        <TileWindow tile={tile} width={width} height={photoHeight} bleed />
+        style={[elevation, { height: photoHeight, borderRadius: PHOTO_NOTE.radius, overflow: 'hidden', backgroundColor: scrim }]}>
+        <View testID={`home-tile-illustration-${tile.key}`} accessible={false} pointerEvents="none"
+          style={{ position: 'absolute', left: 0, right: 0, top: 5, bottom: 29, alignItems: 'center', justifyContent: 'center', opacity: 0.22 }}>
+          <Glyph name={tile.glyph} size={Math.min(64, Math.round(photoHeight * .62))} color={colors['selected-glyph']} strokeWidth={1.2} />
+        </View>
         <LinearGradient
           testID={`home-tile-scrim-${tile.key}`}
           pointerEvents="none"
           accessible={false}
-          // D9 (0.851) raised 15% to F9 (0.976): the heading sits over a
-          // near-solid floor now, so a bright photograph cannot wash it out.
           colors={[`${scrim}00`, `${scrim}F9`]}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
@@ -190,11 +110,6 @@ export function AroundYou({ tiles }: { tiles: CountTile[] }) {
 }
 
 const styles = StyleSheet.create({
-  window: { borderRadius: PHOTO_NOTE.photoRadius, overflow: 'hidden' },
-  photoFrame: { width: '100%', height: '100%', borderRadius: PHOTO_NOTE.photoRadius, overflow: 'hidden' },
-  fallback: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  fade: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 18 },
-  // Deep enough to carry a 17px serif heading over whatever the photo does.
   scrim: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 56 },
 });
 
