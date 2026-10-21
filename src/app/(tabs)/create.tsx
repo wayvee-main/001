@@ -832,6 +832,13 @@ export default function CreateScreen() {
               <Text className="font-fraunces text-ink" style={{marginTop:18,fontSize:screenWidth<=360?26:28,lineHeight:34,letterSpacing:-.45}}>
                 {askPlan ? 'What should change?' : 'Where to?'}
               </Text>
+              {/* Only under the opening question. Beneath "What should change?"
+                * it would introduce Vee to someone already mid-conversation. */}
+              {askPlan ? null : (
+                <Text className="font-dm text-fine text-taupe" style={{marginTop:6}}>
+                  Tell Vee the night you want. Vee finds it.
+                </Text>
+              )}
             </View>
           ) : null}
 

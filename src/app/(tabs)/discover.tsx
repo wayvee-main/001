@@ -146,7 +146,7 @@ export default function DiscoverScreen() {
         placeholder="A place, artist, or good idea" placeholderTextColor={colors['fg-muted']} className="min-w-0 flex-1 py-3 font-dm text-label text-ink" />
       {query?<TouchableOpacity accessibilityRole="button" accessibilityLabel="Clear search" hitSlop={10} onPress={()=>setQuery('')}><Glyph name="close" size={15} color={colors['fg-muted']} /></TouchableOpacity>:null}
     </View>
-    <View className="mt-2.5 mb-[18px]"><HRow gap={11.44} bleed={false}>{MODES.map(x=><TouchableOpacity key={x.value} accessibilityRole="button" accessibilityLabel={x.label}
+    <View className="mt-2.5 mb-[8px]"><HRow gap={11.44} bleed={false}>{MODES.map(x=><TouchableOpacity key={x.value} accessibilityRole="button" accessibilityLabel={x.label}
       accessibilityState={{selected:mode===x.value}} activeOpacity={.78} hitSlop={{top:6,bottom:6}} onPress={()=>choose(x.value)}
       style={[mode===x.value?selectedControl:{...control,backgroundColor:colors['surface-discovery']},{minHeight:32.2,paddingVertical:6.44,paddingHorizontal:8.28,borderRadius:999,flexDirection:'row',alignItems:'center',gap:4.6}]}>
       {x.value==='All'?<VeeMark size={16} color={mode===x.value?colors['selected-glyph']:colors['fg-muted']} />:<Glyph name={x.glyph} size={13.8} color={mode===x.value?colors['selected-glyph']:colors['fg-muted']} />}
@@ -156,9 +156,9 @@ export default function DiscoverScreen() {
       {search.length?search.slice(0,40).map((x,i)=><ListRow key={`${x.kind}/${x.id}`} title={x.title} meta={x.subtitle} image={x.image} divider={i<Math.min(search.length,40)-1} onPress={()=>router.push(x.href as never)} />)
         :<EmptyState title="Nothing here just yet" message="Try another place, artist or kind of evening." actionLabel="Clear search" onAction={()=>setQuery('')} />}
     </View>:<>
-      {/* The strapline that sat here carried the 24px gap above the trail;
-        * a little of it is kept so the first stop does not butt the chips. */}
-      <View testID="evening-trail" style={{paddingLeft:20,position:'relative',marginTop:6}}>
+      {/* The strapline that sat here carried a 24px gap above the trail. With
+        * it gone the first stop rides just under the mode chips. */}
+      <View testID="evening-trail" style={{paddingLeft:20,position:'relative'}}>
       <View testID="evening-trail-thread" pointerEvents="none" style={{position:'absolute',left:3,top:16,bottom:20,width:1,backgroundColor:colors['edge-faint']}} />
       {(mode==='All'||mode==='Events')?stage:null}
       {(mode==='All'||mode==='Food')?food:null}

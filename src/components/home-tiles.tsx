@@ -9,7 +9,7 @@ import type { HomeTilePreview } from '@/lib/home-tile-previews';
 import { useAppGutter } from '@/components/layout';
 import { MiniChevron } from '@/components/ui';
 import { Photo } from '@/components/photo';
-import { useRaisedSurface } from '@/lib/shadows';
+import { useElevation, useRaisedSurface } from '@/lib/shadows';
 import { useThemeColors, type ThemeColors } from '@/lib/theme';
 
 export type CountTile = HomeTilePreview & {
@@ -98,6 +98,9 @@ function TileWindow({ tile, width, height, bleed = false }: {
  * photograph and a near-black one alike, rather than depending on the picture. */
 function GalleryTile({ tile, width }: { tile: CountTile; width: number }) {
   const colors = useThemeColors();
+  // Level 3 rather than the cards' level 1: a tile has no border and no
+  // surface of its own, so the shadow is doing all of the separating.
+  const elevation = useElevation(3);
   const photoHeight = Math.round(width * PHOTO_NOTE.photoHeight / PHOTO_NOTE.photoWidth);
   const scrim = colors['selected-surface'];
 
@@ -109,8 +112,13 @@ function GalleryTile({ tile, width }: { tile: CountTile; width: number }) {
       onPress={tile.onPress}
       testID={`home-count-tile-${tile.key}`}
       style={{ width, flexShrink: 0 }}>
+      {/* Elevation rather than a border: the tile has no surface of its own —
+        * the photograph is the surface — so a shadow is the only thing that
+        * can lift it off the wash. useElevation gives the shadow without
+        * useRaisedSurface's background and edge, which would sit behind an
+        * image that already covers them. */}
       <View testID={`home-tile-mount-${tile.key}`}
-        style={{ height: photoHeight, borderRadius: PHOTO_NOTE.radius, overflow: 'hidden' }}>
+        style={[elevation, { height: photoHeight, borderRadius: PHOTO_NOTE.radius, overflow: 'hidden' }]}>
         <TileWindow tile={tile} width={width} height={photoHeight} bleed />
         <LinearGradient
           testID={`home-tile-scrim-${tile.key}`}
