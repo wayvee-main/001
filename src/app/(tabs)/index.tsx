@@ -10,7 +10,7 @@ import { Photo } from '@/components/photo';
 import { SectionHeading } from '@/components/section-heading';
 import { BUNDLE_CITY, useActiveCity, useActiveCityName } from '@/lib/city';
 import { useNow } from '@/lib/clock';
-import { CRAWLS, CURATED_COLLECTION_ORDER, CURATED_COLLECTIONS, NIGHTLIFE_SPOTS, activeCollectionItems, currentEventListings } from '@/lib/data';
+import { CRAWLS, CURATED_COLLECTION_ORDER, CURATED_COLLECTIONS, NIGHTLIFE_SPOTS, RESTAURANTS, activeCollectionItems, currentEventListings } from '@/lib/data';
 import { hydrateEventsFromBackend } from '@/lib/events-remote';
 import { hydratePlacesFromBackend } from '@/lib/places';
 import { activeReminders } from '@/lib/reminders';
@@ -18,7 +18,8 @@ import { useScoper } from '@/lib/store';
 import { useThemeColors } from '@/lib/theme';
 import { useNearestPool } from '@/lib/use-nearest-pool';
 import { useHomeQuickActions } from '@/lib/use-home-quick-actions';
-import { OAKLAND_HOME_TILE_PHOTOS } from '@/lib/home-tile-photos';
+import { HOME_TILE_PREVIEW_PHOTOS } from '@/lib/home-tile-photos';
+import { buildHomeTilePreviews } from '@/lib/home-tile-previews';
 import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
 import { hydrateWeatherFromBackend } from '@/lib/weather';
 
@@ -38,16 +39,23 @@ export default function HomeScreen() {
     try { await Promise.all([hydrateEventsFromBackend(true), hydratePlacesFromBackend(true), hydrateWeatherFromBackend(true), s.refreshLocation()]); }
     finally { setRefreshing(false); }
   };
-  const tilePhotos = citySlug === BUNDLE_CITY ? OAKLAND_HOME_TILE_PHOTOS : undefined;
+  const local = citySlug === BUNDLE_CITY;
+  const nightlife = local ? NIGHTLIFE_SPOTS : [];
+  const crawls = local ? Object.values(CRAWLS) : [];
+  const events = currentEventListings(now);
+  const previews = buildHomeTilePreviews({
+    nearest, featuredRestaurant: local ? RESTAURANTS.mua : undefined,
+    nightlife, crawls, events, now,
+  });
   const tileDefinitions: CountTile[] = [
-    { key:'eat', count:String(nearest.length), glyph:'food', label:'Eat', tint:'tile-eat', ink:'fg', onPress:()=>router.push('/featured') },
-    { key:'bars', count:String(NIGHTLIFE_SPOTS.length), glyph:'drink', label:'Bars', tint:'tile-bars', ink:'fg', onPress:()=>router.push('/discover?mode=Nightlife') },
-    { key:'routes', count:String(Object.keys(CRAWLS).length), glyph:'route', label:'Routes', tint:'tile-routes', ink:'fg', onPress:()=>router.push('/discover?mode=Routes') },
-    { key:'events', count:String(currentEventListings(now).length), glyph:'ticket', label:'Events', tint:'tile-events', ink:'fg', onPress:()=>router.push('/discover?mode=Events') },
+    { ...previews.eat, key:'eat', count:String(nearest.length), glyph:'food', label:'Eat', tint:'tile-eat', ink:'fg', onPress:()=>router.push('/featured') },
+    { ...previews.bars, key:'bars', count:String(nightlife.length), glyph:'drink', label:'Bars', tint:'tile-bars', ink:'fg', onPress:()=>router.push('/discover?mode=Nightlife') },
+    { ...previews.routes, key:'routes', count:String(crawls.length), glyph:'route', label:'Routes', tint:'tile-routes', ink:'fg', onPress:()=>router.push('/discover?mode=Routes') },
+    { ...previews.events, key:'events', count:String(events.length), glyph:'ticket', label:'Events', tint:'tile-events', ink:'fg', onPress:()=>router.push('/discover?mode=Events') },
   ];
   const tiles = tileDefinitions.map(tile => {
-    const photo = tilePhotos?.[tile.key as keyof typeof OAKLAND_HOME_TILE_PHOTOS];
-    return { ...tile, image: photo?.source, imageLabel: photo?.label };
+    const photo = tile.photoKey ? HOME_TILE_PREVIEW_PHOTOS[tile.photoKey] : undefined;
+    return { ...tile, image: photo?.source ?? tile.image, imageLabel: photo?.label ?? tile.imageLabel };
   });
   return <Screen><ScreenScroll gap={18} clearsTabBar refreshing={refreshing} onRefresh={onRefresh}>
     <HomeHeader hasReminders={activeReminders(s.plans,s.stay).length>0}
