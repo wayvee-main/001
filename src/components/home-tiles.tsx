@@ -1,12 +1,9 @@
-import { LinearGradient } from 'expo-linear-gradient';
-import { StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Glyph, type GlyphName } from '@/components/glyph';
-import { PHOTO_NOTE } from '@/components/field-notes';
-import { useAppGutter } from '@/components/layout';
 import { MiniChevron } from '@/components/ui';
 import { Photo } from '@/components/photo';
-import { useElevation, useRaisedSurface } from '@/lib/shadows';
+import { useRaisedSurface } from '@/lib/shadows';
 import { useThemeColors, type ThemeColors } from '@/lib/theme';
 
 export type CountTile = {
@@ -14,69 +11,12 @@ export type CountTile = {
   /** Already formatted: some counts are exact, others are a catalog size. */
   count: string;
   label: string;
+  hint: string;
   tint: keyof ThemeColors;
   ink: keyof ThemeColors;
   glyph: GlyphName;
   onPress: () => void;
 };
-
-/** Quiet outline illustrations in the existing tile frame. The heading, count,
- * chevron, grid geometry and elevation retain their existing treatment. */
-function GalleryTile({ tile, width }: { tile: CountTile; width: number }) {
-  const colors = useThemeColors();
-  const elevation = useElevation(3);
-  const photoHeight = Math.round(width * PHOTO_NOTE.photoHeight / PHOTO_NOTE.photoWidth);
-  const scrim = colors['selected-surface'];
-
-  return (
-    <TouchableOpacity
-      accessibilityRole="button"
-      accessibilityLabel={`Explore ${tile.count} ${tile.label}`}
-      activeOpacity={0.78}
-      onPress={tile.onPress}
-      testID={`home-count-tile-${tile.key}`}
-      style={{ width, flexShrink: 0 }}>
-      <View testID={`home-tile-mount-${tile.key}`}
-        style={[elevation, { height: photoHeight, borderRadius: PHOTO_NOTE.radius, overflow: 'hidden', backgroundColor: scrim }]}>
-        <View testID={`home-tile-illustration-${tile.key}`} accessible={false} pointerEvents="none"
-          style={{ position: 'absolute', left: 0, right: 0, top: 5, bottom: 29, alignItems: 'center', justifyContent: 'center', opacity: 0.22 }}>
-          <Glyph name={tile.glyph} size={Math.min(64, Math.round(photoHeight * .62))} color={colors['selected-glyph']} strokeWidth={1.2} />
-        </View>
-        <LinearGradient
-          testID={`home-tile-scrim-${tile.key}`}
-          pointerEvents="none"
-          accessible={false}
-          colors={[`${scrim}00`, `${scrim}F9`]}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-          style={styles.scrim}
-        />
-        <View testID={`home-tile-heading-${tile.key}`}
-          style={{
-            position: 'absolute', left: 11, right: 10, bottom: 9,
-            flexDirection: 'row', alignItems: 'center', gap: 8,
-          }}>
-          <View className="min-w-0 flex-1 flex-row items-baseline" style={{ gap: 6 }}>
-            <Text testID={`home-tile-title-${tile.key}`} numberOfLines={1}
-              className="shrink font-fraunces"
-              style={{ color: colors['on-selected'], fontSize: 17, lineHeight: 19.55, letterSpacing: -0.2 }}>
-              {tile.label}
-            </Text>
-            <Text testID={`home-tile-count-${tile.key}`} numberOfLines={1}
-              className="shrink-0 font-dm-medium"
-              style={{ color: colors['selected-glyph'], fontSize: 13, lineHeight: 19.55 }}>
-              {tile.count}
-            </Text>
-          </View>
-          <View testID={`home-tile-chevron-${tile.key}`} accessible={false} pointerEvents="none"
-            style={{ width: 16, height: 16, alignItems: 'center', justifyContent: 'center' }}>
-            <Glyph name="chevron" size={16} color={colors['on-selected']} />
-          </View>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-}
 
 /** Home's "Around you" grid.
  *
@@ -87,31 +27,46 @@ function GalleryTile({ tile, width }: { tile: CountTile; width: number }) {
  * cannot follow is decoration (CLAUDE.md #3).
  */
 export function AroundYou({ tiles }: { tiles: CountTile[] }) {
-  const { width } = useWindowDimensions();
-  const gutter = useAppGutter();
-  const gap = 16;
-  const availableWidth = Math.min(width, 720) - gutter * 2;
-  const cardWidth = (availableWidth - gap) / 2;
+  const colors = useThemeColors();
+  const surface = useRaisedSurface(1);
   const rows: CountTile[][] = [];
   for (let i = 0; i < tiles.length; i += 2) rows.push(tiles.slice(i, i + 2));
 
   return (
-    <View testID="around-you-grid" style={{width:cardWidth*2+gap,alignSelf:'center',gap}}>
-      {rows.map(row => (
-        <View key={row.map(tile => tile.key).join('-')} style={{flexDirection:'row',gap}}>
-          {row.map(tile => (
-            <GalleryTile key={tile.key} tile={tile} width={cardWidth} />
+    <View testID="around-you-grid" className="gap-y-2.5">
+      {rows.map((row) => (
+        <View key={row.map((tile) => tile.key).join('-')} className="flex-row gap-x-2.5">
+          {row.map((tile) => (
+            <TouchableOpacity
+              key={tile.key}
+              accessibilityRole="button"
+              accessibilityLabel={`${tile.count} ${tile.label}, ${tile.hint}`}
+              activeOpacity={0.78}
+              onPress={tile.onPress}
+              testID={`home-count-tile-${tile.key}`}
+              style={[surface, { backgroundColor: colors['home-tile'] }]}
+              className="min-h-[100px] flex-1 rounded-panel px-3 pb-3 pt-3">
+              <View className="flex-row items-center justify-between gap-x-2">
+                <View testID={`home-tile-glyph-${tile.key}`} style={{ backgroundColor: colors['home-tile-well'] }} className="h-7 w-7 items-center justify-center rounded-full">
+                  <Glyph name={tile.glyph} size={16} color={colors['home-tile-glyph']} strokeWidth={1.9} />
+                </View>
+                <Text testID={`home-tile-count-${tile.key}`}
+                  style={{ color: colors.fg, fontVariant: ['tabular-nums'] }}
+                  className="font-dm-medium text-[18px] leading-[22px]">
+                  {tile.count}
+                </Text>
+              </View>
+              <Text testID={`home-tile-title-${tile.key}`} numberOfLines={1} className="mt-2 font-fraunces text-[20px] leading-[23px] text-ink">{tile.label}</Text>
+              <Text testID={`home-tile-caption-${tile.key}`} numberOfLines={2} className="mt-0.5 font-dm text-fine text-taupe">{tile.hint}</Text>
+            </TouchableOpacity>
           ))}
-          {row.length===1 ? <View style={{width:cardWidth}} /> : null}
+          {/* An odd count would otherwise stretch the last tile to full width. */}
+          {row.length === 1 ? <View className="flex-1" /> : null}
         </View>
       ))}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  scrim: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 56 },
-});
 
 /** The screen's second-level heading: a named group of sections. Sits a step
  * below the page title (19px) and well under the 26–28px heroes Home used to

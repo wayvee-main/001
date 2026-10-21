@@ -50,9 +50,10 @@ populate the backend immediately, ahead of the next deploy.
 
 Each tile shows its real inventory count beside its category name: the nearest
 food pool, active-city nightlife/route catalogs, or current event listings.
-Home tiles now show subtle category glyph illustrations; no venue preview
-metadata or photos are promoted into those four category tiles. Their labels,
-counts and typography remain intact, and their counts open the same real pools
+Home tiles use the restored reference layout: small category glyphs, real
+counts at top right, category names and short general captions. No venue preview
+metadata or photos are promoted into those four cards. Captions describe the
+category, not an unsupported opening status. Counts open the same real pools
 through Home's separate Field Guide routes.
 
 ## Home intentions and Field Guide

@@ -19,7 +19,7 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   Discover listings use `#F7F2EC` / `#29252A`. In dark mode, the evening ribbon's
   `#29252A` is the default background for every card container, including Home tiles
   and every Discover listing. Light-mode search and navigation share plain off-white `#FFFCF8`.
-  Home tiles use Collections' `#F5F0E9` / `#29252A` material. Search uses its own `surface-search`
+  Home glyph tiles use `#FFFCF8` / `#29252A`. Search uses its own `surface-search`
   role everywhere: Home, Discover, the search overlay, food hub and stay picks.
   Dark search retains Oyster's muted green `#28372F`; dark navigation uses
   `#29252A`. Keep these roles separate from cards so changing search never
@@ -33,16 +33,18 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   dots have transparent surrounds so the gradient stays continuous.
 - Add 14px to the previous horizontal gutters throughout screens and layers:
   34px normally, 30px on phones up to 400px. Use `useAppGutter`.
-- Home keeps four tiles, ordered Eat, Bars, Routes, Events. Counts describe
-  actual inventory, never unsupported opening status. Use quiet outline glyph
-  illustrations instead of photos, at 22% opacity on `selected-surface`.
-  Keep the existing 121:73 tile geometry, 12px corners, level-3 elevation,
-  16px grid gaps and full two-column width inside the app gutters.
-  Preserve the existing text styling and placement: 17px Fraunces category,
-  muted 13px DM Sans count on one baseline with 6px gap, 16px outline chevron,
-  and the existing `on-selected` / `selected-glyph` colors. Do not add captions
-  or metadata under the category. Each tile opens its own Home Field Guide pool.
-  These Home changes do not alter Discover's contained listings or details.
+- Home keeps four tiles, ordered Eat, Bars, Routes, Events. Restore the compact
+  reference glyph cards: `home-tile` off-white `#FFFCF8` in light and the existing
+  charcoal `#29252A` in dark. Use level-1 raised surfaces, faint borders,
+  `rounded-panel` corners, 12px insets, 100px minimum height and 10px grid gaps.
+  The two columns fill the content width. Small 16px outline glyphs sit inside
+  28px peach circles at top left (`#F7E5D8` light / `#48312E` dark); the real
+  inventory count sits at top right in 18px medium DM Sans with tabular figures.
+  Below, use a 20px Fraunces category and a short 11px DM Sans caption:
+  Eat / Nearby places; Bars / After dinner; Routes / A few good stops;
+  Events / Find your next show. Keep the whole card one accessible button.
+  These four cards open their existing Home Field Guide pools. Source counts,
+  city scoping, For you, Collections, Field Guide and Discover remain unchanged.
   In light mode, quick venue chips share search's off-white fill;
   dark mode retains their Oyster charcoal fill. Link your stay and the evening
   ribbon share Collections' `surface-raised` fill, normal theme ink and faint edge.
