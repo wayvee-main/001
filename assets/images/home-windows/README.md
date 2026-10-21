@@ -1,21 +1,22 @@
-# Home · Window Cards
+# Home · real local previews
 
-Venue-owned photography, checked October 20, 2026. These are category images,
-not claims that a specific dish or performance is currently available.
-The files retain each complete source frame, with orientation corrected and
-size reduced for the app. The bundled files are uncropped. All four displayed
-photos use the More on stage photo ratio (121:73), cover fit without
-stretching, and 8px corners. Photos scale proportionally to fill both Home
-columns across the content width inside the existing app gutters. The component retains a lower-edge theme fade of
-at most 15/255 (5.9%) opacity. The four JPEGs total under 300KB.
+Verified against the establishments' own pages, October 20, 2026.
+These identify the named preview, rather than supplying generic category scenery.
+Files preserve the source photographs; no synthetic scenes, fake grain or invented signage.
 
-| File | Subject | Official source | Original image |
+| File | Exact preview | Official source | Original image |
 | --- | --- | --- | --- |
-| eat.jpg | Mägo table setting | https://www.magorestaurant.com/ | https://images.getbento.com/accounts/d615d0323782ca5443f19298221179c7/media/images/833072024_Mago_Photos_081_1.jpg?w=1000&fit=max&auto=compress,format&cs=origin |
-| bars.jpg | Bar Shiru interior | https://www.barshiru.com/ | https://images.squarespace-cdn.com/content/v1/5abbe7a1f2e6b18135abbf19/722ccf83-6a48-4e93-a18a-05382113af00/BarShiru_BarWideWithPortraits.jpg?format=1000w |
-| routes.jpg | Fox Theater exterior, Uptown Oakland | https://thefoxoakland.com/ | https://thefoxoakland.com/wp-content/uploads/sites/5/2016/12/marquee-shot-1024x683.jpg |
-| events.jpg | Paramount Theatre auditorium | https://www.paramountoakland.org/ | https://www.paramountoakland.org/assets/img/2017-2-4-Balc-Auditorium-HKam-416e12d650.jpg |
+| eat.jpg | MUA Oakland's occupied dining room | https://www.muaoakland.com/ | https://images.squarespace-cdn.com/content/v1/6a0e3c0157e2e13d2e8153e6/9f51d2f5-9920-4ee3-b5b0-d4e8d9d7b99c/from-balcony-L-1.jpeg?format=1000w |
+| bars.jpg | Little Bird's actual 13th Street window | https://www.littlebirdbar.com/ | https://images.squarespace-cdn.com/content/v1/681fa9fa8166e940653d6b47/9e94bd91-1951-4ee4-b77b-c72fd77a552b/LBfrontwindow2_extended.jpg?format=750w |
+| routes.jpg | Fox Theater marquee in the Uptown route's neighborhood | https://thefoxoakland.com/ | https://thefoxoakland.com/wp-content/uploads/sites/5/2016/12/marquee-shot-1024x683.jpg |
 
-The Oakland photo set is used only for Oakland. Other cities retain the category
-glyph until their own photography is sourced. Missing or failed image loads also
-show the category glyph, leaving the tile label, inventory count and action intact.
+Events use the selected current listing's own artist image. The old events.jpg
+auditorium photo is no longer referenced as a Home fallback, preventing a
+permanent venue photo from masquerading as the featured artist.
+
+The map is keyed by /restaurant/mua, /night/little-bird and /crawl/uptown.
+Another pick uses its own native catalog image, never an unrelated bundled photo.
+Other cities receive their actual local pick/image or a category glyph. Missing
+photos preserve the caption, two metadata rows, real count and destination.
+Frames use the shared 121:73 display ratio and the existing 18px lower-edge
+fade capped at 15/255 (5.9%) opacity.

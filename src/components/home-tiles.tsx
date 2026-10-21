@@ -4,14 +4,15 @@ import { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 
 import { Glyph, type GlyphName } from '@/components/glyph';
-import { PHOTO_NOTE } from '@/components/field-notes';
+import { NoteFact, PHOTO_NOTE } from '@/components/field-notes';
+import type { HomeTilePreview } from '@/lib/home-tile-previews';
 import { useAppGutter } from '@/components/layout';
 import { MiniChevron } from '@/components/ui';
 import { Photo } from '@/components/photo';
 import { useRaisedSurface } from '@/lib/shadows';
 import { useThemeColors, type ThemeColors } from '@/lib/theme';
 
-export type CountTile = {
+export type CountTile = HomeTilePreview & {
   key: string;
   /** Already formatted: some counts are exact, others are a catalog size. */
   count: string;
@@ -19,9 +20,6 @@ export type CountTile = {
   tint: keyof ThemeColors;
   ink: keyof ThemeColors;
   glyph: GlyphName;
-  /** Bundled, full-frame category photo, or a photo from the active catalog. */
-  image?: string | number;
-  imageLabel?: string;
   onPress: () => void;
 };
 
@@ -77,7 +75,7 @@ function GalleryTile({ tile, width }: { tile: CountTile; width: number }) {
   return (
     <TouchableOpacity
       accessibilityRole="button"
-      accessibilityLabel={`Explore ${tile.count} ${tile.label}`}
+      accessibilityLabel={`Explore ${tile.count} ${tile.label}. Preview: ${tile.accessibilityDetail}`}
       activeOpacity={0.78}
       onPress={tile.onPress}
       testID={`home-count-tile-${tile.key}`}
@@ -97,19 +95,28 @@ function GalleryTile({ tile, width }: { tile: CountTile; width: number }) {
         }} />
         <TileWindow tile={tile} width={width - PHOTO_NOTE.padding * 2} />
       </View>
-      <View testID={`home-tile-caption-${tile.key}`}
-        style={{ marginTop: 7, paddingHorizontal: PHOTO_NOTE.padding, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <View className="min-w-0 flex-1 flex-row items-baseline" style={{ gap: 6 }}>
-          <Text testID={`home-tile-title-${tile.key}`} numberOfLines={1}
-            className="shrink font-fraunces text-ink"
-            style={{ fontSize: 17, lineHeight: 19.55, letterSpacing: -0.2 }}>{tile.label}</Text>
-          <Text testID={`home-tile-count-${tile.key}`} numberOfLines={1}
-            className="shrink-0 font-dm-medium text-taupe"
-            style={{ fontSize: 13, lineHeight: 19.55 }}>{tile.count}</Text>
+      <View testID={`home-tile-caption-${tile.key}`} style={{ marginTop: 7, paddingHorizontal: PHOTO_NOTE.padding }}>
+        <View testID={`home-tile-heading-${tile.key}`}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <View className="min-w-0 flex-1 flex-row items-baseline" style={{ gap: 6 }}>
+            <Text testID={`home-tile-title-${tile.key}`} numberOfLines={1}
+              className="shrink font-fraunces text-ink"
+              style={{ fontSize: 17, lineHeight: 19.55, letterSpacing: -0.2 }}>{tile.label}</Text>
+            <Text testID={`home-tile-count-${tile.key}`} numberOfLines={1}
+              className="shrink-0 font-dm-medium text-taupe"
+              style={{ fontSize: 13, lineHeight: 19.55 }}>{tile.count}</Text>
+          </View>
+          <View testID={`home-tile-chevron-${tile.key}`} accessible={false} pointerEvents="none"
+            style={{ width: 16, height: 16, alignItems: 'center', justifyContent: 'center' }}>
+            <Glyph name="chevron" size={16} color={colors['surface-accent']} />
+          </View>
         </View>
-        <View testID={`home-tile-chevron-${tile.key}`} accessible={false} pointerEvents="none"
-          style={{ width: 16, height: 16, alignItems: 'center', justifyContent: 'center' }}>
-          <Glyph name="chevron" size={16} color={colors['surface-accent']} />
+        <Text testID={`home-tile-description-${tile.key}`} numberOfLines={1}
+          className="font-dm text-fine text-taupe" style={{ marginTop: 5 }}>{tile.caption}</Text>
+        <View testID={`home-tile-facts-${tile.key}`}
+          style={{ marginTop: 8, flexDirection: 'row', flexWrap: 'nowrap', columnGap: 8 }}>
+          {tile.facts.map((fact, index) => <NoteFact key={fact.glyph + '-' + index}
+            glyph={fact.glyph} value={fact.value} label={fact.label} compact flexible={index === 0} />)}
         </View>
       </View>
     </TouchableOpacity>

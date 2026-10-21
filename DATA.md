@@ -49,21 +49,27 @@ populate the backend immediately, ahead of the next deploy.
 ## Home tile counts
 
 Each tile shows its real inventory count beside its category name: the nearest
-food pool, nightlife catalog, route catalog, or current event listings. No
-secondary facts or descriptions are rendered. Existing pools, location ordering,
-event freshness and tap destinations remain authoritative.
+food pool, active-city nightlife/route catalogs, or current event listings.
+Two extra rows use a real catalog pick and its source-backed glyph facts.
+MUA's travel estimate is marked `~` unless its existing Nearest entry has a
+measured distance; do not alter the Nearest pool/order to choose a photo.
+Little Bird's listed daily closing time comes from its hours string, not an
+inferred open-now claim. Routes use actual stop counts and the route's own
+walking/ride metadata. Events select the earliest current listing and keep
+its name, venue, date, time and native image together.
 
 ## Image policy
 
-Home's four **Window Cards** bundle venue-owned category photos for Oakland
-from `assets/images/home-windows/README.md`. They retain the complete source
-frame in the bundled files, avoiding remote-load failures. Home displays every
-category at the More on stage photo ratio (121:73), with 8px corners and
-cover fit without stretching. Photos scale proportionally to fill Home's two
-full-width columns inside the app gutters.
-They represent categories rather than current dishes, artists or availability.
-Oakland's photos are not reused for another city. A missing or failed photo
-keeps its category glyph while the real inventory count and action remain.
+Home's **Open Gallery** uses exact preview IDs in `src/lib/home-tile-photos.ts`.
+MUA's occupied dining room and Little Bird's actual window replace generic
+category imagery; the existing Fox marquee anchors the Uptown route. These
+venue-owned files are bundled for immediate/offline display, with provenance
+in `assets/images/home-windows/README.md`. Current events use their own
+listing image, refreshing with the calendar rather than a permanent auditorium
+photo. Remote fallback images must belong to the named pick; known stock hosts
+are rejected. Missing/failed images show a category glyph, preserving facts and taps.
+The shared 121:73 ratio, 8px photo corners and subtle lower-edge fade remain.
+Oakland images are keyed to Oakland preview IDs and never reused for another city.
 
 Photos must come from the establishment itself (its site or official listing).
 Nearby place photos are supplemented in `src/lib/place-images.ts` using exact

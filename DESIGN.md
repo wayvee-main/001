@@ -48,17 +48,24 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   Keep the 17px Fraunces category and its real inventory count together on one
   baseline, separated by 6px; counts use muted 13px DM Sans. A 16px outline
   chevron at the far right uses the ribbon's orange `surface-accent`.
-  Remove all descriptions, secondary metadata, footer rows and fixed/minimum
-  heights. Allow the category to ellipsize on narrow screens while keeping
-  the count and chevron visible. Counts stay exact; every tile opens its pool.
+  Beneath the title/count row, add exactly two compact metadata rows like
+  More on stage: a one-line DM Sans `text-fine` local pick caption after 5px,
+  then a single inline glyph-fact row after 8px. Reuse `NoteFact`; allow
+  ellipses and at most two facts, keeping time/count values readable. Show real
+  place/artist names, source-backed prices/travel, route stops/distance and
+  event dates/showtimes. No invented opening status or precise GPS claims.
+  Heights fit all three text rows. Counts stay exact; every tile opens its pool.
   Reuse `TileWindow` and `PHOTO_NOTE` for the established photos and geometry;
   Discover's contained `NoteCard` listings retain their own treatment.
   A theme-colored image fade covers only the lower 18px, rising from
   transparent to 5.9% opacity; photo frames stay flat.
-  The bundled Oakland set uses complete venue-owned table/interior/landmark
-  compositions, not tight dish details or expiring artist posters. It is not
-  reused for another city. Missing/failed photos show the category glyph in
-  the common orange; counts, labels and actions remain available.
+  Images identify the actual preview: a lived-in MUA dining room, Little Bird's
+  real window sign and the Uptown route's Fox marquee are bundled by exact
+  preview ID. Events show the current artist/listing's own artwork and update
+  with the calendar; never keep an old artist as a category fallback. Reject
+  known stock-photo stand-ins. An unsourced pick gets its category glyph.
+  Oakland pictures/curated picks are not reused for another city. Missing/failed
+  photos retain the named pick, metadata, inventory count and action.
   In light mode, quick venue chips share search's off-white fill;
   dark mode retains their Oyster charcoal fill. Link your stay and the evening
   ribbon share Collections' `surface-raised` fill, normal theme ink and faint edge.
