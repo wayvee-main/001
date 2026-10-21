@@ -28,7 +28,7 @@ async function goto(page,url){
   const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.zIndex==='20'&&s.position==='absolute'&&r.width>100&&r.height>100&&s.display!=='none';
  }),null,{timeout:30000});
 }
-async function guideReady(page){await page.getByTestId('home-field-guide').waitFor({timeout:20000});await noOverflow(page,'Field Guide');}
+async function guideReady(page){await page.getByTestId('home-field-guide').last().waitFor({timeout:20000});await page.waitForTimeout(400);await noOverflow(page,'Field Guide');}
 async function main(){
  await new Promise(resolve=>server.listen(9876,'127.0.0.1',resolve));browser=await chromium.launch({headless:true});
  for(const theme of ['light','dark'])for(const hour of [8,19]){

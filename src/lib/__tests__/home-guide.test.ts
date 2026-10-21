@@ -71,6 +71,9 @@ describe('Home Field Guide isolation and real data', () => {
     const coffee=entriesForHomeIdea(homeDiscoveryIdea('coffee',morning)!,catalog);
     expect(coffee.length).toBeGreaterThan(0);
     expect(coffee.every(x=>/coffee|cafe|espresso/.test(x.searchText))).toBe(true);
+    const breakfast=entriesForHomeIdea(homeDiscoveryIdea('breakfast',morning)!,catalog);
+    expect(breakfast.some(x=>x.id==='brendas')).toBe(true);
+    expect(breakfast.some(x=>x.id==='gogi'||x.id==='woodtavern')).toBe(false);
     const outdoors=entriesForHomeIdea(homeDiscoveryIdea('fresh-air',morning)!,catalog);
     expect(outdoors).toHaveLength(3);
     expect(outdoors.every(x=>!x.saveKind&&!x.planKind&&x.links[0].url.startsWith('https://'))).toBe(true);

@@ -12,7 +12,7 @@ export type HomeGuideCategory = 'eat' | 'bars' | 'routes' | 'events';
 export type HomeGuideFact = { glyph: string; value: string; label?: string };
 export type HomeGuideEntry = {
   kind: HomeGuideKind; id: string; name: string; caption: string; description: string;
-  glyph: string; image?: string; facts: HomeGuideFact[]; searchText: string; category?: string;
+  glyph: string; image?: string; facts: HomeGuideFact[]; searchText: string; category?: string; foodTags?: string;
   members?: {kind: 'restaurant' | 'event'; id: string}[];
   details: {label: string; value: string}[];
   sections?: {title: string; lines: string[]}[];
@@ -57,6 +57,7 @@ export function buildHomeGuide({city,nearest,places,events,picks,now}: {
   if (local) for (const r of Object.values(RESTAURANTS)) add({
     kind:'restaurant',id:r.id,name:r.name,caption:r.cuisine,description:FOOD_HUB_REASON_BY_ID[r.id] || r.cuisine,
     image:r.image,glyph:'food',facts:[{glyph:'wallet',value:r.price},{glyph:'food',value:r.cuisine}],
+    foodTags:normalized([r.name,r.cuisine,...(r.searchTags||[])].join(' ')),
     searchText:[r.cuisine,...(r.searchTags||[]),...r.popularDishes.map(x=>x.name)].join(' '),
     details:[{label:'Address',value:r.address},...r.detailFacts],
     sections:r.menuHighlights.length?[{title:r.highlightsLabel || 'Menu highlights',lines:r.menuHighlights.slice(0,8).map(x=>[x.name,x.price,x.desc].filter(Boolean).join(' · '))}]:[],
@@ -66,6 +67,7 @@ export function buildHomeGuide({city,nearest,places,events,picks,now}: {
     kind:'place',id:p.id,name:p.name,caption:[p.cuisine,p.category.replace(/_/g,' ')].filter(Boolean).join(' · '),
     description:[p.cuisine,p.category.replace(/_/g,' ')].filter(Boolean).join(' · '),image:p.image || undefined,
     glyph:/cafe|bakery/.test(p.category)?'coffee':'food',category:p.category,facts:[{glyph:'pin',value:p.address?.split(',')[0] || p.category.replace(/_/g,' ')}],
+    foodTags:normalized([p.name,p.category,p.cuisine].filter(Boolean).join(' ')),
     searchText:[p.category,p.cuisine,p.address,p.category==='cafe'?'coffee espresso':''].filter(Boolean).join(' '),
     details:[p.address?{label:'Address',value:p.address}:null,p.phone?{label:'Phone',value:p.phone}:null].filter((x):x is {label:string;value:string}=>!!x),
     links:links(p.website?{label:'Official site',url:p.website}:undefined,directions(p.name,city,p.address)),saveKind:'place',
@@ -145,8 +147,10 @@ export function entriesForHomeIdea(idea: HomeIdea, catalog: HomeGuideCatalog): H
     return entriesForHomeCollection(catalog,'late-night');
   }
   const food=Object.values(catalog.entries).filter(x=>x.kind==='restaurant'||(x.kind==='place'&&['restaurant','cafe','bakery'].includes(x.category || '')));
-  if(idea.topic==='tomorrow'||idea.query==='breakfast')return food.filter(x=>/breakfast|brunch|bakery|bagel|pastr|pancake|waffle|beignet|donut/.test(x.searchText));
-  if(idea.query==='coffee')return food.filter(x=>/coffee|cafe|espresso/.test(x.searchText));
+  // A savory pancake or a pastrami sandwich is not evidence of breakfast.
+  // Use explicit venue categories/tags, not words from unrelated menu dishes.
+  if(idea.topic==='tomorrow'||idea.query==='breakfast')return food.filter(x=>/\b(breakfast|brunch|bakery|bagels?|donuts?|cafe|coffee|espresso)\b/.test(x.foodTags || ''));
+  if(idea.query==='coffee')return food.filter(x=>/\b(coffee|cafe|espresso)\b/.test(x.foodTags || ''));
   if(idea.query==='lunch')return food.filter(x=>/lunch|sandwich|salad|burger|pizza|taco|deli/.test(x.searchText));
   return food.filter(x=>x.kind==='restaurant'||x.category==='restaurant');
 }
