@@ -11,7 +11,7 @@ async function main(){
   const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:1,colorScheme:theme,timezoneId:'America/Los_Angeles',serviceWorkers:'block',ignoreHTTPSErrors:true});
   await context.addInitScript(theme=>{localStorage.setItem('wayvee.arrival.v1','done');localStorage.setItem('wayvee.stay-onboarding.v1','skipped');localStorage.setItem('wayvee.appearance.v1',theme);localStorage.setItem('wayvee.city.v1','oakland');},theme);
   await context.route('**/*',async route=>{const req=route.request(),method=req.method(),url=new URL(req.url());if(url.hostname==='127.0.0.1'||method==='GET'||method==='HEAD')return route.continue();if(method==='OPTIONS')return route.fulfill({status:204,headers:{'access-control-allow-origin':'*','access-control-allow-headers':'*','access-control-allow-methods':'*'}});return route.fulfill({status:503,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:'{"error":"Read-only preview"}'});});
-  page=await context.newPage();page.on('pageerror',err=>report.errors.push(err.message));await page.goto('http://127.0.0.1:9876',{waitUntil:'domcontentloaded'});await page.getByText('Shall we wander?',{exact:true}).waitFor({timeout:60000});await page.evaluate(()=>document.fonts.ready);
+  let collectionTitle;page=await context.newPage();page.on('pageerror',err=>report.errors.push(err.message));await page.goto('http://127.0.0.1:9876',{waitUntil:'domcontentloaded'});await page.getByText('Shall we wander?',{exact:true}).waitFor({timeout:60000});await page.evaluate(()=>document.fonts.ready);
   await page.waitForFunction(()=>![...document.querySelectorAll('div')].some(el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.zIndex==='20'&&s.position==='absolute'&&r.width>100&&r.height>100&&s.display!=='none';}),null,{timeout:30000});
   for(const width of [320,390,430]){
    await page.setViewportSize({width,height:844});await page.waitForTimeout(100);
@@ -35,6 +35,7 @@ async function main(){
    for(const id of ['home-evening-ribbon','home-stay-chip'])assert.equal(await page.getByTestId(id).evaluate(el=>getComputedStyle(el).backgroundColor),thumbBg,id+' matches For you thumbnail');
    const collectionCards=page.locator('[role="button"][data-testid^="home-collection-"]');
    assert.ok(await collectionCards.count()>0);
+   collectionTitle=(await collectionCards.first().getAttribute('aria-label')).split('. ')[0];
    for(const card of await collectionCards.all()){
     assert.equal(await card.locator('img').count(),0,'Collection uses glyph, not cover image');
     const id=await card.getAttribute('data-testid'),well=page.getByTestId(id+'-glyph');
@@ -57,6 +58,11 @@ async function main(){
    near((await card.boundingBox()).height,83,'See all collection height preserved');
   }
   await shot('collection-list',theme);await collectionList.first().click();await page.waitForURL(/\/home\/collection\?id=/);await page.getByTestId('home-field-guide').last().waitFor();
+
+  await page.goto('http://127.0.0.1:9876/home/browse?category=all&q='+encodeURIComponent(collectionTitle),{waitUntil:'domcontentloaded'});
+  await page.getByTestId('home-guide-lead').waitFor({timeout:60000});
+  assert.equal(await page.getByTestId('home-guide-lead').locator('img').count(),0,'Home search Collection keeps its glyph');
+  await page.getByTestId('home-guide-lead').getByRole('img',{name:collectionTitle+' collection',exact:true}).waitFor();
   await context.close();
  }
  assert.deepEqual(report.errors,[]);console.log('RESTORED_TILE_REPORT '+JSON.stringify(report));

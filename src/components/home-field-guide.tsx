@@ -94,7 +94,7 @@ export function HomeGuideRow({entry}: {entry:HomeGuideEntry}) {
   const router=useRouter(),colors=useThemeColors();
   return <TouchableOpacity testID="home-guide-row" accessibilityRole="button" accessibilityLabel={`Explore ${entry.name}. ${entry.caption}. ${entry.facts.map(x=>x.label || x.value).join('. ')}`}
     onPress={()=>router.push(homeGuideHref(entry) as never)} activeOpacity={.78} className="flex-row items-center gap-x-3 border-t border-edge-faint py-3">
-    <Photo uri={entry.image} radius={10} fallbackGlyph={entry.glyph} fallbackLabel={`Photo unavailable for ${entry.name}`} style={{width:70,height:70}} />
+    <Photo uri={entry.image} radius={10} fallbackGlyph={entry.glyph} fallbackLabel={entry.kind==='collection'?`${entry.name} collection`:`Photo unavailable for ${entry.name}`} style={{width:70,height:70}} />
     <View className="min-w-0 flex-1 gap-y-1.5"><Text numberOfLines={1} className="font-fraunces text-ink" style={{fontSize:17,lineHeight:20.7,letterSpacing:-.15}}>{briefTitle(entry.name)}</Text>
       <Text numberOfLines={1} className="font-dm text-fine text-taupe">{entry.caption}</Text>
       <HomeGuideFacts facts={entry.facts} />
@@ -108,7 +108,7 @@ export function HomeGuideLead({entry}: {entry:HomeGuideEntry}) {
   return <View testID="home-guide-lead" style={[surface,{padding:14,borderRadius:15,gap:12}]}>
     <Text className="font-dm text-fine uppercase tracking-[1px] text-taupe">A place to begin</Text>
     <View className="flex-row items-center gap-x-3">
-      <Photo uri={entry.image} radius={10} fallbackGlyph={entry.glyph} fallbackLabel={`Photo unavailable for ${entry.name}`} style={{width:65,height:65}} />
+      <Photo uri={entry.image} radius={10} fallbackGlyph={entry.glyph} fallbackLabel={entry.kind==='collection'?`${entry.name} collection`:`Photo unavailable for ${entry.name}`} style={{width:65,height:65}} />
       <View className="min-w-0 flex-1 gap-y-1.5"><Text numberOfLines={2} className="font-fraunces text-ink" style={{fontSize:17,lineHeight:20.7}}>{briefTitle(entry.name)}</Text>
         <Text numberOfLines={1} className="font-dm text-fine text-taupe">{entry.caption}</Text><HomeGuideFacts facts={entry.facts} />
       </View>
