@@ -67,7 +67,7 @@ function TileWindow({ tile, width }: { tile: CountTile; width: number }) {
   );
 }
 
-/** Open Gallery keeps the raised material around the photo, with its caption on the page. */
+/** A single raised card contains the photo, category and both metadata rows. */
 function GalleryTile({ tile, width }: { tile: CountTile; width: number }) {
   const colors = useThemeColors();
   const surface = useRaisedSurface(1);
@@ -94,29 +94,29 @@ function GalleryTile({ tile, width }: { tile: CountTile; width: number }) {
           borderWidth: 1, borderColor: surface.borderColor,
         }} />
         <TileWindow tile={tile} width={width - PHOTO_NOTE.padding * 2} />
-      </View>
-      <View testID={`home-tile-caption-${tile.key}`} style={{ marginTop: 7, paddingHorizontal: PHOTO_NOTE.padding }}>
-        <View testID={`home-tile-heading-${tile.key}`}
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <View className="min-w-0 flex-1 flex-row items-baseline" style={{ gap: 6 }}>
-            <Text testID={`home-tile-title-${tile.key}`} numberOfLines={1}
-              className="shrink font-fraunces text-ink"
-              style={{ fontSize: 17, lineHeight: 19.55, letterSpacing: -0.2 }}>{tile.label}</Text>
-            <Text testID={`home-tile-count-${tile.key}`} numberOfLines={1}
-              className="shrink-0 font-dm-medium text-taupe"
-              style={{ fontSize: 13, lineHeight: 19.55 }}>{tile.count}</Text>
+        <View testID={`home-tile-caption-${tile.key}`} style={{ marginTop: PHOTO_NOTE.padding + 7 }}>
+          <View testID={`home-tile-heading-${tile.key}`}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <View className="min-w-0 flex-1 flex-row items-baseline" style={{ gap: 6 }}>
+              <Text testID={`home-tile-title-${tile.key}`} numberOfLines={1}
+                className="shrink font-fraunces text-ink"
+                style={{ fontSize: 17, lineHeight: 19.55, letterSpacing: -0.2 }}>{tile.label}</Text>
+              <Text testID={`home-tile-count-${tile.key}`} numberOfLines={1}
+                className="shrink-0 font-dm-medium text-taupe"
+                style={{ fontSize: 13, lineHeight: 19.55 }}>{tile.count}</Text>
+            </View>
+            <View testID={`home-tile-chevron-${tile.key}`} accessible={false} pointerEvents="none"
+              style={{ width: 16, height: 16, alignItems: 'center', justifyContent: 'center' }}>
+              <Glyph name="chevron" size={16} color={colors['surface-accent']} />
+            </View>
           </View>
-          <View testID={`home-tile-chevron-${tile.key}`} accessible={false} pointerEvents="none"
-            style={{ width: 16, height: 16, alignItems: 'center', justifyContent: 'center' }}>
-            <Glyph name="chevron" size={16} color={colors['surface-accent']} />
+          <Text testID={`home-tile-description-${tile.key}`} numberOfLines={1}
+            className="font-dm text-fine text-taupe" style={{ marginTop: 5 }}>{tile.caption}</Text>
+          <View testID={`home-tile-facts-${tile.key}`}
+            style={{ marginTop: 8, flexDirection: 'row', flexWrap: 'nowrap', columnGap: 8 }}>
+            {tile.facts.map((fact, index) => <NoteFact key={fact.glyph + '-' + index}
+              glyph={fact.glyph} value={fact.value} label={fact.label} compact flexible={index === 0} />)}
           </View>
-        </View>
-        <Text testID={`home-tile-description-${tile.key}`} numberOfLines={1}
-          className="font-dm text-fine text-taupe" style={{ marginTop: 5 }}>{tile.caption}</Text>
-        <View testID={`home-tile-facts-${tile.key}`}
-          style={{ marginTop: 8, flexDirection: 'row', flexWrap: 'nowrap', columnGap: 8 }}>
-          {tile.facts.map((fact, index) => <NoteFact key={fact.glyph + '-' + index}
-            glyph={fact.glyph} value={fact.value} label={fact.label} compact flexible={index === 0} />)}
         </View>
       </View>
     </TouchableOpacity>
