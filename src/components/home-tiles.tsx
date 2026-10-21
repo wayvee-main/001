@@ -87,8 +87,11 @@ function TileWindow({ tile, width, height, bleed = false }: {
  * Every tile is the same rectangle whatever its picture, which is what the
  * previous arrangement could not promise: a pool with no photograph rendered a
  * glyph floating in an empty box, so one tile in four was a different object.
- * Here the category and count ride a scrim over the bottom of the image, and
- * only the caption and facts fall to the ground below.
+ * The tile is the photograph and nothing else: the category and count ride a
+ * scrim over the bottom of the image, and there is no text beneath it. A
+ * caption naming one venue, and a row of facts about that venue, both sat here
+ * and both described whichever record happened to sort first rather than the
+ * category the tile opens.
  *
  * The scrim is built from `selected-surface` under `on-selected` — the pair the
  * contrast gate already verifies — so the heading is legible over a bright
@@ -113,7 +116,9 @@ function GalleryTile({ tile, width }: { tile: CountTile; width: number }) {
           testID={`home-tile-scrim-${tile.key}`}
           pointerEvents="none"
           accessible={false}
-          colors={[`${scrim}00`, `${scrim}D9`]}
+          // D9 (0.851) raised 15% to F9 (0.976): the heading sits over a
+          // near-solid floor now, so a bright photograph cannot wash it out.
+          colors={[`${scrim}00`, `${scrim}F9`]}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
           style={styles.scrim}
@@ -140,14 +145,6 @@ function GalleryTile({ tile, width }: { tile: CountTile; width: number }) {
             <Glyph name="chevron" size={16} color={colors['on-selected']} />
           </View>
         </View>
-      </View>
-      {/* One line, and it describes the category rather than naming one venue
-        * inside it. The facts row that used to sit under this is gone: two
-        * rows of metadata under a 95px photograph made the grid read as four
-        * dense paragraphs rather than four doors. */}
-      <View testID={`home-tile-caption-${tile.key}`} style={{ marginTop: 7 }}>
-        <Text testID={`home-tile-description-${tile.key}`} numberOfLines={1}
-          className="font-dm text-fine text-taupe">{tile.caption}</Text>
       </View>
     </TouchableOpacity>
   );

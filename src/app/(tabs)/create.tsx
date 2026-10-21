@@ -827,7 +827,7 @@ export default function CreateScreen() {
             * controls restating defaults made the assumptions look like the
             * point of the screen. */}
           {!showingLiveMatches ? (
-            <View testID="vee-open-letter" style={{marginTop:askPlan?28:56,alignItems:'flex-start'}}>
+            <View testID="vee-open-letter" style={{marginTop:askPlan?18:46,alignItems:'flex-start'}}>
               <WorkingVee size={47} animate={screenFocused} label="Vee" />
               <Text className="font-fraunces text-ink" style={{marginTop:18,fontSize:screenWidth<=360?26:28,lineHeight:34,letterSpacing:-.45}}>
                 {askPlan ? 'What should change?' : 'Where to?'}
@@ -861,7 +861,7 @@ export default function CreateScreen() {
               returnKeyType="send"
               onSubmitEditing={() => void submitAsk(promptReady ? promptText : askExampleLabel)}
               className="min-w-0 font-dm text-ink"
-              style={{ height:105.6,fontSize:18,lineHeight:26.1,paddingVertical:8,paddingHorizontal:4,
+              style={{ height:105.6,fontSize:16,lineHeight:23.2,paddingVertical:8,paddingHorizontal:4,
                 backgroundColor:'transparent',borderWidth:0,textAlignVertical:'top',
                 ...(Platform.OS === 'web' ? { outlineWidth:0,caretColor:colors['accent-fill'] } as any : {}) }}
             />

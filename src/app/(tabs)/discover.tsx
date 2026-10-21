@@ -157,8 +157,9 @@ export default function DiscoverScreen() {
       {search.length?search.slice(0,40).map((x,i)=><ListRow key={`${x.kind}/${x.id}`} title={x.title} meta={x.subtitle} image={x.image} divider={i<Math.min(search.length,40)-1} onPress={()=>router.push(x.href as never)} />)
         :<EmptyState title="Nothing here just yet" message="Try another place, artist or kind of evening." actionLabel="Clear search" onAction={()=>setQuery('')} />}
     </View>:<>
-      <Text className="mb-6 font-dm text-[12px] leading-[17px] text-taupe">One good thing can lead to another.</Text>
-      <View testID="evening-trail" style={{paddingLeft:20,position:'relative'}}>
+      {/* The strapline that sat here carried the 24px gap above the trail;
+        * a little of it is kept so the first stop does not butt the chips. */}
+      <View testID="evening-trail" style={{paddingLeft:20,position:'relative',marginTop:6}}>
       <View testID="evening-trail-thread" pointerEvents="none" style={{position:'absolute',left:3,top:16,bottom:20,width:1,backgroundColor:colors['edge-faint']}} />
       {(mode==='All'||mode==='Events')?stage:null}
       {(mode==='All'||mode==='Food')?food:null}
