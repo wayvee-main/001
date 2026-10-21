@@ -6,11 +6,10 @@ import { HomeEveningRibbon, HomeHeader } from '@/components/home-top';
 import { AroundYou, RailCard, type CountTile } from '@/components/home-tiles';
 import { HRow, Screen, ScreenScroll } from '@/components/layout';
 import { Glyph } from '@/components/glyph';
-import { Photo } from '@/components/photo';
 import { SectionHeading } from '@/components/section-heading';
 import { BUNDLE_CITY, useActiveCity, useActiveCityName } from '@/lib/city';
 import { useNow } from '@/lib/clock';
-import { CRAWLS, CURATED_COLLECTION_ORDER, CURATED_COLLECTIONS, NIGHTLIFE_SPOTS, RESTAURANTS, activeCollectionItems, currentEventListings } from '@/lib/data';
+import { CRAWLS, NIGHTLIFE_SPOTS, RESTAURANTS, currentEventListings } from '@/lib/data';
 import { hydrateEventsFromBackend } from '@/lib/events-remote';
 import { hydratePlacesFromBackend } from '@/lib/places';
 import { activeReminders } from '@/lib/reminders';
@@ -18,7 +17,8 @@ import { useScoper } from '@/lib/store';
 import { useThemeColors } from '@/lib/theme';
 import { useNearestPool } from '@/lib/use-nearest-pool';
 import { useHomeQuickActions } from '@/lib/use-home-quick-actions';
-import { HOME_TILE_PREVIEW_PHOTOS } from '@/lib/home-tile-photos';
+import { OAKLAND_HOME_CATEGORY_PHOTOS } from '@/lib/home-tile-photos';
+import { homeDiscoveryCollections, homeDiscoveryIdeas } from '@/lib/home-discovery';
 import { buildHomeTilePreviews } from '@/lib/home-tile-previews';
 import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
 import { hydrateWeatherFromBackend } from '@/lib/weather';
@@ -32,8 +32,9 @@ export default function HomeScreen() {
   const quickActions = useHomeQuickActions(now);
   const searchLabel = `Search the city of ${/^san francisco$/i.test(city) ? 'SF' : city}`;
   const [refreshing, setRefreshing] = useState(false);
+  const ideas = homeDiscoveryIdeas(now);
   const collections = useMemo(() => citySlug===BUNDLE_CITY
-    ? CURATED_COLLECTION_ORDER.map(id => CURATED_COLLECTIONS[id]).filter(x => activeCollectionItems(x,now).length) : [], [now,citySlug]);
+    ? homeDiscoveryCollections(now) : [], [now,citySlug]);
   const onRefresh = async () => {
     setRefreshing(true);
     try { await Promise.all([hydrateEventsFromBackend(true), hydratePlacesFromBackend(true), hydrateWeatherFromBackend(true), s.refreshLocation()]); }
@@ -54,7 +55,7 @@ export default function HomeScreen() {
     { ...previews.events, key:'events', count:String(events.length), glyph:'ticket', label:'Events', tint:'tile-events', ink:'fg', onPress:()=>router.push('/discover?mode=Events') },
   ];
   const tiles = tileDefinitions.map(tile => {
-    const photo = tile.photoKey ? HOME_TILE_PREVIEW_PHOTOS[tile.photoKey] : undefined;
+    const photo = local ? OAKLAND_HOME_CATEGORY_PHOTOS[tile.key] : undefined;
     return { ...tile, image: photo?.source ?? tile.image, imageLabel: photo?.label ?? tile.imageLabel };
   });
   return <Screen><ScreenScroll gap={18} clearsTabBar refreshing={refreshing} onRefresh={onRefresh}>
@@ -96,20 +97,20 @@ export default function HomeScreen() {
       <SectionHeading title="Around you" /><AroundYou tiles={tiles} />
     </View>
     <View className="gap-y-3 border-t border-edge-faint pt-4">
-      {/* The way through rides the heading itself. Left on its own row after
-        * the "Nearest" label went, it sat in 24px of gap with nothing beside
-        * it — a strip of empty between the title and the first card. */}
-      <SectionHeading title="For you" action="See all" onPress={()=>router.push('/nearest')} />
-      <View testID="nearest-preview" className="gap-y-2">
-        {nearest.slice(0,3).map(x=><TouchableOpacity key={x.href} accessibilityRole="button" accessibilityLabel={`View ${x.name}`} onPress={()=>router.push(x.href)}
-          style={[surface,{minHeight:83}]}
+      <SectionHeading title="For you" action="See all" onPress={()=>router.push('/discover')} />
+      <View testID="home-ideas-preview" className="gap-y-2">
+        {ideas.map(idea=><TouchableOpacity key={idea.id} accessibilityRole="button" accessibilityLabel={`${idea.title}. ${idea.detail}`}
+          onPress={()=>router.push(idea.href as never)} style={[surface,{minHeight:83}]}
           className="flex-row items-center gap-x-3 rounded-setting bg-surface-raised px-[11px] py-[11px] border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
-          <Photo uri={x.image} fallbackGlyph={x.thumbnailGlyph} fallbackLabel={`Photo unavailable for ${x.name}`} radius={11} style={{width:58,height:58}} />
-          <View className="min-w-0 flex-1"><Text numberOfLines={2} className="font-dm-medium text-card-name text-ink">{x.name}</Text>
-            <Text className="mt-1 font-dm text-fine text-taupe">{[x.cuisine,x.price,x.distanceLabel].filter(Boolean).join(' · ')}</Text></View>
+          <View style={{width:58,height:58,backgroundColor:colors['surface-sunk'],borderRadius:11,alignItems:'center',justifyContent:'center'}}>
+            <Glyph name={idea.glyph} size={23} color={colors['surface-accent']} />
+          </View>
+          <View className="min-w-0 flex-1">
+            <Text numberOfLines={2} className="font-dm-medium text-card-name text-ink">{idea.title}</Text>
+            <Text numberOfLines={1} className="mt-1 font-dm text-fine text-taupe">{idea.detail}</Text>
+          </View>
           <Glyph name="chevron" size={14} color={colors['surface-accent']} />
         </TouchableOpacity>)}
-        {!nearest.length?<Text className="font-dm text-label text-taupe">Nearby places appear as the local catalog loads.</Text>:null}
       </View>
       {collections.length?<><SectionHeading title="Collections" action="See all" onPress={()=>router.push('/collection')} />
         <HRow gap={10}>{collections.map(x=><RailCard key={x.id} image={x.coverImage} title={x.title} meta={x.subtitle} onPress={()=>router.push(`/collection/${x.id}`)} />)}</HRow></>:null}

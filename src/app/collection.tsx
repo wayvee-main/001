@@ -5,7 +5,10 @@ import { HeaderRow, Screen, ScreenScroll } from '@/components/layout';
 import { Photo } from '@/components/photo';
 import { RaisedTouchable } from '@/components/raised-surface';
 import { ChevronRight, EmptyState } from '@/components/ui';
-import { CURATED_COLLECTION_ORDER, CURATED_COLLECTIONS, EVENTS, RESTAURANTS, activeCollectionItems } from '@/lib/data';
+import { EVENTS, RESTAURANTS, activeCollectionItems } from '@/lib/data';
+import { homeDiscoveryCollections } from '@/lib/home-discovery';
+import { useNow } from '@/lib/clock';
+import { BUNDLE_CITY, useActiveCity } from '@/lib/city';
 import { useScoper } from '@/lib/store';
 import { collectionHaystack, sortByAffinity } from '@/lib/taste';
 import { useThemeColors } from '@/lib/theme';
@@ -14,10 +17,9 @@ export default function CollectionsScreen() {
   const router = useRouter();
   const colors = useThemeColors();
   const tasteTags = useScoper((s) => s.tasteTags);
+  const now = useNow(), city = useActiveCity();
   const collections = sortByAffinity(
-    CURATED_COLLECTION_ORDER
-      .map((id) => CURATED_COLLECTIONS[id])
-      .filter((collection) => activeCollectionItems(collection).length > 0),
+    city === BUNDLE_CITY ? homeDiscoveryCollections(now) : [],
     tasteTags,
     collectionHaystack,
   );
@@ -27,13 +29,13 @@ export default function CollectionsScreen() {
       <ScreenScroll gap={16}>
         <HeaderRow title="Collections" />
         <Text className="-mt-1 font-dm text-[13px] leading-[19px] text-taupe">
-          Shortlists worth keeping.
+          Shortlists for this part of the day.
         </Text>
 
         {collections.length > 0 ? (
           <View className="gap-y-3">
             {collections.map((collection) => {
-              const items = activeCollectionItems(collection);
+              const items = activeCollectionItems(collection, now);
               const lead = items[0];
               const leadName = lead
                 ? lead.type === 'restaurant'

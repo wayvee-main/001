@@ -35,39 +35,16 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   34px normally, 30px on phones up to 400px. Use `useAppGutter`.
 - Home keeps four tiles, ordered Eat, Bars, Routes, Events. Counts describe
   actual inventory, never unsupported opening status.
-  Extend the **Open Gallery** treatment into one contained card around the
-  photo, category/count and both metadata rows. The full card uses raised
-  paper `#F5F0E9` / charcoal `#29252A`, one faint 1px outer edge and
-  level-1 elevation. Keep explicit 8px outer padding on all four sides, 12px
-  card corners and 8px photo corners. The entire tile remains one accessible
-  button covering both its photo and metadata; do not raise a second image-only frame.
-  Home's two columns fill the content width inside the existing app gutters,
-  with 16px horizontal and vertical gaps. Scale photos with the shared 121:73
-  aspect ratio at every viewport width; never cap Home tiles at Discover's 137px.
-  Captions sit inside the same surface, aligned with the photo's left/right
-  edges. Preserve the existing 15px photo-to-heading gap and finish with 8px
-  padding below the final fact row. No separate metadata border or shadow.
-  Keep the 17px Fraunces category and its real inventory count together on one
-  baseline, separated by 6px; counts use muted 13px DM Sans. A 16px outline
-  chevron at the far right uses the ribbon's orange `surface-accent`.
-  Beneath the title/count row, add exactly two compact metadata rows like
-  More on stage: a one-line DM Sans `text-fine` local pick caption after 5px,
-  then a single inline glyph-fact row after 8px. Reuse `NoteFact`; allow
-  ellipses and at most two facts, keeping time/count values readable. Show real
-  place/artist names, source-backed prices/travel, route stops/distance and
-  event dates/showtimes. No invented opening status or precise GPS claims.
-  Heights fit all three text rows. Counts stay exact; every tile opens its pool.
-  Reuse `TileWindow` and `PHOTO_NOTE` for the established photos and geometry;
-  Discover's contained `NoteCard` listings retain their own treatment.
-  A theme-colored image fade covers only the lower 18px, rising from
-  transparent to 5.9% opacity; photo frames stay flat.
-  Images identify the actual preview: a lived-in MUA dining room, Little Bird's
-  real window sign and the Uptown route's Fox marquee are bundled by exact
-  preview ID. Events show the current artist/listing's own artwork and update
-  with the calendar; never keep an old artist as a category fallback. Reject
-  known stock-photo stand-ins. An unsourced pick gets its category glyph.
-  Oakland pictures/curated picks are not reused for another city. Missing/failed
-  photos retain the named pick, metadata, inventory count and action.
+  Preserve the externally updated photo-only tiles: full-bleed photographs,
+  category/count over a selected-surface scrim, 12px corners and level-3
+  elevation. There is no caption, fact row or mounted photo border.
+  The two columns fill the app gutters, with 16px horizontal/vertical gaps
+  and the shared 121:73 photo ratio at every width.
+  Use the new Oakland category photographs for Eat, Bars and Routes; these
+  illustrate each door, not one secretly selected venue. Events keeps the
+  current listing's own artwork and existing loading/fallback behavior.
+  Tile accessibility names state category/count, without an obsolete named
+  preview. Other cities never borrow Oakland category imagery.
   In light mode, quick venue chips share search's off-white fill;
   dark mode retains their Oyster charcoal fill. Link your stay and the evening
   ribbon share Collections' `surface-raised` fill, normal theme ink and faint edge.
@@ -103,16 +80,20 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   level-1 elevation match the shared card material. The ticket notches and
   perforated seam are removed. Keep its compact 61.2px minimum height.
   Home dividers stay faint.
-- For you → Nearest is **three vertical rows**, with **See all** opening `/nearest`.
-  The default pool targets 24 real results (at least 20 where the catalog has
-  them) within five miles of the selected city/ZIP trip anchor. GPS reorders
-  that same pool. It must populate without GPS. Never use Oakland's curated
-  distances for another city; backend city anchors and local places vary.
-  A tilde identifies a curated distance estimate.
-  Keep the nearest ordering independent of photo availability. Verified venue
-  photos supplement missing source fields by exact place ID and survive live
-  and cached hydration; supplied catalog photos take priority. Missing or failed
-  nearest photos use a clear coffee/food glyph, without unrelated stock imagery.
+- **For you** is three vertical suggestion cards, not individual venues.
+  Match intentions to the guest-local daypart: breakfast/coffee and fresh air
+  in the morning, lunch at midday, coffee/outdoors/dinner in the afternoon,
+  dinner/shows/drinks in the evening, late bites/nightcaps/tomorrow at night.
+  Use calm outline glyphs and short supporting categories. Each opens a real
+  browse/search/collection/planner destination, never a fabricated result.
+  See all opens Discover. The separate Nearest page and five-mile pool remain
+  available, and Home's Eat count still uses the same GPS-refined nearest pool.
+- **Collections** follows the same clock on Home and See all. Breakfast does
+  not stay on the evening shelf; late kitchens do not lead at breakfast.
+  Dated collections contain only current entries within seven days, use an
+  active entry's artwork and disappear when empty. Timing is editorial
+  relevance, never a claim that a venue is open. Use the shared
+  `homeDiscoveryCollections` helper rather than duplicating time rules.
 - The second tab is **Discover** in both tab bars. Its glyph pills are one
   horizontal row, without hard borders, with subtle elevation and an extra
   5px gap (11.44px total).

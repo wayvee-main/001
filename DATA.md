@@ -207,3 +207,20 @@ use their own hydrated place pool. For you → Nearest keeps its existing pool.
 - Ratings appear only where a licensed/attributable source is represented —
   omit rather than estimate.
 - Prices, hours, and lineups carry the date they were checked.
+
+## Home discovery intentions and timing · October 21, 2026
+
+For you uses `homeDiscoveryIdeas(now)`: three category-level suggestions
+per guest-local daypart. These are browsing intentions, not specific venue
+recommendations, ratings, distances or open-state claims. Real venue chips
+beside Link your stay retain their existing hour-aware local selection.
+
+Home and Collections See all share `homeDiscoveryCollections(now)`. Filter
+by the relevant part of the day, omit empty collections, expire past event
+entries and limit dated editorial shortlists to the next seven days. A dated
+cover follows an active item rather than retaining a past artist's image.
+The minute clock advances mounted screens across daypart boundaries.
+
+The nearest pool, city/ZIP radius and GPS ordering are unchanged. The three
+new category photos are Oakland-only. Events' image selection is unchanged.
+Secondary Home screen designs are proposals until the user selects one.

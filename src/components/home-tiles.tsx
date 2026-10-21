@@ -107,7 +107,7 @@ function GalleryTile({ tile, width }: { tile: CountTile; width: number }) {
   return (
     <TouchableOpacity
       accessibilityRole="button"
-      accessibilityLabel={`Explore ${tile.count} ${tile.label}. Preview: ${tile.accessibilityDetail}`}
+      accessibilityLabel={`Explore ${tile.count} ${tile.label}`}
       activeOpacity={0.78}
       onPress={tile.onPress}
       testID={`home-count-tile-${tile.key}`}
