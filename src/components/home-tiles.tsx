@@ -23,18 +23,30 @@ export type CountTile = HomeTilePreview & {
   onPress: () => void;
 };
 
-/** More on stage photo proportions, scaled to fill each Home column. */
-function TileWindow({ tile, width }: { tile: CountTile; width: number }) {
+/** More on stage photo proportions, scaled to fill each Home column.
+ *
+ * `bleed` makes the photograph the card itself rather than a picture mounted
+ * inside one: it fills its parent, which does the clipping, so there is no
+ * inner radius or border to read as a second frame. */
+function TileWindow({ tile, width, height, bleed = false }: {
+  tile: CountTile; width: number; height: number; bleed?: boolean;
+}) {
   const colors = useThemeColors();
   const [failedImage, setFailedImage] = useState<string | number>();
   const showImage = tile.image !== undefined && failedImage !== tile.image;
   const paper = colors['home-tile'];
 
   return (
-    <View testID={`home-tile-window-${tile.key}`} style={[styles.window,{width,height:width*PHOTO_NOTE.photoHeight/PHOTO_NOTE.photoWidth}]}>
+    <View
+      testID={`home-tile-window-${tile.key}`}
+      style={bleed
+        ? [StyleSheet.absoluteFill, { backgroundColor: colors['home-tile-well'] }]
+        : [styles.window, { width, height }]}>
       {showImage ? (
         <View testID={`home-tile-photo-frame-${tile.key}`}
-          style={[styles.photoFrame,{borderWidth:1,borderColor:colors['edge-faint']}]}>
+          style={bleed
+            ? StyleSheet.absoluteFill
+            : [styles.photoFrame, { borderWidth: 1, borderColor: colors['edge-faint'] }]}>
           <Image
             testID={`home-tile-image-${tile.key}`}
             source={tile.image}
@@ -48,18 +60,21 @@ function TileWindow({ tile, width }: { tile: CountTile; width: number }) {
             recyclingKey={String(tile.image)}
             onError={() => setFailedImage(tile.image)}
           />
-          <LinearGradient
-            testID={`home-tile-fade-${tile.key}`}
-            pointerEvents="none"
-            accessible={false}
-            colors={[`${paper}00`, `${paper}0F`]}
-            start={{ x: 0.5, y: 0 }}
-            end={{ x: 0.5, y: 1 }}
-            style={styles.fade}
-          />
+          {bleed ? null : (
+            <LinearGradient
+              testID={`home-tile-fade-${tile.key}`}
+              pointerEvents="none"
+              accessible={false}
+              colors={[`${paper}00`, `${paper}0F`]}
+              start={{ x: 0.5, y: 0 }}
+              end={{ x: 0.5, y: 1 }}
+              style={styles.fade}
+            />
+          )}
         </View>
       ) : (
-        <View testID={`home-tile-fallback-${tile.key}`} style={styles.fallback}>
+        <View testID={`home-tile-fallback-${tile.key}`}
+          style={bleed ? [StyleSheet.absoluteFill, styles.fallback] : styles.fallback}>
           <Glyph name={tile.glyph} size={25} color={colors['home-tile-glyph']} strokeWidth={1.7} />
         </View>
       )}
@@ -67,10 +82,21 @@ function TileWindow({ tile, width }: { tile: CountTile; width: number }) {
   );
 }
 
-/** A single raised card contains the photo, category and both metadata rows. */
+/** The photograph is the tile; the place and its facts sit beneath it.
+ *
+ * Every tile is the same rectangle whatever its picture, which is what the
+ * previous arrangement could not promise: a pool with no photograph rendered a
+ * glyph floating in an empty box, so one tile in four was a different object.
+ * Here the category and count ride a scrim over the bottom of the image, and
+ * only the caption and facts fall to the ground below.
+ *
+ * The scrim is built from `selected-surface` under `on-selected` — the pair the
+ * contrast gate already verifies — so the heading is legible over a bright
+ * photograph and a near-black one alike, rather than depending on the picture. */
 function GalleryTile({ tile, width }: { tile: CountTile; width: number }) {
   const colors = useThemeColors();
-  const surface = useRaisedSurface(1);
+  const photoHeight = Math.round(width * PHOTO_NOTE.photoHeight / PHOTO_NOTE.photoWidth);
+  const scrim = colors['selected-surface'];
 
   return (
     <TouchableOpacity
@@ -81,42 +107,51 @@ function GalleryTile({ tile, width }: { tile: CountTile; width: number }) {
       testID={`home-count-tile-${tile.key}`}
       style={{ width, flexShrink: 0 }}>
       <View testID={`home-tile-mount-${tile.key}`}
-        style={[surface, {
-          borderWidth: 0,
-          borderRadius: PHOTO_NOTE.radius,
-          paddingTop: PHOTO_NOTE.padding,
-          paddingRight: PHOTO_NOTE.padding,
-          paddingBottom: PHOTO_NOTE.padding,
-          paddingLeft: PHOTO_NOTE.padding,
-        }]}>
-        <View pointerEvents="none" style={{
-          position: 'absolute', inset: 0, borderRadius: PHOTO_NOTE.radius,
-          borderWidth: 1, borderColor: surface.borderColor,
-        }} />
-        <TileWindow tile={tile} width={width - PHOTO_NOTE.padding * 2} />
-        <View testID={`home-tile-caption-${tile.key}`} style={{ marginTop: PHOTO_NOTE.padding + 7 }}>
-          <View testID={`home-tile-heading-${tile.key}`}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <View className="min-w-0 flex-1 flex-row items-baseline" style={{ gap: 6 }}>
-              <Text testID={`home-tile-title-${tile.key}`} numberOfLines={1}
-                className="shrink font-fraunces text-ink"
-                style={{ fontSize: 17, lineHeight: 19.55, letterSpacing: -0.2 }}>{tile.label}</Text>
-              <Text testID={`home-tile-count-${tile.key}`} numberOfLines={1}
-                className="shrink-0 font-dm-medium text-taupe"
-                style={{ fontSize: 13, lineHeight: 19.55 }}>{tile.count}</Text>
-            </View>
-            <View testID={`home-tile-chevron-${tile.key}`} accessible={false} pointerEvents="none"
-              style={{ width: 16, height: 16, alignItems: 'center', justifyContent: 'center' }}>
-              <Glyph name="chevron" size={16} color={colors['surface-accent']} />
-            </View>
+        style={{ height: photoHeight, borderRadius: PHOTO_NOTE.radius, overflow: 'hidden' }}>
+        <TileWindow tile={tile} width={width} height={photoHeight} bleed />
+        <LinearGradient
+          testID={`home-tile-scrim-${tile.key}`}
+          pointerEvents="none"
+          accessible={false}
+          colors={[`${scrim}00`, `${scrim}D9`]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={styles.scrim}
+        />
+        <View testID={`home-tile-heading-${tile.key}`}
+          style={{
+            position: 'absolute', left: 11, right: 10, bottom: 9,
+            flexDirection: 'row', alignItems: 'center', gap: 8,
+          }}>
+          <View className="min-w-0 flex-1 flex-row items-baseline" style={{ gap: 6 }}>
+            <Text testID={`home-tile-title-${tile.key}`} numberOfLines={1}
+              className="shrink font-fraunces"
+              style={{ color: colors['on-selected'], fontSize: 17, lineHeight: 19.55, letterSpacing: -0.2 }}>
+              {tile.label}
+            </Text>
+            <Text testID={`home-tile-count-${tile.key}`} numberOfLines={1}
+              className="shrink-0 font-dm-medium"
+              style={{ color: colors['selected-glyph'], fontSize: 13, lineHeight: 19.55 }}>
+              {tile.count}
+            </Text>
           </View>
-          <Text testID={`home-tile-description-${tile.key}`} numberOfLines={1}
-            className="font-dm text-fine text-taupe" style={{ marginTop: 5 }}>{tile.caption}</Text>
-          <View testID={`home-tile-facts-${tile.key}`}
-            style={{ marginTop: 8, flexDirection: 'row', flexWrap: 'nowrap', columnGap: 8 }}>
-            {tile.facts.map((fact, index) => <NoteFact key={fact.glyph + '-' + index}
-              glyph={fact.glyph} value={fact.value} label={fact.label} compact flexible={index === 0} />)}
+          <View testID={`home-tile-chevron-${tile.key}`} accessible={false} pointerEvents="none"
+            style={{ width: 16, height: 16, alignItems: 'center', justifyContent: 'center' }}>
+            <Glyph name="chevron" size={16} color={colors['on-selected']} />
           </View>
+        </View>
+      </View>
+      <View testID={`home-tile-caption-${tile.key}`} style={{ marginTop: 7 }}>
+        <Text testID={`home-tile-description-${tile.key}`} numberOfLines={1}
+          className="font-dm text-fine text-taupe">{tile.caption}</Text>
+        {/* alignSelf keeps the row only as wide as its content, so NoteFact's
+          * flexGrow has no slack to distribute and the two facts stay next to
+          * each other instead of being thrown to opposite edges. It still
+          * shrinks and truncates when a value is long. */}
+        <View testID={`home-tile-facts-${tile.key}`}
+          style={{ marginTop: 5, flexDirection: 'row', flexWrap: 'nowrap', columnGap: 10, alignSelf: 'flex-start', maxWidth: '100%' }}>
+          {tile.facts.map((fact, index) => <NoteFact key={fact.glyph + '-' + index}
+            glyph={fact.glyph} value={fact.value} label={fact.label} compact flexible={index === 0} />)}
         </View>
       </View>
     </TouchableOpacity>
@@ -159,6 +194,8 @@ const styles = StyleSheet.create({
   photoFrame: { width: '100%', height: '100%', borderRadius: PHOTO_NOTE.photoRadius, overflow: 'hidden' },
   fallback: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   fade: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 18 },
+  // Deep enough to carry a 17px serif heading over whatever the photo does.
+  scrim: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 56 },
 });
 
 /** The screen's second-level heading: a named group of sections. Sits a step
