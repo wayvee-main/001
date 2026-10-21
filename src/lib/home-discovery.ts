@@ -55,6 +55,16 @@ const COLLECTIONS_BY_TIME: Record<Daypart, readonly CuratedCollection['id'][]> =
   lateNight: ['late-night'],
 };
 
+/** One outline glyph per shortlist, shared by Home's rail and See all. */
+export function homeCollectionGlyph(id: string): string {
+  const glyphs: Record<string,string> = {
+    'morning-plates':'coffee', 'outdoor-tables':'sun', 'slice-order':'food',
+    'before-the-show':'ticket', 'yoshis-week':'music', 'omca-fridays':'landmark',
+    'late-night':'food',
+  };
+  return glyphs[id] || 'compass';
+}
+
 export function timelyHomeCollection(collection: CuratedCollection, now = new Date()): CuratedCollection | undefined {
   const horizon = now.getTime() + 7 * 24 * 60 * 60 * 1000;
   const items = activeCollectionItems(collection, now).filter(item => item.type !== 'event'

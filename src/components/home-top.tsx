@@ -91,12 +91,12 @@ export function HomeHeader({
   );
 }
 
-/** A softly rounded ribbon in the same raised paper as Collections. */
+/** Home's ribbon shares the For you glyph well's theme-aware fill. */
 export function HomeEveningRibbon({onPress}:{onPress:()=>void}) {
   const colors=useThemeColors(),surface=useRaisedSurface(1);
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel="Open your evening with Vee" activeOpacity={.78}
     onPress={onPress} testID="home-evening-ribbon"
-    style={[surface,{minHeight:61.2,borderRadius:22,flexDirection:'row',alignItems:'stretch'}]}>
+    style={[surface,{backgroundColor:colors['surface-sunk'],minHeight:61.2,borderRadius:22,flexDirection:'row',alignItems:'stretch'}]}>
     <View className="min-w-0 flex-1 flex-row items-center" style={{paddingHorizontal:11,paddingVertical:8.4,gap:7}}>
       <VeeMark size={28.9} color={colors['surface-accent']} />
       <View className="min-w-0 flex-1"><Text numberOfLines={1} className="font-fraunces text-ink" style={{fontSize:15.3,lineHeight:18}}>Your evening, with Vee</Text>

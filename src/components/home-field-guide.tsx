@@ -18,16 +18,15 @@ export const HOME_DOOR_HEIGHT = 83;
 const briefTitle = (name: string) => {const words=name.trim().split(/\s+/);return words.length>5?words.slice(0,5).join(' ')+'…':name;};
 
 /** Same exact height, inset, typography and chevron for For you and Collections. */
-export function HomeDoorCard({title,meta,glyph='compass',image,width,onPress,testID}: {
-  title:string;meta:string;glyph?:string;image?:string;width?:number;onPress:()=>void;testID?:string;
+export function HomeDoorCard({title,meta,glyph='compass',width,onPress,testID}: {
+  title:string;meta:string;glyph?:string;width?:number;onPress:()=>void;testID?:string;
 }) {
   const colors=useThemeColors(),surface=useRaisedSurface(1);
   return <TouchableOpacity testID={testID} accessibilityRole="button" accessibilityLabel={`${title}. ${meta}`} activeOpacity={.78} onPress={onPress}
     style={[surface,{height:HOME_DOOR_HEIGHT,width,flexShrink:0,padding:11,borderRadius:15,flexDirection:'row',alignItems:'center',gap:12}]}>
-    {image?<Photo uri={image} radius={11} fallbackGlyph={glyph} fallbackLabel={`Photo unavailable for ${title}`} style={{width:58,height:58}} />:
-      <View style={{width:58,height:58,borderRadius:11,backgroundColor:colors['surface-sunk'],alignItems:'center',justifyContent:'center'}}>
-        <Glyph name={glyph} size={23} color={colors['surface-accent']} strokeWidth={1.6} />
-      </View>}
+    <View testID={testID?`${testID}-glyph`:undefined} style={{width:58,height:58,borderRadius:11,backgroundColor:colors['surface-sunk'],alignItems:'center',justifyContent:'center'}}>
+      <Glyph name={glyph} size={23} color={colors['surface-accent']} strokeWidth={1.6} />
+    </View>
     <View className="min-w-0 flex-1">
       <Text numberOfLines={2} className="font-dm-medium text-card-name text-ink">{title}</Text>
       <Text numberOfLines={1} className="mt-1 font-dm text-fine text-taupe">{meta}</Text>

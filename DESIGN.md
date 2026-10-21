@@ -16,8 +16,8 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   detail and onboarding page, with aspect-correct angles on web and native.
   Oyster cards, sheets and unselected controls use warm paper `#F5F0E9` in
   light mode and charcoal `#29252A` in dark mode, with faint edges and elevation.
-  Discover listings use `#F7F2EC` / `#29252A`. In dark mode, the evening ribbon's
-  `#29252A` is the default background for every card container, including Home tiles
+  Discover listings use `#F7F2EC` / `#29252A`. In dark mode,
+  `#29252A` is the default background for card containers, including Home tiles
   and every Discover listing. Light-mode search and navigation share plain off-white `#FFFCF8`.
   Home glyph tiles use `#FFFCF8` / `#29252A`. Search uses its own `surface-search`
   role everywhere: Home, Discover, the search overlay, food hub and stay picks.
@@ -43,11 +43,12 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   Below, use a 20px Fraunces category and a short 11px DM Sans caption:
   Eat / Nearby places; Bars / After dinner; Routes / A few good stops;
   Events / Find your next show. Keep the whole card one accessible button.
-  These four cards open their existing Home Field Guide pools. Source counts,
-  city scoping, For you, Collections, Field Guide and Discover remain unchanged.
+  These four cards open their existing Home Field Guide pools. Their inventory
+  counts and ordering follow the active city's existing source pools.
   In light mode, quick venue chips share search's off-white fill;
   dark mode retains their Oyster charcoal fill. Link your stay and the evening
-  ribbon share Collections' `surface-raised` fill, normal theme ink and faint edge.
+  ribbon share For you's glyph-thumbnail `surface-sunk` fill (`#E7E0D6` light /
+  `#100D13` dark), normal theme ink and a faint edge.
   Home keeps “Shall we wander?” without supporting subtext. Its one-line search
   label reads “Search the city of Oakland” for Oakland and uses the active city;
   San Francisco is shortened to “SF” in the visible label, with the full name
@@ -74,8 +75,8 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   text at `#963D24` / `#F0835C`. Legacy category and Vee tints follow Oyster
   surfaces and orange accents. Keep the original gradient Vee mark and the
   original page gradients intact; explicit error states retain their red.
-- “Your evening, with Vee” uses Collections' raised paper `#F5F0E9` in light
-  mode / charcoal `#29252A` in dark mode, with standard theme lettering and
+- “Your evening, with Vee” and Link your stay use the exact For you thumbnail
+  `surface-sunk` fill: `#E7E0D6` light / `#100D13` dark, with standard theme lettering and
   orange `surface-accent` icons. Its smooth 22px corners, faint edge and
   level-1 elevation match the shared card material. The ticket notches and
   perforated seam are removed. Keep its compact 61.2px minimum height.
@@ -93,7 +94,10 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   Cards name suggestions rather than specific establishments. See all opens
   `/home/ideas`; each idea opens its own local results in Field Guide.
   Collections use the same `HomeDoorCard` and exact **83px** height as For you,
-  including the horizontal Home rail. Their promotions follow the daypart;
+  including the horizontal Home rail. Both the rail and `/home/collections`
+  use relevant 23px outline glyphs in the same 58px `surface-sunk` thumbnail
+  wells as For you, instead of food/cover photos. Individual place and event
+  photos inside a collection remain source-backed. Their promotions follow the daypart;
   expired events and events beyond seven days are omitted from Home shortlists.
 - Eat retains the existing nearest pool and ordering: target 24 real results
   (at least 20 where the catalog has them), within five miles of the selected
@@ -201,7 +205,8 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   Preserve the real, generated example for empty-field submission and accessibility
   hints, alongside live search, constraints and plan refinement.
   “Start from a shape” is open by default and remains collapsible. Options use
-  Home evening ribbon's exact material, faint edge, elevation, 22px corners,
+  Home evening ribbon's faint edge, elevation and 22px corners, retaining
+  their existing `surface-raised` card fill,
   61.2px minimum height and 11px horizontal / 8.4px vertical inner padding.
   Keep its 28.9px leading slot, 7px content gap and 44px trailing action slot.
   Titles use the ribbon's 15.3/18px Fraunces; metadata uses its muted 11px DM Sans

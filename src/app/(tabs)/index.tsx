@@ -11,7 +11,7 @@ import { SectionHeading } from '@/components/section-heading';
 import { BUNDLE_CITY, useActiveCity, useActiveCityName } from '@/lib/city';
 import { useNow } from '@/lib/clock';
 import { CRAWLS, NIGHTLIFE_SPOTS, currentEventListings } from '@/lib/data';
-import { homeDiscoveryCollections, homeDiscoveryIdeas } from '@/lib/home-discovery';
+import { homeCollectionGlyph, homeDiscoveryCollections, homeDiscoveryIdeas } from '@/lib/home-discovery';
 import { homeGuideHrefFromLegacy } from '@/lib/home-guide';
 import { hydrateEventsFromBackend } from '@/lib/events-remote';
 import { hydratePlacesFromBackend } from '@/lib/places';
@@ -63,7 +63,7 @@ export default function HomeScreen() {
       </View>
     </TouchableOpacity>
     <View testID="home-quick-actions" className="flex-row items-center gap-x-2">
-      <TouchableOpacity accessibilityRole="button" accessibilityLabel={s.stay?'Update your stay':'Link your stay'} activeOpacity={.74} onPress={()=>s.openStaySheet()} style={control}
+      <TouchableOpacity testID="home-stay-chip" accessibilityRole="button" accessibilityLabel={s.stay?'Update your stay':'Link your stay'} activeOpacity={.74} onPress={()=>s.openStaySheet()} style={[control,{backgroundColor:colors['surface-sunk']}]}
         className="min-h-[34px] shrink-0 flex-row items-center gap-x-1.5 rounded-full px-2.5 py-[7px]" hitSlop={{top:6,bottom:6}}>
         <Glyph name="briefcase" size={13} color={colors['fg-muted']} />
         <Text className="font-dm text-fine text-ink">{s.stay?'Update your stay':'Link your stay'}</Text>
@@ -94,7 +94,7 @@ export default function HomeScreen() {
       </View>
       {collections.length?<><SectionHeading title="Collections" action="See all" onPress={()=>router.push('/home/collections')} />
         <HRow gap={10}>{collections.map(collection=><HomeDoorCard key={collection.id} testID={`home-collection-${collection.id}`} width={252}
-          image={collection.coverImage} title={collection.title} meta={`${collection.items.length} picks · ${collection.subtitle.split(' · ').slice(-1)[0]}`} glyph="compass"
+          title={collection.title} meta={`${collection.items.length} picks · ${collection.subtitle.split(' · ').slice(-1)[0]}`} glyph={homeCollectionGlyph(collection.id)}
           onPress={()=>router.push(`/home/collection?id=${encodeURIComponent(collection.id)}` as never)} />)}</HRow></>:null}
     </View>
   </ScreenScroll></Screen>;

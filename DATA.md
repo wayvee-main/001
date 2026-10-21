@@ -61,8 +61,7 @@ through Home's separate Field Guide routes.
 `home-discovery.ts` selects three suggestion themes and collections using the
 existing guest-local daypart boundaries. For you names intentions (breakfast,
 dinner, trails, shows), not individual places. Collections use current member
-records, omit past events and events more than seven days away, and select a
-current event cover. Bookmarking an idea or collection does not require it to
+records and omit past events and events more than seven days away. Bookmarking an idea or collection does not require it to
 remain in the current Home promotion window.
 
 `home-guide.ts` adapts existing native records without changing shared data or
@@ -73,7 +72,11 @@ Curated Oakland food/nightlife/routes never fill another city's catalog.
 `home-outdoors.ts` supplies separately city-scoped walking ideas for Oakland and
 San Francisco with official destination links. Do not invent difficulty,
 opening status, park access or GPS distances. Link current park notices.
-Collections and For you share `HomeDoorCard` with an exact 83px height.
+Collections and For you share `HomeDoorCard` with an exact 83px height and
+58px glyph wells. Home collection cards and their See all list use the same
+collection-specific outline glyph instead of cover images; source photos
+remain available on individual place/event listings. Home's Vee ribbon and
+Link your stay share the glyph well's `surface-sunk` background in both themes.
 
 ## Image policy
 
