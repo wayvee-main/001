@@ -96,7 +96,8 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   Collections use the same `HomeDoorCard` and exact **83px** height as For you,
   including the horizontal Home rail. Both the rail and `/home/collections`
   use relevant 23px outline glyphs in the same 58px `surface-sunk` thumbnail
-  wells as For you, instead of food/cover photos. Individual place and event
+  wells as For you, instead of food/cover photos. Home search uses the same
+  glyph for each Collection. Individual place and event
   photos inside a collection remain source-backed. Their promotions follow the daypart;
   expired events and events beyond seven days are omitted from Home shortlists.
 - Eat retains the existing nearest pool and ordering: target 24 real results
