@@ -1,0 +1,52 @@
+name: Validate Home Field Guide
+on:
+  push:
+    branches: ['codex/qa-home-field-guide-2026-10-21']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: home-field-guide-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      TZ: UTC
+      EXPO_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Verify Discover isolation
+        run: git diff --exit-code 5763e481f08883054a8f331d5e8f94b372c741a3 -- 'src/app/(tabs)/discover.tsx' src/components/field-notes.tsx src/components/layout.tsx src/components/editorial-nav.tsx src/global.css src/lib/theme.ts src/lib/tokens.ts src/app/restaurant src/app/place src/app/event src/app/night src/app/crawl src/app/venue src/app/collection.tsx src/app/collection
+      - name: Verify generated tokens
+        run: |
+          npm run tokens
+          git diff --exit-code -- src/global.css src/lib/theme.ts src/lib/tailwind-tokens.generated.js
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test -- --runInBand
+      - run: npm run tokens:contrast
+      - run: npm run build:web
+      - name: Install browser tools
+        run: |
+          npm install --prefix /tmp/wayvee-home-guide-tools --no-package-lock --ignore-scripts playwright
+          node /tmp/wayvee-home-guide-tools/node_modules/playwright/cli.js install --with-deps chromium
+      - name: Check Home Field Guide on mobile
+        env:
+          NODE_PATH: /tmp/wayvee-home-guide-tools/node_modules
+        run: node scripts/validate-home-field-guide.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: home-field-guide-preview
+          path: polish-preview/
+          retention-days: 14
