@@ -71,6 +71,10 @@ async function main(){
   await page.goto('http://127.0.0.1:9876',{waitUntil:'domcontentloaded'});
   await page.getByText('Shall we wander?',{exact:true}).waitFor({timeout:60000});
   await page.evaluate(()=>document.fonts.ready);
+  await page.waitForFunction(()=>![...document.querySelectorAll('div')].some(el=>{
+    const s=getComputedStyle(el),r=el.getBoundingClientRect();
+    return s.zIndex==='20'&&s.position==='absolute'&&r.width>100&&r.height>100&&s.display!=='none';
+  }),null,{timeout:30000});
   await page.waitForFunction(()=>['eat','bars','routes'].every(key=>{
     const el=document.querySelector('[data-testid="home-tile-image-'+key+'"]');
     const img=el?.tagName==='IMG'?el:el?.querySelector('img');

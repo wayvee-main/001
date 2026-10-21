@@ -51,12 +51,16 @@ jobs:
           key: ${{ steps.web-build-cache.outputs.cache-primary-key }}
       - name: Install browser preview tools
         run: |
-          npm install --prefix /tmp/wayvee-polish-tools --no-package-lock --ignore-scripts playwright
+          npm install --prefix /tmp/wayvee-polish-tools --no-package-lock --ignore-scripts playwright lucide
           node /tmp/wayvee-polish-tools/node_modules/playwright/cli.js install --with-deps chromium
       - name: Check Home timing, imagery and navigation
         env:
           NODE_PATH: /tmp/wayvee-polish-tools/node_modules
         run: node scripts/validate-home-discovery.cjs
+      - name: Check all five secondary design previews
+        env:
+          NODE_PATH: /tmp/wayvee-polish-tools/node_modules
+        run: node scripts/validate-home-design-preview.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

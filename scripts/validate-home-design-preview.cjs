@@ -1,0 +1,65 @@
+const fs=require('node:fs');
+const assert=require('node:assert/strict');
+const {chromium}=require('playwright');
+const base=require('node:path').resolve('polish-preview/designs');fs.mkdirSync(base,{recursive:true});
+const fragment=fs.readFileSync('docs/design/home-secondary-alternatives.html','utf8');
+const utility='body{margin:0;padding:20px;background:#f4f1ee;font-family:Arial,sans-serif}#wayvee-layer-studio{max-width:736px;margin:auto}.viz-controls{display:flex;gap:18px;flex-wrap:wrap;padding:10px 0 18px}.form-label{font-size:12px;display:flex;align-items:center;gap:8px}.form-select{padding:7px;border:1px solid #ddd;border-radius:6px;background:white;color:#312039}.viz-dotted-background{background-image:radial-gradient(#cabec3 .7px,transparent .7px);background-size:15px 15px}';
+const errors=[];
+(async()=>{
+ const browser=await chromium.launch({headless:true});
+ const page=await browser.newPage({viewport:{width:736,height:1100},deviceScaleFactor:1});
+ page.on('pageerror',err=>errors.push(err.message));
+ await page.setContent('<!doctype html><html><head><meta charset="utf-8"><style>'+utility+'</style></head><body>'+fragment+'</body></html>',{waitUntil:'domcontentloaded'});
+ await page.addScriptTag({path:require.resolve('lucide').replace('/cjs/lucide.js','/umd/lucide.js')});
+ await page.evaluate(()=>lucide.createIcons({attrs:{width:16,height:16}}));
+ await page.evaluate(()=>Promise.race([document.fonts.ready,new Promise(resolve=>setTimeout(resolve,5000))]));
+ await page.selectOption('#wv-appearance','light');
+ const names=['guide','photo','ledger','daybook','chapters'];
+ for(const name of names){
+  await page.evaluate(name=>{for(const section of document.querySelectorAll('[data-variant]'))section.hidden=section.querySelector('.wv-phone').dataset.design!==name},name);
+  const phone=page.locator('.wv-phone[data-design="'+name+'"]');
+  await phone.screenshot({path:base+'/'+name+'-light.png'});
+  console.log('POLISH_QA_IMAGE prototype-'+name+' light '+(await phone.screenshot({type:'jpeg',quality:65})).toString('base64'));
+  await phone.locator('[data-filter="Quick bites"]').click();
+  assert.equal(await phone.locator('[data-open="cook"]').count()>0,true);
+  await phone.locator('[data-open="cook"]').first().click();
+  await phone.getByRole('button',{name:'Save for later',exact:true}).click();
+  await phone.locator('[data-nav="profile"]').click();
+  assert.equal(await phone.locator('[data-open="cook"]').count(),1);
+  await phone.locator('[data-nav="home"]').click();
+  assert.equal(await phone.locator('.wv-home-tile').count(),4);
+  assert.equal(await phone.locator('.wv-idea').count(),3);
+  await phone.locator('[data-view="ideas"]').click();
+  assert.equal(await phone.locator('.wv-idea').count(),3);
+  await phone.locator('[data-idea="fresh"]').click();
+  assert.equal(await phone.locator('[data-open="lake"]').count(),1);
+  await phone.locator('[data-nav="home"]').click();
+  await phone.locator('[data-view="collections"]').click();
+  assert.ok(await phone.locator('[data-collection]').count()>0);
+  await phone.locator('[data-collection]').first().click();
+  assert.ok(await phone.locator('[data-open]').count()>0);
+  await phone.locator('[data-nav="home"]').click();
+  await page.selectOption('#wv-daypart','morning');
+  assert.equal(await phone.locator('[data-idea="breakfast"]').count(),1);
+  assert.equal(await phone.locator('[data-idea="dinner"]').count(),0);
+  await page.selectOption('#wv-daypart','lateNight');
+  assert.equal(await phone.locator('[data-idea="fresh"]').count(),0);
+  assert.equal(await phone.locator('[data-collection="late"]').count(),1);
+  await page.selectOption('#wv-daypart','afternoon');
+  await phone.locator('[data-category="eat"]').click();
+  await page.selectOption('#wv-appearance','dark');
+  await phone.screenshot({path:base+'/'+name+'-dark.png'});
+  if(name==='photo'||name==='chapters')console.log('POLISH_QA_IMAGE prototype-'+name+' dark '+(await phone.screenshot({type:'jpeg',quality:65})).toString('base64'));
+  for(const width of [320,390,736]){
+   await page.setViewportSize({width,height:1100});
+   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1);
+   assert.equal(overflow,false,name+' no document overflow at '+width);
+  }
+  await page.setViewportSize({width:736,height:1100});
+  await page.selectOption('#wv-appearance','light');
+  console.log('PASS '+name+' navigation, save, ideas, collections, timing, both themes and responsive widths');
+ }
+ assert.deepEqual(errors,[]);
+ console.log('PREVIEW_OK '+JSON.stringify({variants:names.length,bytes:Buffer.byteLength(fragment),errors}));
+ await browser.close();
+})().catch(err=>{console.error(err);process.exitCode=1});
