@@ -35,16 +35,18 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   34px normally, 30px on phones up to 400px. Use `useAppGutter`.
 - Home keeps four tiles, ordered Eat, Bars, Routes, Events. Counts describe
   actual inventory, never unsupported opening status.
-  Use the approved **Open Gallery** treatment: only each photo has a raised
-  paper `#F5F0E9` / charcoal `#29252A` frame, faint 1px edge and level-1
-  elevation. Photo frames use explicit 8px padding on all four sides, 12px
-  outer corners and 8px photo corners. The entire tile remains one accessible
-  button covering both its photo and caption.
+  Extend the **Open Gallery** treatment into one contained card around the
+  photo, category/count and both metadata rows. The full card uses raised
+  paper `#F5F0E9` / charcoal `#29252A`, one faint 1px outer edge and
+  level-1 elevation. Keep explicit 8px outer padding on all four sides, 12px
+  card corners and 8px photo corners. The entire tile remains one accessible
+  button covering both its photo and metadata; do not raise a second image-only frame.
   Home's two columns fill the content width inside the existing app gutters,
   with 16px horizontal and vertical gaps. Scale photos with the shared 121:73
   aspect ratio at every viewport width; never cap Home tiles at Discover's 137px.
-  Captions sit directly on the page gradient, 7px below the photo frame, with
-  8px horizontal inset. They have no opaque background, border or shadow.
+  Captions sit inside the same surface, aligned with the photo's left/right
+  edges. Preserve the existing 15px photo-to-heading gap and finish with 8px
+  padding below the final fact row. No separate metadata border or shadow.
   Keep the 17px Fraunces category and its real inventory count together on one
   baseline, separated by 6px; counts use muted 13px DM Sans. A 16px outline
   chevron at the far right uses the ribbon's orange `surface-accent`.
