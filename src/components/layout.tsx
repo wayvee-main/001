@@ -1,6 +1,9 @@
 import { LinearGradient } from 'expo-linear-gradient';
+import { useFocusEffect } from 'expo-router';
 import { useColorScheme } from 'nativewind';
-import { useState, type ReactNode } from 'react';
+import { useCallback, useState, type ReactNode } from 'react';
+
+import { reportNavScroll, resetNavVisibility } from '@/lib/nav-visibility';
 import {
   Platform,
   RefreshControl,
@@ -115,12 +118,22 @@ export function ScreenScroll({
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const gutter = useAppGutter();
-  return (
+
+  // Only tab screens have a bar over them, so only they drive it — and each
+  // one hands it back on focus, or leaving a screen scrolled down would hand
+  // the next screen a hidden bar.
+  useFocusEffect(useCallback(() => {
+    if (clearsTabBar) resetNavVisibility();
+  }, [clearsTabBar]));
+
+  const scroll = (
     <ScrollView
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps={keyboardShouldPersistTaps}
       keyboardDismissMode={keyboardDismissMode}
       automaticallyAdjustKeyboardInsets={automaticallyAdjustKeyboardInsets}
+      scrollEventThrottle={16}
+      onScroll={clearsTabBar ? (event) => reportNavScroll(event.nativeEvent.contentOffset.y) : undefined}
       refreshControl={
         onRefresh ? <RefreshControl refreshing={refreshing ?? false} onRefresh={onRefresh} tintColor={colors.rust} /> : undefined
       }
@@ -135,6 +148,25 @@ export function ScreenScroll({
       }}>
       {children}
     </ScrollView>
+  );
+
+  if (!clearsTabBar) return scroll;
+
+  // The bar leaves while you read, but it still crosses the content on its way
+  // out and back. A short wash in the page colour at the foot means a row
+  // dissolves into the ground rather than being sliced by a hard edge.
+  return (
+    <View style={{ flex: 1 }}>
+      {scroll}
+      <LinearGradient
+        pointerEvents="none"
+        accessible={false}
+        colors={[`${colors.bg}00`, `${colors.bg}E6`]}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: insets.bottom + 46 }}
+      />
+    </View>
   );
 }
 

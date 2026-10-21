@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useColorScheme } from 'nativewind';
 import { Animated, Platform, Pressable, Text, View } from 'react-native';
+import Reanimated, { useAnimatedStyle } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Glyph } from '@/components/glyph';
 import { useAppGutter } from '@/components/layout';
 import { VeeMark } from '@/components/vee-mark';
 import { useReducedMotionPreference } from '@/lib/motion';
+import { navHidden } from '@/lib/nav-visibility';
 import { useThemeColors } from '@/lib/theme';
 import { withAlpha } from '@/lib/tokens';
 
@@ -50,13 +52,24 @@ export function EditorialNav({items,reserveSpace=false}:{items:NavigationItem[];
   const {colorScheme}=useColorScheme(),reduceMotion=useReducedMotionPreference();
   const light=colorScheme==='light';
   const bottom=insets.bottom+18;
+  /** Far enough to clear the pill, its bottom offset and its shadow. */
+  const tuckAway=bottom+86;
+  // Floating only. In reserveSpace mode the bar is a block in the flow of a
+  // pushed screen, with nothing scrolling underneath it to get out of the way
+  // of, and sliding it would leave a hole.
+  const tuck=useAnimatedStyle(()=>({transform:[{translateY:navHidden.value*tuckAway}]}));
+  const hides=!reserveSpace&&!reduceMotion;
   return <View pointerEvents="box-none" style={reserveSpace?{height:bottom+76}:{position:'absolute',left:0,right:0,bottom:0,height:bottom+76}}>
-    <View testID="editorial-navigation" accessibilityRole="tablist" className="flex-row items-center rounded-full"
-      style={{position:'absolute',left:gutter,right:gutter,bottom,paddingTop:9,paddingBottom:8,paddingHorizontal:10,
+    {/* Layout lives in `style`, not `className`: nativewind does not wrap
+      * Reanimated.View, so a className on it is silently dropped and the pill
+      * stacks its tabs vertically. */}
+    <Reanimated.View testID="editorial-navigation" accessibilityRole="tablist"
+      style={[{flexDirection:'row',alignItems:'center',borderRadius:999,
+        position:'absolute',left:gutter,right:gutter,bottom,paddingTop:9,paddingBottom:8,paddingHorizontal:10,
         backgroundColor:withAlpha(colors['surface-navigation'],.97),borderWidth:1,borderColor:colors['edge-faint'],
         boxShadow:light?`0 6.6px 24.2px ${withAlpha(colors.fg,.1045)}`:'0 6.6px 24.2px rgba(0,0,0,.352)',
-        ...(Platform.OS==='web'?{backdropFilter:'blur(18px)'}:{})}}>
+        ...(Platform.OS==='web'?{backdropFilter:'blur(18px)'}:{})}, hides?tuck:null]}>
       {items.map(item=><EditorialTab key={item.key} item={item} reduceMotion={reduceMotion} />)}
-    </View>
+    </Reanimated.View>
   </View>;
 }
