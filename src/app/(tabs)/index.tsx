@@ -23,6 +23,15 @@ import { buildHomeTilePreviews } from '@/lib/home-tile-previews';
 import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
 import { hydrateWeatherFromBackend } from '@/lib/weather';
 
+/** What each category is, in one compact line. Deliberately not a venue name:
+ * the tile is the door, and the particular place lives on the other side. */
+const TILE_DESCRIPTIONS: Record<string, string> = {
+  eat: 'Kitchens near you',
+  bars: 'Bars and late rooms',
+  routes: 'Multi-stop nights',
+  events: 'Dated shows in town',
+};
+
 export default function HomeScreen() {
   const router = useRouter(), colors = useThemeColors(), s = useScoper();
   const city = useActiveCityName(), citySlug = useActiveCity(), nearest = useNearestPool();
@@ -55,7 +64,19 @@ export default function HomeScreen() {
   ];
   const tiles = tileDefinitions.map(tile => {
     const photo = tile.photoKey ? HOME_TILE_PREVIEW_PHOTOS[tile.photoKey] : undefined;
-    return { ...tile, image: photo?.source ?? tile.image, imageLabel: photo?.label ?? tile.imageLabel };
+    // A tile is a door into a category, so its line says what is behind the
+    // door rather than naming one venue from inside it — the name belonged to
+    // whichever record happened to sort first, and changed under the guest for
+    // no reason they could see. An empty pool keeps the preview's own honest
+    // line instead, because "Bars and late rooms" over a zero would be a
+    // promise the catalog cannot keep.
+    const described = Number(tile.count) > 0 ? TILE_DESCRIPTIONS[tile.key] : undefined;
+    return {
+      ...tile,
+      caption: described ?? tile.caption,
+      image: photo?.source ?? tile.image,
+      imageLabel: photo?.label ?? tile.imageLabel,
+    };
   });
   return <Screen><ScreenScroll gap={18} clearsTabBar refreshing={refreshing} onRefresh={onRefresh}>
     <HomeHeader hasReminders={activeReminders(s.plans,s.stay).length>0}

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 
 import { Glyph, type GlyphName } from '@/components/glyph';
-import { NoteFact, PHOTO_NOTE } from '@/components/field-notes';
+import { PHOTO_NOTE } from '@/components/field-notes';
 import type { HomeTilePreview } from '@/lib/home-tile-previews';
 import { useAppGutter } from '@/components/layout';
 import { MiniChevron } from '@/components/ui';
@@ -141,18 +141,13 @@ function GalleryTile({ tile, width }: { tile: CountTile; width: number }) {
           </View>
         </View>
       </View>
+      {/* One line, and it describes the category rather than naming one venue
+        * inside it. The facts row that used to sit under this is gone: two
+        * rows of metadata under a 95px photograph made the grid read as four
+        * dense paragraphs rather than four doors. */}
       <View testID={`home-tile-caption-${tile.key}`} style={{ marginTop: 7 }}>
         <Text testID={`home-tile-description-${tile.key}`} numberOfLines={1}
           className="font-dm text-fine text-taupe">{tile.caption}</Text>
-        {/* alignSelf keeps the row only as wide as its content, so NoteFact's
-          * flexGrow has no slack to distribute and the two facts stay next to
-          * each other instead of being thrown to opposite edges. It still
-          * shrinks and truncates when a value is long. */}
-        <View testID={`home-tile-facts-${tile.key}`}
-          style={{ marginTop: 5, flexDirection: 'row', flexWrap: 'nowrap', columnGap: 10, alignSelf: 'flex-start', maxWidth: '100%' }}>
-          {tile.facts.map((fact, index) => <NoteFact key={fact.glyph + '-' + index}
-            glyph={fact.glyph} value={fact.value} label={fact.label} compact flexible={index === 0} />)}
-        </View>
       </View>
     </TouchableOpacity>
   );
