@@ -135,16 +135,15 @@ export default function DiscoverScreen() {
     <PhotoRow count={roomPicks.length}>{cardWidth=>roomPicks.map(x=><RoomNote key={x.id} venue={x} cardWidth={cardWidth} onPress={()=>router.push(`/venue/${x.id}`)} />)}</PhotoRow>
   </TrailSection>:null;
   return <Screen><ScreenScroll gap={0} clearsTabBar refreshing={refreshing} onRefresh={onRefresh} keyboardShouldPersistTaps="handled">
-    <View className="mb-5 flex-row items-center justify-between gap-x-3 pt-4">
-      <View><Text className="font-dm text-fine text-taupe">{cityName}, CA</Text>
-        <Text className="mt-1.5 font-fraunces text-ink" style={{fontSize:32,lineHeight:35.2,letterSpacing:-.7}}>Discover</Text></View>
-      <TouchableOpacity accessibilityRole="button" accessibilityLabel="Open Vee" onPress={()=>router.push('/create')} className="h-11 w-9 items-center justify-center">
-        <VeeMark size={28} />
-      </TouchableOpacity>
+    {/* The mark used to sit opposite the title as a second way into Vee. The
+      * tab bar already carries one, two rows down and always in reach. */}
+    <View className="mb-5 pt-4">
+      <Text className="font-dm text-fine text-taupe">{cityName}, CA</Text>
+      <Text className="mt-1.5 font-fraunces text-ink" style={{fontSize:32,lineHeight:35.2,letterSpacing:-.7}}>Discover</Text>
     </View>
     <View className="flex-row items-center gap-x-2 rounded-full border border-edge-faint bg-surface-search px-3 shadow-soft-light dark:shadow-soft-dark">
       <Glyph name="search" size={17} color={colors['fg-muted']} /><TextInput accessibilityLabel="Search Discover" value={query} onChangeText={setQuery}
-        placeholder="A place, artist, or good idea" placeholderTextColor={colors['fg-muted']} className="min-w-0 flex-1 py-3 font-dm text-ink" style={{fontSize:16,lineHeight:22.4}} />
+        placeholder="A place, artist, or good idea" placeholderTextColor={colors['fg-muted']} className="min-w-0 flex-1 py-3 font-dm text-label text-ink" />
       {query?<TouchableOpacity accessibilityRole="button" accessibilityLabel="Clear search" hitSlop={10} onPress={()=>setQuery('')}><Glyph name="close" size={15} color={colors['fg-muted']} /></TouchableOpacity>:null}
     </View>
     <View className="mt-2.5 mb-[18px]"><HRow gap={11.44} bleed={false}>{MODES.map(x=><TouchableOpacity key={x.value} accessibilityRole="button" accessibilityLabel={x.label}

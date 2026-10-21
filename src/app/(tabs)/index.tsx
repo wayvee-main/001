@@ -96,12 +96,10 @@ export default function HomeScreen() {
       <SectionHeading title="Around you" /><AroundYou tiles={tiles} />
     </View>
     <View className="gap-y-3 border-t border-edge-faint pt-4">
-      <SectionHeading title="For you" />
-      {/* "For you" already names the group; a "Nearest" label under it was a
-        * second heading for the same three rows. The way through stays. */}
-      <View className="flex-row items-center justify-end">
-        <TouchableOpacity accessibilityRole="button" accessibilityLabel="See all nearest places" onPress={()=>router.push('/nearest')} hitSlop={10}>
-          <Text className="font-dm-medium text-fine text-peach">See all</Text></TouchableOpacity></View>
+      {/* The way through rides the heading itself. Left on its own row after
+        * the "Nearest" label went, it sat in 24px of gap with nothing beside
+        * it — a strip of empty between the title and the first card. */}
+      <SectionHeading title="For you" action="See all" onPress={()=>router.push('/nearest')} />
       <View testID="nearest-preview" className="gap-y-2">
         {nearest.slice(0,3).map(x=><TouchableOpacity key={x.href} accessibilityRole="button" accessibilityLabel={`View ${x.name}`} onPress={()=>router.push(x.href)}
           style={[surface,{minHeight:83}]}

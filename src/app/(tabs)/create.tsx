@@ -241,10 +241,10 @@ function ShapeTile({
       activeOpacity={0.78}
       onPress={() => onPress(title)}
       style={[surface, { minHeight: 61.2, borderRadius: 22, flexDirection: 'row', alignItems: 'stretch' }]}>
-      <View className="min-w-0 flex-1 flex-row items-center" style={{ paddingHorizontal: 11, paddingVertical: 8.4, gap: 7 }}>
-        <View className="shrink-0 items-center justify-center" style={{ width: 28.9, height: 28.9 }}>
-          <Glyph name={first === 'dinner' ? 'food' : first === 'event' ? 'ticket' : 'drink'} size={17} color={colors['fg-muted']} />
-        </View>
+      {/* No leading glyph. It was keyed off the shape's first stop, so three
+        * dinner-led shapes drew three identical forks down the left edge and
+        * said nothing the name and the facts did not already say. */}
+      <View className="min-w-0 flex-1 flex-row items-center" style={{ paddingHorizontal: 13, paddingVertical: 8.4 }}>
         <View className="min-w-0 flex-1">
           <Text testID="vee-shape-title" numberOfLines={1} className="font-fraunces text-ink" style={{ fontSize: 15.3, lineHeight: 18 }}>{name}</Text>
           <View testID="vee-shape-facts" className="mt-0.5 flex-row items-center gap-x-3">
