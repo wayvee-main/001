@@ -1,0 +1,37 @@
+name: Verify Home thumbnail surfaces
+on:
+  push:
+    branches: ['codex/qa-home-thumbnail-surfaces-2026-10-21']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TZ: UTC
+      EXPO_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build:web
+      - name: Install browser
+        run: |
+          npm install --prefix /tmp/wayvee-tile-tools --no-package-lock --ignore-scripts playwright
+          node /tmp/wayvee-tile-tools/node_modules/playwright/cli.js install --with-deps chromium
+      - name: Check Home surfaces and Collection glyphs
+        env:
+          NODE_PATH: /tmp/wayvee-tile-tools/node_modules
+        run: node scripts/verify-home-thumbnail-surfaces.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: home-thumbnail-surfaces
+          path: home-surfaces-preview/
+          retention-days: 14
