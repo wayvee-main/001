@@ -50,26 +50,36 @@ populate the backend immediately, ahead of the next deploy.
 
 Each tile shows its real inventory count beside its category name: the nearest
 food pool, active-city nightlife/route catalogs, or current event listings.
-Two extra rows use a real catalog pick and its source-backed glyph facts.
-MUA's travel estimate is marked `~` unless its existing Nearest entry has a
-measured distance; do not alter the Nearest pool/order to choose a photo.
-Little Bird's listed daily closing time comes from its hours string, not an
-inferred open-now claim. Routes use actual stop counts and the route's own
-walking/ride metadata. Events select the earliest current listing and keep
-its name, venue, date, time and native image together.
+Home tiles now show subtle category glyph illustrations; no venue preview
+metadata or photos are promoted into those four category tiles. Their labels,
+counts and typography remain intact, and their counts open the same real pools
+through Home's separate Field Guide routes.
+
+## Home intentions and Field Guide
+
+`home-discovery.ts` selects three suggestion themes and collections using the
+existing guest-local daypart boundaries. For you names intentions (breakfast,
+dinner, trails, shows), not individual places. Collections use current member
+records, omit past events and events more than seven days away, and select a
+current event cover. Bookmarking an idea or collection does not require it to
+remain in the current Home promotion window.
+
+`home-guide.ts` adapts existing native records without changing shared data or
+Discover. Its Eat list preserves nearest membership/order and measured versus
+estimated labels. Home search, category lists, idea lists, collection lists and
+details use `/home/*`; Discover and its existing details remain unchanged.
+Curated Oakland food/nightlife/routes never fill another city's catalog.
+`home-outdoors.ts` supplies separately city-scoped walking ideas for Oakland and
+San Francisco with official destination links. Do not invent difficulty,
+opening status, park access or GPS distances. Link current park notices.
+Collections and For you share `HomeDoorCard` with an exact 83px height.
 
 ## Image policy
 
-Home's **Open Gallery** uses exact preview IDs in `src/lib/home-tile-photos.ts`.
-MUA's occupied dining room and Little Bird's actual window replace generic
-category imagery; the existing Fox marquee anchors the Uptown route. These
-venue-owned files are bundled for immediate/offline display, with provenance
-in `assets/images/home-windows/README.md`. Current events use their own
-listing image, refreshing with the calendar rather than a permanent auditorium
-photo. Remote fallback images must belong to the named pick; known stock hosts
-are rejected. Missing/failed images show a category glyph, preserving facts and taps.
-The shared 121:73 ratio, 8px photo corners and subtle lower-edge fade remain.
-Oakland images are keyed to Oakland preview IDs and never reused for another city.
+Home Field Guide photos belong to the named source record. Known stock-photo
+hosts are rejected; missing/failed images use the corresponding outline glyph.
+The old bundled Home window assets remain available but are not used for
+Around you's category illustrations.
 
 Photos must come from the establishment itself (its site or official listing).
 Nearby place photos are supplemented in `src/lib/place-images.ts` using exact
@@ -200,7 +210,8 @@ in the afternoon, and sourced late-hours venues at night. Known closures are
 excluded and matching known-open places are preferred. Unknown hours remain
 unknown; the chips do not claim “Open now.” Each chip opens the venue's detail
 page. Oakland's curated records are only mixed in for Oakland; other cities
-use their own hydrated place pool. For you → Nearest keeps its existing pool.
+use their own hydrated place pool. Home quick-action details use Field Guide;
+Discover retains its own routes and presentation.
 
 - Nothing is invented. Entries without verified depth say so plainly
   (e.g. seeds list "See official site for today's hours").
