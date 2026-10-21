@@ -22,11 +22,16 @@ export function WayveeWordmark({
   color,
   /** Backward-compatible prop; every spiral uses the brand gradient. */
   gradient = true,
+  mark = true,
 }: {
   size?: number;
   /** Colour of the lettering; the spiral keeps its gradient. */
   color?: string;
   gradient?: boolean;
+  /** Set false where the word alone should carry the brand. Home's header is
+   * the one such place: the spiral is already on screen twice below it, in the
+   * concierge panel and in the navigation. */
+  mark?: boolean;
 }) {
   const colors = useThemeColors();
 
@@ -35,8 +40,8 @@ export function WayveeWordmark({
       accessible
       accessibilityRole="image"
       accessibilityLabel="Wayvee"
-      style={{ flexDirection: 'row', alignItems: 'center', gap: size * 0.35 }}>
-      <VeeMark size={size * 0.95} variant={size >= 28 ? 'primary' : 'compact'} gradient={gradient} color={color} />
+      style={{ flexDirection: 'row', alignItems: 'center', gap: mark ? size * 0.35 : 0 }}>
+      {mark ? <VeeMark size={size * 0.95} variant={size >= 28 ? 'primary' : 'compact'} gradient={gradient} color={color} /> : null}
       <Text
         className="font-fraunces"
         style={{ fontSize: size, lineHeight: size * 1.12, letterSpacing: size * -0.018, color: color ?? colors.fg }}>

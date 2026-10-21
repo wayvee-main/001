@@ -50,7 +50,7 @@ export function HomeHeader({
   return (
     <View testID="home-header" style={{ paddingTop: 10 }} className="flex-row items-start justify-between gap-x-3">
       <View className="min-w-0 flex-1">
-        <WayveeWordmark size={26} />
+        <WayveeWordmark size={26} mark={false} />
         {weather ? (
           <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">
             {weatherLine(weather)}
