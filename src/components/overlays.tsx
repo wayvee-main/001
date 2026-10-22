@@ -1237,7 +1237,7 @@ function AskSheet() {
           onChangeText={setText}
           placeholder="Dinner and something with live music, walking distance, back by 10:30"
           placeholderTextColor="#9C9086"
-          className="min-h-[64px] rounded-card border border-edge-card border-b-edge-card-bottom bg-shell px-3.5 py-3 font-dm text-[14px] text-ink shadow-soft-light dark:shadow-soft-dark"
+          className="min-h-[64px] rounded-card border border-edge-card border-b-edge-card-bottom bg-surface-input px-3.5 py-3 font-dm text-[14px] text-ink shadow-soft-light dark:shadow-soft-dark"
         />
         {moodVocabulary.length > 0 ? (
           <View className="flex-row flex-wrap gap-2">

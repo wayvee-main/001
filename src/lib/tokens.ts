@@ -43,6 +43,7 @@ export const ROLES: Record<string, ThemeValue> = {
   'surface-raised': { light: '#F7E5E1', dark: '#29252A' },
   'surface-soft': { light: '#F7E5E1', dark: '#29252A' },
   'surface-control': { light: '#F5F0E9', dark: '#29252A' }, // controls keep their existing material
+  'surface-input': { light: '#FFFCF8', dark: '#29252A' }, // text fields stay lighter than blush cards
   'surface-ribbon': { light: '#F7E5E1', dark: '#100D13' }, // Home ribbon and stay anchor
   'surface-search': { light: '#FFFCF8', dark: '#28372F' },
   'surface-navigation': { light: '#FFFCF8', dark: '#29252A' },
@@ -120,8 +121,8 @@ export const EDGE_ROLES: Record<string, { base: 'fg'; alpha: number; lightBase?:
   edge: { base: 'fg', alpha: 0.12 }, // borders / dividers
   'edge-soft': { base: 'fg', alpha: 0.08 }, // placeholder stripe C
   'edge-faint': { base: 'fg', alpha: 0.04 }, // quiet dividers and decorative rules
-  'edge-card': { base: 'fg', alpha: 0.04, lightBase: '#693F3A', lightAlpha: 0.18 },
-  'edge-card-bottom': { base: 'fg', alpha: 0.04, lightBase: '#693F3A', lightAlpha: 0.26 },
+  'edge-card': { base: 'fg', alpha: 0.04, lightBase: '#693F3A', lightAlpha: 0.135 },
+  'edge-card-bottom': { base: 'fg', alpha: 0.04, lightBase: '#693F3A', lightAlpha: 0.195 },
 };
 
 /** Same value in both themes — either brand hue or a translucent tint over

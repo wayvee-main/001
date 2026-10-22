@@ -7,6 +7,7 @@ module.exports = {
   "surface-raised": 'rgb(var(--color-surface-raised) / <alpha-value>)',
   "surface-soft": 'rgb(var(--color-surface-soft) / <alpha-value>)',
   "surface-control": 'rgb(var(--color-surface-control) / <alpha-value>)',
+  "surface-input": 'rgb(var(--color-surface-input) / <alpha-value>)',
   "surface-ribbon": 'rgb(var(--color-surface-ribbon) / <alpha-value>)',
   "surface-search": 'rgb(var(--color-surface-search) / <alpha-value>)',
   "surface-navigation": 'rgb(var(--color-surface-navigation) / <alpha-value>)',
@@ -91,7 +92,7 @@ module.exports = {
   sheet: "25px",
   },
   boxShadow: {
-    'soft-light': 'inset 0 1px 0 rgba(255, 255, 255, .82), 0 3px 10px rgba(49, 32, 57, .09)',
+    'soft-light': '0 2px 7px rgba(49, 32, 57, .05)',
     'soft-dark': '0 2.2px 8.8px rgba(16, 13, 19, 0.33)',
   },
 };

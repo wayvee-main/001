@@ -128,7 +128,7 @@ export default function TasteScreen() {
                 onSubmitEditing={submitCustomTag}
                 maxLength={40}
                 accessibilityLabel="New taste tag"
-                className="flex-1 rounded-full border border-edge-card border-b-edge-card-bottom bg-cream px-3.5 py-2 font-dm text-label text-ink shadow-soft-light dark:shadow-soft-dark"
+                className="flex-1 rounded-full border border-edge-card border-b-edge-card-bottom bg-surface-input px-3.5 py-2 font-dm text-label text-ink shadow-soft-light dark:shadow-soft-dark"
               />
               <TouchableOpacity
                 accessibilityRole="button"

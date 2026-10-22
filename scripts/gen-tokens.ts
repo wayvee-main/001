@@ -177,7 +177,7 @@ ${fontSizeLines}
 ${radiusLines}
   },
   boxShadow: {
-    'soft-light': 'inset 0 1px 0 rgba(255, 255, 255, .82), 0 3px 10px rgba(49, 32, 57, .09)',
+    'soft-light': '0 2px 7px rgba(49, 32, 57, .05)',
     'soft-dark': '0 ${ELEVATION[1].y}px ${ELEVATION[1].blur}px ${rgba(ROLES['surface-sunk'].dark, Number(ELEVATION[1].opacity.dark))}',
   },
 };

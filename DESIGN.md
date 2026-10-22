@@ -65,8 +65,10 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   never imply “Open now.” The divider is omitted when there are no venue chips.
   Cards, tiles, containers, chips, buttons and rounded photo frames use a 1px
   `edge-card` perimeter and `edge-card-bottom` lower rim. In light mode the
-  Etched paper treatment uses clay ink `#693F3A` at 18% / 26%, a soft white
-  inset highlight and a low plum shadow. Dark retains its existing 4% ink
+  Etched paper treatment uses clay ink `#693F3A` at 13.5% / 19.5%. Cards
+  carry a restrained inset highlight and plum shadow; compact controls use a
+  quieter shadow without the inset. Text inputs use off-white `surface-input`
+  instead of the blush card fill. Dark retains its existing 4% ink
   perimeter and shadow. Keep `edge-faint` for dividers and decorative rules.
   Apply the card edge to filled controls,
   including selected and primary controls, without boxing transparent layout

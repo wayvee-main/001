@@ -15,6 +15,7 @@
 // The manual pick lists and the locked/Regenerate draft timeline live one tap
 // away at /plan-draft; this screen only leads with them.
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useColorScheme } from 'nativewind';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -287,6 +288,7 @@ export default function CreateScreen() {
     savedPlaceKeys,
   } = useScoper();
   const colors = useThemeColors();
+  const { colorScheme } = useColorScheme();
   const raisedSurface = useRaisedSurface(1), control = useControlSurface(), primarySurface = useControlSurface(false, true);
   const curatedCoords = useCuratedCoords();
   const curatedHours = useCuratedHours();
@@ -849,7 +851,9 @@ export default function CreateScreen() {
                 marginTop: showingLiveMatches ? 20 : 30,
               }}>
             <View testID="vee-composer-box" style={[raisedSurface,{
-              backgroundColor:withAlpha(colors['surface-raised'],.8),borderRadius:18,paddingHorizontal:10,paddingTop:5,paddingBottom:12,
+              backgroundColor:colorScheme==='light'?colors['surface-input']:withAlpha(colors['surface-raised'],.8),
+              ...(colorScheme==='light'?{boxShadow:'0 2px 7px rgba(49,32,57,.045)'}:{}),
+              borderRadius:18,paddingHorizontal:10,paddingTop:5,paddingBottom:12,
             }]}>
             <TextInput
               testID="vee-text-input"
