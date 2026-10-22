@@ -79,7 +79,7 @@ use a current member photo or their verified cover, including in Home search.
 `home-guide-photos.ts` adds official source photos only to Home's adapters;
 it does not alter Discover or shared native records. Missing/failed images
 retain a relevant outline-glyph fallback. Home's Vee ribbon and Link your stay
-use `surface-ribbon` (`#FFF9DD` light / `#100D13` dark).
+use `surface-ribbon` (`#FFFCF3` light / `#100D13` dark).
 
 ## Image policy
 

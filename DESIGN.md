@@ -14,7 +14,7 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   `BACKDROP_GRADIENTS` in `src/lib/tokens.ts` records the exact 230°, 121° and
   226° layers, alpha and stops. `AppBackdrop` paints them behind every screen,
   detail and onboarding page, with aspect-correct angles on web and native.
-  Default cards and sheets use pale cream `#FFF9DD` in light mode and
+  Default cards and sheets use pale cream `#FFFCF3` in light mode and
   charcoal `#29252A` in dark mode, with faint edges and elevation.
   Discover listings use the same card fill. Controls have a separate
   `surface-control` role, retaining `#F5F0E9` / `#29252A`. In dark mode,
@@ -48,7 +48,7 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   counts and ordering follow the active city's existing source pools.
   In light mode, quick venue chips share search's off-white fill;
   dark mode retains their Oyster charcoal fill. Link your stay and the evening
-  ribbon share `surface-ribbon` (`#FFF9DD` light / `#100D13` dark),
+  ribbon share `surface-ribbon` (`#FFFCF3` light / `#100D13` dark),
   normal theme ink and a faint edge.
   Home keeps “Shall we wander?” without supporting subtext. Its one-line search
   label reads “Search the city of Oakland” for Oakland and uses the active city;
@@ -77,7 +77,7 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   surfaces and orange accents. Keep the original gradient Vee mark and the
   original page gradients intact; explicit error states retain their red.
 - “Your evening, with Vee” and Link your stay use `surface-ribbon`:
-  `#FFF9DD` light / `#100D13` dark, with standard theme lettering and
+  `#FFFCF3` light / `#100D13` dark, with standard theme lettering and
   orange `surface-accent` icons. Light adds a very faint 6% ink border;
   dark retains the existing 4% edge. Its smooth 22px corners, faint edge and
   level-1 elevation match the shared card material. The ticket notches and
@@ -276,11 +276,11 @@ with full strength reserved for Vee and primary actions.
 | Semantic | Legacy alias | Light | Dark | Use |
 |---|---|---|---|---|
 | `bg` | `cream` | #FFFDFA | #151117 | screen background |
-| `surface` | — | #FFF9DD | #29252A | default card surface |
-| `surface-raised` | `shell` | #FFF9DD | #29252A | cards, panels, peek rows |
-| `surface-soft` | — | #FFF9DD | #29252A | quiet card tier |
+| `surface` | — | #FFFCF3 | #29252A | default card surface |
+| `surface-raised` | `shell` | #FFFCF3 | #29252A | cards, panels, peek rows |
+| `surface-soft` | — | #FFFCF3 | #29252A | quiet card tier |
 | `surface-control` | — | #F5F0E9 | #29252A | neutral controls |
-| `surface-ribbon` | — | #FFF9DD | #100D13 | Home ribbon and stay anchor |
+| `surface-ribbon` | — | #FFFCF3 | #100D13 | Home ribbon and stay anchor |
 | `surface-sunk` | — | #E7E0D6 | #100D13 | input wells, sheet track |
 | `fg` | `ink` | #2A1B33 | #FFFDFA | primary text/icon |
 | `fg-muted` | `taupe` | #716672 | #B8AAB5 | secondary text/icon |

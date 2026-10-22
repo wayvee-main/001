@@ -11,11 +11,11 @@
    for tokens with fixed baked-in opacity. */
 :root {
   --color-bg: 255 253 250;
-  --color-surface: 255 249 221;
-  --color-surface-raised: 255 249 221;
-  --color-surface-soft: 255 249 221;
+  --color-surface: 255 252 243;
+  --color-surface-raised: 255 252 243;
+  --color-surface-soft: 255 252 243;
   --color-surface-control: 245 240 233;
-  --color-surface-ribbon: 255 249 221;
+  --color-surface-ribbon: 255 252 243;
   --color-surface-search: 255 252 248;
   --color-surface-navigation: 255 252 248;
   --color-surface-sunk: 231 224 214;
@@ -30,7 +30,7 @@
   --color-selected-glyph: 245 188 167;
   --color-navigation-muted: 216 199 221;
   --color-home-tile: 255 252 248;
-  --color-surface-discovery: 255 249 221;
+  --color-surface-discovery: 255 252 243;
   --color-home-tile-glyph: 150 61 36;
   --color-home-tile-well: 247 229 216;
   --color-tile-eat: 245 240 233;
@@ -47,9 +47,9 @@
   --color-warm-ink: 150 61 36;
   --color-vee: 184 70 36;
   --color-vee-strong: 150 61 36;
-  --color-accent-tint: 255 249 221;
-  --color-warm-tint: 255 249 221;
-  --color-vee-tint: 255 249 221;
+  --color-accent-tint: 255 252 243;
+  --color-warm-tint: 255 252 243;
+  --color-vee-tint: 255 252 243;
   --color-danger: 160 47 56;
   --color-edge: rgba(49, 32, 57, 0.12);
   --color-edge-soft: rgba(49, 32, 57, 0.08);

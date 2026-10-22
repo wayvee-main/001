@@ -113,10 +113,13 @@ jobs:
           message="$INPUT_MESSAGE"
           [ -n "$message" ] || message="$(git log -1 --pretty=%s)"
           # Empty on a push event; preview is the channel the installed APK
-          # is built against.
+          # is built against. SDK 55+ requires an explicit EAS environment for
+          # updates: without it, the Supabase public URL/key are not inlined and
+          # weather and other live content disappear from the published bundle.
           branch="$INPUT_BRANCH"
           [ -n "$branch" ] || branch="preview"
           eas update \
             --branch "$branch" \
+            --environment preview \
             --message "$message" \
             --non-interactive
