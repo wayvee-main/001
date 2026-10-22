@@ -24,7 +24,7 @@ export function CitySearchBar({city,testID,labelTestID,inputTestID,inputLabel,pl
     <Glyph name="search" size={17} color={colors['fg-muted']} />
     {onChangeText?<TextInput ref={inputRef} testID={inputTestID || `${testID}-input`} accessibilityLabel={inputLabel || label} value={value} onChangeText={onChangeText}
       autoFocus={autoFocus} autoCorrect={false} placeholder={label} placeholderTextColor={colors['fg-muted']} returnKeyType="search" onSubmitEditing={submit}
-      className="min-w-0 flex-1 font-dm text-label text-ink" style={{height:37,padding:0,borderWidth:0,outlineWidth:0}} />:
+      className="wayvee-search-input min-w-0 flex-1 font-dm text-label text-ink" style={{height:37,padding:0,borderWidth:0,outlineWidth:0}} />:
       <Text testID={labelTestID} numberOfLines={1} className="min-w-0 flex-1 font-dm text-label text-taupe">{value || label}</Text>}
     {onChangeText&&value?<TouchableOpacity accessibilityRole="button" accessibilityLabel="Clear search" hitSlop={8} onPress={()=>onChangeText('')}><Glyph name="close" size={14} color={colors['fg-muted']} /></TouchableOpacity>:null}
     {onChangeText?<TouchableOpacity accessibilityRole="button" accessibilityLabel={inputLabel || label} onPress={submit}>{arrow}</TouchableOpacity>:arrow}

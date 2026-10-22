@@ -4,6 +4,7 @@ import type { PropsWithChildren } from 'react';
 import { ROLES } from '@/lib/tokens';
 
 const navigationInteractions = `
+  .wayvee-search-input { outline-style: none; }
   [data-testid="editorial-navigation"] [role="tab"] {
     outline: none;
     -webkit-tap-highlight-color: transparent;
