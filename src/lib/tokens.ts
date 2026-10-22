@@ -11,11 +11,11 @@
  * aliases are kept pointing at the same hex so existing className strings in src/app
  * and src/components keep working; new code should reach for the semantic name.
  *
- * Palette: original layered peach/lilac backdrop, soft blush cards in light,
- * plum-black in dark, with Blush ember paper cards and restrained orange accents.
+ * Palette: Apricot linen wash and paper cards in light, the original
+ * Nightfall wash in dark, with restrained orange accents.
  * Filled controls use the approved rust/light and peach/dark pairing with
  * theme-specific on-accent ink. Legacy color aliases follow the same orange
- * family; the original mark and page-wide gradient keep their brand colors.
+ * family; the original gradient mark keeps its brand colors.
  */
 
 export type ThemeValue = { light: string; dark: string };
@@ -36,15 +36,15 @@ export function withAlpha(hex: string, alpha: number): string {
  * space-separated RGB triples so Tailwind's <alpha-value> opacity modifier
  * (bg-surface/50) keeps working. */
 export const ROLES: Record<string, ThemeValue> = {
-  bg: { light: '#FFFDFA', dark: '#151117' }, // original ground beneath the wash
-  // Blush ember paper carries through cards and sheets. Search and
+  bg: { light: '#FFFCF7', dark: '#151117' }, // ivory ground beneath the wash
+  // Apricot linen paper carries through cards and sheets. Search and
   // navigation have separate roles so their lighter treatment stays consistent.
-  surface: { light: '#F7E5E1', dark: '#29252A' },
-  'surface-raised': { light: '#F7E5E1', dark: '#29252A' },
-  'surface-soft': { light: '#F7E5E1', dark: '#29252A' },
+  surface: { light: '#F6EADD', dark: '#29252A' },
+  'surface-raised': { light: '#F6EADD', dark: '#29252A' },
+  'surface-soft': { light: '#F6EADD', dark: '#29252A' },
   'surface-control': { light: '#F5F0E9', dark: '#29252A' }, // controls keep their existing material
-  'surface-input': { light: '#FFFCF8', dark: '#29252A' }, // text fields stay lighter than blush cards
-  'surface-ribbon': { light: '#F7E5E1', dark: '#100D13' }, // Home ribbon and stay anchor
+  'surface-input': { light: '#FFFCF8', dark: '#29252A' }, // text fields stay lighter than cards
+  'surface-ribbon': { light: '#F6EADD', dark: '#100D13' }, // Home ribbon and stay anchor
   'surface-search': { light: '#FFFCF8', dark: '#28372F' },
   'surface-navigation': { light: '#FFFCF8', dark: '#29252A' },
   'surface-sunk': { light: '#E7E0D6', dark: '#100D13' }, // input wells, sheet track
@@ -60,9 +60,9 @@ export const ROLES: Record<string, ThemeValue> = {
   'navigation-muted': { light: '#D8C7DD', dark: '#D8C7DD' },
   // Home's reference glyph cards use off-white; other card materials stay separate.
   'home-tile': { light: '#FFFCF8', dark: '#29252A' },
-  'surface-discovery': { light: '#F7E5E1', dark: '#29252A' },
+  'surface-discovery': { light: '#F6EADD', dark: '#29252A' },
   'home-tile-glyph': { light: '#963D24', dark: '#F0835C' },
-  'home-tile-well': { light: '#F7E5D8', dark: '#48312E' },
+  'home-tile-well': { light: '#F3E2CE', dark: '#48312E' },
   'tile-eat': { light: '#F5F0E9', dark: '#29252A' },
   'tile-bars': { light: '#F5F0E9', dark: '#29252A' },
   'tile-routes': { light: '#F5F0E9', dark: '#29252A' },
@@ -79,41 +79,51 @@ export const ROLES: Record<string, ThemeValue> = {
   'warm-ink': { light: '#963D24', dark: '#F0835C' }, // text on warm-tint
   vee: { light: '#B84624', dark: '#F0835C' }, // legacy Vee accents, now the shared orange
   'vee-strong': { light: '#963D24', dark: '#F0835C' }, // legacy Vee text, now the shared readable orange
-  'accent-tint': { light: '#F7E5E1', dark: '#29252A' },
-  'warm-tint': { light: '#F7E5E1', dark: '#29252A' },
-  'vee-tint': { light: '#F7E5E1', dark: '#29252A' },
+  'accent-tint': { light: '#F6EADD', dark: '#29252A' },
+  'warm-tint': { light: '#F6EADD', dark: '#29252A' },
+  'vee-tint': { light: '#F6EADD', dark: '#29252A' },
   danger: { light: '#A02F38', dark: '#FF6B6D' }, // closed / sold out / error — the one functional red
 };
 
-/** Original app-wide wash from the earlier preview's --wf-wash. Paint in this
- * back-to-front order. Angles are CSS angles; stops include their original
- * alpha, with hue-matched transparent endpoints to avoid muddy native fades. */
-export const BACKDROP_GRADIENTS = [
-  {
-    angle: 230,
-    locations: [0, 0.42, 1],
-    colors: {
-      light: ['#FCBA7875', '#FAC8A633', '#FFFDFA00'],
-      dark: ['#E85D2C1C', '#E85D2C09', '#E85D2C00'],
+/** App-wide washes, painted back to front. Light matches the selected
+ * Apricot linen preview; dark keeps the original Nightfall layers. Angles
+ * are CSS angles, with hue-matched transparent endpoints for native fades. */
+export const BACKDROP_GRADIENTS = {
+  light: [
+    {
+      angle: 220,
+      locations: [0.05, 0.62, 0.94],
+      colors: ['#F0CFB000', '#F0CFB026', '#F0CFB000'],
     },
-  },
-  {
-    angle: 121,
-    locations: [0.16, 0.52, 0.9],
-    colors: {
-      light: ['#6F5BD100', '#806CD82B', '#6F5BD100'],
-      dark: ['#6F5BD100', '#6F5BD11B', '#6F5BD100'],
+    {
+      angle: 125,
+      locations: [0.12, 0.55, 0.92],
+      colors: ['#E1D9CF00', '#E1D9CF2B', '#E1D9CF00'],
     },
-  },
-  {
-    angle: 226,
-    locations: [0.08, 0.48, 0.88],
-    colors: {
-      light: ['#FFC75700', '#FA8E6621', '#FFC75700'],
-      dark: ['#FFC75700', '#FF92710E', '#FFC75700'],
+    {
+      angle: 230,
+      locations: [0, 0.64, 1],
+      colors: ['#EBC6A34D', '#EBC6A300', '#EBC6A300'],
     },
-  },
-] as const;
+  ],
+  dark: [
+    {
+      angle: 230,
+      locations: [0, 0.42, 1],
+      colors: ['#E85D2C1C', '#E85D2C09', '#E85D2C00'],
+    },
+    {
+      angle: 121,
+      locations: [0.16, 0.52, 0.9],
+      colors: ['#6F5BD100', '#6F5BD11B', '#6F5BD100'],
+    },
+    {
+      angle: 226,
+      locations: [0.08, 0.48, 0.88],
+      colors: ['#FFC75700', '#FF92710E', '#FFC75700'],
+    },
+  ],
+} as const;
 
 /** Roles with fixed opacity baked in (not run through <alpha-value>). Base
  * hue is fg, since edge = "a hairline of ink/paper", not its own color. */

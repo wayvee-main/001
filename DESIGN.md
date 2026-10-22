@@ -1,6 +1,6 @@
 # Wayvee design system
 
-The approved October 20, 2026 Oyster palette and editorial refinements are the current UI contract.
+The approved Apricot linen light palette, Nightfall dark palette and editorial refinements are the current UI contract.
 Palette and dimensions come from `src/lib/tokens.ts`; regenerate the CSS,
 inline palette and Tailwind tokens together with `npm run tokens`.
 
@@ -9,12 +9,14 @@ inline palette and Tailwind tokens together with `npm run tokens`.
 - Keep the original Vee mark and Fraunces / DM Sans typography.
   Editorial serif headings use the reference's Fraunces 500 weight; explicit
   bold variants remain available for emphasis.
-- Restore the original page-wide gradient in both themes: light `#FFFDFA`,
-  dark `#151117`, beneath the original three peach/coral/lilac washes.
-  `BACKDROP_GRADIENTS` in `src/lib/tokens.ts` records the exact 230°, 121° and
-  226° layers, alpha and stops. `AppBackdrop` paints them behind every screen,
+- Light uses the selected **Apricot linen** palette: ivory `#FFFCF7` ground,
+  muted apricot, neutral linen and pale peach washes, with `#F6EADD` paper cards.
+  `BACKDROP_GRADIENTS.light` in `src/lib/tokens.ts` records the preview's 220°,
+  125° and 230° layers in back-to-front order, including alpha and stops.
+  Dark keeps the original `#151117` ground and 230° / 121° / 226° Nightfall
+  washes. `AppBackdrop` paints the selected theme's layers behind every screen,
   detail and onboarding page, with aspect-correct angles on web and native.
-  Default cards and sheets use soft blush `#F7E5E1` in light mode and
+  Default cards and sheets use Apricot linen `#F6EADD` in light mode and
   charcoal `#29252A` in dark mode, with faint edges and elevation.
   Discover listings use the same card fill. Controls have a separate
   `surface-control` role, retaining `#F5F0E9` / `#29252A`. In dark mode,
@@ -25,10 +27,10 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   Dark search retains Oyster's muted green `#28372F`; dark navigation uses
   `#29252A`. Keep these roles separate from cards so changing search never
   recolors all listings.
-  Cards stay free of gradients; the original page-wide wash remains unchanged. Manual theme changes update the
+  Cards stay free of gradients. Manual theme changes update the
   backdrop immediately. The gradient never intercepts taps or scrolling.
   Light-mode secondary, accent, success and error inks clear AA over the wash,
-  including its most saturated areas; gradient strength is preserved.
+  including its most saturated areas.
   Horizontal rows use an alpha edge fade on web and a trailing peek on native;
   never paint a flat background-colored fade over the wash. Discover's trail
   dots have transparent surrounds so the gradient stays continuous.
@@ -48,7 +50,7 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   counts and ordering follow the active city's existing source pools.
   In light mode, quick venue chips share search's off-white fill;
   dark mode retains their Oyster charcoal fill. Link your stay and the evening
-  ribbon share `surface-ribbon` (`#F7E5E1` light / `#100D13` dark),
+  ribbon share `surface-ribbon` (`#F6EADD` light / `#100D13` dark),
   normal theme ink and a faint edge.
   Home keeps “Shall we wander?” without supporting subtext. Its one-line search
   label reads “Search the city of Oakland” for Oakland and uses the active city;
@@ -83,7 +85,7 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   surfaces and orange accents. Keep the original gradient Vee mark and the
   original page gradients intact; explicit error states retain their red.
 - “Your evening, with Vee” and Link your stay use `surface-ribbon`:
-  `#F7E5E1` light / `#100D13` dark, with standard theme lettering and
+  `#F6EADD` light / `#100D13` dark, with standard theme lettering and
   orange `surface-accent` icons. Its smooth 22px corners, etched edge and
   level-1 elevation match the shared card material. The ticket notches and
   perforated seam are removed. Keep its compact 61.2px minimum height.
@@ -280,12 +282,12 @@ with full strength reserved for Vee and primary actions.
 
 | Semantic | Legacy alias | Light | Dark | Use |
 |---|---|---|---|---|
-| `bg` | `cream` | #FFFDFA | #151117 | screen background |
-| `surface` | — | #F7E5E1 | #29252A | default card surface |
-| `surface-raised` | `shell` | #F7E5E1 | #29252A | cards, panels, peek rows |
-| `surface-soft` | — | #F7E5E1 | #29252A | quiet card tier |
+| `bg` | `cream` | #FFFCF7 | #151117 | screen background |
+| `surface` | — | #F6EADD | #29252A | default card surface |
+| `surface-raised` | `shell` | #F6EADD | #29252A | cards, panels, peek rows |
+| `surface-soft` | — | #F6EADD | #29252A | quiet card tier |
 | `surface-control` | — | #F5F0E9 | #29252A | neutral controls |
-| `surface-ribbon` | — | #F7E5E1 | #100D13 | Home ribbon and stay anchor |
+| `surface-ribbon` | — | #F6EADD | #100D13 | Home ribbon and stay anchor |
 | `surface-sunk` | — | #E7E0D6 | #100D13 | input wells, sheet track |
 | `fg` | `ink` | #2A1B33 | #FFFDFA | primary text/icon |
 | `fg-muted` | `taupe` | #716672 | #B8AAB5 | secondary text/icon |

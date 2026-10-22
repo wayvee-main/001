@@ -39,7 +39,7 @@ function gradientLine(angle: number, width: number, height: number) {
   };
 }
 
-/** Original layered wash shared by screens, details and onboarding. The wash
+/** Theme-specific layered wash shared by screens, details and onboarding. The wash
  * stays behind content, never intercepts touches, and follows manual themes. */
 export function AppBackdrop({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const colors = useThemeColors();
@@ -53,8 +53,8 @@ export function AppBackdrop({ children, style }: { children: ReactNode; style?: 
         if (layout.width > 0 && layout.height > 0) setSize(current => current.width === layout.width && current.height === layout.height ? current : { width: layout.width, height: layout.height });
       }}>
       <View testID="app-background-gradient" pointerEvents="none" accessible={false} style={StyleSheet.absoluteFill}>
-        {BACKDROP_GRADIENTS.map(layer => <LinearGradient key={layer.angle} pointerEvents="none"
-          colors={layer.colors[theme]} locations={layer.locations}
+        {BACKDROP_GRADIENTS[theme].map(layer => <LinearGradient key={layer.angle} pointerEvents="none"
+          colors={layer.colors} locations={layer.locations}
           {...gradientLine(layer.angle, size.width, size.height)}
           style={StyleSheet.absoluteFill} />)}
       </View>

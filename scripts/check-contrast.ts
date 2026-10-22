@@ -134,7 +134,7 @@ for (const theme of ['light', 'dark'] as Theme[]) {
  * the layers behind it. Aspect ratios cover narrow phones through desktop. */
 function backdropAt(theme: Theme, width: number, height: number, x: number, y: number): string {
   let ground = hexToRgb(ROLES.bg[theme]);
-  for (const layer of BACKDROP_GRADIENTS) {
+  for (const layer of BACKDROP_GRADIENTS[theme]) {
     const radians = layer.angle * Math.PI / 180;
     const dx = Math.sin(radians), dy = -Math.cos(radians);
     const span = Math.abs(width * dx) + Math.abs(height * dy);
@@ -142,7 +142,7 @@ function backdropAt(theme: Theme, width: number, height: number, x: number, y: n
     const at = Math.max(layer.locations[0], Math.min(layer.locations[2], position));
     const index = at <= layer.locations[1] ? 0 : 1;
     const amount = (at - layer.locations[index]) / (layer.locations[index + 1] - layer.locations[index]);
-    const a = layer.colors[theme][index], b = layer.colors[theme][index + 1];
+    const a = layer.colors[index], b = layer.colors[index + 1];
     const aa = parseInt(a.slice(7, 9), 16) / 255, ba = parseInt(b.slice(7, 9), 16) / 255;
     const alpha = aa * (1 - amount) + ba * amount;
     const ar = hexToRgb(a.slice(0, 7)), br = hexToRgb(b.slice(0, 7));

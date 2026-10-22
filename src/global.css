@@ -10,13 +10,13 @@
    go through Tailwind's <alpha-value> opacity modifier; full rgba() strings
    for tokens with fixed baked-in opacity. */
 :root {
-  --color-bg: 255 253 250;
-  --color-surface: 247 229 225;
-  --color-surface-raised: 247 229 225;
-  --color-surface-soft: 247 229 225;
+  --color-bg: 255 252 247;
+  --color-surface: 246 234 221;
+  --color-surface-raised: 246 234 221;
+  --color-surface-soft: 246 234 221;
   --color-surface-control: 245 240 233;
   --color-surface-input: 255 252 248;
-  --color-surface-ribbon: 247 229 225;
+  --color-surface-ribbon: 246 234 221;
   --color-surface-search: 255 252 248;
   --color-surface-navigation: 255 252 248;
   --color-surface-sunk: 231 224 214;
@@ -31,9 +31,9 @@
   --color-selected-glyph: 245 188 167;
   --color-navigation-muted: 216 199 221;
   --color-home-tile: 255 252 248;
-  --color-surface-discovery: 247 229 225;
+  --color-surface-discovery: 246 234 221;
   --color-home-tile-glyph: 150 61 36;
-  --color-home-tile-well: 247 229 216;
+  --color-home-tile-well: 243 226 206;
   --color-tile-eat: 245 240 233;
   --color-tile-bars: 245 240 233;
   --color-tile-routes: 245 240 233;
@@ -48,9 +48,9 @@
   --color-warm-ink: 150 61 36;
   --color-vee: 184 70 36;
   --color-vee-strong: 150 61 36;
-  --color-accent-tint: 247 229 225;
-  --color-warm-tint: 247 229 225;
-  --color-vee-tint: 247 229 225;
+  --color-accent-tint: 246 234 221;
+  --color-warm-tint: 246 234 221;
+  --color-vee-tint: 246 234 221;
   --color-danger: 160 47 56;
   --color-edge: rgba(49, 32, 57, 0.12);
   --color-edge-soft: rgba(49, 32, 57, 0.08);
