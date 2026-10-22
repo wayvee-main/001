@@ -1,11 +1,13 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { HeaderRow, Screen, ScreenScroll } from '@/components/layout';
 import { Photo } from '@/components/photo';
 import { RaisedTouchable, RaisedView } from '@/components/raised-surface';
-import { ChevronRight, Chip, SearchIcon } from '@/components/ui';
+import { ChevronRight, Chip } from '@/components/ui';
+import { CitySearchBar } from '@/components/city-controls';
+import { useActiveCityName } from '@/lib/city';
 import { useThemeColors } from '@/lib/theme';
 import { DESTINATION_PRIORITY, sortedViatorPicks, useViatorPicks, viatorPriceLabel, type ViatorPick } from '@/lib/viator';
 
@@ -151,13 +153,12 @@ function PickList({ picks, onOpen }: { picks: ViatorPick[]; onOpen: (id: string)
 const SCREEN_GUTTER = 20;
 
 export default function PicksScreen() {
+  const cityName = useActiveCityName();
   const router = useRouter();
   const [sortMode, setSortMode] = useState<SortMode>('best');
   const [durationFilter, setDurationFilter] = useState<DurationFilter | null>(null);
   const [freeCancellationOnly, setFreeCancellationOnly] = useState(false);
   const [query, setQuery] = useState('');
-  const colors = useThemeColors();
-
   const hydratedViatorPicks = useViatorPicks();
   const allPicks = sortedViatorPicks(hydratedViatorPicks);
   const q = query.trim().toLowerCase();
@@ -186,18 +187,7 @@ export default function PicksScreen() {
 
         {hasAnyPicks ? (
           <>
-            <View className="flex-row items-center gap-x-2.5 rounded-card border border-edge-card border-b-edge-card-bottom bg-surface-search px-4 py-2.5 shadow-soft-light dark:shadow-soft-dark">
-              <SearchIcon size={15} />
-              <TextInput
-                value={query}
-                onChangeText={setQuery}
-                accessibilityLabel="Search picks"
-                placeholder="Search picks"
-                placeholderTextColor={colors.taupe}
-                className="min-w-0 flex-1 font-dm text-[13px] text-ink"
-                style={{ paddingVertical: 0 }}
-              />
-            </View>
+            <CitySearchBar testID="picks-search" city={cityName} value={query} onChangeText={setQuery} inputLabel="Search picks" placeholder="Search picks" />
 
             <View style={{ marginHorizontal: -SCREEN_GUTTER }}>
               <ScrollView

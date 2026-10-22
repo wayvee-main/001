@@ -34,7 +34,7 @@ export interface SearchResult {
   score: number;
 }
 
-interface SearchCandidate {
+export interface SearchCandidate {
   kind: SearchResultKind;
   id: string;
   title: string;

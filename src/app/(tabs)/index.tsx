@@ -49,7 +49,7 @@ export default function HomeScreen() {
     <HomeHeader hasReminders={activeReminders(s.plans,s.stay).length>0}
       onNotifications={()=>router.push('/notifications')} onProfile={()=>router.push('/profile')} />
     <Text className="font-fraunces text-ink" style={{fontSize:25,lineHeight:29,letterSpacing:-.8}}>Shall we wander?</Text>
-    <CitySearchBar testID="home-search" labelTestID="home-search-label" city={city} onPress={()=>router.push('/home/browse?category=all')} />
+    <CitySearchBar testID="home-search" labelTestID="home-search-label" city={city} onPress={()=>router.push('/search')} />
     <View testID="home-quick-actions" className="flex-row items-center gap-x-2">
       <TouchableOpacity testID="home-stay-chip" accessibilityRole="button" accessibilityLabel={s.stay?'Update your stay':'Link your stay'} activeOpacity={.74} onPress={()=>s.openStaySheet()} style={[control,{backgroundColor:colors['surface-ribbon']}]}
         className="min-h-[34px] shrink-0 flex-row items-center gap-x-1.5 rounded-full px-2.5 py-[7px]" hitSlop={{top:6,bottom:6}}>

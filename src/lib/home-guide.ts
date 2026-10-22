@@ -4,6 +4,7 @@ import { HOME_OUTDOORS } from '@/lib/home-outdoors';
 import { HOME_GUIDE_PHOTOS } from '@/lib/home-guide-photos';
 import { usableHomePhoto } from '@/lib/home-tile-previews';
 import type { NearestPick } from '@/lib/nearest-pool';
+import type { SearchCandidate } from '@/lib/search';
 import type { Place } from '@/lib/places';
 import type { PlanKind, SavedPlaceKind } from '@/lib/user-data';
 import type { ViatorPick } from '@/lib/viator';
@@ -142,6 +143,16 @@ export function searchHomeGuide(catalog: HomeGuideCatalog, query: string): HomeG
     if(tokens.some(token=>!entry.searchText.includes(token)))return false;
     const name=normalized(entry.name);if(seen.has(name))return false;seen.add(name);return true;
   });
+}
+
+/** The shared ranked matcher over the active city's Field Guide, including
+ * its outdoor ideas. No curated records from another city enter this index. */
+export function buildHomeSearchIndex(catalog: HomeGuideCatalog): SearchCandidate[] {
+  return Object.values(catalog.entries).map(entry=>({
+    kind:entry.kind==='outdoor'?'place':entry.kind,id:entry.id,title:entry.name,
+    subtitle:entry.caption,image:entry.image,href:homeGuideHref(entry),
+    fields:[{text:entry.name,weight:10},{text:entry.caption,weight:6},{text:entry.searchText,weight:4}],
+  }));
 }
 
 export function entriesForHomeIdea(idea: HomeIdea, catalog: HomeGuideCatalog): HomeGuideEntry[] {

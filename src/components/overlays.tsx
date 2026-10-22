@@ -21,11 +21,10 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Calendar, type DateData } from 'react-native-calendars';
 
-import { AskVeeRow } from '@/components/ask-vee-row';
 import { Field } from '@/components/onboarding';
 import { WayveeWordmark } from '@/components/wayvee-wordmark';
 import { RaisedTouchable, RaisedView } from '@/components/raised-surface';
-import { ChevronRight, GoogleLogo, OptionPill, SearchIcon } from '@/components/ui';
+import { ChevronRight, GoogleLogo, OptionPill } from '@/components/ui';
 import { isAccountAuthConfigured } from '@/lib/auth';
 import { buildPlan, mergeRefineRequest, resolveAskNow } from '@/lib/concierge/adapter';
 import { requestConciergeRequest } from '@/lib/concierge/client';
@@ -36,26 +35,19 @@ import {
   EVENTS,
   GUEST,
   RESTAURANTS,
-  currentEventListings,
   isCurrentEvent,
   parseTimeToMinutes,
-  type HomeActionLink,
 } from '@/lib/data';
-import { homeActionLinks } from '@/lib/daypart';
 import { loadDinnerHistory } from '@/lib/dinner-history';
-import { canonicalRestaurantHref, recordRestaurantExploration } from '@/lib/exploration-history';
 import { doorDashLink, lyftRideLink, streetAddress, uberEatsLink, uberRideLink } from '@/lib/links';
 import { useOnlineStatus } from '@/lib/network';
 import { START_TIME_OPTIONS } from '@/lib/plan-constraints';
-import { useAllPlaces, useCuratedCoords, useCuratedHours } from '@/lib/places';
-import { buildSearchIndex, buildVocabulary, queryIndex, suggestFor, SEARCH_KIND_LABELS, type SearchResult, type SearchResultKind } from '@/lib/search';
-import { clearRecentSearches, loadRecentSearches, recordRecentSearch, type RecentSearch } from '@/lib/recent-searches';
+import { useCuratedCoords, useCuratedHours } from '@/lib/places';
 import { addDaysIso, nightsBetween, parseDateOnly, stayNightDates, todayIso } from '@/lib/stay';
 import { useScoper } from '@/lib/store';
 import { tasteVocabulary } from '@/lib/taste';
 import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
-import { useViatorPicks } from '@/lib/viator';
 import type { VisitRating } from '@/lib/visit-feedback';
 import { useWeatherNow } from '@/lib/weather';
 
@@ -890,256 +882,6 @@ function StaySheet() {
 
 // ── Filter sheet ────────────────────────────────────────────────────────────
 
-// ── Search overlay (full screen, live results) ──────────────────────────────
-
-const RESULTS_PER_KIND = 6;
-const SUGGESTION_QUERY_LENGTH = 3;
-// Display order — food/drink first (the app's core), then things to do, then broader entry points.
-const KIND_ORDER: SearchResultKind[] = ['restaurant', 'dish', 'place', 'event', 'venue', 'night', 'crawl', 'pick', 'collection'];
-
-function SearchOverlay() {
-  const gutter = useAppGutter();
-  const closeSheet = useScoper((s) => s.closeSheet);
-  const router = useRouter();
-  const insets = useSafeAreaInsets();
-  const colors = useThemeColors();
-  const [anim] = useState(() => new Animated.Value(0));
-  const [query, setQuery] = useState('');
-  const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([]);
-  const [expandedKinds, setExpandedKinds] = useState<Set<SearchResultKind>>(new Set());
-  const allPlaces = useAllPlaces();
-  const allPicks = useViatorPicks();
-  const tasteTags = useScoper((s) => s.tasteTags);
-
-  useAndroidBack(closeSheet);
-  useEffect(() => {
-    Animated.timing(anim, { toValue: 1, duration: 150, easing: Easing.out(Easing.ease), useNativeDriver: true }).start();
-  }, [anim]);
-  useEffect(() => {
-    loadRecentSearches().then(setRecentSearches);
-  }, []);
-
-  const trimmedQuery = query.trim();
-  const index = useMemo(() => buildSearchIndex(allPlaces, allPicks), [allPlaces, allPicks]);
-  const vocabulary = useMemo(() => buildVocabulary(allPlaces), [allPlaces]);
-
-  const results = useMemo(() => (trimmedQuery ? queryIndex(index, trimmedQuery, tasteTags) : []), [index, trimmedQuery, tasteTags]);
-  const showSuggestions = trimmedQuery.length > 0 && trimmedQuery.length <= SUGGESTION_QUERY_LENGTH;
-  const suggestions = useMemo(() => (showSuggestions ? suggestFor(trimmedQuery, vocabulary) : []), [showSuggestions, trimmedQuery, vocabulary]);
-
-  const grouped = useMemo(() => {
-    const byKind = new Map<SearchResultKind, SearchResult[]>();
-    for (const result of results) {
-      const bucket = byKind.get(result.kind) ?? [];
-      bucket.push(result);
-      byKind.set(result.kind, bucket);
-    }
-    return KIND_ORDER.map((kind) => ({ kind, items: byKind.get(kind) ?? [] })).filter((group) => group.items.length > 0);
-  }, [results]);
-
-  const featuredEvent = currentEventListings()[0];
-
-  const goResult = (result: SearchResult) => {
-    void recordRecentSearch({ label: result.title, href: result.href });
-    if (trimmedQuery && (result.kind === 'restaurant' || result.kind === 'dish')) {
-      const restaurantHref = canonicalRestaurantHref(result.href);
-      const restaurantId = restaurantHref?.slice('/restaurant/'.length);
-      const restaurantLabel = restaurantId ? RESTAURANTS[restaurantId]?.name : null;
-      if (restaurantHref && restaurantLabel) {
-        void recordRestaurantExploration({ href: restaurantHref, label: restaurantLabel });
-      }
-    }
-    closeSheet();
-    router.push(result.href);
-  };
-  const goEvent = (event: { id: string; name: string }) => {
-    void recordRecentSearch({ label: event.name, href: `/event/${event.id}` });
-    closeSheet();
-    router.push(`/event/${event.id}`);
-  };
-  const goRecent = (entry: RecentSearch) => {
-    closeSheet();
-    router.push(entry.href);
-  };
-  const resetFilters = useScoper((state) => state.resetFilters);
-  const toggleFlag = useScoper((state) => state.toggleFlag);
-  const setSort = useScoper((state) => state.setSort);
-  const goFoodAction = (link: HomeActionLink) => {
-    resetFilters();
-    if (link.flag) toggleFlag(link.flag);
-    if (link.sort) setSort(link.sort);
-    closeSheet();
-    if (link.href) {
-      router.push(link.href);
-      return;
-    }
-    router.push(link.query ? `/featured?q=${encodeURIComponent(link.query)}` : '/featured');
-  };
-  const toggleExpanded = (kind: SearchResultKind) => {
-    setExpandedKinds((prev) => {
-      const next = new Set(prev);
-      if (next.has(kind)) next.delete(kind);
-      else next.add(kind);
-      return next;
-    });
-  };
-
-  const resultRow = (title: string, sub: string, onPress: () => void, key: string) => (
-    <RaisedTouchable key={key} activeOpacity={0.7} onPress={onPress} className="flex-row items-center justify-between rounded-card px-3.5 py-3">
-      <View style={{ flex: 1, minWidth: 0 }}>
-        <Text numberOfLines={1} className="font-dm-medium text-[14px] text-ink">{title}</Text>
-        <Text numberOfLines={1} className="mt-0.5 font-dm text-label text-taupe">{sub}</Text>
-      </View>
-      <ChevronRight />
-    </RaisedTouchable>
-  );
-
-  return (
-    <Animated.View
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: 30,
-        backgroundColor: colors.cream,
-        paddingTop: insets.top + 16,
-        paddingHorizontal: gutter,
-        opacity: anim,
-      }}>
-      <View className="flex-row items-center gap-x-2.5">
-        <View className="flex-1 flex-row items-center gap-x-2.5 rounded-full border border-edge-card border-b-edge-card-bottom bg-surface-search px-4 py-1 shadow-soft-light dark:shadow-soft-dark">
-          <SearchIcon size={15} />
-          <TextInput
-            autoFocus
-            value={query}
-            onChangeText={setQuery}
-            accessibilityLabel="Search Wayvee"
-            placeholder="Places, dishes, shows…"
-            placeholderTextColor={colors.taupe}
-            returnKeyType="search"
-            className="flex-1 py-2.5 font-dm text-[14px] text-ink"
-          />
-        </View>
-        <TouchableOpacity onPress={closeSheet}>
-          <Text className="font-dm-medium text-[14px] text-rust">Cancel</Text>
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" className="mt-[22px]" contentContainerStyle={{ gap: 18, paddingBottom: 24 }}>
-        {trimmedQuery ? (
-          <>
-            {suggestions.length > 0 && (
-              <View className="flex-row flex-wrap gap-2">
-                {suggestions.map((s) => (
-                  <TouchableOpacity
-                    key={s.label}
-                    accessibilityRole="button"
-                    activeOpacity={0.7}
-                    onPress={() => setQuery(s.query)}
-                    className="rounded-full border border-edge-card border-b-edge-card-bottom bg-surface-raised px-3.5 py-1.5 shadow-soft-light dark:shadow-soft-dark">
-                    <Text className="font-dm-medium text-label text-peach">{s.label}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-            {grouped.map((group) => {
-              const expanded = expandedKinds.has(group.kind);
-              const visible = expanded ? group.items : group.items.slice(0, RESULTS_PER_KIND);
-              const hiddenCount = group.items.length - visible.length;
-              return (
-                <View key={group.kind} className="gap-y-2.5">
-                  <Text className="font-dm-medium text-label text-taupe">{SEARCH_KIND_LABELS[group.kind]}</Text>
-                  {visible.map((r) => resultRow(r.title, r.subtitle, () => goResult(r), r.id))}
-                  {hiddenCount > 0 ? (
-                    <TouchableOpacity accessibilityRole="button" activeOpacity={0.7} onPress={() => toggleExpanded(group.kind)} className="items-center py-1.5">
-                      <Text className="font-dm-medium text-label text-peach">Show {hiddenCount} more</Text>
-                    </TouchableOpacity>
-                  ) : expanded && group.items.length > RESULTS_PER_KIND ? (
-                    <TouchableOpacity accessibilityRole="button" activeOpacity={0.7} onPress={() => toggleExpanded(group.kind)} className="items-center py-1.5">
-                      <Text className="font-dm-medium text-label text-taupe">Show fewer</Text>
-                    </TouchableOpacity>
-                  ) : null}
-                </View>
-              );
-            })}
-            {grouped.length === 0 && (
-              <View className="gap-y-2.5">
-                <RaisedView className="items-center rounded-card px-4 py-8">
-                  <Text className="font-dm-medium text-[13.5px] text-ink">{`No matches for “${query}”`}</Text>
-                  <Text className="mt-1 text-center font-dm text-label text-taupe">Try a restaurant, dish, cuisine, artist, or venue.</Text>
-                </RaisedView>
-                <AskVeeRow query={trimmedQuery} onNavigate={closeSheet} />
-              </View>
-            )}
-          </>
-        ) : (
-          <>
-            <View className="flex-row flex-wrap gap-2">
-              {homeActionLinks().map((link) => (
-                <TouchableOpacity
-                  key={link.label}
-                  accessibilityRole="button"
-                  activeOpacity={0.7}
-                  onPress={() => goFoodAction(link)}
-                  className="rounded-full border border-edge-card border-b-edge-card-bottom bg-surface-raised px-3.5 py-1.5 shadow-soft-light dark:shadow-soft-dark">
-                  <Text className="font-dm-medium text-label text-peach">{link.label}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            {recentSearches.length > 0 ? (
-              <View>
-                <View className="mb-2.5 flex-row items-center justify-between">
-                  <Text className="font-dm-medium text-label text-taupe">Recent searches</Text>
-                  <TouchableOpacity
-                    accessibilityRole="button"
-                    activeOpacity={0.7}
-                    onPress={() => {
-                      void clearRecentSearches();
-                      setRecentSearches([]);
-                    }}>
-                    <Text className="font-dm-medium text-label text-rust">Clear</Text>
-                  </TouchableOpacity>
-                </View>
-                <View className="flex-row flex-wrap gap-2">
-                  {recentSearches.map((entry) => (
-                    <TouchableOpacity
-                      key={entry.href}
-                      accessibilityRole="button"
-                      activeOpacity={0.7}
-                      onPress={() => goRecent(entry)}
-                      className="rounded-full border border-edge-card border-b-edge-card-bottom bg-shell px-3.5 py-1.5 shadow-soft-light dark:shadow-soft-dark">
-                      <Text numberOfLines={1} className="font-dm-medium text-label text-ink">{entry.label}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            ) : null}
-            <View>
-              <Text className="mb-2.5 font-dm-medium text-label text-taupe">Around {GUEST.anchor}</Text>
-              <View className="gap-y-2.5">
-                {resultRow('Late night eats', 'Sinaloa & Colonial Donuts — open past midnight', () => { closeSheet(); router.push('/collection/late-night'); }, 'collection')}
-                {featuredEvent
-                  ? resultRow(
-                      featuredEvent.name,
-                      `${featuredEvent.date.split(' · ')[0]} · ${featuredEvent.venue}`,
-                      () => goEvent(featuredEvent),
-                      featuredEvent.id,
-                    )
-                  : null}
-                {resultRow('Upcoming official listings', 'Dated listings update automatically', () => { closeSheet(); router.push('/discover'); }, 'discover')}
-              </View>
-            </View>
-            <AskVeeRow onNavigate={closeSheet} />
-            <Text className="text-center font-dm text-label text-taupe">Search restaurants, dishes, cuisines, artists, or venues</Text>
-          </>
-        )}
-      </ScrollView>
-    </Animated.View>
-  );
-}
-
 // ── Ask concierge sheet ──────────────────────────────────────────────────────
 
 /** One new entry point on Home (docs/build-book.md Part 3.8/4.1) — reuses the
@@ -1318,9 +1060,13 @@ function AddConstraintSheet() {
 
 export function GlobalOverlays() {
   const sheet = useScoper((s) => s.sheet);
+  const closeSheet = useScoper((s) => s.closeSheet);
+  const router = useRouter();
+  useEffect(()=>{
+    if(sheet==='search'){closeSheet();router.push('/search');}
+  },[sheet,closeSheet,router]);
   return (
     <>
-      {sheet === 'search' && <SearchOverlay />}
       {sheet === 'delivery' && <DeliverySheet />}
       {sheet === 'ride' && <RideSheet />}
       {sheet === 'logout' && <LogoutSheet />}

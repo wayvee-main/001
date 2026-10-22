@@ -9,6 +9,20 @@ inline palette and Tailwind tokens together with `npm run tokens`.
 - Keep the original Vee mark and Fraunces / DM Sans typography.
   Editorial serif headings use the reference's Fraunces 500 weight; explicit
   bold variants remain available for emphasis.
+- Search uses the approved **Quiet index** page at `/search`: a Back action,
+  static gradient Vee mark, Search/city heading, Recent history and four calm
+  Browse links. Empty history stays honest; never seed sample searches.
+  Typed queries show compact glyph rows with source-backed results from the
+  active city's Field Guide, including outdoor ideas. Keep ranked typo matching,
+  text scope selectors, empty feedback and Show more. Recent queries and selected
+  results persist on the device, follow the city, and can be cleared.
+  Home, Discover and legacy search launchers open this route. Category and
+  directory pages retain their own filtering through the same `CitySearchBar`.
+  **Every search bar uses Home's exact geometry:** 53px outer height, full
+  content width, 999px radius, 14px left / 7px right and vertical insets,
+  17px search glyph and 37px orange action. Editable fields and launchers
+  share the same font, surface, edge and elevation. Keep inputs off-white in
+  light mode. Do not rebuild search silhouettes separately on other screens.
 - Light uses the selected **Apricot linen** palette: ivory `#FFFCF7` ground,
   muted apricot, neutral linen and pale peach washes, with `#F6EADD` paper cards.
   `BACKDROP_GRADIENTS.light` in `src/lib/tokens.ts` records the preview's 220°,

@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { AskVeeRow } from '@/components/ask-vee-row';
 import { FactStrip, FoodHubRow, HubDropdown, HubMenu, type HubFact } from '@/components/featured';
@@ -9,7 +9,9 @@ import { RaisedView } from '@/components/raised-surface';
 import { SectionHeading } from '@/components/section-heading';
 import { TrustChip } from '@/components/trust-chip';
 import { Glyph } from '@/components/glyph';
-import { Chip, EmptyState, SearchIcon } from '@/components/ui';
+import { Chip, EmptyState } from '@/components/ui';
+import { CitySearchBar } from '@/components/city-controls';
+import { useActiveCityName } from '@/lib/city';
 import {
   DEALS,
   FOOD_HUB_REASON_BY_ID,
@@ -118,6 +120,7 @@ function listingFromPlace(place: Place, distanceMiles?: number, tasteTag?: strin
 }
 
 export default function FeaturedDirectoryScreen() {
+  const cityName = useActiveCityName();
   const gutter = useAppGutter();
   const router = useRouter();
   const { q } = useLocalSearchParams<{ q?: string }>();
@@ -377,18 +380,7 @@ export default function FeaturedDirectoryScreen() {
         <FactStrip facts={showHub ? hubFacts : pageFacts} pullUp />
 
         <View className="gap-y-2.5">
-          <View className="flex-row items-center gap-x-2.5 rounded-full border border-edge-card border-b-edge-card-bottom bg-surface-search px-3.5 py-0.5 shadow-soft-light dark:shadow-soft-dark">
-            <SearchIcon size={15} />
-            <TextInput
-              value={query}
-              onChangeText={setQuery}
-              accessibilityLabel="Search places"
-              placeholder="Dish, cuisine, or place"
-              placeholderTextColor={colors.taupe}
-              returnKeyType="search"
-              className="min-w-0 flex-1 py-2.5 font-dm text-[13px] text-ink"
-            />
-          </View>
+          <CitySearchBar testID="featured-search" city={cityName} value={query} onChangeText={setQuery} inputLabel="Search places" placeholder="Dish, cuisine, or place" />
 
           <HRow gap={6}>
             <HubDropdown

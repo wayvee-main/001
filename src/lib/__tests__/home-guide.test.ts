@@ -2,7 +2,8 @@ import { BUNDLE_CITY } from '@/lib/city';
 import { applyCurationForCity } from '@/lib/curation';
 import { CURATED_COLLECTIONS, EVENTS, RESTAURANTS, type CuratedCollection } from '@/lib/data';
 import { homeDiscoveryCollections, homeDiscoveryIdea, homeDiscoveryIdeas, timelyHomeCollection } from '@/lib/home-discovery';
-import { buildHomeGuide, entriesForHomeCollection, entriesForHomeIdea, filterHomeGuide, homeGuideHref, homeGuideHrefFromLegacy, homeIdeaPhoto, searchHomeGuide } from '@/lib/home-guide';
+import { buildHomeGuide, buildHomeSearchIndex, entriesForHomeCollection, entriesForHomeIdea, filterHomeGuide, homeGuideHref, homeGuideHrefFromLegacy, homeIdeaPhoto, searchHomeGuide } from '@/lib/home-guide';
+import { queryIndex } from '@/lib/search';
 import type { NearestPick } from '@/lib/nearest-pool';
 import { NEARBY_OAKLAND } from '@/lib/nearby-oakland';
 
@@ -12,6 +13,21 @@ const build = (options: Partial<Parameters<typeof buildHomeGuide>[0]> = {}) => b
   city:'oakland', now:morning, nearest:[], places:NEARBY_OAKLAND, events:[], picks:[], ...options,
 });
 afterEach(() => applyCurationForCity(BUNDLE_CITY));
+
+describe('Global Quiet index search',()=>{
+  it('uses ranked typo matching and keeps results linked to current Field Guide entries',()=>{
+    const catalog=build(),index=buildHomeSearchIndex(catalog);
+    const results=queryIndex(index,'ramin');
+    expect(results.some(item=>item.title==='Itani Ramen')).toBe(true);
+    expect(index.every(item=>Object.values(catalog.entries).some(entry=>homeGuideHref(entry)===item.href))).toBe(true);
+  });
+  it('finds the active city’s outdoor ideas without leaking Oakland records into SF',()=>{
+    const index=buildHomeSearchIndex(build({city:'san-francisco',places:[]}));
+    expect(queryIndex(index,'lands end').some(item=>item.id==='lands-end')).toBe(true);
+    expect(queryIndex(index,'MUA')).toEqual([]);
+    expect(index.every(item=>item.href.includes('kind=outdoor'))).toBe(true);
+  });
+});
 
 describe('Home intentions and shortlists', () => {
   it.each([8, 12, 15, 19, 23, 2])('offers exactly three Home-only intentions at %s:30', hour => {

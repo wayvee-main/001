@@ -139,7 +139,7 @@ export default function DiscoverScreen() {
       <Text testID="discover-title" className="font-fraunces text-ink" style={{fontSize:26,lineHeight:29.12,letterSpacing:-.468}}>Discover</Text>
       <Text testID="discover-city" className="mt-0.5 font-dm text-meta text-taupe">{cityName}</Text>
     </View>
-    <CitySearchBar testID="discover-search" city={cityName} inputLabel="Search Discover" value={query} onChangeText={setQuery} />
+    <CitySearchBar testID="discover-search" city={cityName} inputLabel="Search Discover" value={query} onPress={()=>router.push({pathname:'/search',params:query?{q:query}:{}})} />
     <View className="mt-2.5 mb-[8px]"><HRow gap={6} bleed={false}>{MODES.map(x=><CityChip key={x.value} testID={`discover-chip-${x.value.toLowerCase()}`}
       label={x.label} glyph={x.value==='All'?undefined:x.glyph} selected={mode===x.value} onPress={()=>choose(x.value)}
       icon={x.value==='All'?<VeeMark size={13} color={mode===x.value?colors['selected-glyph']:colors['fg-muted']} />:undefined} />)}</HRow></View>

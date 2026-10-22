@@ -1,34 +1,38 @@
 import { useColorScheme } from 'nativewind';
-import type { ReactNode } from 'react';
+import type { ReactNode, Ref } from 'react';
 import { Keyboard, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { Glyph } from '@/components/glyph';
 import { useControlSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
 
-/** Home and Discover share one search silhouette, type scale and action. */
-export function CitySearchBar({city,testID,labelTestID,inputLabel,value='',onChangeText,onPress}: {
+// Home's 37px action, 7px top/bottom insets and 1px perimeter total 53px.
+// Keep this geometry identical for launchers and editable search fields.
+export const SEARCH_BAR_HEIGHT = 53;
+export function CitySearchBar({city,testID,labelTestID,inputTestID,inputLabel,placeholder,value='',onChangeText,onPress,onSubmit,autoFocus=false,inputRef}: {
   city:string;testID:string;labelTestID?:string;inputLabel?:string;value?:string;
-  onChangeText?:(text:string)=>void;onPress?:()=>void;
+  inputTestID?:string;placeholder?:string;autoFocus?:boolean;inputRef?:Ref<TextInput>;
+  onChangeText?:(text:string)=>void;onPress?:()=>void;onSubmit?:(query:string)=>void;
 }) {
   const colors=useThemeColors(),control=useControlSurface(),primary=useControlSurface(false,true);
-  const label=`Search the city of ${/^san francisco$/i.test(city)?'SF':city}`;
+  const label=placeholder || `Search the city of ${/^san francisco$/i.test(city)?'SF':city}`;
+  const submit=()=>{Keyboard.dismiss();onSubmit?.(value.trim());};
   const arrow=<View style={[primary,{width:37,height:37,borderRadius:999,alignItems:'center',justifyContent:'center'}]}>
     <Glyph name="arrow" size={17} color={colors['on-accent']} />
   </View>;
   const content=<>
     <Glyph name="search" size={17} color={colors['fg-muted']} />
-    {onChangeText?<TextInput testID={`${testID}-input`} accessibilityLabel={inputLabel || label} value={value} onChangeText={onChangeText}
-      placeholder={label} placeholderTextColor={colors['fg-muted']} returnKeyType="search" onSubmitEditing={Keyboard.dismiss}
+    {onChangeText?<TextInput ref={inputRef} testID={inputTestID || `${testID}-input`} accessibilityLabel={inputLabel || label} value={value} onChangeText={onChangeText}
+      autoFocus={autoFocus} autoCorrect={false} placeholder={label} placeholderTextColor={colors['fg-muted']} returnKeyType="search" onSubmitEditing={submit}
       className="min-w-0 flex-1 font-dm text-label text-ink" style={{height:37,padding:0,borderWidth:0,outlineWidth:0}} />:
-      <Text testID={labelTestID} numberOfLines={1} className="min-w-0 flex-1 font-dm text-label text-taupe">{label}</Text>}
+      <Text testID={labelTestID} numberOfLines={1} className="min-w-0 flex-1 font-dm text-label text-taupe">{value || label}</Text>}
     {onChangeText&&value?<TouchableOpacity accessibilityRole="button" accessibilityLabel="Clear search" hitSlop={8} onPress={()=>onChangeText('')}><Glyph name="close" size={14} color={colors['fg-muted']} /></TouchableOpacity>:null}
-    {onChangeText?<TouchableOpacity accessibilityRole="button" accessibilityLabel="Search Discover" onPress={Keyboard.dismiss}>{arrow}</TouchableOpacity>:arrow}
+    {onChangeText?<TouchableOpacity accessibilityRole="button" accessibilityLabel={inputLabel || label} onPress={submit}>{arrow}</TouchableOpacity>:arrow}
   </>;
-  const style=[control,{minHeight:52,backgroundColor:colors['surface-search']}];
-  const className='flex-row items-center gap-x-2.5 rounded-full pl-3.5 pr-[7px] py-[7px] border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark';
-  return onPress?<TouchableOpacity testID={testID} accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={style} className={className}>{content}</TouchableOpacity>:
-    <View testID={testID} style={style} className={className}>{content}</View>;
+  const style=[control,{height:SEARCH_BAR_HEIGHT,width:'100%' as const,backgroundColor:colors['surface-search'],borderRadius:999,
+    flexDirection:'row' as const,alignItems:'center' as const,gap:10,paddingLeft:14,paddingRight:7,paddingVertical:7}];
+  return onPress?<TouchableOpacity testID={testID} accessibilityRole="button" accessibilityLabel={inputLabel || label} onPress={onPress} style={style}>{content}</TouchableOpacity>:
+    <View testID={testID} style={style}>{content}</View>;
 }
 
 /** Home's venue chips and Discover's filters share the same quiet material. */
