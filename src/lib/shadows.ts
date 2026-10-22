@@ -33,6 +33,6 @@ export function useRaisedSurface(level: 1 | 2 | 3 | 4 = 1, tone: 'neutral' | 'di
 export function useControlSurface(selected = false, primary = false): ViewStyle {
   const colors = useThemeColors();
   const surface = useRaisedSurface(1);
-  const fill = primary ? colors['accent-fill'] : selected ? colors['selected-surface'] : colors['surface-raised'];
+  const fill = primary ? colors['accent-fill'] : selected ? colors['selected-surface'] : colors['surface-control'];
   return { ...surface, backgroundColor: fill, borderColor: colors['edge-faint'] };
 }

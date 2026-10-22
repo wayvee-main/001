@@ -1,7 +1,8 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useRef, useState, type ReactNode } from 'react';
-import { ScrollView, Text, TextInput, TouchableOpacity, View, useWindowDimensions } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { Glyph } from '@/components/glyph';
+import { CityChip, CitySearchBar } from '@/components/city-controls';
 import { BarNote, TrailLead, RoomNote, RouteNote, ShowNote, TableNote, PHOTO_NOTE } from '@/components/field-notes';
 import { HRow, Screen, ScreenScroll } from '@/components/layout';
 import { ListRow } from '@/components/list-row';
@@ -14,7 +15,6 @@ import { useContentHydrating } from '@/lib/bootstrap';
 import { hydrateEventsFromBackend } from '@/lib/events-remote';
 import { hydratePlacesFromBackend, useAllPlaces } from '@/lib/places';
 import { buildSearchIndex, queryIndex } from '@/lib/search';
-import { useControlSurface } from '@/lib/shadows';
 import { useScoper } from '@/lib/store';
 import { useThemeColors } from '@/lib/theme';
 import { useNow } from '@/lib/clock';
@@ -83,7 +83,7 @@ function Shelf({title,children,onAll,fullWidth=false}:{title:string;children:Rea
 }
 
 export default function DiscoverScreen() {
-  const router=useRouter(),params=useLocalSearchParams<{q?:string;mode?:string}>(),colors=useThemeColors(),control=useControlSurface(),selectedControl=useControlSurface(true);
+  const router=useRouter(),params=useLocalSearchParams<{q?:string;mode?:string}>(),colors=useThemeColors();
   const city=useActiveCity(),cityName=useActiveCityName(),local=city===BUNDLE_CITY;
   const [query,setQuery]=useState(params.q||''),[mode,setMode]=useState<Mode>(normalizeMode(params.mode));
   const [seed,setSeed]=useState(`${params.q||''}:${params.mode||''}`),[refreshing,setRefreshing]=useState(false);
@@ -135,23 +135,14 @@ export default function DiscoverScreen() {
     <PhotoRow count={roomPicks.length}>{cardWidth=>roomPicks.map(x=><RoomNote key={x.id} venue={x} cardWidth={cardWidth} onPress={()=>router.push(`/venue/${x.id}`)} />)}</PhotoRow>
   </TrailSection>:null;
   return <Screen><ScreenScroll gap={0} clearsTabBar refreshing={refreshing} onRefresh={onRefresh} keyboardShouldPersistTaps="handled">
-    {/* The mark used to sit opposite the title as a second way into Vee. The
-      * tab bar already carries one, two rows down and always in reach. */}
-    <View className="mb-5 pt-4">
-      <Text className="font-dm text-fine text-taupe">{cityName}, CA</Text>
-      <Text className="mt-1.5 font-fraunces text-ink" style={{fontSize:32,lineHeight:35.2,letterSpacing:-.7}}>Discover</Text>
+    <View testID="discover-header" style={{paddingTop:10,marginBottom:18}}>
+      <Text testID="discover-title" className="font-fraunces text-ink" style={{fontSize:26,lineHeight:29.12,letterSpacing:-.468}}>Discover</Text>
+      <Text testID="discover-city" className="mt-0.5 font-dm text-meta text-taupe">{cityName}</Text>
     </View>
-    <View className="flex-row items-center gap-x-2 rounded-full border border-edge-faint bg-surface-search px-3 shadow-soft-light dark:shadow-soft-dark">
-      <Glyph name="search" size={17} color={colors['fg-muted']} /><TextInput accessibilityLabel="Search Discover" value={query} onChangeText={setQuery}
-        placeholder="A place, artist, or good idea" placeholderTextColor={colors['fg-muted']} className="min-w-0 flex-1 py-3 font-dm text-label text-ink" />
-      {query?<TouchableOpacity accessibilityRole="button" accessibilityLabel="Clear search" hitSlop={10} onPress={()=>setQuery('')}><Glyph name="close" size={15} color={colors['fg-muted']} /></TouchableOpacity>:null}
-    </View>
-    <View className="mt-2.5 mb-[8px]"><HRow gap={11.44} bleed={false}>{MODES.map(x=><TouchableOpacity key={x.value} accessibilityRole="button" accessibilityLabel={x.label}
-      accessibilityState={{selected:mode===x.value}} activeOpacity={.78} hitSlop={{top:6,bottom:6}} onPress={()=>choose(x.value)}
-      style={[mode===x.value?selectedControl:{...control,backgroundColor:colors['surface-discovery']},{minHeight:32.2,paddingVertical:6.44,paddingHorizontal:8.28,borderRadius:999,flexDirection:'row',alignItems:'center',gap:4.6}]}>
-      {x.value==='All'?<VeeMark size={16} color={mode===x.value?colors['selected-glyph']:colors['fg-muted']} />:<Glyph name={x.glyph} size={13.8} color={mode===x.value?colors['selected-glyph']:colors['fg-muted']} />}
-      <Text className="font-dm" style={{fontSize:11.04,lineHeight:15,color:mode===x.value?colors['on-selected']:colors.fg}}>{x.label}</Text>
-    </TouchableOpacity>)}</HRow></View>
+    <CitySearchBar testID="discover-search" city={cityName} inputLabel="Search Discover" value={query} onChangeText={setQuery} />
+    <View className="mt-2.5 mb-[8px]"><HRow gap={6} bleed={false}>{MODES.map(x=><CityChip key={x.value} testID={`discover-chip-${x.value.toLowerCase()}`}
+      label={x.label} glyph={x.value==='All'?undefined:x.glyph} selected={mode===x.value} onPress={()=>choose(x.value)}
+      icon={x.value==='All'?<VeeMark size={13} color={mode===x.value?colors['selected-glyph']:colors['fg-muted']} />:undefined} />)}</HRow></View>
     {query.trim()?<View className="gap-y-2"><Heading title={`Matches for “${query}”`} />
       {search.length?search.slice(0,40).map((x,i)=><ListRow key={`${x.kind}/${x.id}`} title={x.title} meta={x.subtitle} image={x.image} divider={i<Math.min(search.length,40)-1} onPress={()=>router.push(x.href as never)} />)
         :<EmptyState title="Nothing here just yet" message="Try another place, artist or kind of evening." actionLabel="Clear search" onAction={()=>setQuery('')} />}

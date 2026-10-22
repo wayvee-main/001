@@ -989,11 +989,9 @@ export default function CreateScreen() {
            * choice rather than a verdict. */}
           <View className="mt-4">
             <TouchableOpacity testID="vee-shapes-toggle" accessibilityRole="button" accessibilityLabel="Start from a shape" accessibilityState={{expanded:showShapes}} aria-expanded={showShapes}
-              onPress={()=>setShowShapes(value=>!value)} style={raisedSurface} activeOpacity={.78}
-              className="min-h-[52px] flex-row items-center justify-between gap-x-3 rounded-setting px-3 py-2.5">
-              <Glyph name="route" size={17} color={colors['fg-muted']} />
-              <Text className="min-w-0 flex-1 font-dm-medium text-label text-ink">Start from a shape</Text>
-              <View style={{transform:[{rotate:showShapes?'270deg':'90deg'}]}}><Glyph name="chevron" size={13} color={colors['fg-muted']} /></View>
+              onPress={()=>setShowShapes(value=>!value)} activeOpacity={.78}
+              className="min-h-11 flex-row items-center justify-start">
+              <Text className="font-dm-medium text-label text-ink">Start from a shape</Text>
             </TouchableOpacity>
             {showShapes?<View className="mt-2">
             {isSolving ? (
@@ -1021,11 +1019,10 @@ export default function CreateScreen() {
                 <TouchableOpacity
                   accessibilityRole="button"
                   accessibilityLabel="Other plan options"
+                  testID="vee-other-options"
                   activeOpacity={0.72}
                   onPress={cycleSet}
-                  style={control}
-                  className="mt-3 h-11 flex-row items-center justify-center gap-x-2 rounded-full">
-                  <Glyph name="refresh" size={16} color={colors['fg-muted']} strokeWidth={1.7} />
+                  className="mt-3 h-11 flex-row items-center justify-start">
                   <Text className="font-dm-medium text-meta text-taupe">
                     Other options
                   </Text>

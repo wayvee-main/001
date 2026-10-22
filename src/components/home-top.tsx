@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useColorScheme } from 'nativewind';
 import { ScrollView, Text, TouchableOpacity, View, type ViewStyle } from 'react-native';
 
 import { Glyph } from '@/components/glyph';
@@ -7,6 +8,7 @@ import { WayveeWordmark } from '@/components/wayvee-wordmark';
 import type { HomeSuggestion } from '@/lib/daypart';
 import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
+import { withAlpha } from '@/lib/tokens';
 import { useWeatherNow, weatherLine } from '@/lib/weather';
 
 /**
@@ -52,7 +54,7 @@ export function HomeHeader({
       <View className="min-w-0 flex-1">
         <WayveeWordmark size={26} mark={false} />
         {weather ? (
-          <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">
+          <Text testID="home-weather" numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">
             {weatherLine(weather)}
           </Text>
         ) : null}
@@ -91,12 +93,12 @@ export function HomeHeader({
   );
 }
 
-/** Home's ribbon keeps the selected theme-aware thumbnail-well fill. */
+/** Home's ribbon shares the light card fill, with a barely visible rim. */
 export function HomeEveningRibbon({onPress}:{onPress:()=>void}) {
-  const colors=useThemeColors(),surface=useRaisedSurface(1);
+  const colors=useThemeColors(),surface=useRaisedSurface(1),{colorScheme}=useColorScheme();
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel="Open your evening with Vee" activeOpacity={.78}
     onPress={onPress} testID="home-evening-ribbon"
-    style={[surface,{backgroundColor:colors['surface-sunk'],minHeight:61.2,borderRadius:22,flexDirection:'row',alignItems:'stretch'}]}>
+    style={[surface,{backgroundColor:colors['surface-ribbon'],borderColor:colorScheme==='light'?withAlpha(colors.fg,.06):colors['edge-faint'],minHeight:61.2,borderRadius:22,flexDirection:'row',alignItems:'stretch'}]}>
     <View className="min-w-0 flex-1 flex-row items-center" style={{paddingHorizontal:11,paddingVertical:8.4,gap:7}}>
       <VeeMark size={28.9} color={colors['surface-accent']} />
       <View className="min-w-0 flex-1"><Text numberOfLines={1} className="font-fraunces text-ink" style={{fontSize:15.3,lineHeight:18}}>Your evening, with Vee</Text>

@@ -79,7 +79,7 @@ use a current member photo or their verified cover, including in Home search.
 `home-guide-photos.ts` adds official source photos only to Home's adapters;
 it does not alter Discover or shared native records. Missing/failed images
 retain a relevant outline-glyph fallback. Home's Vee ribbon and Link your stay
-keep their existing `surface-sunk` background in both themes.
+use `surface-ribbon` (`#FFF9DD` light / `#100D13` dark).
 
 ## Image policy
 
@@ -170,6 +170,13 @@ published: no averaging, no derived values, nulls left null.
 the sync stops, stored periods age out and `weatherAt()` returns null once none
 covers the current hour — the weather simply disappears from Home rather than
 showing yesterday's forecast as "right now".
+
+`useWeatherNow` ticks each minute and refreshes on app foreground, browser
+focus/visibility and city changes. The backend read is shared across concurrent
+callers and throttled to 15 minutes while a current period exists; a missing
+current hour retries immediately. Cache keys and late-response checks keep
+cities isolated. Current valid cache periods work offline; stale periods never
+become a guessed temperature.
 
 ## Sync observability
 

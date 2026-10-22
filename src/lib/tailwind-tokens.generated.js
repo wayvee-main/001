@@ -6,6 +6,8 @@ module.exports = {
   surface: 'rgb(var(--color-surface) / <alpha-value>)',
   "surface-raised": 'rgb(var(--color-surface-raised) / <alpha-value>)',
   "surface-soft": 'rgb(var(--color-surface-soft) / <alpha-value>)',
+  "surface-control": 'rgb(var(--color-surface-control) / <alpha-value>)',
+  "surface-ribbon": 'rgb(var(--color-surface-ribbon) / <alpha-value>)',
   "surface-search": 'rgb(var(--color-surface-search) / <alpha-value>)',
   "surface-navigation": 'rgb(var(--color-surface-navigation) / <alpha-value>)',
   "surface-sunk": 'rgb(var(--color-surface-sunk) / <alpha-value>)',

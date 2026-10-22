@@ -14,9 +14,10 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   `BACKDROP_GRADIENTS` in `src/lib/tokens.ts` records the exact 230°, 121° and
   226° layers, alpha and stops. `AppBackdrop` paints them behind every screen,
   detail and onboarding page, with aspect-correct angles on web and native.
-  Oyster cards, sheets and unselected controls use warm paper `#F5F0E9` in
-  light mode and charcoal `#29252A` in dark mode, with faint edges and elevation.
-  Discover listings use `#F7F2EC` / `#29252A`. In dark mode,
+  Default cards and sheets use pale cream `#FFF9DD` in light mode and
+  charcoal `#29252A` in dark mode, with faint edges and elevation.
+  Discover listings use the same card fill. Controls have a separate
+  `surface-control` role, retaining `#F5F0E9` / `#29252A`. In dark mode,
   `#29252A` is the default background for card containers, including Home tiles
   and every Discover listing. Light-mode search and navigation share plain off-white `#FFFCF8`.
   Home glyph tiles use `#FFFCF8` / `#29252A`. Search uses its own `surface-search`
@@ -47,8 +48,8 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   counts and ordering follow the active city's existing source pools.
   In light mode, quick venue chips share search's off-white fill;
   dark mode retains their Oyster charcoal fill. Link your stay and the evening
-  ribbon share the retained thumbnail-well `surface-sunk` fill (`#E7E0D6` light /
-  `#100D13` dark), normal theme ink and a faint edge.
+  ribbon share `surface-ribbon` (`#FFF9DD` light / `#100D13` dark),
+  normal theme ink and a faint edge.
   Home keeps “Shall we wander?” without supporting subtext. Its one-line search
   label reads “Search the city of Oakland” for Oakland and uses the active city;
   San Francisco is shortened to “SF” in the visible label, with the full name
@@ -75,9 +76,10 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   text at `#963D24` / `#F0835C`. Legacy category and Vee tints follow Oyster
   surfaces and orange accents. Keep the original gradient Vee mark and the
   original page gradients intact; explicit error states retain their red.
-- “Your evening, with Vee” and Link your stay keep the thumbnail-well
-  `surface-sunk` fill: `#E7E0D6` light / `#100D13` dark, with standard theme lettering and
-  orange `surface-accent` icons. Its smooth 22px corners, faint edge and
+- “Your evening, with Vee” and Link your stay use `surface-ribbon`:
+  `#FFF9DD` light / `#100D13` dark, with standard theme lettering and
+  orange `surface-accent` icons. Light adds a very faint 6% ink border;
+  dark retains the existing 4% edge. Its smooth 22px corners, faint edge and
   level-1 elevation match the shared card material. The ticket notches and
   perforated seam are removed. Keep its compact 61.2px minimum height.
   Home dividers stay faint.
@@ -100,7 +102,7 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   from a current member or its verified cover. Home search uses the same
   Collection photo. No generic stock substitution; missing/failed photos keep
   a relevant outline-glyph fallback. This does not change the ribbon or stay
-  chip’s retained `surface-sunk` fill. Promotions follow the daypart;
+  chip’s separately defined `surface-ribbon` fill. Promotions follow the daypart;
   expired events and events beyond seven days are omitted from Home shortlists.
 - Eat retains the existing nearest pool and ordering: target 24 real results
   (at least 20 where the catalog has them), within five miles of the selected
@@ -108,9 +110,11 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   reuse Oakland's curated distances in another city. A tilde marks an estimate.
   Eat's tile count and Field Guide list use that same pool. Source photos stay
   with their named places and missing/failed photos use category glyphs.
-- The second tab is **Discover** in both tab bars. Its glyph pills are one
-  horizontal row, without hard borders, with subtle elevation and an extra
-  5px gap (11.44px total).
+- The second tab is **Discover** in both tab bars. Home and Discover use
+  the same `CitySearchBar` and `CityChip` components in both themes: the same
+  search fill, 37px orange action, 34px pills, typography, faint edges and lift.
+  Discover filters remain a single scrollable row with 6px gaps; active filters
+  retain their selected fill and accessible selection state.
   Bottom navigation uses a softly raised floating pill: 97% off-white in
   light mode, 97% charcoal in dark mode (`surface-navigation`), a 4% ink edge and the common 10% elevation increase.
   Active tabs have an orange icon (the Vee spiral retains its gradient),
@@ -164,13 +168,15 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   `edge-faint` border. Leave 8px between cards and remove row-divider lines.
   Find a good table keeps right-side thumbnails at 59 × 82px
   (47 × 73px on narrow phones).
-- Discover uses Oyster `surface-discovery` fills on unselected pills and every listing
-  container; search uses `surface-search`. Faint borders, elevation, the Evening Trail thread and page-wide
+- Discover uses `surface-discovery` on listing containers; its unselected
+  chips match Home’s venue chips, using `surface-search` in light and
+  `surface-control` in dark. Search uses `surface-search`. Faint borders, elevation, the Evening Trail thread and page-wide
   gradient remain; selected pills keep `selected-surface` / `on-selected`.
 - Discover keeps category pills, full search, pull-to-refresh, city-aware data,
   See all actions, the original Vee logo and existing detail routes. Its intro
-  reads “One good thing can lead to another.” The header shows the selected city.
-- Home opens with the original Wayvee mark and Fraunces wordmark at top left,
+  retains the Evening Trail. “Discover” sits at the same top-left position
+  and 26px Fraunces scale as Home’s Wayvee wordmark, with the city below.
+- Home opens with the Fraunces Wayvee wordmark at top left,
   live weather beneath, and notification/profile actions at right. It greets
   with “Shall we wander?”. Search uses the compact city label specified above;
   omit the old city/state header and greeting repetition.
@@ -207,7 +213,10 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   Omit the “Your starting point” label and its margin above the composer.
   Preserve the real, generated example for empty-field submission and accessibility
   hints, alongside live search, constraints and plan refinement.
-  “Start from a shape” is open by default and remains collapsible. Options use
+  “Start from a shape” is open by default and remains collapsible. Its toggle
+  and “Other options” are plain left-aligned text actions in both themes:
+  no enclosing fill, border, shadow or decorative glyph; retain 44px hit targets.
+  The actual shape cards keep their containment. Options use
   Home evening ribbon's faint edge, elevation and 22px corners, retaining
   their existing `surface-raised` card fill,
   61.2px minimum height and 11px horizontal / 8.4px vertical inner padding.
@@ -267,9 +276,11 @@ with full strength reserved for Vee and primary actions.
 | Semantic | Legacy alias | Light | Dark | Use |
 |---|---|---|---|---|
 | `bg` | `cream` | #FFFDFA | #151117 | screen background |
-| `surface` | `shell` | #F0EBE3 | #251E29 | card surface |
-| `surface-raised` | — | #FFFDFA | #1B161E | ask bar, peek rows |
-| `surface-soft` | — | #FBF8F4 | #372E3C | lightest card tier — the cards that open Home |
+| `surface` | — | #FFF9DD | #29252A | default card surface |
+| `surface-raised` | `shell` | #FFF9DD | #29252A | cards, panels, peek rows |
+| `surface-soft` | — | #FFF9DD | #29252A | quiet card tier |
+| `surface-control` | — | #F5F0E9 | #29252A | neutral controls |
+| `surface-ribbon` | — | #FFF9DD | #100D13 | Home ribbon and stay anchor |
 | `surface-sunk` | — | #E7E0D6 | #100D13 | input wells, sheet track |
 | `fg` | `ink` | #2A1B33 | #FFFDFA | primary text/icon |
 | `fg-muted` | `taupe` | #716672 | #B8AAB5 | secondary text/icon |

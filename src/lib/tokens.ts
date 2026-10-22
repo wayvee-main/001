@@ -39,9 +39,11 @@ export const ROLES: Record<string, ThemeValue> = {
   bg: { light: '#FFFDFA', dark: '#151117' }, // original ground beneath the wash
   // Oyster paper carries through cards, controls and sheets. Search and
   // navigation have separate roles so their lighter treatment stays consistent.
-  surface: { light: '#F5F0E9', dark: '#29252A' },
-  'surface-raised': { light: '#F5F0E9', dark: '#29252A' },
-  'surface-soft': { light: '#F5F0E9', dark: '#29252A' },
+  surface: { light: '#FFF9DD', dark: '#29252A' },
+  'surface-raised': { light: '#FFF9DD', dark: '#29252A' },
+  'surface-soft': { light: '#FFF9DD', dark: '#29252A' },
+  'surface-control': { light: '#F5F0E9', dark: '#29252A' }, // controls keep their existing material
+  'surface-ribbon': { light: '#FFF9DD', dark: '#100D13' }, // Home ribbon and stay anchor
   'surface-search': { light: '#FFFCF8', dark: '#28372F' },
   'surface-navigation': { light: '#FFFCF8', dark: '#29252A' },
   'surface-sunk': { light: '#E7E0D6', dark: '#100D13' }, // input wells, sheet track
@@ -57,7 +59,7 @@ export const ROLES: Record<string, ThemeValue> = {
   'navigation-muted': { light: '#D8C7DD', dark: '#D8C7DD' },
   // Home's reference glyph cards use off-white; other card materials stay separate.
   'home-tile': { light: '#FFFCF8', dark: '#29252A' },
-  'surface-discovery': { light: '#F7F2EC', dark: '#29252A' }, // Dark cards share the evening ribbon's default surface
+  'surface-discovery': { light: '#FFF9DD', dark: '#29252A' },
   'home-tile-glyph': { light: '#963D24', dark: '#F0835C' },
   'home-tile-well': { light: '#F7E5D8', dark: '#48312E' },
   'tile-eat': { light: '#F5F0E9', dark: '#29252A' },
@@ -76,9 +78,9 @@ export const ROLES: Record<string, ThemeValue> = {
   'warm-ink': { light: '#963D24', dark: '#F0835C' }, // text on warm-tint
   vee: { light: '#B84624', dark: '#F0835C' }, // legacy Vee accents, now the shared orange
   'vee-strong': { light: '#963D24', dark: '#F0835C' }, // legacy Vee text, now the shared readable orange
-  'accent-tint': { light: '#F5F0E9', dark: '#29252A' }, // Oyster container with orange accents
-  'warm-tint': { light: '#F5F0E9', dark: '#29252A' }, // legacy category container
-  'vee-tint': { light: '#F5F0E9', dark: '#29252A' }, // legacy Vee container
+  'accent-tint': { light: '#FFF9DD', dark: '#29252A' },
+  'warm-tint': { light: '#FFF9DD', dark: '#29252A' },
+  'vee-tint': { light: '#FFF9DD', dark: '#29252A' },
   danger: { light: '#A02F38', dark: '#FF6B6D' }, // closed / sold out / error — the one functional red
 };
 

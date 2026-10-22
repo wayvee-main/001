@@ -12,9 +12,10 @@
 // and the UI simply says nothing about the weather. A forecast from yesterday
 // presented as "right now" would be exactly the invented data CLAUDE.md rules
 // out.
-import { useSyncExternalStore } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
+import { AppState, Platform } from 'react-native';
 
-import { activeCity, cityCacheKey } from '@/lib/city';
+import { activeCity, cityCacheKey, useActiveCity } from '@/lib/city';
 import { getStoredItem, setStoredItem } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
 
@@ -91,9 +92,28 @@ export function weatherAt(now = new Date(), hours: WeatherHour[] = snapshot): We
   );
 }
 
-/** Reactive form of weatherAt — re-renders once the forecast lands. */
-export function useWeatherNow(now = new Date()): WeatherHour | null {
-  return weatherAt(now, useWeatherHours());
+/** Keep an open/resumed app current as forecast periods roll over. Never
+ * replace missing current weather with a yesterday/future-period guess. */
+export function useWeatherNow(at?: Date): WeatherHour | null {
+  const city=useActiveCity(),hours=useWeatherHours();
+  const [now,setNow]=useState(()=>new Date());
+  useEffect(()=>{
+    const refresh=()=>{setNow(new Date());void hydrateWeatherFromBackend();};
+    refresh();
+    const timer=setInterval(refresh,60_000);
+    const subscription=AppState.addEventListener('change',state=>{if(state==='active')refresh();});
+    const visible=()=>{if(document.visibilityState==='visible')refresh();};
+    if(Platform.OS==='web'&&typeof window!=='undefined'){
+      window.addEventListener('focus',refresh);document.addEventListener('visibilitychange',visible);
+    }
+    return ()=>{
+      clearInterval(timer);subscription.remove();
+      if(Platform.OS==='web'&&typeof window!=='undefined'){
+        window.removeEventListener('focus',refresh);document.removeEventListener('visibilitychange',visible);
+      }
+    };
+  },[city]);
+  return weatherAt(at ?? now,hours);
 }
 
 /** Percent at or above which rain is worth naming. Below this, NWS's own
@@ -160,6 +180,9 @@ export function useDaylightRemaining(now = new Date()) {
 // a different slug means the guest changed city and what is held belongs to the
 // city they left.
 let hydratedCity: string | null = null;
+let hydratedAt = 0;
+const REFRESH_MS = 15 * 60_000;
+const pending = new Map<string,Promise<boolean>>();
 
 // Last-known-good snapshot for offline cold launches, same pattern as
 // places.ts/events-remote.ts. Weather ages out faster than any other cached
@@ -174,29 +197,40 @@ function isWeatherHour(value: unknown): value is WeatherHour {
   );
 }
 
-async function loadWeatherFromCache(): Promise<boolean> {
-  const raw = await getStoredItem(cityCacheKey(CACHE_BASE));
+async function loadWeatherFromCache(city: string): Promise<boolean> {
+  const raw = await getStoredItem(cityCacheKey(CACHE_BASE,city));
   if (!raw) return false;
   try {
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return false;
     const hours = parsed.filter(isWeatherHour);
-    if (!hours.length) return false;
+    if (!hours.length || activeCity()!==city) return false;
     publish(hours);
+    hydratedCity=city;
+    hydratedAt=Date.now();
     return true;
   } catch {
     return false;
   }
 }
 
-/** Fetch the stored forecast. Returns true when the snapshot changed.
- * Pass force=true (pull-to-refresh) to bypass the one-shot guard. */
-export async function hydrateWeatherFromBackend(force = false): Promise<boolean> {
+/** Refresh at most every 15 minutes while current weather exists; a missing
+ * current period retries immediately. Bootstrap and mounted surfaces share
+ * each city's pending request. Pull-to-refresh bypasses the age check. */
+export function hydrateWeatherFromBackend(force = false): Promise<boolean> {
   const city = activeCity();
   const hydrated = hydratedCity === city;
-  if (hydrated && !force) return false;
+  if (hydrated && !force && Date.now()-hydratedAt<REFRESH_MS && weatherAt()) return Promise.resolve(false);
+  const existing=pending.get(city);
+  if(existing)return existing;
   if (hydratedCity !== null && !hydrated) publish([]);
-  if (!supabase) return hydrated ? false : loadWeatherFromCache();
+  const request=readWeather(city,hydrated).finally(()=>pending.delete(city));
+  pending.set(city,request);
+  return request;
+}
+
+async function readWeather(city: string, hydrated: boolean): Promise<boolean> {
+  if (!supabase) return hydrated ? false : loadWeatherFromCache(city);
   try {
     // An hour of slack keeps the period covering "now" in the result right up
     // to the moment it ends — the same cutoff the sync prunes on.
@@ -208,13 +242,15 @@ export async function hydrateWeatherFromBackend(force = false): Promise<boolean>
       .gte('starts_at', since)
       .order('starts_at', { ascending: true })
       .limit(FETCH_LIMIT);
-    if (error || !data?.length) return hydrated ? false : loadWeatherFromCache();
+    if(activeCity()!==city)return false;
+    if (error || !data?.length) return hydrated ? false : loadWeatherFromCache(city);
 
     publish((data as unknown as WeatherRow[]).map(rowToHour));
     hydratedCity = city;
-    void setStoredItem(cityCacheKey(CACHE_BASE), JSON.stringify(snapshot)).catch(() => {});
+    hydratedAt=Date.now();
+    void setStoredItem(cityCacheKey(CACHE_BASE,city), JSON.stringify(snapshot)).catch(() => {});
     return true;
   } catch {
-    return hydrated ? false : loadWeatherFromCache();
+    return hydrated || activeCity()!==city ? false : loadWeatherFromCache(city);
   }
 }
