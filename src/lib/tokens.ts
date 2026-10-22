@@ -11,8 +11,8 @@
  * aliases are kept pointing at the same hex so existing className strings in src/app
  * and src/components keep working; new code should reach for the semantic name.
  *
- * Palette: original layered peach/lilac backdrop, warm off-white in light,
- * plum-black in dark, with Oyster paper cards and restrained orange accents.
+ * Palette: original layered peach/lilac backdrop, soft blush cards in light,
+ * plum-black in dark, with Blush ember paper cards and restrained orange accents.
  * Filled controls use the approved rust/light and peach/dark pairing with
  * theme-specific on-accent ink. Legacy color aliases follow the same orange
  * family; the original mark and page-wide gradient keep their brand colors.
@@ -37,7 +37,7 @@ export function withAlpha(hex: string, alpha: number): string {
  * (bg-surface/50) keeps working. */
 export const ROLES: Record<string, ThemeValue> = {
   bg: { light: '#FFFDFA', dark: '#151117' }, // original ground beneath the wash
-  // Oyster paper carries through cards, controls and sheets. Search and
+  // Blush ember paper carries through cards and sheets. Search and
   // navigation have separate roles so their lighter treatment stays consistent.
   surface: { light: '#F7E5E1', dark: '#29252A' },
   'surface-raised': { light: '#F7E5E1', dark: '#29252A' },
