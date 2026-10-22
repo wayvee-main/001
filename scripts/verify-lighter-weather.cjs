@@ -1,3 +1,4 @@
+// Two-step lighter paper: #FFFCF3 in light mode; dark remains unchanged.
 const assert=require('node:assert/strict'),http=require('node:http'),fs=require('node:fs'),path=require('node:path'),{chromium}=require('playwright');
 const ROOT=path.resolve('dist'),OUT=path.resolve('cream-controls-preview');fs.mkdirSync(OUT,{recursive:true});
 const mime={'.html':'text/html','.js':'application/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.svg':'image/svg+xml','.ttf':'font/ttf','.woff2':'font/woff2'};
