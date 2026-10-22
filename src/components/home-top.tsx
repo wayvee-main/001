@@ -91,7 +91,7 @@ export function HomeHeader({
   );
 }
 
-/** Home's ribbon shares the For you glyph well's theme-aware fill. */
+/** Home's ribbon keeps the selected theme-aware thumbnail-well fill. */
 export function HomeEveningRibbon({onPress}:{onPress:()=>void}) {
   const colors=useThemeColors(),surface=useRaisedSurface(1);
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel="Open your evening with Vee" activeOpacity={.78}

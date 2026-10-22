@@ -8,5 +8,5 @@ import { useViatorPicks } from '@/lib/viator';
 
 export function useHomeGuide() {
   const city=useActiveCity(),now=useNow(),nearest=useNearestPool(),places=useAllPlaces(),picks=useViatorPicks();
-  return {catalog:buildHomeGuide({city,now,nearest,places,picks,events:currentEventListings(now)}),now,city};
+  return {catalog:buildHomeGuide({city,now,nearest,places,picks,events:currentEventListings(now)}),now,city,nearest};
 }

@@ -2,7 +2,7 @@ import { BUNDLE_CITY } from '@/lib/city';
 import { applyCurationForCity } from '@/lib/curation';
 import { CURATED_COLLECTIONS, EVENTS, RESTAURANTS, type CuratedCollection } from '@/lib/data';
 import { homeDiscoveryCollections, homeDiscoveryIdea, homeDiscoveryIdeas, timelyHomeCollection } from '@/lib/home-discovery';
-import { buildHomeGuide, entriesForHomeCollection, entriesForHomeIdea, filterHomeGuide, homeGuideHref, homeGuideHrefFromLegacy, searchHomeGuide } from '@/lib/home-guide';
+import { buildHomeGuide, entriesForHomeCollection, entriesForHomeIdea, filterHomeGuide, homeGuideHref, homeGuideHrefFromLegacy, homeIdeaPhoto, searchHomeGuide } from '@/lib/home-guide';
 import type { NearestPick } from '@/lib/nearest-pool';
 import { NEARBY_OAKLAND } from '@/lib/nearby-oakland';
 
@@ -78,6 +78,23 @@ describe('Home Field Guide isolation and real data', () => {
     expect(outdoors).toHaveLength(3);
     expect(outdoors.every(x=>!x.saveKind&&!x.planKind&&x.links[0].url.startsWith('https://'))).toBe(true);
     expect(outdoors.every(x=>x.facts.every(f=>!f.value.includes(' mi')))).toBe(true);
+  });
+  it('keeps intention photos local and collection photos attached to current members', () => {
+    const catalog=build();
+    for(const hour of [8,12,15,19,23])for(const idea of homeDiscoveryIdeas(at(hour))){
+      const photo=homeIdeaPhoto(idea,catalog);
+      if(photo){
+        expect(entriesForHomeIdea(idea,catalog).some(entry=>entry.image===photo)).toBe(true);
+        expect(photo).not.toMatch(/unsplash|pexels|pixabay|wikimedia/);
+      }
+    }
+    for(const collection of catalog.collections){
+      expect(collection.coverImage).toMatch(/^https:\/\//);
+      expect(catalog.entries['collection:'+collection.id].image).toBe(collection.coverImage);
+    }
+    const sf=build({city:'san-francisco',places:[]});
+    expect(homeIdeaPhoto(homeDiscoveryIdea('breakfast',morning)!,sf)).toBeUndefined();
+    expect(homeIdeaPhoto(homeDiscoveryIdea('fresh-air',morning)!,sf)).toContain('nps.gov');
   });
   it('resolves a bookmarked late-food collection outside its promotion window', () => {
     const catalog=build();

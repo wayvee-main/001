@@ -8,31 +8,29 @@ import { HRow, Screen, ScreenScroll } from '@/components/layout';
 import { Glyph } from '@/components/glyph';
 import { HomeDoorCard } from '@/components/home-field-guide';
 import { SectionHeading } from '@/components/section-heading';
-import { BUNDLE_CITY, useActiveCity, useActiveCityName } from '@/lib/city';
-import { useNow } from '@/lib/clock';
+import { BUNDLE_CITY, useActiveCityName } from '@/lib/city';
 import { CRAWLS, NIGHTLIFE_SPOTS, currentEventListings } from '@/lib/data';
-import { homeCollectionGlyph, homeDiscoveryCollections, homeDiscoveryIdeas } from '@/lib/home-discovery';
-import { homeGuideHrefFromLegacy } from '@/lib/home-guide';
+import { homeCollectionGlyph, homeDiscoveryIdeas } from '@/lib/home-discovery';
+import { homeGuideHrefFromLegacy, homeIdeaPhoto } from '@/lib/home-guide';
 import { hydrateEventsFromBackend } from '@/lib/events-remote';
 import { hydratePlacesFromBackend } from '@/lib/places';
 import { activeReminders } from '@/lib/reminders';
 import { useScoper } from '@/lib/store';
 import { useThemeColors } from '@/lib/theme';
-import { useNearestPool } from '@/lib/use-nearest-pool';
+import { useHomeGuide } from '@/lib/use-home-guide';
 import { useHomeQuickActions } from '@/lib/use-home-quick-actions';
 import { useControlSurface } from '@/lib/shadows';
 import { hydrateWeatherFromBackend } from '@/lib/weather';
 
 export default function HomeScreen() {
   const router = useRouter(), colors = useThemeColors(), s = useScoper();
-  const city = useActiveCityName(), citySlug = useActiveCity(), nearest = useNearestPool();
+  const city = useActiveCityName(), {catalog,now,city:citySlug,nearest} = useHomeGuide();
   const control = useControlSurface();
   const {colorScheme}=useColorScheme(),light=colorScheme==='light';
-  const now = useNow();
   const quickActions = useHomeQuickActions(now);
   const searchLabel = `Search the city of ${/^san francisco$/i.test(city) ? 'SF' : city}`;
   const [refreshing, setRefreshing] = useState(false);
-  const collections = citySlug===BUNDLE_CITY ? homeDiscoveryCollections(now) : [];
+  const collections = catalog.collections;
   const ideas = homeDiscoveryIdeas(now);
   const onRefresh = async () => {
     setRefreshing(true);
@@ -90,11 +88,11 @@ export default function HomeScreen() {
     <View className="gap-y-3 border-t border-edge-faint pt-4">
       <SectionHeading title="For you" action="See all" onPress={()=>router.push('/home/ideas')} />
       <View testID="home-ideas-preview" className="gap-y-2">
-        {ideas.map(idea=><HomeDoorCard key={idea.id} testID={`home-idea-${idea.id}`} title={idea.title} meta={idea.detail} glyph={idea.glyph} onPress={()=>router.push(idea.href as never)} />)}
+        {ideas.map(idea=><HomeDoorCard key={idea.id} testID={`home-idea-${idea.id}`} title={idea.title} meta={idea.detail} image={homeIdeaPhoto(idea,catalog)} glyph={idea.glyph} onPress={()=>router.push(idea.href as never)} />)}
       </View>
       {collections.length?<><SectionHeading title="Collections" action="See all" onPress={()=>router.push('/home/collections')} />
         <HRow gap={10}>{collections.map(collection=><HomeDoorCard key={collection.id} testID={`home-collection-${collection.id}`} width={252}
-          title={collection.title} meta={`${collection.items.length} picks · ${collection.subtitle.split(' · ').slice(-1)[0]}`} glyph={homeCollectionGlyph(collection.id)}
+          title={collection.title} meta={`${collection.items.length} picks · ${collection.subtitle.split(' · ').slice(-1)[0]}`} image={collection.coverImage} glyph={homeCollectionGlyph(collection.id)}
           onPress={()=>router.push(`/home/collection?id=${encodeURIComponent(collection.id)}` as never)} />)}</HRow></>:null}
     </View>
   </ScreenScroll></Screen>;

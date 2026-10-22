@@ -1,6 +1,7 @@
 import { CRAWLS, CURATED_COLLECTIONS, FOOD_HUB_REASON_BY_ID, NIGHTLIFE_SPOTS, RESTAURANTS, VENUES, eventDayGroupLabel, isCurrentEvent, type ScoperEvent } from '@/lib/data';
 import { homeCollectionGlyph, homeDiscoveryCollections, timelyHomeCollection, type HomeIdea } from '@/lib/home-discovery';
 import { HOME_OUTDOORS } from '@/lib/home-outdoors';
+import { HOME_GUIDE_PHOTOS } from '@/lib/home-guide-photos';
 import { usableHomePhoto } from '@/lib/home-tile-previews';
 import type { NearestPick } from '@/lib/nearest-pool';
 import type { Place } from '@/lib/places';
@@ -53,7 +54,10 @@ export function buildHomeGuide({city,nearest,places,events,picks,now}: {
   events: readonly ScoperEvent[]; picks: readonly ViatorPick[]; now: Date;
 }): HomeGuideCatalog {
   const local = city === 'oakland', entries: Record<string, HomeGuideEntry> = {};
-  const add = (entry: HomeGuideEntry) => { entries[homeGuideKey(entry.kind,entry.id)] = {...entry,image:usableHomePhoto(entry.image),searchText:normalized(entry.name+' '+entry.caption+' '+entry.searchText)}; };
+  const add = (entry: HomeGuideEntry) => {
+    const key=homeGuideKey(entry.kind,entry.id);
+    entries[key] = {...entry,image:usableHomePhoto(entry.image) || HOME_GUIDE_PHOTOS[key]?.image,searchText:normalized(entry.name+' '+entry.caption+' '+entry.searchText)};
+  };
   if (local) for (const r of Object.values(RESTAURANTS)) add({
     kind:'restaurant',id:r.id,name:r.name,caption:r.cuisine,description:FOOD_HUB_REASON_BY_ID[r.id] || r.cuisine,
     image:r.image,glyph:'food',facts:[{glyph:'wallet',value:r.price},{glyph:'food',value:r.cuisine}],
@@ -125,10 +129,11 @@ export function buildHomeGuide({city,nearest,places,events,picks,now}: {
   });
   if (local) for (const collection of Object.values(CURATED_COLLECTIONS)) {
     const current=timelyHomeCollection(collection,now);if(!current)continue;
-    add({kind:'collection',id:current.id,name:current.title,caption:current.subtitle,description:current.description,glyph:homeCollectionGlyph(current.id),
+    const image=usableHomePhoto(current.coverImage) || current.items.map(item=>entries[homeGuideKey(item.type,item.id)]?.image).find(Boolean);
+    add({kind:'collection',id:current.id,name:current.title,caption:current.subtitle,description:current.description,image,glyph:homeCollectionGlyph(current.id),
       facts:[{glyph:'compass',value:current.items.length+' picks'}],searchText:current.eyebrow+' '+current.description,details:[],links:[],members:current.items.map(item=>({kind:item.type,id:item.id}))});
   }
-  return {entries,categories:{eat,bars,routes,events:shows},collections:local?homeDiscoveryCollections(now):[]};
+  return {entries,categories:{eat,bars,routes,events:shows},collections:local?homeDiscoveryCollections(now).map(collection=>({...collection,coverImage:entries[homeGuideKey('collection',collection.id)]?.image || ''})):[]};
 }
 
 export function searchHomeGuide(catalog: HomeGuideCatalog, query: string): HomeGuideEntry[] {
@@ -168,4 +173,10 @@ export function filterHomeGuide(entries: readonly HomeGuideEntry[], filter: stri
   if(filter==='Walking')return entries.filter(x=>!x.facts.some(f=>f.glyph==='car'));
   if(filter==='Rides')return entries.filter(x=>x.facts.some(f=>f.glyph==='car'));
   return [...entries];
+}
+
+/** Representative photo from this idea's own local results. An empty city's
+ * pool never borrows another city's image; titles remain suggestion-led. */
+export function homeIdeaPhoto(idea: HomeIdea, catalog: HomeGuideCatalog): string | undefined {
+  return entriesForHomeIdea(idea,catalog).find(entry=>entry.image)?.image;
 }

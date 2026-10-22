@@ -47,7 +47,7 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   counts and ordering follow the active city's existing source pools.
   In light mode, quick venue chips share search's off-white fill;
   dark mode retains their Oyster charcoal fill. Link your stay and the evening
-  ribbon share For you's glyph-thumbnail `surface-sunk` fill (`#E7E0D6` light /
+  ribbon share the retained thumbnail-well `surface-sunk` fill (`#E7E0D6` light /
   `#100D13` dark), normal theme ink and a faint edge.
   Home keeps “Shall we wander?” without supporting subtext. Its one-line search
   label reads “Search the city of Oakland” for Oakland and uses the active city;
@@ -75,7 +75,7 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   text at `#963D24` / `#F0835C`. Legacy category and Vee tints follow Oyster
   surfaces and orange accents. Keep the original gradient Vee mark and the
   original page gradients intact; explicit error states retain their red.
-- “Your evening, with Vee” and Link your stay use the exact For you thumbnail
+- “Your evening, with Vee” and Link your stay keep the thumbnail-well
   `surface-sunk` fill: `#E7E0D6` light / `#100D13` dark, with standard theme lettering and
   orange `surface-accent` icons. Its smooth 22px corners, faint edge and
   level-1 elevation match the shared card material. The ticket notches and
@@ -94,11 +94,13 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   Cards name suggestions rather than specific establishments. See all opens
   `/home/ideas`; each idea opens its own local results in Field Guide.
   Collections use the same `HomeDoorCard` and exact **83px** height as For you,
-  including the horizontal Home rail. Both the rail and `/home/collections`
-  use relevant 23px outline glyphs in the same 58px `surface-sunk` thumbnail
-  wells as For you, instead of food/cover photos. Home search uses the same
-  glyph for each Collection. Individual place and event
-  photos inside a collection remain source-backed. Their promotions follow the daypart;
+  including the horizontal Home rail. For you and Collections use actual
+  **58 × 58px photo thumbnails**, with 11px corners, on Home and See all.
+  Idea photos come from their own city-scoped results; collection photos come
+  from a current member or its verified cover. Home search uses the same
+  Collection photo. No generic stock substitution; missing/failed photos keep
+  a relevant outline-glyph fallback. This does not change the ribbon or stay
+  chip’s retained `surface-sunk` fill. Promotions follow the daypart;
   expired events and events beyond seven days are omitted from Home shortlists.
 - Eat retains the existing nearest pool and ordering: target 24 real results
   (at least 20 where the catalog has them), within five miles of the selected

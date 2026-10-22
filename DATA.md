@@ -73,10 +73,13 @@ Curated Oakland food/nightlife/routes never fill another city's catalog.
 San Francisco with official destination links. Do not invent difficulty,
 opening status, park access or GPS distances. Link current park notices.
 Collections and For you share `HomeDoorCard` with an exact 83px height and
-58px glyph wells. Home collection cards and their See all list use the same
-collection-specific outline glyph instead of cover images; source photos
-remain available on individual place/event listings. Home's Vee ribbon and
-Link your stay share the glyph well's `surface-sunk` background in both themes.
+58px square photo thumbnails (11px corners), including their See all lists.
+For you uses a representative image from its own local results; Collections
+use a current member photo or their verified cover, including in Home search.
+`home-guide-photos.ts` adds official source photos only to Home's adapters;
+it does not alter Discover or shared native records. Missing/failed images
+retain a relevant outline-glyph fallback. Home's Vee ribbon and Link your stay
+keep their existing `surface-sunk` background in both themes.
 
 ## Image policy
 
