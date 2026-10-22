@@ -897,7 +897,7 @@ export default function CreateScreen() {
                 disabled={asking}
                 onPress={() => void submitAsk(promptReady ? promptText : askExampleLabel)}
                 style={[primarySurface,{ opacity: asking ? 0.48 : 1 }]}
-                className="h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ember border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+                className="h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ember border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
                 {asking ? (
                   <ActivityIndicator size="small" color={colors['on-accent']} />
                 ) : (
@@ -920,7 +920,7 @@ export default function CreateScreen() {
                 disabled={asking}
                 onPress={() => void submitAsk(promptText)}
                 style={{ backgroundColor: colors['vee-tint'] }}
-                className="flex-row items-center gap-x-2.5 rounded-card px-3 py-3 border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+                className="flex-row items-center gap-x-2.5 rounded-card px-3 py-3 border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
                 <Glyph name="spark" size={15} color={colors['vee-strong']} strokeWidth={1.8} />
                 <Text numberOfLines={1} style={{ color: colors['vee-strong'] }} className="min-w-0 flex-1 font-dm-bold text-label">
                   Ask Vee to plan around this
@@ -940,10 +940,11 @@ export default function CreateScreen() {
                   <View
                     style={{
                       backgroundColor: colors['surface-raised'],
-                      borderColor: colors['edge-faint'],
+                      borderColor: colors['edge-card'],
+                      borderBottomColor: colors['edge-card-bottom'],
                       borderWidth: StyleSheet.hairlineWidth,
                     }}
-                    className="mt-2 overflow-hidden rounded-card border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+                    className="mt-2 overflow-hidden rounded-card border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
                     {liveMatches.map((match, index) => (
                       <TouchableOpacity
                         key={`${match.kind}-${match.id}`}
@@ -959,7 +960,7 @@ export default function CreateScreen() {
                         className={`min-h-[64px] flex-row items-center gap-x-3 px-3 py-2.5 ${index === 0 ? 'rounded-card' : 'border-t border-edge-faint'} border shadow-soft-light dark:shadow-soft-dark`}>
                         <View
                           style={{ backgroundColor: colors['vee-tint'] }}
-                          className="h-10 w-10 shrink-0 items-center justify-center rounded-full border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+                          className="h-10 w-10 shrink-0 items-center justify-center rounded-full border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
                           <Glyph name={SEARCH_RESULT_GLYPHS[match.kind]} size={18} color={colors['vee-strong']} strokeWidth={1.65} />
                         </View>
 

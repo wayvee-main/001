@@ -63,7 +63,7 @@ export default function NotificationsScreen() {
               <Text className="font-dm-medium text-[13px] text-ink">Get real reminders</Text>
               <Text className="mt-0.5 font-dm text-label text-taupe">Enable notifications for a nudge before plans and on checkout day.</Text>
             </View>
-            <TouchableOpacity accessibilityRole="button" activeOpacity={0.75} onPress={enableNotifications} className="rounded-full bg-ember px-3.5 py-2 border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+            <TouchableOpacity accessibilityRole="button" activeOpacity={0.75} onPress={enableNotifications} className="rounded-full bg-ember px-3.5 py-2 border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
               <Text className="font-dm-medium text-label text-on-accent">Enable</Text>
             </TouchableOpacity>
           </RaisedView>
@@ -73,7 +73,7 @@ export default function NotificationsScreen() {
           <View className="gap-y-2.5">
             {reminders.map((reminder) => (
               <RaisedView key={reminder.key} className="flex-row items-center gap-x-3 rounded-card px-4 py-3.5">
-                <View className="h-9 w-9 items-center justify-center rounded-full bg-coral-50 border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+                <View className="h-9 w-9 items-center justify-center rounded-full bg-coral-50 border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
                   <Icon d={BELL_ICON} size={16} color={colors.peach} strokeWidth={1.8} />
                 </View>
                 <View className="min-w-0 flex-1">
@@ -85,7 +85,7 @@ export default function NotificationsScreen() {
           </View>
         ) : (
           <RaisedView className="items-center gap-y-3 rounded-card px-5 py-10">
-            <View className="h-11 w-11 items-center justify-center rounded-full bg-coral-50 border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+            <View className="h-11 w-11 items-center justify-center rounded-full bg-coral-50 border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
               <Icon d={BELL_ICON} size={20} color={colors.peach} strokeWidth={1.8} />
             </View>
             <Text className="font-fraunces text-[18px] text-ink">No notifications yet</Text>

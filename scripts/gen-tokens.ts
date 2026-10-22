@@ -27,14 +27,18 @@ function cssVarName(role: string): string {
   return `--color-${role}`;
 }
 
+function resolveEdge(edge: (typeof EDGE_ROLES)[string], theme: 'light' | 'dark'): string {
+  return rgba(theme === 'light' && edge.lightBase ? edge.lightBase : ROLES[edge.base][theme],
+    theme === 'light' ? edge.lightAlpha ?? edge.alpha : edge.alpha);
+}
+
 function buildCssBlock(theme: 'light' | 'dark'): string {
   const lines: string[] = [];
   for (const [role, value] of Object.entries(ROLES)) {
     lines.push(`  ${cssVarName(role)}: ${triple(value[theme])};`);
   }
   for (const [role, edge] of Object.entries(EDGE_ROLES)) {
-    const baseHex = ROLES[edge.base][theme];
-    lines.push(`  ${cssVarName(role)}: ${rgba(baseHex, edge.alpha)};`);
+    lines.push(`  ${cssVarName(role)}: ${resolveEdge(edge, theme)};`);
   }
   return lines.join('\n');
 }
@@ -71,7 +75,7 @@ function genThemeTs(): string {
   function resolveValue(role: string, theme: 'light' | 'dark'): string {
     if (role in ROLES) return ROLES[role][theme];
     const edge = EDGE_ROLES[role];
-    return rgba(ROLES[edge.base][theme], edge.alpha);
+    return resolveEdge(edge, theme);
   }
 
   function paletteLines(theme: 'light' | 'dark'): string {
@@ -173,7 +177,7 @@ ${fontSizeLines}
 ${radiusLines}
   },
   boxShadow: {
-    'soft-light': '0 ${ELEVATION[1].y}px ${ELEVATION[1].blur}px ${rgba(ROLES.fg.light, Number(ELEVATION[1].opacity.light))}',
+    'soft-light': 'inset 0 1px 0 rgba(255, 255, 255, .82), 0 3px 10px rgba(49, 32, 57, .09)',
     'soft-dark': '0 ${ELEVATION[1].y}px ${ELEVATION[1].blur}px ${rgba(ROLES['surface-sunk'].dark, Number(ELEVATION[1].opacity.dark))}',
   },
 };

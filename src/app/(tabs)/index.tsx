@@ -1,5 +1,4 @@
 import { useRouter } from 'expo-router';
-import { useColorScheme } from 'nativewind';
 import { useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { HomeEveningRibbon, HomeHeader } from '@/components/home-top';
@@ -18,7 +17,6 @@ import { hydratePlacesFromBackend } from '@/lib/places';
 import { activeReminders } from '@/lib/reminders';
 import { useScoper } from '@/lib/store';
 import { useThemeColors } from '@/lib/theme';
-import { withAlpha } from '@/lib/tokens';
 import { useHomeGuide } from '@/lib/use-home-guide';
 import { useHomeQuickActions } from '@/lib/use-home-quick-actions';
 import { useControlSurface } from '@/lib/shadows';
@@ -28,7 +26,6 @@ export default function HomeScreen() {
   const router = useRouter(), colors = useThemeColors(), s = useScoper();
   const city = useActiveCityName(), {catalog,now,city:citySlug,nearest} = useHomeGuide();
   const control = useControlSurface();
-  const {colorScheme}=useColorScheme(),light=colorScheme==='light';
   const quickActions = useHomeQuickActions(now);
   const [refreshing, setRefreshing] = useState(false);
   const collections = catalog.collections;
@@ -54,7 +51,7 @@ export default function HomeScreen() {
     <Text className="font-fraunces text-ink" style={{fontSize:25,lineHeight:29,letterSpacing:-.8}}>Shall we wander?</Text>
     <CitySearchBar testID="home-search" labelTestID="home-search-label" city={city} onPress={()=>router.push('/home/browse?category=all')} />
     <View testID="home-quick-actions" className="flex-row items-center gap-x-2">
-      <TouchableOpacity testID="home-stay-chip" accessibilityRole="button" accessibilityLabel={s.stay?'Update your stay':'Link your stay'} activeOpacity={.74} onPress={()=>s.openStaySheet()} style={[control,{backgroundColor:colors['surface-ribbon'],borderColor:light?withAlpha(colors.fg,.06):colors['edge-faint']}]}
+      <TouchableOpacity testID="home-stay-chip" accessibilityRole="button" accessibilityLabel={s.stay?'Update your stay':'Link your stay'} activeOpacity={.74} onPress={()=>s.openStaySheet()} style={[control,{backgroundColor:colors['surface-ribbon']}]}
         className="min-h-[34px] shrink-0 flex-row items-center gap-x-1.5 rounded-full px-2.5 py-[7px]" hitSlop={{top:6,bottom:6}}>
         <Glyph name="briefcase" size={13} color={colors['fg-muted']} />
         <Text className="font-dm text-fine text-ink">{s.stay?'Update your stay':'Link your stay'}</Text>

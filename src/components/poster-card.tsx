@@ -38,7 +38,7 @@ export function ViatorPickCard({ pick, onPress }: { pick: ViatorPick; onPress: (
           accessibilityLabel={`Book ${pick.title} on Viator`}
           activeOpacity={0.75}
           onPress={() => Linking.openURL(pick.bookingUrl).catch(() => showToast('Could not open Viator'))}
-          className="absolute right-1.5 top-1.5 h-7 w-7 items-center justify-center rounded-full bg-ember border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+          className="absolute right-1.5 top-1.5 h-7 w-7 items-center justify-center rounded-full bg-ember border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
           <Icon d={TICKET_ICON} size={13} color={colors['on-accent']} strokeWidth={2} />
         </TouchableOpacity>
       </View>

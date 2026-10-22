@@ -56,7 +56,7 @@ export default function CollectionsScreen() {
                   className="flex-row items-center gap-x-3.5 rounded-card p-3.5">
                   <Photo uri={collection.coverImage} radius={10} style={{ width: 64, height: 64 }} />
                   <View className="min-w-0 flex-1">
-                    <View className="self-start rounded-full bg-blush px-2 py-[2px] border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+                    <View className="self-start rounded-full bg-blush px-2 py-[2px] border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
                       <Text numberOfLines={1} className="font-dm-bold text-[9px] tracking-[0.6px] text-peach">
                         {collection.eyebrow}
                       </Text>

@@ -20,7 +20,7 @@ export function AppErrorBoundary({ children }: { children: React.ReactNode }) {
             accessibilityRole="button"
             activeOpacity={0.85}
             onPress={resetError}
-            className="mt-6 h-[48px] items-center justify-center rounded-full bg-ember px-8 border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+            className="mt-6 h-[48px] items-center justify-center rounded-full bg-ember px-8 border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
             <Text className="font-dm-bold text-[14px] text-on-accent">Try again</Text>
           </TouchableOpacity>
         </SafeAreaView>

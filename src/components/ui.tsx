@@ -159,9 +159,9 @@ export function Skeleton({ width, height, radius = 8 }: { width?: ViewStyle['wid
 // ── Badges ──────────────────────────────────────────────────────────────────
 
 const BADGE_TONES = {
-  accent: { border: 'border-edge-faint', bg: 'bg-blush', text: 'text-peach' },
-  success: { border: 'border-edge-faint', bg: 'bg-sage', text: 'text-pine' },
-  default: { border: 'border-edge-faint', bg: 'bg-shell', text: 'text-ink' },
+  accent: { border: 'border-edge-card border-b-edge-card-bottom', bg: 'bg-blush', text: 'text-peach' },
+  success: { border: 'border-edge-card border-b-edge-card-bottom', bg: 'bg-sage', text: 'text-pine' },
+  default: { border: 'border-edge-card border-b-edge-card-bottom', bg: 'bg-shell', text: 'text-ink' },
 } as const;
 
 /** Small filled pill. `eyebrow` (uppercase, bold, on poster/card art) and
@@ -262,7 +262,7 @@ export function OptionPill({
 export function PrimaryButton({ label, onPress, className = '' }: { label: string; onPress?: () => void; className?: string }) {
   const surface = useControlSurface(false, true);
   return (
-    <TouchableOpacity accessibilityRole="button" style={surface} activeOpacity={0.8} onPress={onPress} className={`items-center rounded-full bg-ember py-[15px] ${className} border border-edge-faint shadow-soft-light dark:shadow-soft-dark`}>
+    <TouchableOpacity accessibilityRole="button" style={surface} activeOpacity={0.8} onPress={onPress} className={`items-center rounded-full bg-ember py-[15px] ${className} border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark`}>
       <Text className="font-dm-medium text-[14.5px] text-on-accent">{label}</Text>
     </TouchableOpacity>
   );
@@ -331,7 +331,7 @@ export function BackButton({ label, onPress }: { label?: string; onPress?: () =>
         accessibilityRole="button"
         accessibilityLabel={`Go back, ${label}`}
         style={surface}
-        className="flex-row items-center gap-x-2 rounded-full border border-edge-faint bg-shell px-3.5 py-2 shadow-soft-light dark:shadow-soft-dark">
+        className="flex-row items-center gap-x-2 rounded-full border border-edge-card border-b-edge-card-bottom bg-shell px-3.5 py-2 shadow-soft-light dark:shadow-soft-dark">
         <Svg width={7} height={12} viewBox="0 0 8 14">
           <Path d="M7 1L1 7l6 6" stroke={colors.ink} strokeWidth={2.2} fill="none" strokeLinecap="round" strokeLinejoin="round" />
         </Svg>
@@ -347,7 +347,7 @@ export function BackButton({ label, onPress }: { label?: string; onPress?: () =>
       accessibilityRole="button"
       accessibilityLabel="Go back"
       style={surface}
-      className="h-10 w-10 shrink-0 items-center justify-center rounded-full border border-edge-faint bg-shell shadow-soft-light dark:shadow-soft-dark">
+      className="h-10 w-10 shrink-0 items-center justify-center rounded-full border border-edge-card border-b-edge-card-bottom bg-shell shadow-soft-light dark:shadow-soft-dark">
       <Svg width={8} height={14} viewBox="0 0 8 14">
         <Path d="M7 1L1 7l6 6" stroke={colors.ink} strokeWidth={2.2} fill="none" strokeLinecap="round" strokeLinejoin="round" />
       </Svg>

@@ -306,7 +306,7 @@ function SingleFooter({ label, onPress }: { label: string; onPress: () => void }
         accessibilityRole="button"
         activeOpacity={0.86}
         onPress={onPress}
-        className="h-[58px] flex-row items-center justify-between rounded-full bg-ember px-5 border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+        className="h-[58px] flex-row items-center justify-between rounded-full bg-ember px-5 border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
         <VeeMark size={19} variant="compact" color={colors['on-accent']} />
         <Text className="font-dm-bold text-body-strong text-on-accent">{label}</Text>
         <Glyph name="arrow" size={17} color={colors['on-accent']} strokeWidth={1.7} />
@@ -342,14 +342,14 @@ function SplitFooter({
           activeOpacity={0.82}
           onPress={onSecondary}
           style={{ backgroundColor: ink.secondaryBg }}
-          className="h-[58px] flex-1 items-center justify-center rounded-full border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+          className="h-[58px] flex-1 items-center justify-center rounded-full border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
           <Text style={{ color: ink.secondaryText }} className="font-dm-medium text-body-strong">{secondary}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           accessibilityRole="button"
           activeOpacity={0.86}
           onPress={onPrimary}
-          className="h-[58px] flex-1 flex-row items-center justify-center gap-x-2 rounded-full bg-ember px-4 border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+          className="h-[58px] flex-1 flex-row items-center justify-center gap-x-2 rounded-full bg-ember px-4 border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
           {vee ? <VeeMark size={18} variant="compact" color={colors['on-accent']} /> : null}
           <Text className="font-dm-bold text-body-strong text-on-accent">{primary}</Text>
           {vee ? null : <Glyph name="arrow" size={16} color={colors['on-accent']} strokeWidth={1.7} />}
@@ -393,7 +393,7 @@ function WelcomeStep() {
       copy="Food, events, outdoors, and fitness—planned around you.">
       <View
         style={{ backgroundColor: ink.cardBg, borderColor: ink.cardBorder }}
-        className="mt-7 rounded-panel border px-4 border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+        className="mt-7 rounded-panel border px-4 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
         {promises.map((promise, index) => (
           <View
             key={promise.glyph}
@@ -437,7 +437,7 @@ function ContextStep({ selected, onSelect }: { selected: TripContext; onSelect: 
                 backgroundColor: active ? ink.optionSelectedBg : ink.optionBg,
                 borderColor: active ? ink.optionSelectedBorder : ink.cardBorder,
               }}
-              className="min-h-[72px] flex-row items-center gap-x-2.5 rounded-panel border px-2.5 py-3 border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+              className="min-h-[72px] flex-row items-center gap-x-2.5 rounded-panel border px-2.5 py-3 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
               <MiniGlyph name={CONTEXT_GLYPHS[context]} tone={context === 'work' ? 'vee' : context === 'live' ? 'warm' : 'accent'} size={45} />
               <View className="min-w-0 flex-1">
                 <Text style={{ color: ink.strong }} className="font-dm-bold text-section">{option.label}</Text>
@@ -449,7 +449,7 @@ function ContextStep({ selected, onSelect }: { selected: TripContext; onSelect: 
                     ? { backgroundColor: ink.stateSelectedBg, borderWidth: 1, borderColor: ink.stateSelectedBorder }
                     : undefined
                 }
-                className="h-[25px] w-[25px] items-center justify-center rounded-full border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+                className="h-[25px] w-[25px] items-center justify-center rounded-full border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
                 <Glyph
                   name={active ? 'check' : 'arrow'}
                   size={15}
@@ -492,7 +492,7 @@ function InterestsStep({ selected, onToggle }: { selected: string[]; onToggle: (
                 backgroundColor: active ? (ink.interestSelectedBg ?? toneTint(tile.tone, colors)) : ink.optionBg,
                 borderColor: ink.cardBorder,
               }}
-              className="min-h-[74px] flex-row items-center gap-x-1.5 rounded-panel border px-2 py-3 border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+              className="min-h-[74px] flex-row items-center gap-x-1.5 rounded-panel border px-2 py-3 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
               <MiniGlyph name={tile.glyph} tone={tile.tone} size={40} />
               <Text style={{ color: ink.strong }} className="min-w-0 flex-1 font-dm-medium text-label">
                 {tile.label}
@@ -500,7 +500,7 @@ function InterestsStep({ selected, onToggle }: { selected: string[]; onToggle: (
               {active ? (
                 <View
                   style={{ backgroundColor: toneHex(tile.tone, colors) }}
-                  className="h-[19px] w-[19px] items-center justify-center rounded-full border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+                  className="h-[19px] w-[19px] items-center justify-center rounded-full border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
                   <Glyph name="check" size={11} color={checkInkFor(tile.tone, colors)} strokeWidth={2.2} />
                 </View>
               ) : (
@@ -570,7 +570,7 @@ function ConfirmStep({
             backgroundColor: chips.includes(NO_RESTRICTIONS) ? ink.chipSelectedBg : ink.chipBg,
             borderColor: chips.includes(NO_RESTRICTIONS) ? ink.chipSelectedBorder : ink.chipBorder,
           }}
-          className="min-h-[46px] justify-center rounded-full border px-3.5 py-2.5 border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+          className="min-h-[46px] justify-center rounded-full border px-3.5 py-2.5 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
           <Text
             style={{ color: chips.includes(NO_RESTRICTIONS) ? ink.strong : ink.body }}
             className={chips.includes(NO_RESTRICTIONS) ? 'font-dm-medium text-body' : 'font-dm text-body'}>
@@ -593,7 +593,7 @@ function ConfirmStep({
                 backgroundColor: selectedCount ? ink.chipSelectedBg : ink.chipBg,
                 borderColor: selectedCount || expanded ? ink.chipSelectedBorder : ink.chipBorder,
               }}
-              className="min-h-[46px] flex-row items-center gap-x-2 rounded-full border px-3.5 py-2.5 border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+              className="min-h-[46px] flex-row items-center gap-x-2 rounded-full border px-3.5 py-2.5 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
               <Text
                 style={{ color: selectedCount ? ink.strong : ink.body }}
                 className={selectedCount ? 'font-dm-medium text-body' : 'font-dm text-body'}>
@@ -616,7 +616,7 @@ function ConfirmStep({
             backgroundColor: otherSelected ? ink.chipSelectedBg : ink.chipBg,
             borderColor: otherSelected ? ink.chipSelectedBorder : ink.chipBorder,
           }}
-          className="min-h-[46px] justify-center rounded-full border px-3.5 py-2.5 border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+          className="min-h-[46px] justify-center rounded-full border px-3.5 py-2.5 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
           <Text
             style={{ color: otherSelected ? ink.strong : ink.body }}
             className={otherSelected ? 'font-dm-medium text-body' : 'font-dm text-body'}>
@@ -642,7 +642,7 @@ function ConfirmStep({
                     backgroundColor: active ? ink.chipSelectedBg : ink.chipBg,
                     borderColor: active ? ink.chipSelectedBorder : ink.chipBorder,
                   }}
-                  className="min-h-[44px] justify-center rounded-full border px-3.5 py-2.5 border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+                  className="min-h-[44px] justify-center rounded-full border px-3.5 py-2.5 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
                   <Text
                     style={{ color: active ? ink.strong : ink.body }}
                     className={active ? 'font-dm-medium text-body' : 'font-dm text-body'}>
@@ -659,7 +659,7 @@ function ConfirmStep({
         <>
           <View
             style={{ backgroundColor: ink.fieldActiveBg, borderColor: ink.fieldActiveBorder }}
-            className="mt-2.5 h-[50px] flex-row items-center gap-x-2 rounded-full border pl-4 pr-3 border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+            className="mt-2.5 h-[50px] flex-row items-center gap-x-2 rounded-full border pl-4 pr-3 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
             <TextInput
               accessibilityLabel="Other restriction for Vee"
               maxLength={PLAN_AROUND_NOTE_MAX}
@@ -695,7 +695,7 @@ function ConfirmStep({
                 backgroundColor: active ? ink.walkSelectedBg : ink.chipBg,
                 borderColor: active ? ink.walkSelectedBorder : ink.chipBorder,
               }}
-              className="min-h-[48px] flex-1 items-center justify-center rounded-full border px-2 py-2.5 border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+              className="min-h-[48px] flex-1 items-center justify-center rounded-full border px-2 py-2.5 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
               <Text
                 style={{ color: active ? ink.walkSelectedText : ink.body }}
                 className={active ? 'font-dm-medium text-body' : 'font-dm text-body'}>
@@ -709,7 +709,7 @@ function ConfirmStep({
       <Text style={{ color: ink.helper }} className="mb-2.5 mt-6 font-dm-bold text-body">Your plan</Text>
       <View
         style={{ backgroundColor: ink.cardBg, borderColor: ink.cardBorder }}
-        className="mx-1 rounded-card border px-4 pb-3 pt-2.5 border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+        className="mx-1 rounded-card border px-4 pb-3 pt-2.5 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
           <View className="flex-row items-center gap-x-3">
             <VeeMark size={25} gradient />
             <View className="min-w-0 flex-1">
@@ -752,16 +752,16 @@ function RouteThumbnail() {
   const colors = useThemeColors();
   const ink = useWashInk();
   return (
-    <View style={{ backgroundColor: colors.bg }} className="h-[55px] w-[55px] overflow-hidden rounded-control border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
-      <View style={{ backgroundColor: colors['warm-tint'] }} className="absolute left-[5px] top-[6px] h-[19px] w-[28px] rounded-md border border-edge-faint shadow-soft-light dark:shadow-soft-dark" />
-      <View style={{ backgroundColor: colors['vee-tint'] }} className="absolute bottom-[5px] right-[5px] h-[27px] w-[22px] rounded-md border border-edge-faint shadow-soft-light dark:shadow-soft-dark" />
-      <View style={{ backgroundColor: colors['accent-tint'] }} className="absolute bottom-[7px] left-[6px] h-[17px] w-[18px] rounded border border-edge-faint shadow-soft-light dark:shadow-soft-dark" />
+    <View style={{ backgroundColor: colors.bg }} className="h-[55px] w-[55px] overflow-hidden rounded-control border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
+      <View style={{ backgroundColor: colors['warm-tint'] }} className="absolute left-[5px] top-[6px] h-[19px] w-[28px] rounded-md border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark" />
+      <View style={{ backgroundColor: colors['vee-tint'] }} className="absolute bottom-[5px] right-[5px] h-[27px] w-[22px] rounded-md border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark" />
+      <View style={{ backgroundColor: colors['accent-tint'] }} className="absolute bottom-[7px] left-[6px] h-[17px] w-[18px] rounded border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark" />
       <View
         style={{ borderColor: ink.strong, transform: [{ rotate: '-18deg' }] }}
         className="absolute left-[17px] top-[28px] h-[17px] w-[31px] border-r border-t border-dashed"
       />
-      <View style={{ backgroundColor: colors.accent, borderColor: colors.bg }} className="absolute bottom-[11px] left-[10px] h-[9px] w-[9px] rounded-full border-2 border-edge-faint shadow-soft-light dark:shadow-soft-dark" />
-      <View style={{ backgroundColor: colors.vee, borderColor: colors.bg }} className="absolute right-[10px] top-[10px] h-[9px] w-[9px] rounded-full border-2 border-edge-faint shadow-soft-light dark:shadow-soft-dark" />
+      <View style={{ backgroundColor: colors.accent, borderColor: colors.bg }} className="absolute bottom-[11px] left-[10px] h-[9px] w-[9px] rounded-full border-2 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark" />
+      <View style={{ backgroundColor: colors.vee, borderColor: colors.bg }} className="absolute right-[10px] top-[10px] h-[9px] w-[9px] rounded-full border-2 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark" />
     </View>
   );
 }

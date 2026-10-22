@@ -348,7 +348,7 @@ export default function PlanDraftScreen() {
               // themselves, so they get their own greeting and the shape they
               // chose.
               <View className="flex-row items-center gap-x-1.5">
-                <View style={{ backgroundColor: colors['vee-tint'] }} className="rounded px-1.5 py-0.5 border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+                <View style={{ backgroundColor: colors['vee-tint'] }} className="rounded px-1.5 py-0.5 border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
                   <Text style={{ color: colors['vee-strong'] }} className="font-dm-bold text-micro uppercase">
                     Vee&rsquo;s pick
                   </Text>
@@ -376,7 +376,7 @@ export default function PlanDraftScreen() {
                 // draft → plan on the stack and a back tap would land on the
                 // builder again instead of the composer.
                 onPress={() => (router.canGoBack() ? router.back() : router.push('/plan'))}
-                className="h-9 items-center justify-center rounded-full border border-edge-faint bg-shell px-3.5 shadow-soft-light dark:shadow-soft-dark">
+                className="h-9 items-center justify-center rounded-full border border-edge-card border-b-edge-card-bottom bg-shell px-3.5 shadow-soft-light dark:shadow-soft-dark">
                 <Text className="font-dm-medium text-label text-peach">Done</Text>
               </TouchableOpacity>
             ) : null
@@ -457,7 +457,7 @@ export default function PlanDraftScreen() {
             <TouchableOpacity
               activeOpacity={0.72}
               onPress={() => router.push('/discover')}
-              className="mt-3 items-center self-start rounded-full border border-edge-faint bg-shell px-4 py-2.5 shadow-soft-light dark:shadow-soft-dark">
+              className="mt-3 items-center self-start rounded-full border border-edge-card border-b-edge-card-bottom bg-shell px-4 py-2.5 shadow-soft-light dark:shadow-soft-dark">
               <Text className="font-dm-medium text-label text-ink">Browse Discover</Text>
             </TouchableOpacity>
           </RaisedView>
@@ -466,7 +466,7 @@ export default function PlanDraftScreen() {
             accessibilityRole="button"
             activeOpacity={0.85}
             onPress={generateNight}
-            className="flex-row items-center justify-center gap-x-2 rounded-full bg-accent-fill py-[15px] shadow-soft-light dark:shadow-soft-dark border border-edge-faint">
+            className="flex-row items-center justify-center gap-x-2 rounded-full bg-accent-fill py-[15px] shadow-soft-light dark:shadow-soft-dark border border-edge-card border-b-edge-card-bottom">
             <Icon d={ICON_PATHS.sparkles} size={15} color={colors['on-accent']} strokeWidth={2} />
             <Text className="font-dm-bold text-body-strong text-on-accent">Generate itinerary</Text>
           </TouchableOpacity>
@@ -648,7 +648,7 @@ export default function PlanDraftScreen() {
                   accessibilityLabel={`${nextListing.name}, ${eventDayGroupLabel(nextListing, selectedDateAt)}`}
                   activeOpacity={0.72}
                   onPress={() => router.push(`/event/${nextListing.id}`)}
-                  className="mt-3 flex-row items-center gap-x-2 rounded-xl border border-edge-faint bg-cream px-3 py-2.5 shadow-soft-light dark:shadow-soft-dark">
+                  className="mt-3 flex-row items-center gap-x-2 rounded-xl border border-edge-card border-b-edge-card-bottom bg-cream px-3 py-2.5 shadow-soft-light dark:shadow-soft-dark">
                   <Text style={{ color: colors['vee-strong'] }} className="shrink-0 font-dm-bold text-micro uppercase">
                     {eventDayGroupLabel(nextListing, selectedDateAt)} · {nextListing.time}
                   </Text>
@@ -659,7 +659,7 @@ export default function PlanDraftScreen() {
               <TouchableOpacity
                 activeOpacity={0.72}
                 onPress={() => router.push('/discover')}
-                className="mt-3 items-center self-start rounded-full border border-edge-faint bg-shell px-4 py-2.5 shadow-soft-light dark:shadow-soft-dark">
+                className="mt-3 items-center self-start rounded-full border border-edge-card border-b-edge-card-bottom bg-shell px-4 py-2.5 shadow-soft-light dark:shadow-soft-dark">
                 <Text className="font-dm-medium text-label text-ink">Browse Discover</Text>
               </TouchableOpacity>
             </RaisedView>

@@ -104,7 +104,7 @@ export function WhyThisTrustSurface({
   if (!terms.length) return null;
 
   return (
-    <View className="rounded-card border border-edge-faint bg-night p-4 gap-y-3 shadow-soft-light dark:shadow-soft-dark">
+    <View className="rounded-card border border-edge-card border-b-edge-card-bottom bg-night p-4 gap-y-3 shadow-soft-light dark:shadow-soft-dark">
       <View className="flex-row items-center justify-between gap-x-2">
         <View className="flex-1 flex-row items-center gap-x-2">
           <View className="h-7 w-7 items-center justify-center rounded-full bg-white/15 border border-white/20">

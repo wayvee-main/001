@@ -31,7 +31,7 @@ export function Photo({
   children?: ReactNode;
 }) {
   const colors = useThemeColors();
-  const frame = radius > 0 ? {borderWidth:1,borderColor:colors['edge-faint']} : {};
+  const frame = radius > 0 ? {borderWidth:1,borderColor:colors['edge-card'],borderBottomColor:colors['edge-card-bottom']} : {};
   const [failedUri,setFailedUri]=useState<string|null>(null);
   if (!uri || failedUri===uri) {
     if(fallbackGlyph)return <View accessible accessibilityRole="image" accessibilityLabel={fallbackLabel} testID="place-photo-fallback"

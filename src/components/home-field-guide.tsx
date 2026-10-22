@@ -45,7 +45,7 @@ export function HomeGuideScreen({children,now,backLabel='Back',search=true}: {ch
         </TouchableOpacity>
         <WayveeWordmark size={17} mark={false} />
         {search?<TouchableOpacity accessibilityRole="button" accessibilityLabel="Search Home" onPress={()=>router.push('/home/browse?category=all')}
-          style={{width:32,height:32,borderRadius:16,backgroundColor:colors['surface-raised'],borderWidth:1,borderColor:colors['edge-faint'],alignItems:'center',justifyContent:'center'}}>
+          style={{width:32,height:32,borderRadius:16,backgroundColor:colors['surface-raised'],borderWidth:1,borderColor:colors['edge-card'],borderBottomColor:colors['edge-card-bottom'],alignItems:'center',justifyContent:'center'}}>
           <Glyph name="search" size={16} color={colors['fg-muted']} />
         </TouchableOpacity>:<View style={{width:32}} />}
       </View>

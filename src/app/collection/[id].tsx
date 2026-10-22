@@ -39,7 +39,7 @@ export default function CuratedCollectionScreen() {
             <Text className="mt-2 text-center font-dm text-body text-taupe">
               Browse the current Oakland shortlists instead.
             </Text>
-            <TouchableOpacity onPress={() => router.replace('/collection')} className="mt-5 rounded-full bg-ember px-5 py-3 border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+            <TouchableOpacity onPress={() => router.replace('/collection')} className="mt-5 rounded-full bg-ember px-5 py-3 border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
               <Text className="font-dm-medium text-label text-on-accent">Browse collections</Text>
             </TouchableOpacity>
           </View>
@@ -112,7 +112,7 @@ export default function CuratedCollectionScreen() {
       <RaisedView className="items-center rounded-card px-5 py-7">
         <Text className="font-dm-medium text-body text-ink">This shortlist has ended.</Text>
         <Text className="mt-1 text-center font-dm text-label text-taupe">Expired listings have been removed.</Text>
-        <TouchableOpacity onPress={() => router.replace('/discover')} className="mt-3 rounded-full bg-ember px-4 py-2.5 border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+        <TouchableOpacity onPress={() => router.replace('/discover')} className="mt-3 rounded-full bg-ember px-4 py-2.5 border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
           <Text className="font-dm-medium text-label text-on-accent">See current events</Text>
         </TouchableOpacity>
       </RaisedView>

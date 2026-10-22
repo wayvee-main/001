@@ -47,7 +47,7 @@ export default function FollowingScreen() {
                       event.stopPropagation();
                       toggleFollow(venue.id, venue.name);
                     }}
-                    className="rounded-full bg-blush px-3 py-2 border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+                    className="rounded-full bg-blush px-3 py-2 border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
                     <Text className="font-dm-medium text-meta text-peach">Unfollow</Text>
                   </TouchableOpacity>
                   <ChevronRight />

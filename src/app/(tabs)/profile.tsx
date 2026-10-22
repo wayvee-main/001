@@ -19,7 +19,7 @@ import { useThemeColors } from '@/lib/theme';
 function Setting({label,note,glyph,onPress}:{label:string;note:string;glyph:string;onPress:()=>void}) {
   const colors=useThemeColors(),surface=useRaisedSurface(1);
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`${label}. ${note}`} onPress={onPress} activeOpacity={.78}
-    className="flex-row items-center gap-x-2.5 rounded-setting bg-surface-raised px-3 py-[13px] border border-edge-faint shadow-soft-light dark:shadow-soft-dark"
+    className="flex-row items-center gap-x-2.5 rounded-setting bg-surface-raised px-3 py-[13px] border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark"
     style={[surface,{minHeight:62}]}>
     <Glyph name={glyph} size={18} color={colors['fg-muted']} />
     <View className="min-w-0 flex-1"><Text className="font-dm text-[13px] leading-[18px] text-ink">{label}</Text>
@@ -64,7 +64,7 @@ export default function ProfileScreen() {
   };
   return <Screen><ScreenScroll gap={20} clearsTabBar>
     <View className="mt-2 flex-row items-center gap-x-3">
-      <View className="items-center justify-center rounded-full bg-surface-raised border border-edge-faint shadow-soft-light dark:shadow-soft-dark" style={{width:44,height:44,borderWidth:1,borderColor:colors['edge-faint'],overflow:'hidden'}}>
+      <View className="items-center justify-center rounded-full bg-surface-raised border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark" style={{width:44,height:44,borderWidth:1,borderColor:colors['edge-card'],borderBottomColor:colors['edge-card-bottom'],overflow:'hidden'}}>
         {s.profileAvatarUrl?<Image source={{uri:s.profileAvatarUrl}} contentFit="cover" style={{width:44,height:44}} />:
           <Text className="font-dm-medium text-[17px] text-ink">{s.session?initialsFor(displayName):'G'}</Text>}
       </View>
@@ -78,7 +78,7 @@ export default function ProfileScreen() {
     {!s.session?<View className="flex-row items-center gap-x-3">
       <Text className="min-w-0 flex-1 font-dm text-label text-taupe">Sign in to save places and plans.</Text>
       <TouchableOpacity accessibilityRole="button" accessibilityLabel="Sign in or create account" onPress={()=>s.openSheet('auth')} activeOpacity={.78}
-        style={control} className="h-11 flex-row items-center gap-x-2 rounded-full bg-surface-raised px-4 border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+        style={control} className="h-11 flex-row items-center gap-x-2 rounded-full bg-surface-raised px-4 border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
         <Text className="font-dm-medium text-label" style={{color:colors['fg-accent']}}>Sign in</Text>
         <Glyph name="arrow" size={14} color={colors['fg-accent']} />
       </TouchableOpacity>
@@ -111,7 +111,7 @@ export default function ProfileScreen() {
       <View accessibilityViewIsModal className="rounded-t-sheet bg-bg" style={{paddingHorizontal:gutter,paddingTop:22,paddingBottom:Math.max(insets.bottom,20),maxHeight:'75%'}}>
         <View className="mb-4 flex-row items-center justify-between">
           <Text className="font-fraunces text-title text-ink">{picker==='appearance'?'A change of light':'Your corner of the city'}</Text>
-          <TouchableOpacity accessibilityRole="button" accessibilityLabel="Close preferences" onPress={()=>setPicker(null)} className="h-11 w-11 items-center justify-center rounded-full bg-surface-raised border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+          <TouchableOpacity accessibilityRole="button" accessibilityLabel="Close preferences" onPress={()=>setPicker(null)} className="h-11 w-11 items-center justify-center rounded-full bg-surface-raised border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
             <Glyph name="close" size={18} color={colors.fg} />
           </TouchableOpacity>
         </View>

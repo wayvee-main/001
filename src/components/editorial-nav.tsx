@@ -66,8 +66,8 @@ export function EditorialNav({items,reserveSpace=false}:{items:NavigationItem[];
     <Reanimated.View testID="editorial-navigation" accessibilityRole="tablist"
       style={[{flexDirection:'row',alignItems:'center',borderRadius:999,
         position:'absolute',left:gutter,right:gutter,bottom,paddingTop:9,paddingBottom:8,paddingHorizontal:10,
-        backgroundColor:withAlpha(colors['surface-navigation'],.97),borderWidth:1,borderColor:colors['edge-faint'],
-        boxShadow:light?`0 6.6px 24.2px ${withAlpha(colors.fg,.1045)}`:'0 6.6px 24.2px rgba(0,0,0,.352)',
+        backgroundColor:withAlpha(colors['surface-navigation'],.97),borderWidth:1,borderColor:colors['edge-card'],borderBottomColor:colors['edge-card-bottom'],
+        boxShadow:light?'inset 0 1px 0 rgba(255,255,255,.82), 0 6.6px 24.2px rgba(49,32,57,.1045)':'0 6.6px 24.2px rgba(0,0,0,.352)',
         ...(Platform.OS==='web'?{backdropFilter:'blur(18px)'}:{})}, hides?tuck:null]}>
       {items.map(item=><EditorialTab key={item.key} item={item} reduceMotion={reduceMotion} />)}
     </Reanimated.View>

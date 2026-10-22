@@ -58,6 +58,8 @@ module.exports = {
   edge: 'var(--color-edge)',
   "edge-soft": 'var(--color-edge-soft)',
   "edge-faint": 'var(--color-edge-faint)',
+  "edge-card": 'var(--color-edge-card)',
+  "edge-card-bottom": 'var(--color-edge-card-bottom)',
   coral: { 50: "rgba(184,70,36,0.11)" },
   forest: "#4C2E22",
   night: "#3D261F",
@@ -89,7 +91,7 @@ module.exports = {
   sheet: "25px",
   },
   boxShadow: {
-    'soft-light': '0 2.2px 8.8px rgba(49, 32, 57, 0.066)',
+    'soft-light': 'inset 0 1px 0 rgba(255, 255, 255, .82), 0 3px 10px rgba(49, 32, 57, .09)',
     'soft-dark': '0 2.2px 8.8px rgba(16, 13, 19, 0.33)',
   },
 };

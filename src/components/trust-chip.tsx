@@ -31,7 +31,7 @@ export function TrustChip({
       accessibilityRole="text"
       accessibilityLabel={hint}
       style={{ backgroundColor: tone === 'pine' ? colors.sage : colors.surface }}
-      className="shrink-0 flex-row items-center gap-x-1 rounded-full px-2.5 py-1 border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+      className="shrink-0 flex-row items-center gap-x-1 rounded-full px-2.5 py-1 border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
       <Glyph name={glyph} size={11} color={tone === 'pine' ? colors.pine : colors.taupe} strokeWidth={1.9} />
       <Text className={`font-dm-medium text-[10px] ${tone === 'pine' ? 'text-pine' : 'text-taupe'}`}>{label}</Text>
     </View>

@@ -10,9 +10,13 @@ export function useElevation(level: 1 | 2 | 3 | 4 = 2): { boxShadow: string } {
   const { colorScheme } = useColorScheme();
   const colors = useThemeColors();
   const theme = colorScheme === 'light' ? 'light' : 'dark';
+  if (theme === 'light' && level === 1) {
+    return { boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, .82), 0 3px 10px rgba(49, 32, 57, .09)' };
+  }
   const { blur, y, opacity } = ELEVATION[level];
   const [r, g, b] = hexToRgb(theme === 'light' ? colors.fg : colors['surface-sunk']);
-  return { boxShadow: `0 ${y}px ${blur}px rgba(${r}, ${g}, ${b}, ${opacity[theme]})` };
+  const shadow = `0 ${y}px ${blur}px rgba(${r}, ${g}, ${b}, ${opacity[theme]})`;
+  return { boxShadow: theme === 'light' ? `inset 0 1px 0 rgba(255, 255, 255, .82), ${shadow}` : shadow };
 }
 
 /** Shared neutral card/panel treatment. Inputs, controls, and semantic tinted
@@ -23,7 +27,8 @@ export function useRaisedSurface(level: 1 | 2 | 3 | 4 = 1, tone: 'neutral' | 'di
   return {
     backgroundColor: colors[tone === 'discovery' ? 'surface-discovery' : 'surface-raised'],
     borderWidth: 1,
-    borderColor: colors['edge-faint'],
+    borderColor: colors['edge-card'],
+    borderBottomColor: colors['edge-card-bottom'],
     ...elevation,
   };
 }
@@ -34,5 +39,5 @@ export function useControlSurface(selected = false, primary = false): ViewStyle 
   const colors = useThemeColors();
   const surface = useRaisedSurface(1);
   const fill = primary ? colors['accent-fill'] : selected ? colors['selected-surface'] : colors['surface-control'];
-  return { ...surface, backgroundColor: fill, borderColor: colors['edge-faint'] };
+  return { ...surface, backgroundColor: fill };
 }

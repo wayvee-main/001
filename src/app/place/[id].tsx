@@ -35,7 +35,7 @@ export default function PlaceScreen() {
           <View className="flex-1 items-center justify-center px-6 pb-16">
             <Text className="font-fraunces text-[25px] text-ink">Place unavailable</Text>
             <Text className="mt-2 text-center font-dm text-[13.5px] leading-5 text-taupe">Browse the Oakland food hub instead.</Text>
-            <TouchableOpacity onPress={() => router.replace('/featured')} className="mt-5 rounded-full bg-ember px-6 py-3 border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+            <TouchableOpacity onPress={() => router.replace('/featured')} className="mt-5 rounded-full bg-ember px-6 py-3 border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
               <Text className="font-dm-medium text-[14px] text-on-accent">Open food hub</Text>
             </TouchableOpacity>
           </View>
@@ -116,7 +116,7 @@ export default function PlaceScreen() {
                 accessibilityRole="button"
                 activeOpacity={0.72}
                 onPress={() => openExternal(`tel:${place.phone!.replace(/\D/g, '')}`, 'Could not start the call')}
-                className="flex-row items-center gap-x-2 rounded-card border border-edge-faint bg-shell px-4 py-3 shadow-soft-light dark:shadow-soft-dark">
+                className="flex-row items-center gap-x-2 rounded-card border border-edge-card border-b-edge-card-bottom bg-shell px-4 py-3 shadow-soft-light dark:shadow-soft-dark">
                 <Icon d={PHONE} size={15} color={colors.peach} strokeWidth={1.8} />
                 <Text className="font-dm-medium text-[13px] text-ink">{place.phone}</Text>
               </TouchableOpacity>
@@ -132,7 +132,7 @@ export default function PlaceScreen() {
             accessibilityRole="button"
             activeOpacity={0.75}
             onPress={() => openExternal(directionsUrl, 'Could not open Maps')}
-            className="h-12 flex-row items-center justify-center gap-x-1.5 rounded-full bg-ember border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+            className="h-12 flex-row items-center justify-center gap-x-1.5 rounded-full bg-ember border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
             <Icon d={ROUTE} size={15} color={colors['on-accent']} strokeWidth={1.9} />
             <Text className="font-dm-medium text-[13px] text-on-accent">Get directions</Text>
           </TouchableOpacity>

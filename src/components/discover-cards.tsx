@@ -70,7 +70,7 @@ export function EssentialNight({spot:x,onPress}:{spot:NightlifeSpot;onPress:()=>
   const note=NIGHT_NOTES[x.id]||[x.kind.split(/\s+/).slice(0,3).join(' '),'clock','Hours'];
   const street=x.address.split(',')[0].replace(/^\d+\s+/,'').replace(/\s+(Ave|Avenue)\.?$/,'');
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Explore ${x.name}`} onPress={onPress} activeOpacity={.78}
-    className="overflow-hidden rounded-card bg-surface border border-edge-faint shadow-soft-light dark:shadow-soft-dark" style={{width:width<=400?149:157,alignSelf:'flex-start'}}>
+    className="overflow-hidden rounded-card bg-surface border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark" style={{width:width<=400?149:157,alignSelf:'flex-start'}}>
     <Photo uri={x.image} radius={0} style={{width:'100%',height:111}} />
     <View style={{paddingHorizontal:11,paddingTop:10,paddingBottom:12}}>
       <Text numberOfLines={2} className="font-dm-medium text-card-name text-card-ink">{x.name}</Text>
@@ -95,7 +95,7 @@ export function EssentialEvent({event:x,onPress}:{event:ScoperEvent;onPress:()=>
   const artHeight=Math.max(56,(111+bodyHeight)*.9-bodyHeight);
   const shortVenue=x.venue==='Fox Theater'?'Fox':x.venue==='Paramount Theatre'?'Paramount':x.venue;
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Explore ${x.name} at ${x.venue}`} onPress={onPress} activeOpacity={.78}
-    className="overflow-hidden rounded-card bg-surface border border-edge-faint shadow-soft-light dark:shadow-soft-dark" style={{width:width<=400?149:157,alignSelf:'flex-start'}}>
+    className="overflow-hidden rounded-card bg-surface border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark" style={{width:width<=400?149:157,alignSelf:'flex-start'}}>
     <Photo uri={x.image} radius={0} style={{width:'100%',height:artHeight}} />
     <View onLayout={e=>setBodyHeight(e.nativeEvent.layout.height)} style={{paddingHorizontal:11,paddingTop:10,paddingBottom:12}}>
       <Text numberOfLines={2} className="font-dm-medium text-card-name text-card-ink">{x.name}</Text>
@@ -115,9 +115,9 @@ export function StageHero({event:x,onPress}:{event:ScoperEvent;onPress:()=>void}
   const date=x.startsAt?new Date(x.startsAt):null;
   const doors=x.date.match(/\bDoors\s+([^·]+)/i)?.[1]?.trim();
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Explore ${x.name}, ${eventDayGroupLabel(x)}, ${x.venue}`} onPress={onPress} activeOpacity={.8}
-    className="overflow-hidden rounded-card bg-surface border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+    className="overflow-hidden rounded-card bg-surface border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
     <View><Photo uri={x.image} radius={0} style={{width:'100%',height:artHeight}} />
-      {date?<View className="absolute left-3 top-3 rounded-control bg-surface px-2.5 py-2 border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+      {date?<View className="absolute left-3 top-3 rounded-control bg-surface px-2.5 py-2 border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
         <Text className="text-center font-dm text-fine text-card-muted">{date.toLocaleDateString('en-US',{month:'short',timeZone:'America/Los_Angeles'})}</Text>
         <Text className="text-center font-fraunces text-title text-card-ink">{date.toLocaleDateString('en-US',{day:'numeric',timeZone:'America/Los_Angeles'})}</Text>
       </View>:null}</View>

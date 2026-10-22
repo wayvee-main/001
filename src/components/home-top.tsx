@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import { useColorScheme } from 'nativewind';
 import { ScrollView, Text, TouchableOpacity, View, type ViewStyle } from 'react-native';
 
 import { Glyph } from '@/components/glyph';
@@ -8,7 +7,6 @@ import { WayveeWordmark } from '@/components/wayvee-wordmark';
 import type { HomeSuggestion } from '@/lib/daypart';
 import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
-import { withAlpha } from '@/lib/tokens';
 import { useWeatherNow, weatherLine } from '@/lib/weather';
 
 /**
@@ -67,7 +65,7 @@ export function HomeHeader({
           activeOpacity={0.72}
           style={control}
           onPress={onNotifications}
-          className="h-9 w-9 items-center justify-center rounded-full bg-surface-raised border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+          className="h-9 w-9 items-center justify-center rounded-full bg-surface-raised border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
           <Glyph name="bell" size={18} color={colors.fg} strokeWidth={1.55} />
           {hasReminders ? (
             <View
@@ -85,7 +83,7 @@ export function HomeHeader({
           activeOpacity={0.78}
           style={control}
           onPress={onProfile}
-          className="h-9 w-9 items-center justify-center rounded-full bg-surface-raised border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+          className="h-9 w-9 items-center justify-center rounded-full bg-surface-raised border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
           <Glyph name="user" size={19} color={colors.fg} strokeWidth={1.55} />
         </TouchableOpacity>
       </View>
@@ -95,10 +93,10 @@ export function HomeHeader({
 
 /** Home's ribbon shares the light card fill, with a barely visible rim. */
 export function HomeEveningRibbon({onPress}:{onPress:()=>void}) {
-  const colors=useThemeColors(),surface=useRaisedSurface(1),{colorScheme}=useColorScheme();
+  const colors=useThemeColors(),surface=useRaisedSurface(1);
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel="Open your evening with Vee" activeOpacity={.78}
     onPress={onPress} testID="home-evening-ribbon"
-    style={[surface,{backgroundColor:colors['surface-ribbon'],borderColor:colorScheme==='light'?withAlpha(colors.fg,.06):colors['edge-faint'],minHeight:61.2,borderRadius:22,flexDirection:'row',alignItems:'stretch'}]}>
+    style={[surface,{backgroundColor:colors['surface-ribbon'],minHeight:61.2,borderRadius:22,flexDirection:'row',alignItems:'stretch'}]}>
     <View className="min-w-0 flex-1 flex-row items-center" style={{paddingHorizontal:11,paddingVertical:8.4,gap:7}}>
       <VeeMark size={28.9} color={colors['surface-accent']} />
       <View className="min-w-0 flex-1"><Text numberOfLines={1} className="font-fraunces text-ink" style={{fontSize:15.3,lineHeight:18}}>Your evening, with Vee</Text>
@@ -230,8 +228,8 @@ export function VeeHero({
               activeOpacity={0.72}
               hitSlop={{ top: 4, bottom: 4 }}
               onPress={() => onSuggestion(suggestion)}
-              style={[launcherSurface, { backgroundColor: colors['surface-raised'], borderColor: colors['edge-faint'] }]}
-              className="h-9 shrink-0 flex-row items-center gap-x-1.5 rounded-full border px-3 border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+              style={[launcherSurface, { backgroundColor: colors['surface-raised'] }]}
+              className="h-9 shrink-0 flex-row items-center gap-x-1.5 rounded-full border px-3 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
               <Glyph name={suggestion.glyph} size={13} color={colors['fg-muted']} strokeWidth={1.8} />
               <Text numberOfLines={1} className="font-dm-medium text-label text-ink">{suggestion.label}</Text>
             </TouchableOpacity>

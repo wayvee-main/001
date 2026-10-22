@@ -31,7 +31,7 @@ export default function FeaturedOrderingScreen() {
         contentContainerStyle={{ width: '100%', maxWidth: 720, alignSelf: 'center', paddingHorizontal: gutter, paddingBottom: 30, gap: 18 }}>
         <HeaderRow title="Menus and ordering" />
 
-        <View className="rounded-card border border-edge-faint bg-coral-50 p-4 shadow-soft-light dark:shadow-soft-dark">
+        <View className="rounded-card border border-edge-card border-b-edge-card-bottom bg-coral-50 p-4 shadow-soft-light dark:shadow-soft-dark">
           <Text className="font-dm-bold text-[9.5px] tracking-[0.8px] text-peach">OFFICIAL HANDOFFS</Text>
           <Text className="mt-2 font-fraunces text-[22px] leading-[26px] text-ink">Start with the restaurant, not a mystery listing</Text>
           <Text className="mt-2 font-dm text-[12.5px] leading-[18px] text-taupe">
@@ -55,7 +55,7 @@ export default function FeaturedOrderingScreen() {
                   activeOpacity={0.72}
                   onPress={() => router.push(`/restaurant/${restaurant.id}`)}
                   className="flex-row items-center gap-x-3">
-                  <View className="rounded-card border border-edge-faint bg-shell p-1 shadow-soft-light dark:shadow-soft-dark">
+                  <View className="rounded-card border border-edge-card border-b-edge-card-bottom bg-shell p-1 shadow-soft-light dark:shadow-soft-dark">
                     <Photo uri={restaurant.image} radius={8} style={{ width: 62, height: 62 }} />
                   </View>
                   <View className="min-w-0 flex-1">
@@ -78,7 +78,7 @@ export default function FeaturedOrderingScreen() {
                   <TouchableOpacity
                     activeOpacity={0.7}
                     onPress={() => router.push(`/restaurant/${restaurant.id}`)}
-                    className="flex-1 items-center rounded-full border border-edge-faint bg-shell py-2 shadow-soft-light dark:shadow-soft-dark">
+                    className="flex-1 items-center rounded-full border border-edge-card border-b-edge-card-bottom bg-shell py-2 shadow-soft-light dark:shadow-soft-dark">
                     <Text className="font-dm-medium text-label text-ink">Details</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -86,7 +86,7 @@ export default function FeaturedOrderingScreen() {
                     accessibilityLabel={`${restaurant.primaryAction.label} from ${restaurant.name}`}
                     activeOpacity={0.7}
                     onPress={() => openOfficialAction(restaurant.name, restaurant.primaryAction.url)}
-                    className="flex-1 flex-row items-center justify-center gap-x-1.5 rounded-full border border-edge-faint bg-coral-50 py-2 shadow-soft-light dark:shadow-soft-dark">
+                    className="flex-1 flex-row items-center justify-center gap-x-1.5 rounded-full border border-edge-card border-b-edge-card-bottom bg-coral-50 py-2 shadow-soft-light dark:shadow-soft-dark">
                     <Text className="font-dm-medium text-label text-peach">{restaurant.primaryAction.label}</Text>
                     <MiniChevron />
                   </TouchableOpacity>

@@ -25,7 +25,7 @@ export default function HomeDetailScreen() {
       <HomeGuideFacts facts={entry.facts} />
       {entry.description!==entry.caption?<Text className="font-dm text-label leading-[19px] text-taupe">{entry.description}</Text>:null}
       {entry.saveKind||entry.planKind?<TouchableOpacity testID="home-guide-save" accessibilityRole="button" accessibilityLabel={saved?(entry.saveKind?'Remove from saved places':'Remove from your plans'):(entry.saveKind?'Save for later':'Add to your plans')} onPress={save} activeOpacity={.78}
-        style={{backgroundColor:colors['accent-fill'],minHeight:43,borderRadius:999,alignItems:'center',justifyContent:'center',flexDirection:'row',gap:7,borderWidth:1,borderColor:colors['edge-faint']}}>
+        style={{backgroundColor:colors['accent-fill'],minHeight:43,borderRadius:999,alignItems:'center',justifyContent:'center',flexDirection:'row',gap:7,borderWidth:1,borderColor:colors['edge-card'],borderBottomColor:colors['edge-card-bottom']}}>
         <Glyph name={saved?'check':'heart'} size={16} color={colors['on-accent']} />
         <Text className="font-dm-medium text-label" style={{color:colors['on-accent']}}>{saved?(entry.saveKind?'Saved for later':'In your plans'):(entry.saveKind?'Save for later':'Add to your plans')}</Text>
       </TouchableOpacity>:null}

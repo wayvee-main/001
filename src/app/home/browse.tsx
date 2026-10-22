@@ -20,7 +20,7 @@ export default function HomeBrowseScreen() {
   const subtitle=category?{eat:`${catalog.categories.eat.length} nearby places. A good place to begin.`,bars:'A good drink, and a room with a little soul.',routes:'A few good stops. One easy way through.',events:'A reason to head out.'}[category]:'A place, artist, or good idea.';
   return <HomeGuideScreen now={now} backLabel="Home" search={false}>
     <HomeGuideHeading title={category?NAMES[category]:'Search the city'} subtitle={subtitle} />
-    <View className="flex-row items-center gap-x-2 rounded-full border border-edge-faint bg-surface-search px-3 shadow-soft-light dark:shadow-soft-dark">
+    <View className="flex-row items-center gap-x-2 rounded-full border border-edge-card border-b-edge-card-bottom bg-surface-search px-3 shadow-soft-light dark:shadow-soft-dark">
       <Glyph name="search" size={16} color={colors['fg-muted']} />
       <TextInput testID="home-guide-search" accessibilityLabel={`Search the city of ${cityName}`} value={query} onChangeText={setQuery}
         placeholder={`Search the city of ${cityName}`} placeholderTextColor={colors['fg-muted']} className="min-w-0 flex-1 py-3 font-dm text-label text-ink" />

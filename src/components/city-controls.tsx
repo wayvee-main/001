@@ -26,7 +26,7 @@ export function CitySearchBar({city,testID,labelTestID,inputLabel,value='',onCha
     {onChangeText?<TouchableOpacity accessibilityRole="button" accessibilityLabel="Search Discover" onPress={Keyboard.dismiss}>{arrow}</TouchableOpacity>:arrow}
   </>;
   const style=[control,{minHeight:52,backgroundColor:colors['surface-search']}];
-  const className='flex-row items-center gap-x-2.5 rounded-full pl-3.5 pr-[7px] py-[7px] border border-edge-faint shadow-soft-light dark:shadow-soft-dark';
+  const className='flex-row items-center gap-x-2.5 rounded-full pl-3.5 pr-[7px] py-[7px] border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark';
   return onPress?<TouchableOpacity testID={testID} accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={style} className={className}>{content}</TouchableOpacity>:
     <View testID={testID} style={style} className={className}>{content}</View>;
 }
@@ -39,7 +39,7 @@ export function CityChip({label,glyph,icon,onPress,selected=false,maxWidth,testI
   return <TouchableOpacity testID={testID} accessibilityRole="button" accessibilityLabel={accessibilityLabel || label}
     accessibilityState={{selected}} onPress={onPress} activeOpacity={.72} hitSlop={{top:6,bottom:6}}
     style={[control,{backgroundColor:selected?colors['selected-surface']:colorScheme==='light'?colors['surface-search']:colors['surface-control'],maxWidth}]}
-    className="min-h-[34px] flex-row items-center gap-x-1.5 rounded-full px-2.5 py-[7px] border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+    className="min-h-[34px] flex-row items-center gap-x-1.5 rounded-full px-2.5 py-[7px] border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
     {icon || (glyph?<Glyph name={glyph} size={13} color={selected?colors['selected-glyph']:colors['fg-muted']} />:null)}
     <Text numberOfLines={1} className="min-w-0 shrink font-dm text-fine" style={{color:selected?colors['on-selected']:colors.fg}}>{label}</Text>
   </TouchableOpacity>;

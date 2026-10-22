@@ -200,7 +200,7 @@ export default function AnswerScreen() {
               accessibilityRole="button"
               activeOpacity={0.85}
               onPress={() => router.replace('/(tabs)/discover')}
-              className="w-full items-center rounded-full bg-ember py-3.5 border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+              className="w-full items-center rounded-full bg-ember py-3.5 border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
               <Text className="font-dm-bold text-label text-on-accent">Show me what&apos;s on</Text>
             </TouchableOpacity>
           </View>
@@ -224,7 +224,7 @@ export default function AnswerScreen() {
                   accessibilityRole="button"
                   activeOpacity={0.85}
                   onPress={() => router.push(`/restaurant/${factSubject.id}`)}
-                  className="w-full items-center rounded-full bg-ember py-3.5 border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+                  className="w-full items-center rounded-full bg-ember py-3.5 border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
                   <Text className="font-dm-bold text-label text-on-accent">View details</Text>
                 </TouchableOpacity>
               ) : factSubject.sourceUrl ? (
@@ -232,7 +232,7 @@ export default function AnswerScreen() {
                   accessibilityRole="button"
                   activeOpacity={0.85}
                   onPress={() => Linking.openURL(factSubject.sourceUrl!).catch(() => showToast('Could not open that link'))}
-                  className="w-full items-center rounded-full bg-ember py-3.5 border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+                  className="w-full items-center rounded-full bg-ember py-3.5 border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
                   <Text className="font-dm-bold text-label text-on-accent">Official site</Text>
                 </TouchableOpacity>
               ) : null}

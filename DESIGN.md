@@ -64,7 +64,11 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   generic placeholders when the catalog has no suitable match. Missing hours
   never imply “Open now.” The divider is omitted when there are no venue chips.
   Cards, tiles, containers, chips, buttons and rounded photo frames use a 1px
-  `edge-faint` outline at 4% theme-ink opacity. Apply it to filled controls,
+  `edge-card` perimeter and `edge-card-bottom` lower rim. In light mode the
+  Etched paper treatment uses clay ink `#693F3A` at 18% / 26%, a soft white
+  inset highlight and a low plum shadow. Dark retains its existing 4% ink
+  perimeter and shadow. Keep `edge-faint` for dividers and decorative rules.
+  Apply the card edge to filled controls,
   including selected and primary controls, without boxing transparent layout
   groups or text-only links. Every elevation tier and the custom navigation
   shadow is 10% stronger in lift, blur and opacity. Chips and buttons share
@@ -78,8 +82,7 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   original page gradients intact; explicit error states retain their red.
 - “Your evening, with Vee” and Link your stay use `surface-ribbon`:
   `#F7E5E1` light / `#100D13` dark, with standard theme lettering and
-  orange `surface-accent` icons. Light adds a very faint 6% ink border;
-  dark retains the existing 4% edge. Its smooth 22px corners, faint edge and
+  orange `surface-accent` icons. Its smooth 22px corners, etched edge and
   level-1 elevation match the shared card material. The ticket notches and
   perforated seam are removed. Keep its compact 61.2px minimum height.
   Home dividers stay faint.
@@ -139,8 +142,8 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   and venue/time facts. Its right portrait is 78 × 114px
   (65 × 96px on narrow phones). Current listings replace samples.
   The hero uses level-1 elevation, 12px padding and a 12px radius. Both the hero
-  and More on stage have a very faint 1px tonal border at roughly 4% ink opacity
-  (`edge-faint`), without affecting text or image contrast.
+  and More on stage use the shared 1px surface perimeter, without affecting
+  text or image contrast.
 - More on stage, More good tables, After dinner and Rooms worth knowing use
   single horizontal photo rows with 16px gaps. On phones up to 600px wide, two
   complete cards fill the measured section width and line up with both edges of
@@ -148,7 +151,7 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   remain swipeable with card-width snapping. Leave the closing edge unfaded so
   the second card's border remains visible. Wider screens retain 137px cards.
   All four have the same raised paper surface, 8px padding, 12px radius,
-  level-1 shadow and very faint 1px border (`edge-faint`).
+  level-1 shadow and shared 1px surface perimeter.
   Photos fill the card's inner width and stay 73px high. Heights fit content;
   the previous 195px minimum is removed to avoid wasted space.
 - More on stage titles, captions and venue/time metadata each use one line.
@@ -165,7 +168,7 @@ inline palette and Tailwind tokens together with `npm run tokens`.
 - A little wandering uses individually contained numbered route notes
   (23px numbers, 31px columns). Both vertical sections share the other Discover
   cards' raised paper, level-1 shadow, 12px radius, 8px padding and faint 1px
-  `edge-faint` border. Leave 8px between cards and remove row-divider lines.
+  etched surface perimeter. Leave 8px between cards and remove row-divider lines.
   Find a good table keeps right-side thumbnails at 59 × 82px
   (47 × 73px on narrow phones).
 - Discover uses `surface-discovery` on listing containers; its unselected

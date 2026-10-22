@@ -116,10 +116,12 @@ export const BACKDROP_GRADIENTS = [
 
 /** Roles with fixed opacity baked in (not run through <alpha-value>). Base
  * hue is fg, since edge = "a hairline of ink/paper", not its own color. */
-export const EDGE_ROLES: Record<string, { base: 'fg'; alpha: number }> = {
+export const EDGE_ROLES: Record<string, { base: 'fg'; alpha: number; lightBase?: string; lightAlpha?: number }> = {
   edge: { base: 'fg', alpha: 0.12 }, // borders / dividers
   'edge-soft': { base: 'fg', alpha: 0.08 }, // placeholder stripe C
-  'edge-faint': { base: 'fg', alpha: 0.04 }, // raised cards and controls
+  'edge-faint': { base: 'fg', alpha: 0.04 }, // quiet dividers and decorative rules
+  'edge-card': { base: 'fg', alpha: 0.04, lightBase: '#693F3A', lightAlpha: 0.18 },
+  'edge-card-bottom': { base: 'fg', alpha: 0.04, lightBase: '#693F3A', lightAlpha: 0.26 },
 };
 
 /** Same value in both themes — either brand hue or a translucent tint over

@@ -54,7 +54,7 @@ function GroupedCard({
       activeOpacity={0.7}
       onPress={onPress}
       style={dark ? undefined : surface}
-      className={`flex-row items-center gap-x-3 rounded-card px-3.5 py-3.5 ${dark ? 'border border-edge-faint bg-coral-50' : ''} shadow-soft-light dark:shadow-soft-dark`}>
+      className={`flex-row items-center gap-x-3 rounded-card px-3.5 py-3.5 ${dark ? 'border border-edge-card border-b-edge-card-bottom bg-coral-50' : ''} shadow-soft-light dark:shadow-soft-dark`}>
       <Icon d={icon} size={18} color={colors.peach} />
       <View className="flex-1">
         <Text className="font-dm-medium text-[14px] text-ink">{title}</Text>
@@ -69,7 +69,7 @@ function GroupedCard({
             event.stopPropagation();
             onAddToCalendar();
           }}
-          className="h-9 w-9 items-center justify-center rounded-full bg-shell border border-edge-faint shadow-soft-light dark:shadow-soft-dark">
+          className="h-9 w-9 items-center justify-center rounded-full bg-shell border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
           <Icon d={CALENDAR_ICON} size={15} color={colors.peach} strokeWidth={1.8} />
         </TouchableOpacity>
       ) : null}
