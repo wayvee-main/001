@@ -27,8 +27,12 @@ export function answerDetailQuestion(context: DetailContext, rawQuestion: string
   const question=rawQuestion.trim().toLowerCase();
   const links=publicLinks(context),source=links.filter(link=>!/directions/i.test(link.label)).slice(0,2);
   const read=(labels:RegExp)=>{
-    const seen=new Set<string>();
-    return context.facts.filter(fact=>{const key=fact.value.trim().toLowerCase();if(!labels.test(fact.label)||seen.has(key))return false;seen.add(key);return true;});
+    const seen=new Set<string>(),seenLabels=new Set<string>();
+    return context.facts.filter(fact=>{
+      const key=fact.value.trim().toLowerCase(),label=fact.label.trim().toLowerCase();
+      if(!labels.test(fact.label)||seen.has(key)||seenLabels.has(label))return false;
+      seen.add(key);seenLabels.add(label);return true;
+    });
   };
   const say=(facts:readonly {label:string;value:string}[])=>facts.map(fact=>`${fact.label}: ${fact.value}`).join('\n');
   if(!question)return {text:'What would you like to know about '+context.name+'?',links:[]};

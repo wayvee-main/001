@@ -33,7 +33,7 @@ export function HomeDoorCard({title,meta,image,glyph='compass',width,onPress,tes
   </TouchableOpacity>;
 }
 
-/** Used only by /home routes. Existing Discover and its detail routes do not use this frame. */
+/** Shared frame for Home guides and Pocket dossier detail routes. */
 export function HomeGuideScreen({children,now,backLabel='Back',search=true,context=true,header=true,beforeNav,activeTab='home'}: {children:ReactNode;now:Date;backLabel?:string;search?:boolean;context?:boolean;header?:boolean;beforeNav?:ReactNode;activeTab?:'home'|'discover'|'create'|'profile'}) {
   const router=useRouter(),colors=useThemeColors(),city=useActiveCityName();
   const period={morning:'This morning',midday:'This afternoon',afternoon:'This afternoon',evening:'This evening',lateNight:'After hours'}[currentDaypart(now)];

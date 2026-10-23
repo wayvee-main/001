@@ -42,6 +42,16 @@ describe('Contextual detail assistant',()=>{
     expect(answerDetailQuestion(context,'How far is it?').text).toContain('Estimated distance: ~0.2 mi');
     expect(answerDetailQuestion(context,'How much does it cost?').text).toBe('Price: $$');
   });
+  it('prefers the detailed event date over a repeated relative date label',()=>{
+    const event:DetailContext={kind:'event',id:'show',name:'A show',facts:[
+      {label:'When',value:'October 23, 2026 at 8 PM'},{label:'Showtime',value:'8 PM'},
+      {label:'When',value:'Tonight'},{label:'Time',value:'8 PM'},
+    ],links:[]};
+    const answer=answerDetailQuestion(event,'What time does it start?');
+    expect(answer.text).toContain('When: October 23, 2026 at 8 PM');
+    expect(answer.text).not.toContain('Tonight');
+    expect(answer.text.match(/8 PM/g)).toHaveLength(2);
+  });
   it('does not infer parking or allergen safety from the cuisine or menu',()=>{
     expect(answerDetailQuestion(context,'Is there parking?').text).toContain('not included');
     expect(answerDetailQuestion(context,'Is it safe to eat with a nut allergy?').text).toContain('does not confirm');

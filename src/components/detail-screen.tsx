@@ -45,7 +45,7 @@ export function DetailScreen({image,heroActions,title,rating,meta,address,onAddr
     onPress:()=>{if(saveKind)s.toggleSaved(saveKind,id,title);else if(planKind)s.togglePlan(planKind,id,title);}});
   const directions=context.links.find(link=>/^directions$/i.test(link.label));
   const open=(url:string)=>{void Linking.openURL(url).catch(()=>s.showToast('Could not open that link. Please try again.'));};
-  if(directions||onAddress)chips.push({key:'directions',label:'Directions',glyph:'navigation',accent:true,onPress:directions?()=>open(directions.url):onAddress});
+  if(directions||onAddress)chips.push({key:'directions',label:'Directions',glyph:'navigation',accent:true,onPress:kind!=='event'&&onAddress?onAddress:directions?()=>open(directions.url):onAddress});
   const secondaryFacts=facts.filter(fact=>!metadata.some(item=>item.value===fact.label));
   for(const fact of secondaryFacts){if(essentials.length>=3)break;if(!essentials.some(item=>item.value===fact.label))essentials.push({label:factLabel(fact.glyph),value:fact.label,glyph:fact.glyph});}
   const folds:DossierFold[]=rows.map(row=>({key:row.key,label:row.label,glyph:row.glyph,children:row.children}));

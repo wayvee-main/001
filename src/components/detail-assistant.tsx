@@ -1,6 +1,6 @@
 import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ComponentRef } from 'react';
 import { Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -16,18 +16,28 @@ import { useThemeColors } from '@/lib/theme';
 export function DetailAssistantDock({context}: {context:DetailContext}) {
   const [open,setOpen]=useState(false),[draft,setDraft]=useState('');
   const [conversation,setConversation]=useState<{question:string;answer:DetailAnswer}[]>([]);
-  const input=useRef<TextInput>(null),scroll=useRef<ScrollView>(null),router=useRouter();
+  const input=useRef<TextInput>(null),scroll=useRef<ScrollView>(null),trigger=useRef<ComponentRef<typeof TouchableOpacity>>(null),router=useRouter();
   const colors=useThemeColors(),control=useControlSurface(),surface=useRaisedSurface(1),gutter=useAppGutter();
   const insets=useSafeAreaInsets(),{height}=useWindowDimensions(),showToast=useScoper(s=>s.showToast);
-  const close=()=>{Keyboard.dismiss();setOpen(false);};
+  const restoreFocus=()=>{if(Platform.OS==='web')requestAnimationFrame(()=>trigger.current?.focus());};
+  const close=()=>{Keyboard.dismiss();setOpen(false);restoreFocus();};
+  useEffect(()=>{
+    if(Platform.OS!=='web'||!open)return;
+    const onEscape=(event:KeyboardEvent)=>{
+      if(event.key!=='Escape')return;
+      event.preventDefault();Keyboard.dismiss();setOpen(false);restoreFocus();
+    };
+    document.addEventListener('keydown',onEscape,true);
+    return ()=>document.removeEventListener('keydown',onEscape,true);
+  },[open]);
   const openLink=(url:string)=>{void Linking.openURL(url).catch(()=>showToast('Could not open that link. Please try again.'));};
   const send=()=>{
     const question=draft.trim();if(!question)return;
-    setConversation(current=>[...current,{question,answer:answerDetailQuestion(context,question)}].slice(-8));setDraft('');
+    setConversation(current=>[...current,{question,answer:answerDetailQuestion(context,question)}].slice(-8));setDraft('');input.current?.focus();
   };
   return <>
     <View testID="detail-assistant-dock" style={{width:'100%',maxWidth:720,alignSelf:'center',paddingHorizontal:gutter,paddingTop:6,paddingBottom:4,alignItems:'flex-end'}}>
-      <TouchableOpacity testID="detail-ask-vee" accessibilityRole="button" accessibilityLabel={`Ask Vee about ${context.name}`}
+      <TouchableOpacity ref={trigger} testID="detail-ask-vee" accessibilityRole="button" accessibilityLabel={`Ask Vee about ${context.name}`}
         activeOpacity={.75} onPress={()=>setOpen(true)} style={[control,{backgroundColor:colors['surface-navigation'],minHeight:44,borderRadius:999,paddingLeft:9,paddingRight:14,flexDirection:'row',alignItems:'center',gap:7}]}>
         <VeeMark size={26} variant="compact" /><Text className="font-dm text-label text-ink">Ask Vee</Text>
       </TouchableOpacity>

@@ -107,7 +107,7 @@ export function buildHomeGuide({city,nearest,places,events,picks,now}: {
   for (const event of events.filter(item=>isCurrentEvent(item,now))) {
     add({kind:'event',id:event.id,name:event.name,caption:compactVenue(event.venue),description:event.know,image:event.image,glyph:'ticket',
       facts:[{glyph:'calendar',value:eventDayGroupLabel(event,now),label:event.date},{glyph:'clock',value:event.time}],searchText:event.venue+' '+event.lineup+' '+event.cats.join(' '),tags:[...event.cats],
-      details:[{label:'When',value:event.date},{label:'Showtime',value:event.time},{label:'Venue',value:event.venue},{label:'Tickets',value:event.priceLabel}],
+      details:[{label:'When',value:event.date},{label:'Showtime',value:event.time},{label:'Venue',value:event.venue},...(event.addr?[{label:'Address',value:event.addr}]:[]),{label:'Tickets',value:event.priceLabel}],
       sections:event.runOfShow?.length?[{title:'Run of show',lines:event.runOfShow.map(x=>x.time+' · '+x.label)}]:[],
       links:links(event.ticketUrl?{label:'Official tickets',url:event.ticketUrl}:undefined,{label:'Official listing',url:event.sourceUrl},directions(event.venue,city,event.addr)),planKind:'event'});
     shows.push(entries[homeGuideKey('event',event.id)]);
