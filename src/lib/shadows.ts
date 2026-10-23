@@ -4,19 +4,19 @@ import { type ViewStyle } from 'react-native';
 import { ELEVATION, hexToRgb } from '@/lib/tokens';
 import { useThemeColors } from '@/lib/theme';
 
-/** Theme-aware elevation. Light derives a neutral shadow from the ink; dark
- * uses the deepest surface so elevation reads as depth instead of a pale halo. */
+/** Theme-aware elevation. Light uses an outer shadow without a specular inset
+ * so cards read as matte paper, like the stay chip. Dark keeps its depth. */
 export function useElevation(level: 1 | 2 | 3 | 4 = 2): { boxShadow: string } {
   const { colorScheme } = useColorScheme();
   const colors = useThemeColors();
   const theme = colorScheme === 'light' ? 'light' : 'dark';
   if (theme === 'light' && level === 1) {
-    return { boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, .62), 0 2.25px 8px rgba(49, 32, 57, .0675)' };
+    return { boxShadow: '0 2px 7px rgba(49, 32, 57, .045)' };
   }
   const { blur, y, opacity } = ELEVATION[level];
   const [r, g, b] = hexToRgb(theme === 'light' ? colors.fg : colors['surface-sunk']);
   const shadow = `0 ${y}px ${blur}px rgba(${r}, ${g}, ${b}, ${opacity[theme]})`;
-  return { boxShadow: theme === 'light' ? `inset 0 1px 0 rgba(255, 255, 255, .62), 0 ${y}px ${blur}px rgba(${r}, ${g}, ${b}, ${Number(opacity.light) * .75})` : shadow };
+  return { boxShadow: theme === 'light' ? `0 ${y}px ${blur}px rgba(${r}, ${g}, ${b}, ${Number(opacity.light) * .75})` : shadow };
 }
 
 /** Shared neutral card/panel treatment. Inputs, controls, and semantic tinted
