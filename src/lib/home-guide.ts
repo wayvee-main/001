@@ -14,7 +14,7 @@ export type HomeGuideCategory = 'eat' | 'bars' | 'routes' | 'events';
 export type HomeGuideFact = { glyph: string; value: string; label?: string };
 export type HomeGuideEntry = {
   kind: HomeGuideKind; id: string; name: string; caption: string; description: string;
-  glyph: string; image?: string; facts: HomeGuideFact[]; searchText: string; category?: string; foodTags?: string;
+  glyph: string; image?: string; facts: HomeGuideFact[]; searchText: string; category?: string; foodTags?: string; tags?: string[];
   members?: {kind: 'restaurant' | 'event'; id: string}[];
   details: {label: string; value: string}[];
   sections?: {title: string; lines: string[]}[];
@@ -105,7 +105,7 @@ export function buildHomeGuide({city,nearest,places,events,picks,now}: {
   }
   for (const event of events.filter(item=>isCurrentEvent(item,now))) {
     add({kind:'event',id:event.id,name:event.name,caption:compactVenue(event.venue),description:event.know,image:event.image,glyph:'ticket',
-      facts:[{glyph:'calendar',value:eventDayGroupLabel(event,now),label:event.date},{glyph:'clock',value:event.time}],searchText:event.venue+' '+event.lineup+' '+event.cats.join(' '),
+      facts:[{glyph:'calendar',value:eventDayGroupLabel(event,now),label:event.date},{glyph:'clock',value:event.time}],searchText:event.venue+' '+event.lineup+' '+event.cats.join(' '),tags:[...event.cats],
       details:[{label:'When',value:event.date},{label:'Showtime',value:event.time},{label:'Venue',value:event.venue},{label:'Tickets',value:event.priceLabel}],
       sections:event.runOfShow?.length?[{title:'Run of show',lines:event.runOfShow.map(x=>x.time+' · '+x.label)}]:[],
       links:links(event.ticketUrl?{label:'Official tickets',url:event.ticketUrl}:undefined,{label:'Official listing',url:event.sourceUrl},directions(event.venue,city,event.addr)),planKind:'event'});
@@ -137,9 +137,9 @@ export function buildHomeGuide({city,nearest,places,events,picks,now}: {
   return {entries,categories:{eat,bars,routes,events:shows},collections:local?homeDiscoveryCollections(now).map(collection=>({...collection,coverImage:entries[homeGuideKey('collection',collection.id)]?.image || ''})):[]};
 }
 
-export function searchHomeGuide(catalog: HomeGuideCatalog, query: string): HomeGuideEntry[] {
+export function searchHomeGuide(catalog: HomeGuideCatalog, query: string, pool: readonly HomeGuideEntry[] = Object.values(catalog.entries)): HomeGuideEntry[] {
   const tokens=normalized(query).trim().split(/\s+/).filter(Boolean),seen=new Set<string>();
-  return Object.values(catalog.entries).filter(entry=>{
+  return pool.filter(entry=>{
     if(tokens.some(token=>!entry.searchText.includes(token)))return false;
     const name=normalized(entry.name);if(seen.has(name))return false;seen.add(name);return true;
   });

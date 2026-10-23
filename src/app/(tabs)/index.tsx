@@ -12,6 +12,7 @@ import { BUNDLE_CITY, useActiveCityName } from '@/lib/city';
 import { CRAWLS, NIGHTLIFE_SPOTS, currentEventListings } from '@/lib/data';
 import { homeCollectionGlyph, homeDiscoveryIdeas } from '@/lib/home-discovery';
 import { homeGuideHrefFromLegacy, homeIdeaPhoto } from '@/lib/home-guide';
+import { HOME_LEDGERS } from '@/lib/home-ledger';
 import { hydrateEventsFromBackend } from '@/lib/events-remote';
 import { hydratePlacesFromBackend } from '@/lib/places';
 import { activeReminders } from '@/lib/reminders';
@@ -40,10 +41,10 @@ export default function HomeScreen() {
   const crawls = local ? Object.values(CRAWLS) : [];
   const events = currentEventListings(now);
   const tiles: CountTile[] = [
-    { key:'eat', count:String(nearest.length), glyph:'food', label:'Eat', hint:'Nearby places', tint:'tile-eat', ink:'fg', onPress:()=>router.push('/home/browse?category=eat') },
-    { key:'bars', count:String(nightlife.length), glyph:'drink', label:'Bars', hint:'After dinner', tint:'tile-bars', ink:'fg', onPress:()=>router.push('/home/browse?category=bars') },
-    { key:'routes', count:String(crawls.length), glyph:'route', label:'Routes', hint:'A few good stops', tint:'tile-routes', ink:'fg', onPress:()=>router.push('/home/browse?category=routes') },
-    { key:'events', count:String(events.length), glyph:'ticket', label:'Events', hint:'Find your next show', tint:'tile-events', ink:'fg', onPress:()=>router.push('/home/browse?category=events') },
+    { key:'eat', count:String(nearest.length), glyph:'food', label:'Eat', hint:'Nearby places', tint:'tile-eat', ink:'fg', onPress:()=>router.push(HOME_LEDGERS.eat.href) },
+    { key:'bars', count:String(nightlife.length), glyph:'drink', label:'Bars', hint:'After dinner', tint:'tile-bars', ink:'fg', onPress:()=>router.push(HOME_LEDGERS.bars.href) },
+    { key:'routes', count:String(crawls.length), glyph:'route', label:'Routes', hint:'A few good stops', tint:'tile-routes', ink:'fg', onPress:()=>router.push(HOME_LEDGERS.routes.href) },
+    { key:'events', count:String(events.length), glyph:'ticket', label:'Events', hint:'Find your next show', tint:'tile-events', ink:'fg', onPress:()=>router.push(HOME_LEDGERS.events.href) },
   ];
   return <Screen><ScreenScroll gap={18} clearsTabBar refreshing={refreshing} onRefresh={onRefresh}>
     <HomeHeader hasReminders={activeReminders(s.plans,s.stay).length>0}

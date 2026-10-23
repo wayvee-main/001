@@ -34,7 +34,7 @@ export function HomeDoorCard({title,meta,image,glyph='compass',width,onPress,tes
 }
 
 /** Used only by /home routes. Existing Discover and its detail routes do not use this frame. */
-export function HomeGuideScreen({children,now,backLabel='Back',search=true}: {children:ReactNode;now:Date;backLabel?:string;search?:boolean}) {
+export function HomeGuideScreen({children,now,backLabel='Back',search=true,context=true}: {children:ReactNode;now:Date;backLabel?:string;search?:boolean;context?:boolean}) {
   const router=useRouter(),colors=useThemeColors(),city=useActiveCityName();
   const period={morning:'This morning',midday:'This afternoon',afternoon:'This afternoon',evening:'This evening',lateNight:'After hours'}[currentDaypart(now)];
   return <Screen><View testID="home-field-guide" style={{flex:1}}>
@@ -43,15 +43,15 @@ export function HomeGuideScreen({children,now,backLabel='Back',search=true}: {ch
         <TouchableOpacity accessibilityRole="button" accessibilityLabel={backLabel} onPress={()=>router.canGoBack()?router.back():router.replace('/')} hitSlop={10} className="min-h-9 flex-row items-center gap-x-1.5">
           <Glyph name="back" size={16} color={colors.fg} /><Text className="font-dm text-label text-ink">{backLabel}</Text>
         </TouchableOpacity>
-        <WayveeWordmark size={17} mark={false} />
+        <WayveeWordmark size={search?17:21} mark={false} />
         {search?<TouchableOpacity accessibilityRole="button" accessibilityLabel="Search Home" onPress={()=>router.push('/search')}
           style={{width:32,height:32,borderRadius:16,backgroundColor:colors['surface-raised'],borderWidth:1,borderColor:colors['edge-card'],borderBottomColor:colors['edge-card-bottom'],alignItems:'center',justifyContent:'center'}}>
           <Glyph name="search" size={16} color={colors['fg-muted']} />
-        </TouchableOpacity>:<View style={{width:32}} />}
+        </TouchableOpacity>:null}
       </View>
-      <View className="flex-row items-center gap-x-1.5"><Glyph name="compass" size={12} color={colors['surface-accent']} />
+      {context?<View className="flex-row items-center gap-x-1.5"><Glyph name="compass" size={12} color={colors['surface-accent']} />
         <Text numberOfLines={1} className="font-dm text-fine text-peach">{city} · {period}</Text>
-      </View>
+      </View>:null}
       {children}
     </ScreenScroll>
     <EditorialNav reserveSpace items={[
