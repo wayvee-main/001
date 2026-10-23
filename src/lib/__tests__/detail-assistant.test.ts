@@ -1,5 +1,5 @@
 import { answerDetailQuestion, detailPlanHref, type DetailContext } from '@/lib/detail-assistant';
-import { dossierContext, dossierEssentials, dossierMetadata, dossierSnapshot } from '@/lib/pocket-dossier';
+import { ledgerContext, ledgerEssentials, ledgerMetadata, ledgerSnapshot } from '@/lib/detail-ledger';
 import type { HomeGuideEntry } from '@/lib/home-guide';
 
 const entry:HomeGuideEntry={kind:'restaurant',id:'shootingstar',name:'Shooting Star Cafe',caption:'Hong Kong cafe',description:'A late dinner option.',glyph:'food',searchText:'',
@@ -9,28 +9,28 @@ const entry:HomeGuideEntry={kind:'restaurant',id:'shootingstar',name:'Shooting S
   sections:[{title:'Menu highlights',lines:['Wonton Noodle Soup · $12.95']}],
   links:[{label:'Menu',url:'https://example.com/menu'},{label:'Directions',url:'https://example.com/maps'},{label:'Official site',url:'https://example.com'}]};
 
-describe('Pocket dossier source facts',()=>{
+describe('Ledger companion source facts',()=>{
   it('prioritizes address, listed hours and service without losing the other source details',()=>{
-    expect(dossierEssentials(entry).map(fact=>fact.label)).toEqual(['Address','Hours','Service']);
-    expect(dossierContext(entry).facts).toEqual(expect.arrayContaining([
+    expect(ledgerEssentials(entry).map(fact=>fact.label)).toEqual(['Address','Hours','Service']);
+    expect(ledgerContext(entry).facts).toEqual(expect.arrayContaining([
       {label:'Late menu',value:'Dinner until 11:30 PM'},{label:'Phone',value:'(510) 251-9882'},
       {label:'Estimated distance',value:'~0.2 mi'},{label:'Menu highlights',value:'Wonton Noodle Soup · $12.95'},
     ]));
   });
   it('uses the approved snapshot only for the matching venue and address',()=>{
-    expect(dossierSnapshot(entry)).toBe('An all-day Hong Kong café with a late dinner menu.');
-    expect(dossierSnapshot({...entry,details:[{label:'Address',value:'A different address'}]})).toBe(entry.description);
+    expect(ledgerSnapshot(entry)).toBe('An all-day Hong Kong café with a late dinner menu.');
+    expect(ledgerSnapshot({...entry,details:[{label:'Address',value:'A different address'}]})).toBe(entry.description);
   });
   it('keeps missing prices absent and does not label a street as distance',()=>{
     const night={...entry,kind:'night' as const,facts:[{glyph:'pin',value:'1535 Broadway'},{glyph:'clock',value:'Hours on the official page'}]};
-    expect(dossierMetadata(night)).toEqual([{glyph:'clock',value:'Hours on the official page'}]);
-    expect(dossierContext(night).facts).toContainEqual({label:'Location',value:'1535 Broadway'});
-    expect(dossierMetadata({...entry,facts:[]})).toEqual([]);
+    expect(ledgerMetadata(night)).toEqual([{glyph:'clock',value:'Hours on the official page'}]);
+    expect(ledgerContext(night).facts).toContainEqual({label:'Location',value:'1535 Broadway'});
+    expect(ledgerMetadata({...entry,facts:[]})).toEqual([]);
   });
 });
 
 describe('Contextual detail assistant',()=>{
-  const context=dossierContext(entry);
+  const context=ledgerContext(entry);
   it('answers pronoun questions from the currently open listing and preserves listed hours',()=>{
     const answer=answerDetailQuestion(context,'Is it open late for dinner?');
     expect(answer.text).toContain('Daily 7:30 AM–midnight');

@@ -3,7 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
-import { PocketDossierScreen, type DossierChip } from '@/components/pocket-dossier';
+import { LedgerCompanionScreen, type LedgerChip } from '@/components/ledger-companion';
 import { Screen, useAppGutter } from '@/components/layout';
 import { BackButton, Check, EmptyState } from '@/components/ui';
 import { useScoper } from '@/lib/store';
@@ -52,13 +52,13 @@ export default function PickScreen() {
 
   const planned=isPlanned('pick',pick.id);
   const price=pick.priceFrom!=null&&pick.currency?'From '+pick.currency+' '+pick.priceFrom:null;
-  const chips:DossierChip[]=[
+  const chips:LedgerChip[]=[
     ...(price?[{key:'price',label:price}]:[]),
     ...(pick.durationLabel?[{key:'duration',glyph:'clock',label:pick.durationLabel}]:[]),
     {key:'save',label:planned?'Saved':'Save',glyph:planned?'check':'bookmark',selected:planned,onPress:()=>togglePlan('pick',pick.id,pick.title)},
     {key:'book',label:'Book',glyph:'arrow',accent:true,onPress:bookOnViator},
   ];
-  return <PocketDossierScreen image={pick.image} glyph="compass" eyebrow="Experience" chips={chips}
+  return <LedgerCompanionScreen image={pick.image} glyph="compass" eyebrow="Experience" chips={chips}
     context={{kind:'pick',id:pick.id,name:pick.title,caption:pick.destination,snapshot:pick.description,
       facts:[{label:'Destination',value:pick.destination},...(price?[{label:'Price',value:price}]:[]),...(pick.durationLabel?[{label:'Duration',value:pick.durationLabel}]:[]),...(pick.inclusions.length?[{label:'Included',value:pick.inclusions.join(' · ')}]:[])],
       links:[{label:'Book on Viator',url:pick.bookingUrl}]}}
@@ -135,5 +135,5 @@ export default function PickScreen() {
         <Text className="font-dm text-fine text-taupe" style={{lineHeight:17}}>Estimate only — choose your date and guests again on Viator to book. Wayvee may earn a commission.</Text>
       </View>
     </View>
-  </PocketDossierScreen>;
+  </LedgerCompanionScreen>;
 }

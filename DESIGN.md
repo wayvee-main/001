@@ -106,7 +106,7 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   Home dividers stay faint.
 - Home uses **Field Guide** for its browse, search, idea and collection
   layers under `/home/*`. Keep Discover’s browse screen and section layouts
-  unchanged. Detail pages use the shared Pocket dossier below. Reuse current fonts, page wash,
+  unchanged. Detail pages use the shared Ledger companion below. Reuse current fonts, page wash,
   faint edges, orange actions and the floating navigation.
   Field Guide has a city/daypart eyebrow, calm title and short supporting copy,
   one raised lead card, compact source-backed glyph facts and rows separated by
@@ -135,17 +135,19 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   Existing `/home/browse?category=…` links redirect to the corresponding page,
   forwarding query text; generic browse/search links open Quiet index.
   For you, Collections and Discover retain their browse layouts.
-- Detail pages use **Pocket dossier** in both themes, including existing
+- Detail pages use **Ledger companion** in both themes, including existing
   restaurant, place, nightlife, event, venue, route and experience entry routes.
-  Omit the Back/Wayvee header row; begin with the small category/city eyebrow and serif venue name,
+  Omit the Back/Wayvee header row; align the opening inset with Home's top row
+  and begin with the small category/city eyebrow and serif venue name,
   then the full-width contained source image below the identity (795:464 ratio,
   capped at 232px high). A compact source-backed snapshot uses the whole row
   and wraps to a second line only as needed. Pricing, distance, Save and
   Directions share the same quiet chip material, left-aligned with exactly
   10px gaps. Price uses dollar text without a wallet glyph. Omit absent facts
   rather than inventing a four-chip row; a narrow screen can scroll that row.
-  Essentials use the standard raised card, prioritizing address, listed hours
-  and service. Additional details, source links, menus and planning controls
+  Practical details use compact, aligned label/value rows with faint rules and
+  small glyphs, prioritizing address, listed hours and service without a
+  raised card. Additional details, source links, menus and planning controls
   remain available in compact disclosures. Preserve existing authentication,
   saves, plans, following, calls and booking selectors.
   Ask Vee stays outside the scroll view, just above navigation, on every
