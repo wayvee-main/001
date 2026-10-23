@@ -112,22 +112,26 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   one raised lead card, compact source-backed glyph facts and rows separated by
   faint rules. The lead is not repeated in the remaining list. Its details use
   existing save/plan authentication and actual source links.
-- The four Home tiles use **Local ledger** on four separate secondary pages:
+- The four Home tiles use **Pocket guide** on four separate secondary pages:
   Eat `/home/eat`, Bars `/home/bars`, Routes `/home/routes`, and Events
   `/home/events`. Each opens only its own counted inventory. The prototype's
   four-category switcher is a preview aid and does not appear on these pages.
   Keep the warm page wash, a Home back action and Wayvee wordmark, serif
   category title with city below, Home's shared 53px search, and quiet glyph
-  filter chips. The ledger has numbered, compact rows with one-line serif
-  names (five-word cap), a small caption glyph, aligned facts at the right,
-  and faint horizontal rules. Use actual prices/distances for Eat, listed
+  filter chips. Pocket guide starts with one raised “Start here” card: a serif
+  name, restrained category glyph, two-line source-backed snapshot and compact
+  glyph facts. The first result is not repeated. “Also worth a look” holds the
+  full remaining inventory in compact raised rows, with a 38px glyph well,
+  one-line serif names (five-word cap), inline glyph metadata and orange
+  chevrons. Reuse the app’s default card fill, faint edges and level-1
+  elevation in both themes. Use actual prices/distances for Eat, listed
   hours for Bars, stops/travel for Routes, and day/time for Events. Do not
   fill absent source facts with invented prices, distances or durations.
   Search and filters stay inside the page's category and city, including when
   combined. Preserve Eat's nearest order and estimated-distance labels.
   Existing `/home/browse?category=…` links redirect to the corresponding page,
   forwarding query text; generic browse/search links open Quiet index.
-  This ledger replaces the lead-card/photo-list layout only for these four
+  This pocket guide replaces the numbered ledger only for these four
   pages. For you, Collections, their details, and Discover retain their layouts.
 - For you is **three vertical intention cards**, selected by guest-local time:
   breakfast, lunch, coffee, dinner, outdoor ideas, shows or late-night plans.
