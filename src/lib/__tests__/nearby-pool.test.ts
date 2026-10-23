@@ -52,6 +52,7 @@ describe('openBadgeLabel', () => {
 describe('nearbyMetaLine', () => {
   it('prefers a measured distance over the catalog label', () => {
     expect(nearbyMetaLine({ cuisine: 'Thai', miles: 0.72, distanceLabel: '12 min walk' })).toBe('Thai · 0.7 mi');
+    expect(nearbyMetaLine({ cuisine: 'Cafe', miles: 0.02, distanceLabel: '5 min walk' })).toBe('Cafe · <0.1 mi');
   });
 
   it('falls back to the catalog label when nothing is measurable', () => {

@@ -12,7 +12,7 @@
 // below a known open is a preference; calling it open would be an invention.
 
 import type { Restaurant } from '@/lib/data';
-import { milesBetween, type GeoPoint } from '@/lib/geo';
+import { formatMiles, milesBetween, type GeoPoint } from '@/lib/geo';
 
 import type { OpenState } from '@/lib/hours';
 
@@ -59,7 +59,7 @@ export function nearbyMetaLine({
   miles: number | null;
   distanceLabel?: string;
 }): string {
-  const distance = miles != null ? `${miles < 10 ? miles.toFixed(1) : Math.round(miles)} mi` : distanceLabel;
+  const distance = miles != null ? formatMiles(miles) : distanceLabel;
   return [cuisine, distance].filter(Boolean).join(' · ');
 }
 

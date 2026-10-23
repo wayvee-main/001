@@ -3,23 +3,23 @@ import { searchHomeGuide, type HomeGuideCatalog, type HomeGuideCategory, type Ho
 type LedgerFilter = { id: string; label: string; glyph: string };
 type LedgerDefinition = {
   title: string; href: `/home/${HomeGuideCategory}`; singular: string; plural: string;
-  column: string; search: string; filters: readonly LedgerFilter[];
+  search: string; filters: readonly LedgerFilter[];
 };
 
 /** Four destinations share their presentation, never their result pools. */
 export const HOME_LEDGERS: Record<HomeGuideCategory, LedgerDefinition> = {
-  eat: { title:'Eat', href:'/home/eat', singular:'place', plural:'places', column:'Price / distance', search:'Search food', filters:[
+  eat: { title:'Eat', href:'/home/eat', singular:'place', plural:'places', search:'Search food', filters:[
     {id:'all',label:'All',glyph:'filter'}, {id:'tables',label:'Tables',glyph:'food'},
     {id:'quick',label:'Quick bites',glyph:'food'}, {id:'coffee',label:'Coffee',glyph:'coffee'},
   ] },
-  bars: { title:'Bars', href:'/home/bars', singular:'bar', plural:'bars', column:'Listed hours', search:'Search bars', filters:[
+  bars: { title:'Bars', href:'/home/bars', singular:'bar', plural:'bars', search:'Search bars', filters:[
     {id:'all',label:'All',glyph:'filter'}, {id:'cocktails',label:'Cocktails',glyph:'drink'},
     {id:'beer',label:'Beer',glyph:'drink'}, {id:'listening',label:'Listening rooms',glyph:'music'},
   ] },
-  routes: { title:'Routes', href:'/home/routes', singular:'route', plural:'routes', column:'Stops / travel', search:'Search routes', filters:[
+  routes: { title:'Routes', href:'/home/routes', singular:'route', plural:'routes', search:'Search routes', filters:[
     {id:'all',label:'All',glyph:'filter'}, {id:'walking',label:'Walking',glyph:'walk'}, {id:'rides',label:'Rides',glyph:'car'},
   ] },
-  events: { title:'Events', href:'/home/events', singular:'show', plural:'shows', column:'Day / time', search:'Search shows', filters:[
+  events: { title:'Events', href:'/home/events', singular:'show', plural:'shows', search:'Search shows', filters:[
     {id:'all',label:'All',glyph:'filter'}, {id:'music',label:'Music',glyph:'music'},
     {id:'outdoors',label:'Outdoors',glyph:'hike'}, {id:'movies',label:'Movies',glyph:'film'},
   ] },

@@ -1,4 +1,4 @@
-import { CITY_CENTER, SERVICE_RADIUS_MILES, isInServiceArea, milesBetween, usableAnchor } from '@/lib/geo';
+import { CITY_CENTER, SERVICE_RADIUS_MILES, formatMiles, isInServiceArea, milesBetween, usableAnchor } from '@/lib/geo';
 
 // Due-north offset makes the haversine distance exact (dLon = 0 collapses
 // milesBetween to EARTH_RADIUS_MILES * dLat-in-radians), so these give a
@@ -42,5 +42,14 @@ describe('usableAnchor', () => {
 
   it('returns null when the fix is outside the service area', () => {
     expect(usableAnchor(pointMilesNorth(SERVICE_RADIUS_MILES + 50))).toBeNull();
+  });
+});
+
+describe('formatMiles', () => {
+  it('shows a small measured distance instead of Here or zero', () => {
+    expect(formatMiles(0)).toBe('<0.1 mi');
+    expect(formatMiles(0.09)).toBe('<0.1 mi');
+    expect(formatMiles(0.1)).toBe('0.1 mi');
+    expect(formatMiles(0.72)).toBe('0.7 mi');
   });
 });

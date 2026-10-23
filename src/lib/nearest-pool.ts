@@ -59,6 +59,7 @@ export function buildNearestPool({ restaurants, places, center, device, coordsFo
   const reference = hasDevice ? device! : center;
   return pool.map(({ point, centerMiles, ...pick }) => {
     const miles = point ? milesBetween(reference, point) : centerMiles;
-    return { ...pick, miles, distanceLabel: `${pick.estimated ? '~' : ''}${formatMiles(miles)}` };
+    const label = formatMiles(miles);
+    return { ...pick, miles, distanceLabel: pick.estimated && !label.startsWith('<') ? `~${label}` : label };
   }).sort((a,b) => (hasDevice ? Number(a.estimated)-Number(b.estimated) : 0) || a.miles-b.miles || a.name.localeCompare(b.name));
 }

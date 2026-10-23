@@ -117,15 +117,20 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   `/home/events`. Each opens only its own counted inventory. The prototype's
   four-category switcher is a preview aid and does not appear on these pages.
   Keep the warm page wash, a serif category title with city below, Home's
-  shared 53px search, and quiet glyph filter chips. Omit the separate
+  shared 53px search, and quiet glyph filter chips. Align the category title's
+  top inset with Home's Wayvee row (10px). Omit the separate
   Home/Wayvee header row on these four category pages; the bottom navigation
-  provides the Home action. The short list uses numbered, unboxed rows with a
+  provides the Home action. Restore one raised `Start here` lead card above
+  the short list, then use numbered, unboxed rows beginning at 02 with a
   one-line serif name, concise category glyph/caption and a right-aligned
-  category fact column, separated by faint rules. Show every result exactly
+  category fact column, separated by faint rules. Omit column-label headers.
+  Show every result exactly
   once. Use actual prices/distances for Eat, listed
   hours for Bars, stops/travel for Routes, and day/time for Events. Do not
   fill absent source facts with invented prices, distances or durations.
-  Search and filters stay inside the page's category and city, including when
+  Measured distances under 0.1 mile display `<0.1 mi` throughout the app;
+  never replace an unknown distance with a number. Search and filters stay
+  inside the page's category and city, including when
   combined. Preserve Eat's nearest order and estimated-distance labels.
   Existing `/home/browse?category=…` links redirect to the corresponding page,
   forwarding query text; generic browse/search links open Quiet index.
