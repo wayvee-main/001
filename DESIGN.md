@@ -1,6 +1,6 @@
 # Wayvee design system
 
-The approved Apricot linen light palette, Nightfall dark palette and editorial refinements are the current UI contract.
+The approved Warm limestone light palette, Nightfall dark palette and editorial refinements are the current UI contract.
 Palette and dimensions come from `src/lib/tokens.ts`; regenerate the CSS,
 inline palette and Tailwind tokens together with `npm run tokens`.
 
@@ -23,20 +23,20 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   17px search glyph and 37px orange action. Editable fields and launchers
   share the same font, surface, edge and elevation. Keep inputs off-white in
   light mode. Do not rebuild search silhouettes separately on other screens.
-- Light uses the selected **Apricot linen** palette: ivory `#FFFCF7` ground,
-  muted apricot, neutral linen and pale peach washes, with `#F6EADD` paper cards.
-  `BACKDROP_GRADIENTS.light` in `src/lib/tokens.ts` records the preview's 220°,
-  125° and 230° layers in back-to-front order, including alpha and stops.
+- Light uses the selected **Warm limestone** palette: `#FAF9F4` ground,
+  quiet limestone washes, `#EEECE4` matte cards and `#FDFCF8` controls.
+  `BACKDROP_GRADIENTS.light` in `src/lib/tokens.ts` records the 160°,
+  135° and 230° layers in back-to-front order, including alpha and stops.
   Dark keeps the original `#151117` ground and 230° / 121° / 226° Nightfall
   washes. `AppBackdrop` paints the selected theme's layers behind every screen,
   detail and onboarding page, with aspect-correct angles on web and native.
-  Default cards and sheets use Apricot linen `#F6EADD` in light mode and
+  Default cards and sheets use Warm limestone `#EEECE4` in light mode and
   charcoal `#29252A` in dark mode, with faint edges and elevation.
   Discover listings use the same card fill. Controls have a separate
-  `surface-control` role, retaining `#F5F0E9` / `#29252A`. In dark mode,
+  `surface-control` role, using `#FDFCF8` / `#29252A`. In dark mode,
   `#29252A` is the default background for card containers, including Home tiles
-  and every Discover listing. Light-mode search and navigation share plain off-white `#FFFCF8`.
-  Home glyph tiles use `#FFFCF8` / `#29252A`. Search uses its own `surface-search`
+  and every Discover listing. Light-mode search and navigation share off-white `#FDFCF8`.
+  Home glyph tiles use `#FDFCF8` / `#29252A`. Search uses its own `surface-search`
   role everywhere: Home, Discover, the search overlay, food hub and stay picks.
   Dark search retains Oyster's muted green `#28372F`; dark navigation uses
   `#29252A`. Keep these roles separate from cards so changing search never
@@ -51,11 +51,11 @@ inline palette and Tailwind tokens together with `npm run tokens`.
 - Add 14px to the previous horizontal gutters throughout screens and layers:
   34px normally, 30px on phones up to 400px. Use `useAppGutter`.
 - Home keeps four tiles, ordered Eat, Bars, Routes, Events. Restore the compact
-  reference glyph cards: `home-tile` off-white `#FFFCF8` in light and the existing
+  reference glyph cards: `home-tile` off-white `#FDFCF8` in light and the existing
   charcoal `#29252A` in dark. Use level-1 raised surfaces, faint borders,
   `rounded-panel` corners, 12px insets, 100px minimum height and 10px grid gaps.
   The two columns fill the content width. Small 16px outline glyphs sit inside
-  28px peach circles at top left (`#F7E5D8` light / `#48312E` dark); the real
+  28px limestone circles at top left (`#E0DED3` light / `#48312E` dark); the real
   inventory count sits at top right in 18px medium DM Sans with tabular figures.
   Below, use a 20px Fraunces category and a short 11px DM Sans caption:
   Eat / Nearby places; Bars / After dinner; Routes / A few good stops;
@@ -64,7 +64,7 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   counts and ordering follow the active city's existing source pools.
   In light mode, quick venue chips share search's off-white fill;
   dark mode retains their Oyster charcoal fill. Link your stay and the evening
-  ribbon share `surface-ribbon` (`#F6EADD` light / `#100D13` dark),
+  ribbon share `surface-ribbon` (`#EEECE4` light / `#100D13` dark),
   normal theme ink and a faint edge.
   Home keeps “Shall we wander?” without supporting subtext. Its one-line search
   label reads “Search the city of Oakland” for Oakland and uses the active city;
@@ -81,10 +81,10 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   never imply “Open now.” The divider is omitted when there are no venue chips.
   Cards, tiles, containers, chips, buttons and rounded photo frames use a 1px
   `edge-card` perimeter and `edge-card-bottom` lower rim. In light mode the
-  Etched paper treatment uses clay ink `#693F3A` at 13.5% / 19.5%. Cards
+  Etched paper treatment uses warm ink `#734F3D` at 15% / 21%. Cards
   use a matte fill and soft outer plum shadow, without a white inset highlight;
   compact controls keep the same paper-like material. Text inputs use off-white `surface-input`
-  instead of the blush card fill. Dark retains its existing 4% ink
+  instead of the limestone card fill. Dark retains its existing 4% ink
   perimeter and shadow. Keep `edge-faint` for dividers and decorative rules.
   Apply the card edge to filled controls,
   including selected and primary controls, without boxing transparent layout
@@ -99,7 +99,7 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   surfaces and orange accents. Keep the original gradient Vee mark and the
   original page gradients intact; explicit error states retain their red.
 - “Your evening, with Vee” and Link your stay use `surface-ribbon`:
-  `#F6EADD` light / `#100D13` dark, with standard theme lettering and
+  `#EEECE4` light / `#100D13` dark, with standard theme lettering and
   orange `surface-accent` icons. Its smooth 22px corners, etched edge and
   level-1 elevation match the shared card material. The ticket notches and
   perforated seam are removed. Keep its compact 61.2px minimum height.
@@ -112,32 +112,27 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   one raised lead card, compact source-backed glyph facts and rows separated by
   faint rules. The lead is not repeated in the remaining list. Its details use
   existing save/plan authentication and actual source links.
-- The four Home tiles use **Pocket guide** on four separate secondary pages:
+- The four Home tiles use **Local ledger** on four separate secondary pages:
   Eat `/home/eat`, Bars `/home/bars`, Routes `/home/routes`, and Events
   `/home/events`. Each opens only its own counted inventory. The prototype's
   four-category switcher is a preview aid and does not appear on these pages.
   Keep the warm page wash, a serif category title with city below, Home's
   shared 53px search, and quiet glyph filter chips. Omit the separate
   Home/Wayvee header row on these four category pages; the bottom navigation
-  provides the Home action. Pocket guide starts with one raised “Start here” card: a serif
-  name, restrained category glyph and one-line source-backed snapshot. Keep
-  the lead compact at a 111px minimum height, with 14px padding and 8px gaps
-  (about 25% shorter than the original). Omit its bottom metadata row. The first result is not repeated. “Also worth a look” holds the
-  full remaining inventory in compact raised rows, with a 38px glyph well,
-  one-line serif names (five-word cap), inline glyph metadata and orange
-  chevrons. Reuse the app’s default card fill, faint edges and level-1
-  elevation in both themes. Use actual prices/distances for Eat, listed
+  provides the Home action. The short list uses numbered, unboxed rows with a
+  one-line serif name, concise category glyph/caption and a right-aligned
+  category fact column, separated by faint rules. Show every result exactly
+  once. Use actual prices/distances for Eat, listed
   hours for Bars, stops/travel for Routes, and day/time for Events. Do not
   fill absent source facts with invented prices, distances or durations.
   Search and filters stay inside the page's category and city, including when
   combined. Preserve Eat's nearest order and estimated-distance labels.
   Existing `/home/browse?category=…` links redirect to the corresponding page,
   forwarding query text; generic browse/search links open Quiet index.
-  This pocket guide replaces the numbered ledger only for these four
-  pages. For you, Collections and Discover retain their browse layouts.
+  For you, Collections and Discover retain their browse layouts.
 - Detail pages use **Pocket dossier** in both themes, including existing
   restaurant, place, nightlife, event, venue, route and experience entry routes.
-  Keep the Back/Wayvee header, a small category/city eyebrow, serif venue name,
+  Omit the Back/Wayvee header row; begin with the small category/city eyebrow and serif venue name,
   then the full-width contained source image below the identity (795:464 ratio,
   capped at 232px high). A compact source-backed snapshot uses the whole row
   and wraps to a second line only as needed. Pricing, distance, Save and

@@ -1,5 +1,5 @@
-import { HomePocketGuideScreen } from '@/components/home-pocket-guide';
+import { HomeLedgerScreen } from '@/components/home-ledger';
 
 export default function RoutesScreen() {
-  return <HomePocketGuideScreen category="routes" />;
+  return <HomeLedgerScreen category="routes" />;
 }

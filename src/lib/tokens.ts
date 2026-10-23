@@ -11,7 +11,7 @@
  * aliases are kept pointing at the same hex so existing className strings in src/app
  * and src/components keep working; new code should reach for the semantic name.
  *
- * Palette: Apricot linen wash and paper cards in light, the original
+ * Palette: Warm limestone wash and matte cards in light, the original
  * Nightfall wash in dark, with restrained orange accents.
  * Filled controls use the approved rust/light and peach/dark pairing with
  * theme-specific on-accent ink. Legacy color aliases follow the same orange
@@ -36,37 +36,37 @@ export function withAlpha(hex: string, alpha: number): string {
  * space-separated RGB triples so Tailwind's <alpha-value> opacity modifier
  * (bg-surface/50) keeps working. */
 export const ROLES: Record<string, ThemeValue> = {
-  bg: { light: '#FFFCF7', dark: '#151117' }, // ivory ground beneath the wash
-  // Apricot linen paper carries through cards and sheets. Search and
+  bg: { light: '#FAF9F4', dark: '#151117' }, // limestone ground beneath the wash
+  // Warm limestone carries through cards and sheets. Search and
   // navigation have separate roles so their lighter treatment stays consistent.
-  surface: { light: '#F6EADD', dark: '#29252A' },
-  'surface-raised': { light: '#F6EADD', dark: '#29252A' },
-  'surface-soft': { light: '#F6EADD', dark: '#29252A' },
-  'surface-control': { light: '#F5F0E9', dark: '#29252A' }, // controls keep their existing material
-  'surface-input': { light: '#FFFCF8', dark: '#29252A' }, // text fields stay lighter than cards
-  'surface-ribbon': { light: '#F6EADD', dark: '#100D13' }, // Home ribbon and stay anchor
-  'surface-search': { light: '#FFFCF8', dark: '#28372F' },
-  'surface-navigation': { light: '#FFFCF8', dark: '#29252A' },
-  'surface-sunk': { light: '#E7E0D6', dark: '#100D13' }, // input wells, sheet track
-  fg: { light: '#312039', dark: '#FAF2E8' }, // Nightfall editorial ink
-  'fg-muted': { light: '#605463', dark: '#BDAFBD' }, // AA across the original wash
-  'card-ink': { light: '#2D2926', dark: '#F5EDE3' },
-  'card-muted': { light: '#645D56', dark: '#C3B9AF' },
+  surface: { light: '#EEECE4', dark: '#29252A' },
+  'surface-raised': { light: '#EEECE4', dark: '#29252A' },
+  'surface-soft': { light: '#EEECE4', dark: '#29252A' },
+  'surface-control': { light: '#FDFCF8', dark: '#29252A' },
+  'surface-input': { light: '#FDFCF8', dark: '#29252A' }, // text fields stay lighter than cards
+  'surface-ribbon': { light: '#EEECE4', dark: '#100D13' }, // Home ribbon and stay anchor
+  'surface-search': { light: '#FDFCF8', dark: '#28372F' },
+  'surface-navigation': { light: '#FDFCF8', dark: '#29252A' },
+  'surface-sunk': { light: '#E0DED3', dark: '#100D13' }, // input wells, sheet track
+  fg: { light: '#302F2C', dark: '#FAF2E8' }, // Nightfall editorial ink
+  'fg-muted': { light: '#64625E', dark: '#BDAFBD' },
+  'card-ink': { light: '#302F2C', dark: '#F5EDE3' },
+  'card-muted': { light: '#64625E', dark: '#C3B9AF' },
   'surface-accent': { light: '#963D24', dark: '#F0835C' }, // orange glyphs on Oyster cards
   'control-edge': { light: '#E2DBD6', dark: '#4F444D' },
-  'selected-surface': { light: '#2B1C35', dark: '#29192E' },
-  'on-selected': { light: '#FFF7ED', dark: '#FFF7ED' },
-  'selected-glyph': { light: '#F5BCA7', dark: '#F0835C' },
-  'navigation-muted': { light: '#D8C7DD', dark: '#D8C7DD' },
+  'selected-surface': { light: '#DEDDD2', dark: '#29192E' },
+  'on-selected': { light: '#302F2C', dark: '#FFF7ED' },
+  'selected-glyph': { light: '#963D24', dark: '#F0835C' },
+  'navigation-muted': { light: '#605C57', dark: '#D8C7DD' },
   // Home's reference glyph cards use off-white; other card materials stay separate.
-  'home-tile': { light: '#FFFCF8', dark: '#29252A' },
-  'surface-discovery': { light: '#F6EADD', dark: '#29252A' },
+  'home-tile': { light: '#FDFCF8', dark: '#29252A' },
+  'surface-discovery': { light: '#EEECE4', dark: '#29252A' },
   'home-tile-glyph': { light: '#963D24', dark: '#F0835C' },
-  'home-tile-well': { light: '#F3E2CE', dark: '#48312E' },
-  'tile-eat': { light: '#F5F0E9', dark: '#29252A' },
-  'tile-bars': { light: '#F5F0E9', dark: '#29252A' },
-  'tile-routes': { light: '#F5F0E9', dark: '#29252A' },
-  'tile-events': { light: '#F5F0E9', dark: '#29252A' },
+  'home-tile-well': { light: '#E0DED3', dark: '#48312E' },
+  'tile-eat': { light: '#FDFCF8', dark: '#29252A' },
+  'tile-bars': { light: '#FDFCF8', dark: '#29252A' },
+  'tile-routes': { light: '#FDFCF8', dark: '#29252A' },
+  'tile-events': { light: '#FDFCF8', dark: '#29252A' },
   'fg-accent': { light: '#963D24', dark: '#F0835C' }, // readable accent text across the wash
   // One theme-specific orange for action fills, icons, rails and active tabs.
   accent: { light: '#B84624', dark: '#F0835C' }, // brand accent — icons, borders, rails
@@ -79,31 +79,31 @@ export const ROLES: Record<string, ThemeValue> = {
   'warm-ink': { light: '#963D24', dark: '#F0835C' }, // text on warm-tint
   vee: { light: '#B84624', dark: '#F0835C' }, // legacy Vee accents, now the shared orange
   'vee-strong': { light: '#963D24', dark: '#F0835C' }, // legacy Vee text, now the shared readable orange
-  'accent-tint': { light: '#F6EADD', dark: '#29252A' },
-  'warm-tint': { light: '#F6EADD', dark: '#29252A' },
-  'vee-tint': { light: '#F6EADD', dark: '#29252A' },
+  'accent-tint': { light: '#EEECE4', dark: '#29252A' },
+  'warm-tint': { light: '#EEECE4', dark: '#29252A' },
+  'vee-tint': { light: '#EEECE4', dark: '#29252A' },
   danger: { light: '#A02F38', dark: '#FF6B6D' }, // closed / sold out / error — the one functional red
 };
 
 /** App-wide washes, painted back to front. Light matches the selected
- * Apricot linen preview; dark keeps the original Nightfall layers. Angles
+ * Warm limestone preview; dark keeps the original Nightfall layers. Angles
  * are CSS angles, with hue-matched transparent endpoints for native fades. */
 export const BACKDROP_GRADIENTS = {
   light: [
     {
-      angle: 220,
-      locations: [0.05, 0.62, 0.94],
-      colors: ['#F0CFB000', '#F0CFB026', '#F0CFB000'],
+      angle: 160,
+      locations: [0, 0.52, 1],
+      colors: ['#FAF9F400', '#EEECE486', '#EEECE4FF'],
     },
     {
-      angle: 125,
-      locations: [0.12, 0.55, 0.92],
-      colors: ['#E1D9CF00', '#E1D9CF2B', '#E1D9CF00'],
+      angle: 135,
+      locations: [0, 0.5, 1],
+      colors: ['#E6E4DA75', '#E6E4DA1A', '#E6E4DA00'],
     },
     {
       angle: 230,
-      locations: [0, 0.64, 1],
-      colors: ['#EBC6A34D', '#EBC6A300', '#EBC6A300'],
+      locations: [0, 0.62, 1],
+      colors: ['#E6E4DA25', '#E6E4DA00', '#E6E4DA00'],
     },
   ],
   dark: [
@@ -131,8 +131,8 @@ export const EDGE_ROLES: Record<string, { base: 'fg'; alpha: number; lightBase?:
   edge: { base: 'fg', alpha: 0.12 }, // borders / dividers
   'edge-soft': { base: 'fg', alpha: 0.08 }, // placeholder stripe C
   'edge-faint': { base: 'fg', alpha: 0.04 }, // quiet dividers and decorative rules
-  'edge-card': { base: 'fg', alpha: 0.04, lightBase: '#693F3A', lightAlpha: 0.135 },
-  'edge-card-bottom': { base: 'fg', alpha: 0.04, lightBase: '#693F3A', lightAlpha: 0.195 },
+  'edge-card': { base: 'fg', alpha: 0.04, lightBase: '#734F3D', lightAlpha: 0.15 },
+  'edge-card-bottom': { base: 'fg', alpha: 0.04, lightBase: '#734F3D', lightAlpha: 0.21 },
 };
 
 /** Same value in both themes — either brand hue or a translucent tint over
@@ -150,9 +150,9 @@ export const FIXED: Record<string, string> = {
 
 /** Non-CSS-var palette entries theme.ts also needs (Stripes placeholder). */
 export const STRIPES: ThemeValue & { stripeB: ThemeValue } = {
-  light: '#EDE7DE',
+  light: '#E8E6DC',
   dark: '#241D27',
-  stripeB: { light: '#E2DAD0', dark: '#2E2633' },
+  stripeB: { light: '#DEDBD0', dark: '#2E2633' },
 };
 
 /** Old hue-named tokens, kept as aliases of the semantic roles above so

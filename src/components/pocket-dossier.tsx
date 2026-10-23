@@ -46,7 +46,7 @@ export function PocketDossierScreen({context,image,glyph='landmark',eyebrow,chip
   navActive?:'home'|'discover'|'create'|'profile';
 }) {
   const colors=useThemeColors(),surface=useRaisedSurface(1),now=useNow(),city=useActiveCityName();
-  return <HomeGuideScreen now={now} search={false} context={false} activeTab={navActive}
+  return <HomeGuideScreen now={now} search={false} context={false} header={false} activeTab={navActive}
     beforeNav={<DetailAssistantDock key={context.kind+':'+context.id} context={context} />}>
     <View testID="pocket-dossier" style={{gap:17}}>
       <View style={{gap:12}}>
