@@ -31,7 +31,6 @@ import { useThemeColors } from '@/lib/theme';
 const CUTLERY = 'M7 3v6a3 3 0 0 0 6 0v-6 M10 3v18 M18 3v18 M18 3c-3 2 -3 8 0 10';
 const COURIER = 'M5 16m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0 M19 16m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0 M7 16h8l2.5 -7.5h3.5 M13 8.5h3';
 const PHONE = 'M5 4h4l2 5l-3 2a11 11 0 0 0 5 5l2-3l5 2v4a2 2 0 0 1 -2 2c-8.3 0 -15 -6.7 -15 -15a2 2 0 0 1 2 -2';
-const HEART = 'M20.84 4.61a5.5 5.5 0 0 0 -7.78 0l-1.06 1.06l-1.06 -1.06a5.5 5.5 0 0 0 -7.78 7.78l1.06 1.06l7.78 7.78l7.78 -7.78l1.06 -1.06a5.5 5.5 0 0 0 0 -7.78z';
 
 export async function generateStaticParams(): Promise<{ id: string }[]> {
   return Object.keys(RESTAURANTS).map((id) => ({ id }));
@@ -41,7 +40,7 @@ export default function RestaurantScreen() {
   const gutter = useAppGutter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { deviceLocation, isSaved, showToast, toggleSaved, walkBudgetMinutes } = useScoper();
+  const { deviceLocation, showToast, walkBudgetMinutes } = useScoper();
   const colors = useThemeColors();
   const curatedCoords = useCuratedCoords();
   const curatedHours = useCuratedHours();
@@ -92,7 +91,6 @@ export default function RestaurantScreen() {
   const openExternal = (url: string, errorMessage: string) => {
     Linking.openURL(url).catch(() => showToast(errorMessage));
   };
-  const saved = isSaved('restaurant', restaurant.id);
   const phone = restaurant.detailFacts.find((fact) => fact.label === 'Phone')?.value;
   // Phone is the hero's call button, and Hours is the row below — a fact list
   // that repeats both is how the old About tab ended up saying the opening
@@ -205,13 +203,6 @@ export default function RestaurantScreen() {
       image={restaurant.image}
       heroActions={
         <>
-          <DetailIconButton
-            d={HEART}
-            label={saved ? `Remove ${restaurant.name} from saved places` : `Save ${restaurant.name}`}
-            active={saved}
-            fill={saved ? colors.peach : 'none'}
-            onPress={() => toggleSaved('restaurant', restaurant.id, restaurant.name)}
-          />
           {phone ? (
             <DetailIconButton
               d={PHONE}

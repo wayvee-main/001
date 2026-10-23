@@ -2,57 +2,20 @@ import * as Linking from 'expo-linking';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { DetailBottomNav } from '@/components/bottom-nav';
-import { DetailSheet } from '@/components/detail';
-import { AppBackdrop, Screen, useAppGutter } from '@/components/layout';
-import { Photo } from '@/components/photo';
-import { BackButton, Check, EmptyState, Icon } from '@/components/ui';
+import { PocketDossierScreen, type DossierChip } from '@/components/pocket-dossier';
+import { Screen, useAppGutter } from '@/components/layout';
+import { BackButton, Check, EmptyState } from '@/components/ui';
 import { useScoper } from '@/lib/store';
 import { useControlSurface } from '@/lib/shadows';
 import { formatDateChip, useViatorPicks, viatorFlagLabels, viatorTotalLabel } from '@/lib/viator';
 
 const MAX_GUESTS = 8;
-const HEART = 'M20.84 4.61a5.5 5.5 0 0 0 -7.78 0l-1.06 1.06l-1.06 -1.06a5.5 5.5 0 0 0 -7.78 7.78l1.06 1.06l7.78 7.78l7.78 -7.78l1.06 -1.06a5.5 5.5 0 0 0 0 -7.78z';
-
-function BackCircle({ onPress }: { onPress: () => void }) {
-  return (
-    <TouchableOpacity
-      accessibilityRole="button"
-      accessibilityLabel="Go back"
-      activeOpacity={0.7}
-      onPress={onPress}
-      className="h-10 w-10 items-center justify-center rounded-full bg-black/45">
-      <Text className="-mt-0.5 font-dm-bold text-[17px] text-white">‹</Text>
-    </TouchableOpacity>
-  );
-}
-
-/** Pin toggle for a dated Viator pick — same "add to plans" concept as an
- * event's own heart button (event/[id].tsx), styled for this screen's dark
- * hero instead of DetailIconButton's light-hero shell. A pick has no night
- * stop of its own (daytime, own booking flow) so this is the only plan
- * affordance it gets — no "Plan a night around this" CTA. */
-function PlanCircle({ active, label, onPress }: { active: boolean; label: string; onPress: () => void }) {
-  return (
-    <TouchableOpacity
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      activeOpacity={0.7}
-      onPress={onPress}
-      className={`h-10 w-10 items-center justify-center rounded-full ${active ? 'bg-rust' : 'bg-black/45'}`}>
-      <Icon d={HEART} size={16} color="#FFFFFF" fill={active ? '#FFFFFF' : 'none'} strokeWidth={1.8} />
-    </TouchableOpacity>
-  );
-}
-
 export default function PickScreen() {
   const control = useControlSurface(), selectedControl = useControlSurface(true);
   const gutter = useAppGutter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { showToast, isPlanned, togglePlan } = useScoper();
   const picks = useViatorPicks();
   const pick = picks.find((p) => p.id === id);
@@ -82,48 +45,25 @@ export default function PickScreen() {
 
   const flagLabels = viatorFlagLabels(pick);
   const total = viatorTotalLabel(pick, guests);
-  const metaLine = [pick.durationLabel, pick.destination].filter(Boolean).join(' · ');
   const guestsLabel = `${guests} guest${guests > 1 ? 's' : ''}`;
   const summaryLine = selectedDate ? `${formatDateChip(selectedDate).weekday}, ${guestsLabel}` : guestsLabel;
 
   const bookOnViator = () => Linking.openURL(pick.bookingUrl).catch(() => showToast('Could not open Viator'));
 
-  return (
-    <AppBackdrop>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
-        <Photo uri={pick.image} radius={0} style={{ height: 211 + insets.top }}>
-          <View style={{ top: insets.top + 10 }} className="absolute left-4 right-4 flex-row items-center justify-between">
-            <BackCircle onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
-            <PlanCircle
-              active={isPlanned('pick', pick.id)}
-              label={isPlanned('pick', pick.id) ? `Remove ${pick.title} from plans` : `Add ${pick.title} to plans`}
-              onPress={() => togglePlan('pick', pick.id, pick.title)}
-            />
-          </View>
-        </Photo>
-
-        <DetailSheet>
-          <View className="gap-y-1.5">
-            <Text className="font-dm-bold text-[9.5px] tracking-[0.6px] text-peach">VIATOR</Text>
-            <Text className="font-fraunces text-[24px] leading-[28px] text-ink">{pick.title}</Text>
-            {metaLine ? <Text numberOfLines={1} className="font-dm text-[13px] text-taupe">{metaLine}</Text> : null}
-
-            {pick.freeCancellation || flagLabels.length ? (
-              <View className="mt-1 flex-row flex-wrap gap-2">
-                {pick.freeCancellation ? (
-                  <View className="rounded-full bg-blush px-3 py-[7px] border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
-                    <Text className="font-dm-medium text-meta text-peach">Free cancellation</Text>
-                  </View>
-                ) : null}
-                {flagLabels.map((label) => (
-                  <View key={label} className="rounded-full bg-shell px-3 py-[7px] border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
-                    <Text className="font-dm-medium text-meta text-ink">{label}</Text>
-                  </View>
-                ))}
-              </View>
-            ) : null}
-          </View>
-
+  const planned=isPlanned('pick',pick.id);
+  const price=pick.priceFrom!=null&&pick.currency?'From '+pick.currency+' '+pick.priceFrom:null;
+  const chips:DossierChip[]=[
+    ...(price?[{key:'price',label:price}]:[]),
+    ...(pick.durationLabel?[{key:'duration',glyph:'clock',label:pick.durationLabel}]:[]),
+    {key:'save',label:planned?'Saved':'Save',glyph:planned?'check':'bookmark',selected:planned,onPress:()=>togglePlan('pick',pick.id,pick.title)},
+    {key:'book',label:'Book',glyph:'arrow',accent:true,onPress:bookOnViator},
+  ];
+  return <PocketDossierScreen image={pick.image} glyph="compass" eyebrow="Experience" chips={chips}
+    context={{kind:'pick',id:pick.id,name:pick.title,caption:pick.destination,snapshot:pick.description,
+      facts:[{label:'Destination',value:pick.destination},...(price?[{label:'Price',value:price}]:[]),...(pick.durationLabel?[{label:'Duration',value:pick.durationLabel}]:[]),...(pick.inclusions.length?[{label:'Included',value:pick.inclusions.join(' · ')}]:[])],
+      links:[{label:'Book on Viator',url:pick.bookingUrl}]}}
+    essentials={[{label:'Destination',value:pick.destination},...(pick.freeCancellation?[{label:'Cancellation',value:'Free cancellation listed'}]:[]),...(flagLabels.length?[{label:'Booking details',value:flagLabels.join(' · ')}]:[])]}>
+    <View style={{gap:18}}>
           {pick.availabilityDates.length ? (
             <View className="gap-y-2.5">
               <Text className="font-dm-bold text-[14px] text-ink">Choose a date</Text>
@@ -189,28 +129,11 @@ export default function PickScreen() {
             </View>
           ) : null}
 
-          <View className="h-px bg-sand" />
-          <Text className="font-dm text-[12.5px] leading-[18px] text-taupe">{pick.description}</Text>
-        </DetailSheet>
-      </ScrollView>
 
-      <View className="border-t border-edge-faint bg-cream pt-3" style={{ paddingHorizontal: gutter, paddingBottom: Math.max(insets.bottom, 12) }}>
-        <View style={{ maxWidth: 720, width: '100%', alignSelf: 'center' }} className="gap-y-2">
-          <View className="flex-row items-center justify-between">
-            <View className="min-w-0 flex-1">
-              <Text numberOfLines={1} className="font-dm text-meta text-taupe">{summaryLine}</Text>
-              <Text numberOfLines={1} className="font-dm-bold text-[18px] text-ink">{total ?? 'See price on Viator'}</Text>
-            </View>
-            <TouchableOpacity activeOpacity={0.85} onPress={bookOnViator} className="h-12 items-center justify-center rounded-full bg-accent-fill px-6 border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
-              <Text className="font-dm-medium text-[13.5px] text-on-accent">Book now</Text>
-            </TouchableOpacity>
-          </View>
-          <Text className="font-dm text-[10.5px] leading-[14px] text-taupe">
-            Estimate only — you&apos;ll choose your date and guests again on Viator to book · Wayvee may earn a commission
-          </Text>
-        </View>
+      <View style={{gap:5}}>
+        <Text className="font-dm text-label text-ink">{summaryLine} · {total ?? 'See price on Viator'}</Text>
+        <Text className="font-dm text-fine text-taupe" style={{lineHeight:17}}>Estimate only — choose your date and guests again on Viator to book. Wayvee may earn a commission.</Text>
       </View>
-      <DetailBottomNav active="home" />
-    </AppBackdrop>
-  );
+    </View>
+  </PocketDossierScreen>;
 }

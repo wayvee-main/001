@@ -34,12 +34,12 @@ export function HomeDoorCard({title,meta,image,glyph='compass',width,onPress,tes
 }
 
 /** Used only by /home routes. Existing Discover and its detail routes do not use this frame. */
-export function HomeGuideScreen({children,now,backLabel='Back',search=true,context=true}: {children:ReactNode;now:Date;backLabel?:string;search?:boolean;context?:boolean}) {
+export function HomeGuideScreen({children,now,backLabel='Back',search=true,context=true,header=true,beforeNav,activeTab='home'}: {children:ReactNode;now:Date;backLabel?:string;search?:boolean;context?:boolean;header?:boolean;beforeNav?:ReactNode;activeTab?:'home'|'discover'|'create'|'profile'}) {
   const router=useRouter(),colors=useThemeColors(),city=useActiveCityName();
   const period={morning:'This morning',midday:'This afternoon',afternoon:'This afternoon',evening:'This evening',lateNight:'After hours'}[currentDaypart(now)];
   return <Screen><View testID="home-field-guide" style={{flex:1}}>
     <ScreenScroll gap={18} keyboardShouldPersistTaps="handled">
-      <View className="flex-row items-center justify-between gap-x-3 py-2">
+      {header?<View className="flex-row items-center justify-between gap-x-3 py-2">
         <TouchableOpacity accessibilityRole="button" accessibilityLabel={backLabel} onPress={()=>router.canGoBack()?router.back():router.replace('/')} hitSlop={10} className="min-h-9 flex-row items-center gap-x-1.5">
           <Glyph name="back" size={16} color={colors.fg} /><Text className="font-dm text-label text-ink">{backLabel}</Text>
         </TouchableOpacity>
@@ -48,17 +48,18 @@ export function HomeGuideScreen({children,now,backLabel='Back',search=true,conte
           style={{width:32,height:32,borderRadius:16,backgroundColor:colors['surface-raised'],borderWidth:1,borderColor:colors['edge-card'],borderBottomColor:colors['edge-card-bottom'],alignItems:'center',justifyContent:'center'}}>
           <Glyph name="search" size={16} color={colors['fg-muted']} />
         </TouchableOpacity>:null}
-      </View>
+      </View>:null}
       {context?<View className="flex-row items-center gap-x-1.5"><Glyph name="compass" size={12} color={colors['surface-accent']} />
         <Text numberOfLines={1} className="font-dm text-fine text-peach">{city} · {period}</Text>
       </View>:null}
       {children}
     </ScreenScroll>
+    {beforeNav}
     <EditorialNav reserveSpace items={[
-      {key:'index',label:'Home',glyph:'home',selected:true,onPress:()=>router.replace('/')},
-      {key:'discover',label:'Discover',glyph:'compass',selected:false,onPress:()=>router.push('/discover')},
-      {key:'create',label:'Vee',glyph:'spark',selected:false,onPress:()=>router.push('/create')},
-      {key:'profile',label:'You',glyph:'user',selected:false,onPress:()=>router.push('/profile')},
+      {key:'index',label:'Home',glyph:'home',selected:activeTab==='home',onPress:()=>router.replace('/')},
+      {key:'discover',label:'Discover',glyph:'compass',selected:activeTab==='discover',onPress:()=>router.push('/discover')},
+      {key:'create',label:'Vee',glyph:'spark',selected:activeTab==='create',onPress:()=>router.push('/create')},
+      {key:'profile',label:'You',glyph:'user',selected:activeTab==='profile',onPress:()=>router.push('/profile')},
     ]} />
   </View></Screen>;
 }

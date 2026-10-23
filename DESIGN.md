@@ -104,9 +104,9 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   level-1 elevation match the shared card material. The ticket notches and
   perforated seam are removed. Keep its compact 61.2px minimum height.
   Home dividers stay faint.
-- Home uses **Field Guide** for its own browse, search, idea, collection and
-  detail layers under `/home/*`. Keep Discover, its shared visual components
-  and its existing detail routes unchanged. Reuse current fonts, page wash,
+- Home uses **Field Guide** for its browse, search, idea and collection
+  layers under `/home/*`. Keep Discover’s browse screen and section layouts
+  unchanged. Detail pages use the shared Pocket dossier below. Reuse current fonts, page wash,
   faint edges, orange actions and the floating navigation.
   Field Guide has a city/daypart eyebrow, calm title and short supporting copy,
   one raised lead card, compact source-backed glyph facts and rows separated by
@@ -116,11 +116,13 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   Eat `/home/eat`, Bars `/home/bars`, Routes `/home/routes`, and Events
   `/home/events`. Each opens only its own counted inventory. The prototype's
   four-category switcher is a preview aid and does not appear on these pages.
-  Keep the warm page wash, a Home back action and Wayvee wordmark, serif
-  category title with city below, Home's shared 53px search, and quiet glyph
-  filter chips. Pocket guide starts with one raised “Start here” card: a serif
-  name, restrained category glyph, two-line source-backed snapshot and compact
-  glyph facts. The first result is not repeated. “Also worth a look” holds the
+  Keep the warm page wash, a serif category title with city below, Home's
+  shared 53px search, and quiet glyph filter chips. Omit the separate
+  Home/Wayvee header row on these four category pages; the bottom navigation
+  provides the Home action. Pocket guide starts with one raised “Start here” card: a serif
+  name, restrained category glyph and one-line source-backed snapshot. Keep
+  the lead compact at a 111px minimum height, with 14px padding and 8px gaps
+  (about 25% shorter than the original). Omit its bottom metadata row. The first result is not repeated. “Also worth a look” holds the
   full remaining inventory in compact raised rows, with a 38px glyph well,
   one-line serif names (five-word cap), inline glyph metadata and orange
   chevrons. Reuse the app’s default card fill, faint edges and level-1
@@ -132,7 +134,26 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   Existing `/home/browse?category=…` links redirect to the corresponding page,
   forwarding query text; generic browse/search links open Quiet index.
   This pocket guide replaces the numbered ledger only for these four
-  pages. For you, Collections, their details, and Discover retain their layouts.
+  pages. For you, Collections and Discover retain their browse layouts.
+- Detail pages use **Pocket dossier** in both themes, including existing
+  restaurant, place, nightlife, event, venue, route and experience entry routes.
+  Keep the Back/Wayvee header, a small category/city eyebrow, serif venue name,
+  then the full-width contained source image below the identity (795:464 ratio,
+  capped at 232px high). A compact source-backed snapshot uses the whole row
+  and wraps to a second line only as needed. Pricing, distance, Save and
+  Directions share the same quiet chip material, left-aligned with exactly
+  10px gaps. Price uses dollar text without a wallet glyph. Omit absent facts
+  rather than inventing a four-chip row; a narrow screen can scroll that row.
+  Essentials use the standard raised card, prioritizing address, listed hours
+  and service. Additional details, source links, menus and planning controls
+  remain available in compact disclosures. Preserve existing authentication,
+  saves, plans, following, calls and booking selectors.
+  Ask Vee stays outside the scroll view, just above navigation, on every
+  detail page. Its gradient spiral stays static. The sheet keeps the current
+  listing visible as context and answers from its actual facts and official
+  links; missing policies and live availability remain unknown. Closing the
+  sheet returns to the same scroll position. Planning carries the supported
+  restaurant/event/venue/nightlife/route ID into the existing Vee planner.
 - For you is **three vertical intention cards**, selected by guest-local time:
   breakfast, lunch, coffee, dinner, outdoor ideas, shows or late-night plans.
   Cards name suggestions rather than specific establishments. See all opens

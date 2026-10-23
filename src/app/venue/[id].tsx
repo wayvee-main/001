@@ -20,7 +20,6 @@ import { useScoper } from '@/lib/store';
 import { useThemeColors } from '@/lib/theme';
 
 const CALENDAR = 'M6 3v3 M18 3v3 M4 8h16 M5 5h14a1 1 0 0 1 1 1v13H4V6a1 1 0 0 1 1-1z M7 11h3v3H7z';
-const HEART = 'M20.84 4.61a5.5 5.5 0 0 0 -7.78 0l-1.06 1.06l-1.06 -1.06a5.5 5.5 0 0 0 -7.78 7.78l1.06 1.06l7.78 7.78l7.78 -7.78l1.06 -1.06a5.5 5.5 0 0 0 0 -7.78z';
 const BELL = 'M18 8a6 6 0 0 0 -12 0c0 7 -3 7 -3 9h18c0 -2 -3 -2 -3 -9 M10 21h4';
 
 export async function generateStaticParams(): Promise<{ id: string }[]> {
@@ -31,7 +30,7 @@ export default function VenueScreen() {
   const gutter = useAppGutter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { deviceLocation, followedVenues, isSaved, showToast, toggleFollow, toggleSaved } = useScoper();
+  const { deviceLocation, followedVenues, showToast, toggleFollow } = useScoper();
   const colors = useThemeColors();
   const venue = VENUES[id ?? ''];
 
@@ -61,7 +60,6 @@ export default function VenueScreen() {
     Linking.openURL(venue.sourceUrl).catch(() => showToast('Could not open the official calendar'));
   };
   const venueEvents = currentEventListings().filter((event) => event.venueId === venue.id);
-  const saved = isSaved('venue', venue.id);
   const following = followedVenues.includes(venue.id);
 
   // The Events/About tabs are gone: what is on is why you are here, so it is
@@ -137,13 +135,6 @@ export default function VenueScreen() {
       image={venue.image}
       heroActions={
         <>
-          <DetailIconButton
-            d={HEART}
-            label={saved ? `Remove ${venue.name} from saved places` : `Save ${venue.name}`}
-            active={saved}
-            fill={saved ? colors.peach : 'none'}
-            onPress={() => toggleSaved('venue', venue.id, venue.name)}
-          />
           <DetailIconButton
             d={BELL}
             label={following ? `Stop following ${venue.name}` : `Follow ${venue.name}`}

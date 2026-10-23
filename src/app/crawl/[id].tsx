@@ -3,8 +3,8 @@ import * as Linking from 'expo-linking';
 import { Text, View } from 'react-native';
 
 import { HeaderRow, Screen, ScreenScroll } from '@/components/layout';
-import { PlanCta } from '@/components/plan-actions';
-import { EmptyState, PrimaryButton } from '@/components/ui';
+import { DetailScreen } from '@/components/detail-screen';
+import { EmptyState } from '@/components/ui';
 import { CRAWLS } from '@/lib/data';
 import { useScoper } from '@/lib/store';
 
@@ -34,41 +34,13 @@ export default function CrawlScreen() {
     );
   }
 
-  return (
-    <Screen>
-      <ScreenScroll gap={16}>
-        <HeaderRow title={crawl.name} />
-        <Text className="font-dm text-[13px] text-taupe">{crawl.meta}</Text>
-
-        <View className="rounded-card border border-edge-card border-b-edge-card-bottom bg-coral-50 px-4 py-3.5 shadow-soft-light dark:shadow-soft-dark">
-          <Text className="font-dm text-[13.5px] italic leading-5 text-ink">{crawl.desc}</Text>
-          <Text className="mt-2 font-dm text-label text-taupe">— Wayvee local team</Text>
-        </View>
-
-        <View>
-          {crawl.stops.map((st, i) => (
-            <View key={st.name} className="flex-row gap-x-3.5">
-              <View className="w-[26px] items-center">
-                <View className="h-[26px] w-[26px] items-center justify-center rounded-full bg-ember border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
-                  <Text className="font-dm-bold text-label text-on-accent">{i + 1}</Text>
-                </View>
-                {i < crawl.stops.length - 1 ? <View className="my-1 w-0.5 flex-1 bg-sand" /> : null}
-              </View>
-              <View className="flex-1 pb-[18px]">
-                <Text className="font-dm-medium text-[14.5px] text-ink">{st.name}</Text>
-                <Text className="mt-0.5 font-dm text-label text-taupe">{st.note}</Text>
-              </View>
-            </View>
-          ))}
-        </View>
-
-        <PrimaryButton label="Start crawl" onPress={() => Linking.openURL(crawl.routeUrl).catch(() => showToast('Could not open the route in Maps'))} />
-        <PlanCta
-          label={`Plan dinner before the ${crawl.name}`}
-          onPress={() => router.push(`/create?crawlId=${crawl.id}&q=${encodeURIComponent(`Dinner before the ${crawl.name} route`)}`)}
-        />
-        <Text className="text-center font-dm text-label text-taupe">Walking route opens in Maps · stops in order</Text>
-      </ScreenScroll>
-    </Screen>
-  );
+  return <DetailScreen title={crawl.name} meta={crawl.meta} lede={crawl.desc}
+    onAddress={() => Linking.openURL(crawl.routeUrl).catch(() => showToast('Could not open the route in Maps'))}
+    facts={[{glyph:'route',label: `${crawl.stops.length} stops`}]}
+    sections={[{key:'stops',title:'Along the way',children:<View style={{gap:14}}>{crawl.stops.map((stop,index)=><View key={stop.name} style={{gap:4}}>
+      <Text className="font-dm-medium text-label text-ink">{index+1}. {stop.name}</Text>
+      <Text className="font-dm text-label text-taupe" style={{lineHeight:19}}>{stop.note}</Text>
+    </View>)}</View>}]}
+    actions={[{label:'Plan dinner before this route',iconD:'M12 3v18 M3 12h18',onPress:()=>router.push(`/create?crawlId=${crawl.id}&q=${encodeURIComponent(`Dinner before the ${crawl.name} route`)}`)}]}
+    navActive="discover" />;
 }

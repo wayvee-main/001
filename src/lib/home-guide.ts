@@ -8,6 +8,7 @@ import type { SearchCandidate } from '@/lib/search';
 import type { Place } from '@/lib/places';
 import type { PlanKind, SavedPlaceKind } from '@/lib/user-data';
 import type { ViatorPick } from '@/lib/viator';
+import { hoursSummary } from '@/lib/hours';
 
 export type HomeGuideKind = 'restaurant' | 'place' | 'night' | 'crawl' | 'event' | 'venue' | 'pick' | 'outdoor' | 'collection';
 export type HomeGuideCategory = 'eat' | 'bars' | 'routes' | 'events';
@@ -74,7 +75,7 @@ export function buildHomeGuide({city,nearest,places,events,picks,now}: {
     glyph:/cafe|bakery/.test(p.category)?'coffee':'food',category:p.category,facts:[{glyph:'pin',value:p.address?.split(',')[0] || p.category.replace(/_/g,' ')}],
     foodTags:normalized([p.name,p.category,p.cuisine].filter(Boolean).join(' ')),
     searchText:[p.category,p.cuisine,p.address,p.category==='cafe'?'coffee espresso':''].filter(Boolean).join(' '),
-    details:[p.address?{label:'Address',value:p.address}:null,p.phone?{label:'Phone',value:p.phone}:null].filter((x):x is {label:string;value:string}=>!!x),
+    details:[p.address?{label:'Address',value:p.address}:null,p.openingHours?{label:'Listed hours',value:hoursSummary(p.openingHours)||p.openingHours}:null,p.phone?{label:'Phone',value:p.phone}:null].filter((x):x is {label:string;value:string}=>!!x),
     links:links(p.website?{label:'Official site',url:p.website}:undefined,directions(p.name,city,p.address)),saveKind:'place',
   });
   // The exact same measured/estimated pool supplies both Eat's count and its list.

@@ -33,19 +33,18 @@ function PocketEntry({entry,category,lead=false}: {entry:HomeGuideEntry;category
   const label=[entry.name,summary.caption,...summary.facts.map(fact=>fact.label || fact.value)].join('. ');
   return <TouchableOpacity testID={lead?'home-pocket-guide-lead':'home-pocket-guide-row'} accessibilityRole="button" accessibilityLabel={`Explore ${label}`}
     onPress={()=>router.push(homeGuideHref(entry) as never)} activeOpacity={.72}
-    style={[surface,lead?{padding:17,borderRadius:18,gap:12}:{flexDirection:'row',alignItems:'center',gap:11,minHeight:69,paddingVertical:11,paddingHorizontal:12,borderRadius:18}]}>
+    style={[surface,lead?{padding:14,minHeight:111,borderRadius:18,gap:8}:{flexDirection:'row',alignItems:'center',gap:11,minHeight:69,paddingVertical:11,paddingHorizontal:12,borderRadius:18}]}>
     {lead?<>
       <View style={{flexDirection:'row',alignItems:'center',gap:6}}>
         <Glyph name="compass" size={12} color={colors['surface-accent']} />
         <Text className="font-dm text-fine uppercase" style={{letterSpacing:1.1,color:colors['surface-accent']}}>Start here</Text>
       </View>
       <View style={{flexDirection:'row',alignItems:'center',gap:16}}>
-        <Text testID="home-pocket-guide-title" numberOfLines={2} ellipsizeMode="tail" className="min-w-0 flex-1 font-fraunces text-ink"
+        <Text testID="home-pocket-guide-title" numberOfLines={1} ellipsizeMode="tail" className="min-w-0 flex-1 font-fraunces text-ink"
           style={{fontSize:25,lineHeight:28.75,letterSpacing:-.45}}>{briefTitle(entry.name)}</Text>
         <Glyph name={entry.glyph} size={29} color={colors['surface-accent']} strokeWidth={1.3} />
       </View>
-      <Text numberOfLines={2} ellipsizeMode="tail" className="font-dm text-label text-taupe" style={{lineHeight:18}}>{entry.description || summary.caption}</Text>
-      <PocketFacts entry={entry} category={category} />
+      <Text numberOfLines={1} ellipsizeMode="tail" className="font-dm text-label text-taupe" style={{lineHeight:18}}>{entry.description || summary.caption}</Text>
     </>:<>
       <View style={{width:38,height:38,borderRadius:12,backgroundColor:colors['surface-sunk'],alignItems:'center',justifyContent:'center'}}>
         <Glyph name={entry.glyph} size={19} color={colors['surface-accent']} strokeWidth={1.4} />
@@ -98,7 +97,7 @@ function PocketGuideContents({category,catalog,cityName,initialQuery,hydrating}:
 export function HomePocketGuideScreen({category}: {category:HomeGuideCategory}) {
   const {q}=useLocalSearchParams<{q?:string|string[]}>(),{catalog,now,city}=useHomeGuide();
   const cityName=useActiveCityName(),hydrating=useContentHydrating(),query=Array.isArray(q)?q[0] || '':q || '';
-  return <HomeGuideScreen now={now} backLabel="Home" search={false} context={false}>
+  return <HomeGuideScreen now={now} backLabel="Home" search={false} context={false} header={false}>
     <PocketGuideContents key={`${city}:${category}:${query}`} category={category} catalog={catalog} cityName={cityName} initialQuery={query} hydrating={hydrating} />
   </HomeGuideScreen>;
 }

@@ -13,7 +13,6 @@ import { useScoper } from '@/lib/store';
 import { useThemeColors } from '@/lib/theme';
 
 const MARTINI = 'M8 21h8 M12 15v6 M5 4h14l-7 8z';
-const HEART = 'M20.84 4.61a5.5 5.5 0 0 0 -7.78 0l-1.06 1.06l-1.06 -1.06a5.5 5.5 0 0 0 -7.78 7.78l1.06 1.06l7.78 7.78l7.78 -7.78l1.06 -1.06a5.5 5.5 0 0 0 0 -7.78z';
 const CHECK = 'M5 12l5 5l10 -10';
 
 export async function generateStaticParams(): Promise<{ id: string }[]> {
@@ -24,7 +23,7 @@ export default function NightSpotScreen() {
   const gutter = useAppGutter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { deviceLocation, isPlanned, isSaved, showToast, toggleSaved, togglePlan } = useScoper();
+  const { deviceLocation, isPlanned, showToast, togglePlan } = useScoper();
   const colors = useThemeColors();
   const spot = NIGHTLIFE_SPOTS.find((entry) => entry.id === id);
 
@@ -48,7 +47,6 @@ export default function NightSpotScreen() {
   const openExternal = (url: string, errorMessage: string) => {
     Linking.openURL(url).catch(() => showToast(errorMessage));
   };
-  const saved = isSaved('night', spot.id);
   const planned = isPlanned('night', spot.id);
 
   const actions: DetailScreenAction[] = [
@@ -66,13 +64,6 @@ export default function NightSpotScreen() {
       image={spot.image}
       heroActions={
         <>
-          <DetailIconButton
-            d={HEART}
-            label={saved ? `Remove ${spot.name} from saved places` : `Save ${spot.name}`}
-            active={saved}
-            fill={saved ? colors.peach : 'none'}
-            onPress={() => toggleSaved('night', spot.id, spot.name)}
-          />
           <DetailIconButton
             d={CHECK}
             label={planned ? `Remove ${spot.name} from plans` : `Add ${spot.name} to plans`}

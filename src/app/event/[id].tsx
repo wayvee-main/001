@@ -3,7 +3,7 @@ import * as Linking from 'expo-linking';
 import { useMemo } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
-import { DetailFactList, DetailIconButton } from '@/components/detail';
+import { DetailFactList } from '@/components/detail';
 import {
   DetailScreen,
   whyRow,
@@ -28,10 +28,8 @@ import { computeDinnerTime } from '@/lib/plan-engine';
 import { useScoper } from '@/lib/store';
 import { eventHaystack, profileAffinity } from '@/lib/taste';
 import { useTasteProfile } from '@/lib/use-taste-profile';
-import { useThemeColors } from '@/lib/theme';
 import { useDaylightRemaining } from '@/lib/weather';
 
-const CALENDAR = 'M6 3v3 M18 3v3 M4 8h16 M5 5h14a1 1 0 0 1 1 1v13H4V6a1 1 0 0 1 1-1z M7 11h3v3H7z';
 const TICKET = 'M15 5v2 M15 11v2 M15 17v2 M5 5h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1 -2 2H5a2 2 0 0 1 -2 -2v-3a2 2 0 0 0 0 -4V7a2 2 0 0 1 2 -2z';
 
 /** How many dinner options a pre-show shortlist shows. Three is the design's
@@ -61,8 +59,7 @@ export default function EventScreen() {
   const gutter = useAppGutter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { deviceLocation, isPlanned, showToast, togglePlan, walkBudgetMinutes } = useScoper();
-  const colors = useThemeColors();
+  const { deviceLocation, showToast, walkBudgetMinutes } = useScoper();
   const curatedCoords = useCuratedCoords();
   const curatedHours = useCuratedHours();
   const profile = useTasteProfile();
@@ -140,7 +137,6 @@ export default function EventScreen() {
     );
   }
 
-  const planned = isPlanned('event', ev.id);
   const hasTicketLink = ev.ticketed && Boolean(ev.ticketUrl);
   const officialActionUrl = hasTicketLink ? ticketLink(ev.ticketUrl!) : ev.sourceUrl;
   const isRsvp = !hasTicketLink && /rsvp/i.test(`${ev.priceLabel} ${ev.priceFrom}`);
@@ -315,16 +311,6 @@ export default function EventScreen() {
   return (
     <DetailScreen
       image={ev.image}
-      heroActions={
-        <DetailIconButton
-          d={CALENDAR}
-          label={planned ? `Remove ${ev.name} from plans` : `Add ${ev.name} to plans`}
-          active={planned}
-          activeClassName="bg-sage"
-          color={planned ? colors.pine : colors.peach}
-          onPress={() => togglePlan('event', ev.id, ev.name)}
-        />
-      }
       title={ev.name}
       meta={metaLine}
       address={`${ev.venue} · ${streetAddress(ev.addr)}`}
