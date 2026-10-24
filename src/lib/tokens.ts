@@ -11,9 +11,9 @@
  * aliases are kept pointing at the same hex so existing className strings in src/app
  * and src/components keep working; new code should reach for the semantic name.
  *
- * Palette: Copper Mist wash and matte cards in light, the original
+ * Palette: Smoke & Bone wash and matte cards in light, the original
  * Nightfall wash in dark, with restrained orange accents.
- * Filled controls use the copper/light and peach/dark pairing with
+ * Filled controls use the smoke/light and peach/dark pairing with
  * theme-specific on-accent ink. Legacy color aliases follow the same orange
  * family; the original gradient mark keeps its brand colors.
  */
@@ -36,74 +36,74 @@ export function withAlpha(hex: string, alpha: number): string {
  * space-separated RGB triples so Tailwind's <alpha-value> opacity modifier
  * (bg-surface/50) keeps working. */
 export const ROLES: Record<string, ThemeValue> = {
-  bg: { light: '#F8F3EC', dark: '#151117' }, // copper paper beneath the wash
-  // Copper Mist carries through cards and sheets. Search and
+  bg: { light: '#EFEEEB', dark: '#151117' }, // mineral paper beneath the wash
+  // Smoke & Bone carries through cards and sheets. Search and
   // navigation have separate roles so their lighter treatment stays consistent.
-  surface: { light: '#EFE5DA', dark: '#29252A' },
-  'surface-raised': { light: '#EFE5DA', dark: '#29252A' },
-  'surface-soft': { light: '#EFE5DA', dark: '#29252A' },
-  'surface-control': { light: '#FFFDFA', dark: '#29252A' },
-  'surface-input': { light: '#FFFDFA', dark: '#29252A' }, // text fields stay lighter than cards
-  'surface-ribbon': { light: '#E9DCD2', dark: '#100D13' }, // Home ribbon and stay anchor
-  'surface-search': { light: '#FFFDFA', dark: '#28372F' },
-  'surface-navigation': { light: '#FFFCF7', dark: '#29252A' },
-  'surface-sunk': { light: '#DFD2C6', dark: '#100D13' }, // input wells, sheet track
-  fg: { light: '#34262B', dark: '#FAF2E8' }, // aubergine editorial ink
-  'fg-muted': { light: '#6C5B5A', dark: '#BDAFBD' },
-  'card-ink': { light: '#34262B', dark: '#F5EDE3' },
-  'card-muted': { light: '#6C5B5A', dark: '#C3B9AF' },
-  'surface-accent': { light: '#9F442B', dark: '#F0835C' },
-  'control-edge': { light: '#DCCFC4', dark: '#4F444D' },
-  'selected-surface': { light: '#39282F', dark: '#29192E' },
+  surface: { light: '#E3E1DE', dark: '#29252A' },
+  'surface-raised': { light: '#E3E1DE', dark: '#29252A' },
+  'surface-soft': { light: '#E3E1DE', dark: '#29252A' },
+  'surface-control': { light: '#FFFEFA', dark: '#29252A' },
+  'surface-input': { light: '#FFFEFA', dark: '#29252A' }, // text fields stay lighter than cards
+  'surface-ribbon': { light: '#DBD8D4', dark: '#100D13' }, // Home ribbon and stay anchor
+  'surface-search': { light: '#FFFEFA', dark: '#28372F' },
+  'surface-navigation': { light: '#F9F8F5', dark: '#29252A' },
+  'surface-sunk': { light: '#D4D0CB', dark: '#100D13' }, // input wells, sheet track
+  fg: { light: '#28252A', dark: '#FAF2E8' }, // aubergine editorial ink
+  'fg-muted': { light: '#615C60', dark: '#BDAFBD' },
+  'card-ink': { light: '#28252A', dark: '#F5EDE3' },
+  'card-muted': { light: '#615C60', dark: '#C3B9AF' },
+  'surface-accent': { light: '#AA5034', dark: '#F0835C' },
+  'control-edge': { light: '#CDC9C5', dark: '#4F444D' },
+  'selected-surface': { light: '#302832', dark: '#29192E' },
   'on-selected': { light: '#FFF8F1', dark: '#FFF7ED' },
   'selected-glyph': { light: '#F5BCA7', dark: '#F0835C' },
   'navigation-muted': { light: '#D8C7DD', dark: '#D8C7DD' },
   // Home's reference glyph cards use off-white; other card materials stay separate.
-  'home-tile': { light: '#FCF8F2', dark: '#29252A' },
-  'surface-discovery': { light: '#EFE5DA', dark: '#29252A' },
-  'home-tile-glyph': { light: '#9F442B', dark: '#F0835C' },
-  'home-tile-well': { light: '#E9DCD2', dark: '#48312E' },
-  'tile-eat': { light: '#FCF8F2', dark: '#29252A' },
-  'tile-bars': { light: '#FCF8F2', dark: '#29252A' },
-  'tile-routes': { light: '#FCF8F2', dark: '#29252A' },
-  'tile-events': { light: '#FCF8F2', dark: '#29252A' },
-  'fg-accent': { light: '#8E3C27', dark: '#F0835C' }, // deeper copper keeps text readable on tinted cards
+  'home-tile': { light: '#F8F7F4', dark: '#29252A' },
+  'surface-discovery': { light: '#E3E1DE', dark: '#29252A' },
+  'home-tile-glyph': { light: '#AA5034', dark: '#F0835C' },
+  'home-tile-well': { light: '#DBD8D4', dark: '#48312E' },
+  'tile-eat': { light: '#F8F7F4', dark: '#29252A' },
+  'tile-bars': { light: '#F8F7F4', dark: '#29252A' },
+  'tile-routes': { light: '#F8F7F4', dark: '#29252A' },
+  'tile-events': { light: '#F8F7F4', dark: '#29252A' },
+  'fg-accent': { light: '#8F3F29', dark: '#F0835C' }, // deeper accent keeps small text readable on tints
   // One theme-specific orange for action fills, icons, rails and active tabs.
-  accent: { light: '#9F442B', dark: '#F0835C' }, // brand accent — icons, borders, rails
-  'accent-fill': { light: '#9F442B', dark: '#F0835C' }, // approved editorial control fill
+  accent: { light: '#AA5034', dark: '#F0835C' }, // brand accent — icons, borders, rails
+  'accent-fill': { light: '#AA5034', dark: '#F0835C' }, // approved editorial control fill
   'on-accent': { light: '#FFFAF4', dark: '#2C1811' }, // theme-paired CTA ink
-  open: { light: '#9F442B', dark: '#F0835C' }, // open-now / confirmed / live; status stays explicit in its label
-  warm: { light: '#9F442B', dark: '#F0835C' }, // legacy category fill, now the shared orange
+  open: { light: '#8F3F29', dark: '#F0835C' }, // open-now / confirmed / live; status stays explicit in its label
+  warm: { light: '#AA5034', dark: '#F0835C' }, // legacy category fill, now the shared orange
   'warm-strong': { light: '#FFFAF4', dark: '#2C1811' }, // ink on the legacy category fill
   // Readable ink for legacy category tints.
-  'warm-ink': { light: '#9F442B', dark: '#F0835C' }, // text on warm-tint
-  vee: { light: '#9F442B', dark: '#F0835C' }, // legacy Vee accents, now the shared orange
-  'vee-strong': { light: '#9F442B', dark: '#F0835C' }, // legacy Vee text, now the shared readable orange
-  'accent-tint': { light: '#EFE5DA', dark: '#29252A' },
-  'warm-tint': { light: '#EFE5DA', dark: '#29252A' },
-  'vee-tint': { light: '#EFE5DA', dark: '#29252A' },
+  'warm-ink': { light: '#8F3F29', dark: '#F0835C' }, // text on warm-tint
+  vee: { light: '#AA5034', dark: '#F0835C' }, // legacy Vee accents, now the shared orange
+  'vee-strong': { light: '#8F3F29', dark: '#F0835C' }, // legacy Vee text, now the shared readable orange
+  'accent-tint': { light: '#E3E1DE', dark: '#29252A' },
+  'warm-tint': { light: '#E3E1DE', dark: '#29252A' },
+  'vee-tint': { light: '#E3E1DE', dark: '#29252A' },
   danger: { light: '#A02F38', dark: '#FF6B6D' }, // closed / sold out / error — the one functional red
 };
 
 /** App-wide washes, painted back to front. Light matches the selected
- * Copper Mist preview; dark keeps the original Nightfall layers. Angles
+ * Smoke & Bone preview; dark keeps the original Nightfall layers. Angles
  * are CSS angles, with hue-matched transparent endpoints for native fades. */
 export const BACKDROP_GRADIENTS = {
   light: [
     {
       angle: 160,
       locations: [0, 0.52, 1],
-      colors: ['#F8F3EC00', '#F8F3EC3D', '#F8F3EC00'],
+      colors: ['#EFEEEB00', '#EFEEEB26', '#EFEEEB00'],
     },
     {
       angle: 135,
       locations: [0, 0.5, 1],
-      colors: ['#DD7D4E29', '#DD7D4E0F', '#DD7D4E00'],
+      colors: ['#B895831A', '#B895830A', '#B8958300'],
     },
     {
       angle: 230,
       locations: [0, 0.62, 1],
-      colors: ['#70557A00', '#70557A12', '#70557A00'],
+      colors: ['#71678A00', '#71678A1A', '#71678A00'],
     },
   ],
   dark: [
@@ -131,8 +131,8 @@ export const EDGE_ROLES: Record<string, { base: 'fg'; alpha: number; lightBase?:
   edge: { base: 'fg', alpha: 0.12 }, // borders / dividers
   'edge-soft': { base: 'fg', alpha: 0.08 }, // placeholder stripe C
   'edge-faint': { base: 'fg', alpha: 0.04 }, // quiet dividers and decorative rules
-  'edge-card': { base: 'fg', alpha: 0.04, lightBase: '#5D3A2D', lightAlpha: 0.11 },
-  'edge-card-bottom': { base: 'fg', alpha: 0.04, lightBase: '#5D3A2D', lightAlpha: 0.15 },
+  'edge-card': { base: 'fg', alpha: 0.04, lightBase: '#2E2B2F', lightAlpha: 0.13 },
+  'edge-card-bottom': { base: 'fg', alpha: 0.04, lightBase: '#2E2B2F', lightAlpha: 0.17 },
 };
 
 /** Same value in both themes — either brand hue or a translucent tint over
@@ -150,9 +150,9 @@ export const FIXED: Record<string, string> = {
 
 /** Non-CSS-var palette entries theme.ts also needs (Stripes placeholder). */
 export const STRIPES: ThemeValue & { stripeB: ThemeValue } = {
-  light: '#EADFD4',
+  light: '#E7E4E0',
   dark: '#241D27',
-  stripeB: { light: '#DED1C5', dark: '#2E2633' },
+  stripeB: { light: '#D6D2CE', dark: '#2E2633' },
 };
 
 /** Old hue-named tokens, kept as aliases of the semantic roles above so

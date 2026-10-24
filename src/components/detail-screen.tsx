@@ -48,8 +48,9 @@ export function DetailScreen({image,heroActions,title,rating,meta,address,onAddr
   if(directions||onAddress)chips.push({key:'directions',label:'Directions',glyph:'navigation',accent:true,onPress:kind!=='event'&&onAddress?onAddress:directions?()=>open(directions.url):onAddress});
   const secondaryFacts=facts.filter(fact=>!metadata.some(item=>item.value===fact.label));
   for(const fact of secondaryFacts){if(essentials.length>=3)break;if(!essentials.some(item=>item.value===fact.label))essentials.push({label:factLabel(fact.glyph),value:fact.label,glyph:fact.glyph});}
-  const folds:LedgerFold[]=rows.map(row=>({key:row.key,label:row.label,glyph:row.glyph,children:row.children}));
-  for(const section of sections)folds.push({key:'section-'+section.key,label:section.title||'More about this '+(kind==='event'?'show':'place'),glyph:kind==='event'?'ticket':'compass',children:<View style={{gap:10}}>
+  const isMenu=(label:string)=>kind==='restaurant'&&/menu|dish|food|drink/i.test(label);
+  const folds:LedgerFold[]=rows.map(row=>({key:row.key,label:row.label,glyph:row.glyph,chapter:isMenu(row.label)?'menu':'more',children:row.children}));
+  for(const section of sections)folds.push({key:'section-'+section.key,label:section.title||'More about this '+(kind==='event'?'show':'place'),glyph:kind==='event'?'ticket':'compass',chapter:isMenu(section.title||'')?'menu':'more',children:<View style={{gap:10}}>
     {section.note?<Text className="font-dm text-fine text-taupe">{section.note}</Text>:null}{section.children}
     {section.action&&section.onAction?<TouchableOpacity accessibilityRole="button" accessibilityLabel={section.action} onPress={section.onAction} style={{minHeight:36,justifyContent:'center'}}><Text className="font-dm text-label text-peach">{section.action}</Text></TouchableOpacity>:null}
     {section.footnote?<Text className="font-dm text-fine text-taupe">{section.footnote}</Text>:null}

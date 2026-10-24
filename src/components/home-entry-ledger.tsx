@@ -19,17 +19,11 @@ export function HomeEntryLedger({entry}: {entry:HomeGuideEntry}) {
   if(directions)chips.push({key:'directions',label:'Directions',glyph:'navigation',accent:true,onPress:()=>open(directions.url)});
   const links=entry.links.filter(link=>link!==directions),remaining=entry.details.filter(fact=>!essentials.includes(fact));
   const folds:LedgerFold[]=[];
-  for(const section of entry.sections||[])folds.push({key:'section-'+section.title,label:section.title,glyph:entry.kind==='restaurant'?'book':entry.glyph,
+  for(const section of entry.sections||[])folds.push({key:'section-'+section.title,label:section.title,glyph:entry.kind==='restaurant'?'book':entry.glyph,chapter:entry.kind==='restaurant'?'menu':'more',
     children:<View style={{gap:9}}>{section.lines.map((line,index)=><Text key={index} className="font-dm text-label text-taupe" style={{lineHeight:19}}>{line}</Text>)}</View>});
   if(remaining.length)folds.push({key:'more',label:'More details',glyph:'compass',children:<View style={{gap:9}}>{remaining.map((fact,index)=><View key={index} style={{gap:3}}><Text className="font-dm text-fine text-taupe">{fact.label}</Text><Text className="font-dm text-label text-ink" style={{lineHeight:18}}>{fact.value}</Text></View>)}</View>});
-  if(links.length)folds.push({key:'links',label:entry.kind==='restaurant'?'Menu & ordering':'Official links',glyph:entry.kind==='restaurant'?'book':'compass',children:<View style={{gap:4}}>{links.map(link=><TouchableOpacity key={link.url} accessibilityRole="link" accessibilityLabel={link.label} onPress={()=>open(link.url)} style={{minHeight:38,flexDirection:'row',alignItems:'center',gap:6}}>
+  if(links.length)folds.push({key:'links',label:entry.kind==='restaurant'?'Menu & ordering':'Official links',glyph:entry.kind==='restaurant'?'book':'compass',chapter:entry.kind==='restaurant'?'menu':'more',children:<View style={{gap:4}}>{links.map(link=><TouchableOpacity key={link.url} accessibilityRole="link" accessibilityLabel={link.label} onPress={()=>open(link.url)} style={{minHeight:38,flexDirection:'row',alignItems:'center',gap:6}}>
     <Text className="font-dm text-label text-peach">{link.label}</Text><Glyph name="arrow" size={13} color={colors['surface-accent']} />
   </TouchableOpacity>)}</View>});
-  if(entry.kind==='restaurant'&&folds.length){
-    const content=<View style={{gap:15}}>{folds.map(fold=><View key={fold.key} style={{gap:7}}>
-      {fold.key.startsWith('section-')?<Text className="font-dm-medium text-label text-ink">{fold.label}</Text>:null}{fold.children}
-    </View>)}</View>;
-    folds.splice(0,folds.length,{key:'menu',label:'Menu & ordering',glyph:'book',children:content});
-  }
   return <LedgerCompanionScreen key={entry.kind+':'+entry.id} context={context} image={entry.image} glyph={entry.glyph} eyebrow={DETAIL_LABELS[entry.kind]} chips={chips} essentials={essentials} folds={folds} />;
 }

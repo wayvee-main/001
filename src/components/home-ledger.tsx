@@ -21,17 +21,17 @@ function LedgerLead({entry,category}: {entry:HomeGuideEntry;category:HomeGuideCa
   const label=[entry.name,summary.caption,...summary.facts.map(fact=>fact.label || fact.value)].join('. ');
   return <TouchableOpacity testID="home-ledger-lead" accessibilityRole="button" accessibilityLabel={`Start here. Explore ${label}`}
     onPress={()=>router.push(homeGuideHref(entry) as never)} activeOpacity={.72}
-    style={[surface,{padding:14,minHeight:111,borderRadius:18,gap:8}]}>
+    style={[surface,{paddingHorizontal:14,paddingVertical:12,minHeight:111,borderRadius:18,gap:7}]}>
     <View style={{flexDirection:'row',alignItems:'center',gap:6}}>
       <Glyph name="compass" size={12} color={colors['surface-accent']} />
       <Text className="font-dm text-fine uppercase" style={{letterSpacing:1.1,color:colors['surface-accent']}}>Start here</Text>
     </View>
-    <View style={{flexDirection:'row',alignItems:'center',gap:16}}>
+    <View style={{flexDirection:'row',alignItems:'center',gap:12}}>
       <Text testID="home-ledger-title" numberOfLines={1} ellipsizeMode="tail" className="min-w-0 flex-1 font-fraunces text-ink"
-        style={{fontSize:25,lineHeight:28.75,letterSpacing:-.45}}>{briefTitle(entry.name)}</Text>
-      <Glyph name={entry.glyph} size={29} color={colors['surface-accent']} strokeWidth={1.3} />
+        style={{fontSize:23,lineHeight:27,letterSpacing:-.4}}>{briefTitle(entry.name)}</Text>
+      <Glyph name={entry.glyph} size={23} color={colors['surface-accent']} strokeWidth={1.3} />
     </View>
-    <Text numberOfLines={1} ellipsizeMode="tail" className="font-dm text-label text-taupe" style={{lineHeight:18}}>{entry.description || summary.caption}</Text>
+    <Text numberOfLines={2} ellipsizeMode="tail" className="font-dm text-label text-taupe" style={{lineHeight:17}}>{entry.description || summary.caption}</Text>
   </TouchableOpacity>;
 }
 
@@ -40,18 +40,18 @@ function LedgerRow({entry,category,index}: {entry:HomeGuideEntry;category:HomeGu
   const label=[entry.name,summary.caption,...summary.facts.map(fact=>fact.label || fact.value)].join('. ');
   return <TouchableOpacity testID="home-ledger-row" accessibilityRole="button" accessibilityLabel={`Explore ${label}`}
     onPress={()=>router.push(homeGuideHref(entry) as never)} activeOpacity={.72}
-    style={{flexDirection:'row',alignItems:'center',gap:8,minHeight:73,paddingVertical:12,borderBottomWidth:1,borderBottomColor:colors['edge-faint']}}>
+    style={{flexDirection:'row',alignItems:'flex-start',gap:8,minHeight:74,paddingVertical:15,borderBottomWidth:1,borderBottomColor:colors['edge-faint']}}>
     <Text accessibilityElementsHidden importantForAccessibility="no" className="font-dm text-meta"
-      style={{width:23,alignSelf:'flex-start',paddingTop:3,color:colors['surface-accent'],fontVariant:['tabular-nums']}}>{String(index+1).padStart(2,'0')}</Text>
-    <View style={{flex:1,minWidth:0,gap:5}}>
+      style={{width:22,paddingTop:2,color:colors['surface-accent'],fontVariant:['tabular-nums']}}>{String(index+1).padStart(2,'0')}</Text>
+    <View style={{flex:1,minWidth:0,gap:4}}>
       <Text testID="home-ledger-title" numberOfLines={1} ellipsizeMode="tail" className="font-fraunces text-ink"
-        style={{fontSize:19,lineHeight:22.8,letterSpacing:-.3}}>{briefTitle(entry.name)}</Text>
+        style={{fontSize:18,lineHeight:21,letterSpacing:-.3}}>{briefTitle(entry.name)}</Text>
       <View style={{flexDirection:'row',alignItems:'center',gap:5,minWidth:0}}>
-        <Glyph name={summary.glyph} size={12} color={colors['fg-muted']} />
+        <Glyph name={summary.glyph} size={11} color={colors['fg-muted']} />
         <Text numberOfLines={1} ellipsizeMode="tail" className="min-w-0 flex-1 font-dm text-meta text-taupe">{summary.caption}</Text>
       </View>
     </View>
-    {summary.facts.length?<View style={{width:88,maxWidth:'30%',alignItems:'flex-end',gap:4}}>
+    {summary.facts.length?<View style={{width:72,maxWidth:'26%',alignItems:'flex-end',gap:4,paddingTop:2}}>
       {summary.facts.map((fact,i)=><Text key={fact.glyph+':'+i} testID="home-ledger-fact" accessibilityLabel={fact.label || fact.value}
         numberOfLines={category==='bars'?2:1} ellipsizeMode="tail" className={`font-dm ${i===0?'text-label text-ink':'text-meta text-taupe'}`}
         style={{maxWidth:'100%',textAlign:'right'}}>{fact.value}</Text>)}
@@ -81,7 +81,7 @@ function LedgerContents({category,catalog,cityName,initialQuery,hydrating}: {
     {entries.length?<View style={{marginTop:25}}>
       <LedgerLead entry={entries[0]} category={category} />
       {entries.length>1?<>
-        <Text accessibilityRole="header" className="font-fraunces text-ink" style={{fontSize:19,lineHeight:22.8,letterSpacing:-.3,marginTop:23,marginBottom:11}}>The short list</Text>
+        <Text accessibilityRole="header" className="font-fraunces text-ink" style={{fontSize:18,lineHeight:22,letterSpacing:-.3,marginTop:22,marginBottom:7}}>The short list</Text>
         {entries.slice(1).map((entry,index)=><LedgerRow key={entry.kind+':'+entry.id} category={category} entry={entry} index={index+1} />)}
       </>:null}
     </View>:<EmptyState compact title={hydrating?'Checking the city…':'Nothing here just yet'}

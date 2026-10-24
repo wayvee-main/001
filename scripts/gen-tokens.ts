@@ -48,7 +48,7 @@ function genGlobalCss(): string {
 @tailwind components;
 @tailwind utilities;
 
-/* Wayvee Copper Mist / Nightfall tokens, generated from src/lib/tokens.ts.
+/* Wayvee Smoke & Bone / Nightfall tokens, generated from src/lib/tokens.ts.
    Light is the default (:root); .dark:root is the manual/system override.
    appearance.ts resolves the system choice on web; NativeWind resolves it
    on native. RGB triples (no commas) for tokens that
@@ -98,7 +98,7 @@ function genThemeTs(): string {
 
   return `${GENERATED_HEADER}import { useColorScheme } from 'nativewind';
 
-/** Mirrors the CSS-variable pairs in src/global.css ("Copper Mist / Nightfall" palette) — kept
+/** Mirrors the CSS-variable pairs in src/global.css ("Smoke & Bone / Nightfall" palette) — kept
  * here as plain hex because inline color props (Icon, placeholderTextColor,
  * SVG fills, shadow colors) can't read Tailwind's CSS variables the way
  * className does. Both semantic role names (bg, fg, accent, ...) and legacy

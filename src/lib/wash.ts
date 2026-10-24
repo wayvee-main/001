@@ -3,7 +3,7 @@ import { useThemeColors } from '@/lib/theme';
 
 /**
  * The arrival sequence's own warmer ink and control ramp. Its light cards
- * now use Copper Mist's matte surface and its background shares the app ground.
+ * now use Smoke & Bone's matte surface and its background shares the app ground.
  * These roles remain local because first-run helper copy and selection states
  * still need a warmer voice
  * than ordinary content screens.
@@ -61,17 +61,17 @@ const WASH: Record<'light' | 'dark', WashRamp> = {
     body: '#7D4938',
     strong: '#65250D',
     muted: '#8F5E4C',
-    cardBg: '#EFE5DA',
-    cardBorder: 'rgba(93,58,45,0.11)',
-    cardDivider: 'rgba(93,58,45,0.11)',
-    chipBg: '#FFFDFA',
-    chipBorder: 'rgba(93,58,45,0.15)',
+    cardBg: '#E3E1DE',
+    cardBorder: 'rgba(46,43,47,0.13)',
+    cardDivider: 'rgba(46,43,47,0.13)',
+    chipBg: '#FFFEFA',
+    chipBorder: 'rgba(46,43,47,0.13)',
     chipSelectedBg: '#FFF0C8',
     chipSelectedBorder: 'rgba(232,93,44,0.38)',
-    optionBg: '#EFE5DA',
+    optionBg: '#E3E1DE',
     optionSelectedBg: 'rgba(255,199,87,0.24)',
     optionSelectedBorder: 'rgba(232,93,44,0.46)',
-    stateSelectedBg: '#FFFDFA',
+    stateSelectedBg: '#FFFEFA',
     stateSelectedBorder: 'rgba(232,93,44,0.22)',
     stateIdle: '#A28C81',
     walkSelectedBg: '#E8E3F8',
@@ -82,13 +82,13 @@ const WASH: Record<'light' | 'dark', WashRamp> = {
     step: '#A34B2D',
     chrome: '#8B371B',
     note: '#9B6551',
-    secondaryBg: '#FFFDFA',
+    secondaryBg: '#FFFEFA',
     secondaryText: '#171214',
-    fieldActiveBg: '#FFFDFA',
+    fieldActiveBg: '#FFFEFA',
     fieldActiveBorder: 'rgba(111,91,209,0.50)',
     placeholder: '#A57868',
     hint: '#A66A53',
-    signupBg: '#E9DCD2',
+    signupBg: '#DBD8D4',
     signupText: '#A23F1D',
     interestSelectedBg: null,
   },
