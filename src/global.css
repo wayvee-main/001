@@ -3,60 +3,60 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Wayvee Nightfall tokens, generated from src/lib/tokens.ts.
+/* Wayvee Copper Mist / Nightfall tokens, generated from src/lib/tokens.ts.
    Light is the default (:root); .dark:root is the manual/system override.
    appearance.ts resolves the system choice on web; NativeWind resolves it
    on native. RGB triples (no commas) for tokens that
    go through Tailwind's <alpha-value> opacity modifier; full rgba() strings
    for tokens with fixed baked-in opacity. */
 :root {
-  --color-bg: 250 249 244;
-  --color-surface: 238 236 228;
-  --color-surface-raised: 238 236 228;
-  --color-surface-soft: 238 236 228;
-  --color-surface-control: 253 252 248;
-  --color-surface-input: 253 252 248;
-  --color-surface-ribbon: 238 236 228;
-  --color-surface-search: 253 252 248;
-  --color-surface-navigation: 253 252 248;
-  --color-surface-sunk: 224 222 211;
-  --color-fg: 48 47 44;
-  --color-fg-muted: 100 98 94;
-  --color-card-ink: 48 47 44;
-  --color-card-muted: 100 98 94;
-  --color-surface-accent: 150 61 36;
-  --color-control-edge: 226 219 214;
-  --color-selected-surface: 222 221 210;
-  --color-on-selected: 48 47 44;
-  --color-selected-glyph: 150 61 36;
-  --color-navigation-muted: 96 92 87;
-  --color-home-tile: 253 252 248;
-  --color-surface-discovery: 238 236 228;
-  --color-home-tile-glyph: 150 61 36;
-  --color-home-tile-well: 224 222 211;
-  --color-tile-eat: 253 252 248;
-  --color-tile-bars: 253 252 248;
-  --color-tile-routes: 253 252 248;
-  --color-tile-events: 253 252 248;
-  --color-fg-accent: 150 61 36;
-  --color-accent: 184 70 36;
-  --color-accent-fill: 184 70 36;
+  --color-bg: 248 243 236;
+  --color-surface: 239 229 218;
+  --color-surface-raised: 239 229 218;
+  --color-surface-soft: 239 229 218;
+  --color-surface-control: 255 253 250;
+  --color-surface-input: 255 253 250;
+  --color-surface-ribbon: 233 220 210;
+  --color-surface-search: 255 253 250;
+  --color-surface-navigation: 255 252 247;
+  --color-surface-sunk: 223 210 198;
+  --color-fg: 52 38 43;
+  --color-fg-muted: 108 91 90;
+  --color-card-ink: 52 38 43;
+  --color-card-muted: 108 91 90;
+  --color-surface-accent: 159 68 43;
+  --color-control-edge: 220 207 196;
+  --color-selected-surface: 57 40 47;
+  --color-on-selected: 255 248 241;
+  --color-selected-glyph: 245 188 167;
+  --color-navigation-muted: 216 199 221;
+  --color-home-tile: 252 248 242;
+  --color-surface-discovery: 239 229 218;
+  --color-home-tile-glyph: 159 68 43;
+  --color-home-tile-well: 233 220 210;
+  --color-tile-eat: 252 248 242;
+  --color-tile-bars: 252 248 242;
+  --color-tile-routes: 252 248 242;
+  --color-tile-events: 252 248 242;
+  --color-fg-accent: 142 60 39;
+  --color-accent: 159 68 43;
+  --color-accent-fill: 159 68 43;
   --color-on-accent: 255 250 244;
-  --color-open: 150 61 36;
-  --color-warm: 184 70 36;
+  --color-open: 159 68 43;
+  --color-warm: 159 68 43;
   --color-warm-strong: 255 250 244;
-  --color-warm-ink: 150 61 36;
-  --color-vee: 184 70 36;
-  --color-vee-strong: 150 61 36;
-  --color-accent-tint: 238 236 228;
-  --color-warm-tint: 238 236 228;
-  --color-vee-tint: 238 236 228;
+  --color-warm-ink: 159 68 43;
+  --color-vee: 159 68 43;
+  --color-vee-strong: 159 68 43;
+  --color-accent-tint: 239 229 218;
+  --color-warm-tint: 239 229 218;
+  --color-vee-tint: 239 229 218;
   --color-danger: 160 47 56;
-  --color-edge: rgba(48, 47, 44, 0.12);
-  --color-edge-soft: rgba(48, 47, 44, 0.08);
-  --color-edge-faint: rgba(48, 47, 44, 0.04);
-  --color-edge-card: rgba(115, 79, 61, 0.15);
-  --color-edge-card-bottom: rgba(115, 79, 61, 0.21);
+  --color-edge: rgba(52, 38, 43, 0.12);
+  --color-edge-soft: rgba(52, 38, 43, 0.08);
+  --color-edge-faint: rgba(52, 38, 43, 0.04);
+  --color-edge-card: rgba(93, 58, 45, 0.11);
+  --color-edge-card-bottom: rgba(93, 58, 45, 0.15);
 }
 
 .dark:root {

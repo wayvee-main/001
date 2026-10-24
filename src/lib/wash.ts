@@ -2,9 +2,10 @@ import { useColorScheme } from 'nativewind';
 import { useThemeColors } from '@/lib/theme';
 
 /**
- * The arrival sequence's own warmer ink and translucent-control ramp. Its
- * background now shares the app's paper/plum ground; these roles remain local
- * because first-run helper copy and selection states still need a warmer voice
+ * The arrival sequence's own warmer ink and control ramp. Its light cards
+ * now use Copper Mist's matte surface and its background shares the app ground.
+ * These roles remain local because first-run helper copy and selection states
+ * still need a warmer voice
  * than ordinary content screens.
  *
  * Everything here is a surface or a lettering colour *for that wash only*. If a
@@ -60,14 +61,14 @@ const WASH: Record<'light' | 'dark', WashRamp> = {
     body: '#7D4938',
     strong: '#65250D',
     muted: '#8F5E4C',
-    cardBg: 'rgba(255,253,250,0.74)',
-    cardBorder: 'rgba(139,55,27,0.14)',
-    cardDivider: 'rgba(139,55,27,0.12)',
-    chipBg: 'rgba(255,253,250,0.67)',
-    chipBorder: 'rgba(139,55,27,0.18)',
+    cardBg: '#EFE5DA',
+    cardBorder: 'rgba(93,58,45,0.11)',
+    cardDivider: 'rgba(93,58,45,0.11)',
+    chipBg: '#FFFDFA',
+    chipBorder: 'rgba(93,58,45,0.15)',
     chipSelectedBg: '#FFF0C8',
     chipSelectedBorder: 'rgba(232,93,44,0.38)',
-    optionBg: 'rgba(255,253,250,0.72)',
+    optionBg: '#EFE5DA',
     optionSelectedBg: 'rgba(255,199,87,0.24)',
     optionSelectedBorder: 'rgba(232,93,44,0.46)',
     stateSelectedBg: '#FFFDFA',
@@ -87,7 +88,7 @@ const WASH: Record<'light' | 'dark', WashRamp> = {
     fieldActiveBorder: 'rgba(111,91,209,0.50)',
     placeholder: '#A57868',
     hint: '#A66A53',
-    signupBg: '#FBE4DA',
+    signupBg: '#E9DCD2',
     signupText: '#A23F1D',
     interestSelectedBg: null,
   },

@@ -1,6 +1,6 @@
 # Wayvee design system
 
-The approved Warm limestone light palette, Nightfall dark palette and editorial refinements are the current UI contract.
+The approved Copper Mist light palette, Nightfall dark palette and editorial refinements are the current UI contract.
 Palette and dimensions come from `src/lib/tokens.ts`; regenerate the CSS,
 inline palette and Tailwind tokens together with `npm run tokens`.
 
@@ -23,20 +23,22 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   17px search glyph and 37px orange action. Editable fields and launchers
   share the same font, surface, edge and elevation. Keep inputs off-white in
   light mode. Do not rebuild search silhouettes separately on other screens.
-- Light uses the selected **Warm limestone** palette: `#FAF9F4` ground,
-  quiet limestone washes, `#EEECE4` matte cards and `#FDFCF8` controls.
+- Light uses the selected **Copper Mist** palette: `#F8F3EC` ground,
+  quiet copper and iris washes, `#EFE5DA` matte cards, `#FFFDFA` controls
+  and input fields, and aubergine `#34262B` ink.
   `BACKDROP_GRADIENTS.light` in `src/lib/tokens.ts` records the 160°,
   135° and 230° layers in back-to-front order, including alpha and stops.
   Dark keeps the original `#151117` ground and 230° / 121° / 226° Nightfall
   washes. `AppBackdrop` paints the selected theme's layers behind every screen,
   detail and onboarding page, with aspect-correct angles on web and native.
-  Default cards and sheets use Warm limestone `#EEECE4` in light mode and
+  Default cards and sheets use Copper Mist `#EFE5DA` in light mode and
   charcoal `#29252A` in dark mode, with faint edges and elevation.
   Discover listings use the same card fill. Controls have a separate
-  `surface-control` role, using `#FDFCF8` / `#29252A`. In dark mode,
+  `surface-control` role, using `#FFFDFA` / `#29252A`. In dark mode,
   `#29252A` is the default background for card containers, including Home tiles
-  and every Discover listing. Light-mode search and navigation share off-white `#FDFCF8`.
-  Home glyph tiles use `#FDFCF8` / `#29252A`. Search uses its own `surface-search`
+  and every Discover listing. Light-mode search uses `#FFFDFA` and navigation
+  uses `#FFFCF7`. Home glyph tiles use `#FCF8F2` / `#29252A`.
+  Search uses its own `surface-search`
   role everywhere: Home, Discover, the search overlay, food hub and stay picks.
   Dark search retains Oyster's muted green `#28372F`; dark navigation uses
   `#29252A`. Keep these roles separate from cards so changing search never
@@ -51,11 +53,11 @@ inline palette and Tailwind tokens together with `npm run tokens`.
 - Add 14px to the previous horizontal gutters throughout screens and layers:
   34px normally, 30px on phones up to 400px. Use `useAppGutter`.
 - Home keeps four tiles, ordered Eat, Bars, Routes, Events. Restore the compact
-  reference glyph cards: `home-tile` off-white `#FDFCF8` in light and the existing
+  reference glyph cards: `home-tile` paper `#FCF8F2` in light and the existing
   charcoal `#29252A` in dark. Use level-1 raised surfaces, faint borders,
   `rounded-panel` corners, 12px insets, 100px minimum height and 10px grid gaps.
   The two columns fill the content width. Small 16px outline glyphs sit inside
-  28px limestone circles at top left (`#E0DED3` light / `#48312E` dark); the real
+  28px copper circles at top left (`#E9DCD2` light / `#48312E` dark); the real
   inventory count sits at top right in 18px medium DM Sans with tabular figures.
   Below, use a 20px Fraunces category and a short 11px DM Sans caption:
   Eat / Nearby places; Bars / After dinner; Routes / A few good stops;
@@ -64,7 +66,7 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   counts and ordering follow the active city's existing source pools.
   In light mode, quick venue chips share search's off-white fill;
   dark mode retains their Oyster charcoal fill. Link your stay and the evening
-  ribbon share `surface-ribbon` (`#EEECE4` light / `#100D13` dark),
+  ribbon share `surface-ribbon` (`#E9DCD2` light / `#100D13` dark),
   normal theme ink and a faint edge.
   Home keeps “Shall we wander?” without supporting subtext. Its one-line search
   label reads “Search the city of Oakland” for Oakland and uses the active city;
@@ -81,25 +83,25 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   never imply “Open now.” The divider is omitted when there are no venue chips.
   Cards, tiles, containers, chips, buttons and rounded photo frames use a 1px
   `edge-card` perimeter and `edge-card-bottom` lower rim. In light mode the
-  Etched paper treatment uses warm ink `#734F3D` at 15% / 21%. Cards
+  Etched paper treatment uses warm ink `#5D3A2D` at 11% / 15%. Cards
   use a matte fill and soft outer plum shadow, without a white inset highlight;
   compact controls keep the same paper-like material. Text inputs use off-white `surface-input`
-  instead of the limestone card fill. Dark retains its existing 4% ink
+  instead of the copper card fill. Dark retains its existing 4% ink
   perimeter and shadow. Keep `edge-faint` for dividers and decorative rules.
   Apply the card edge to filled controls,
   including selected and primary controls, without boxing transparent layout
   groups or text-only links. Every elevation tier and the custom navigation
   shadow is 10% stronger in lift, blur and opacity. Chips and buttons share
-  that material. Selected choices
-  use `selected-surface` / `on-selected`; primary actions use `accent-fill` /
+  that material. Light selected choices use aubergine `#39282F` with pale
+  `#FFF8F1` ink; dark retains its Nightfall pairing. Primary actions use `accent-fill` /
   `on-accent`. Never hardcode white on an accent fill.
 - One contrasting orange family carries through the app: action fills and
-  active navigation use `#B84624` light / `#F0835C` dark, with readable accent
-  text at `#963D24` / `#F0835C`. Legacy category and Vee tints follow Oyster
+  active navigation use `#9F442B` light / `#F0835C` dark, with readable accent
+  text at `#8E3C27` / `#F0835C`. Legacy category and Vee tints follow Copper Mist
   surfaces and orange accents. Keep the original gradient Vee mark and the
   original page gradients intact; explicit error states retain their red.
 - “Your evening, with Vee” and Link your stay use `surface-ribbon`:
-  `#EEECE4` light / `#100D13` dark, with standard theme lettering and
+  `#E9DCD2` light / `#100D13` dark, with standard theme lettering and
   orange `surface-accent` icons. Its smooth 22px corners, etched edge and
   level-1 elevation match the shared card material. The ticket notches and
   perforated seam are removed. Keep its compact 61.2px minimum height.
