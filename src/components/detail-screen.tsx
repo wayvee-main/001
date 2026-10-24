@@ -48,6 +48,7 @@ export function DetailScreen({image,heroActions,title,rating,meta,address,onAddr
   if(directions||onAddress)chips.push({key:'directions',label:'Directions',glyph:'navigation',accent:true,onPress:kind!=='event'&&onAddress?onAddress:directions?()=>open(directions.url):onAddress});
   const secondaryFacts=facts.filter(fact=>!metadata.some(item=>item.value===fact.label));
   for(const fact of secondaryFacts){if(essentials.length>=3)break;if(!essentials.some(item=>item.value===fact.label))essentials.push({label:factLabel(fact.glyph),value:fact.label,glyph:fact.glyph});}
+  const primaryAction:LedgerChip|undefined=actions[0]?{key:'primary',label:actions[0].label,glyph:'arrow',onPress:actions[0].onPress}:undefined;
   const isMenu=(label:string)=>kind==='restaurant'&&/menu|dish|food|drink/i.test(label);
   const folds:LedgerFold[]=rows.map(row=>({key:row.key,label:row.label,glyph:row.glyph,chapter:isMenu(row.label)?'menu':'more',children:row.children}));
   for(const section of sections)folds.push({key:'section-'+section.key,label:section.title||'More about this '+(kind==='event'?'show':'place'),glyph:kind==='event'?'ticket':'compass',chapter:isMenu(section.title||'')?'menu':'more',children:<View style={{gap:10}}>
@@ -55,8 +56,8 @@ export function DetailScreen({image,heroActions,title,rating,meta,address,onAddr
     {section.action&&section.onAction?<TouchableOpacity accessibilityRole="button" accessibilityLabel={section.action} onPress={section.onAction} style={{minHeight:36,justifyContent:'center'}}><Text className="font-dm text-label text-peach">{section.action}</Text></TouchableOpacity>:null}
     {section.footnote?<Text className="font-dm text-fine text-taupe">{section.footnote}</Text>:null}
   </View>});
-  if(actions.length||sourceUrl||heroActions||sourceNote)folds.push({key:'actions',label:kind==='restaurant'?'Menu & planning':'Links & planning',glyph:'book',children:<View style={{gap:5}}>
-    {actions.map(action=><TouchableOpacity key={action.label} accessibilityRole="button" accessibilityLabel={action.label} onPress={action.onPress} style={{minHeight:40,flexDirection:'row',alignItems:'center',gap:7}}>
+  if(actions.length>1||sourceUrl||heroActions||sourceNote)folds.push({key:'actions',label:kind==='restaurant'?'Menu & planning':'Links & planning',glyph:'book',children:<View style={{gap:5}}>
+    {actions.slice(1).map(action=><TouchableOpacity key={action.label} accessibilityRole="button" accessibilityLabel={action.label} onPress={action.onPress} style={{minHeight:40,flexDirection:'row',alignItems:'center',gap:7}}>
       <Icon d={action.iconD} size={14} color={colors['surface-accent']} /><Text className="font-dm text-label text-peach">{action.label}</Text>
     </TouchableOpacity>)}
     {heroActions?<View style={{flexDirection:'row',gap:8,paddingVertical:5}}>{heroActions}</View>:null}
@@ -64,5 +65,5 @@ export function DetailScreen({image,heroActions,title,rating,meta,address,onAddr
     {sourceNote?<Text className="font-dm text-fine text-taupe" style={{lineHeight:18}}>{sourceNote}</Text>:null}
     {typeof rating==='number'?<Text className="font-dm text-fine text-taupe">Listed rating: {rating}</Text>:null}
   </View>});
-  return <LedgerCompanionScreen key={kind+':'+id} context={context} image={image||entry?.image} glyph={entry?.glyph||'landmark'} eyebrow={DETAIL_LABELS[kind]} chips={chips} essentials={essentials} folds={folds} navActive={navActive} />;
+  return <LedgerCompanionScreen key={kind+':'+id} context={context} image={image||entry?.image} glyph={entry?.glyph||'landmark'} eyebrow={DETAIL_LABELS[kind]} chips={chips} primaryAction={primaryAction} essentials={essentials} folds={folds} navActive={navActive} />;
 }

@@ -139,22 +139,23 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   Existing `/home/browse?category=…` links redirect to the corresponding page,
   forwarding query text; generic browse/search links open Quiet index.
   For you, Collections and Discover retain their browse layouts.
-- Detail pages use **Quiet Chapters** in both themes, including existing
+- Detail pages use **Marquee** in both themes, including existing
   restaurant, place, nightlife, event, venue, route and experience entry routes.
-  Omit the Back/Wayvee header row; align the opening inset with Home's top row
-  and begin with the small category/city eyebrow and serif venue name,
-  then the full-width contained source image below the identity (795:464 ratio,
-  capped at 232px high). A compact source-backed snapshot uses the whole row
-  and wraps to a second line only as needed. Pricing, distance, Save and
-  Directions share the same quiet chip material, left-aligned with exactly
-  10px gaps. Price uses dollar text without a wallet glyph. Omit absent facts
-  rather than inventing a four-chip row; a narrow screen can scroll that row.
-  A thin-underlined Visit tab presents compact, aligned label/value rows with
-  faint rules and small glyphs, prioritizing address, listed hours and service
-  without a raised card or extra heading. When source menu content exists,
-  Menu opens its flat source-backed items and links. More holds remaining
-  details, source links and planning controls in compact sections. Omit empty
-  tabs. Preserve existing authentication,
+  Begin with a full-width photo and a dark readability scrim. Overlay a small
+  category/city eyebrow, serif title and one-line caption at its lower edge;
+  put Back and the actual Save/plan action in 40px circular controls above.
+  Missing or failed photos keep the category glyph beneath the scrim, so the
+  title remains legible. Never invent a rating or destination to fill the hero.
+  Use only supplied price, distance, duration and other compact metadata below
+  the photo. Price uses dollar text without a wallet glyph. A source-backed
+  snapshot uses the full row, followed by a quiet raised fact panel for address,
+  listed hours and service. The understated Directions and primary action share
+  matching navigation-paper fill, a faint edge, normal ink and a small orange
+  glyph. They retain source-specific labels, links and handlers. A thin-underlined
+  Visit tab holds these actions and any booking selectors. When source menu
+  content exists, Menu opens its flat source-backed items and links. More holds
+  remaining details, source links and planning controls in compact sections.
+  Omit empty tabs. Preserve existing authentication,
   saves, plans, following, calls and booking selectors.
   Ask Vee stays outside the scroll view, just above navigation, on every
   detail page. Its gradient spiral stays static. The sheet keeps the current

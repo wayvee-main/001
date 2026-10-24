@@ -18,6 +18,8 @@ export function HomeEntryLedger({entry}: {entry:HomeGuideEntry}) {
   if(entry.saveKind||entry.planKind)chips.push({key:'save',label:saved?'Saved':'Save',glyph:saved?'check':'bookmark',selected:saved,onPress:save,testID:'home-guide-save',accessibilityLabel:saved?`Remove ${entry.name} from ${entry.saveKind?'saved places':'plans'}`:`Save ${entry.name}`});
   if(directions)chips.push({key:'directions',label:'Directions',glyph:'navigation',accent:true,onPress:()=>open(directions.url)});
   const links=entry.links.filter(link=>link!==directions),remaining=entry.details.filter(fact=>!essentials.includes(fact));
+  const primaryLink=links.find(link=>/order|reserve|book|tickets|menu/i.test(link.label));
+  const primaryAction:LedgerChip|undefined=primaryLink?{key:'primary',label:primaryLink.label,glyph:'arrow',onPress:()=>open(primaryLink.url)}:undefined;
   const folds:LedgerFold[]=[];
   for(const section of entry.sections||[])folds.push({key:'section-'+section.title,label:section.title,glyph:entry.kind==='restaurant'?'book':entry.glyph,chapter:entry.kind==='restaurant'?'menu':'more',
     children:<View style={{gap:9}}>{section.lines.map((line,index)=><Text key={index} className="font-dm text-label text-taupe" style={{lineHeight:19}}>{line}</Text>)}</View>});
@@ -25,5 +27,5 @@ export function HomeEntryLedger({entry}: {entry:HomeGuideEntry}) {
   if(links.length)folds.push({key:'links',label:entry.kind==='restaurant'?'Menu & ordering':'Official links',glyph:entry.kind==='restaurant'?'book':'compass',chapter:entry.kind==='restaurant'?'menu':'more',children:<View style={{gap:4}}>{links.map(link=><TouchableOpacity key={link.url} accessibilityRole="link" accessibilityLabel={link.label} onPress={()=>open(link.url)} style={{minHeight:38,flexDirection:'row',alignItems:'center',gap:6}}>
     <Text className="font-dm text-label text-peach">{link.label}</Text><Glyph name="arrow" size={13} color={colors['surface-accent']} />
   </TouchableOpacity>)}</View>});
-  return <LedgerCompanionScreen key={entry.kind+':'+entry.id} context={context} image={entry.image} glyph={entry.glyph} eyebrow={DETAIL_LABELS[entry.kind]} chips={chips} essentials={essentials} folds={folds} />;
+  return <LedgerCompanionScreen key={entry.kind+':'+entry.id} context={context} image={entry.image} glyph={entry.glyph} eyebrow={DETAIL_LABELS[entry.kind]} chips={chips} primaryAction={primaryAction} essentials={essentials} folds={folds} />;
 }
