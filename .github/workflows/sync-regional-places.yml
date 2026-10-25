@@ -6,17 +6,30 @@ on:
   workflow_dispatch:
     inputs:
       source_requests:
-        description: 'Maximum source HTTP requests, including retries (0 = seed/coverage only)'
+        description: 'Maximum OSM HTTP requests, including retries (0 = skip identity downloads)'
         required: false
         default: '6'
         type: choice
         options: ['0', '3', '6', '12']
+      detail_requests:
+        description: 'Maximum official-site HTTP requests, including redirects and menu pages'
+        required: false
+        default: '30'
+        type: choice
+        options: ['0', '10', '30']
   push:
     branches: [main]
     paths:
       - 'scripts/sync-regional-places.ts'
       - 'scripts/lib/regional-places.ts'
+      - 'scripts/sync-regional-details.ts'
+      - 'scripts/lib/regional-details.ts'
+      - 'scripts/lib/official-source-loader.ts'
+      - 'scripts/lib/detail-source-cache.ts'
+      - 'scripts/lib/menu-schema.ts'
+      - 'src/lib/detail-content.ts'
       - 'supabase/migrations/20261025010000_regional_places.sql'
+      - 'supabase/migrations/20261025020000_regional_details_queue.sql'
       - '.github/workflows/sync-regional-places.yml'
 
 permissions:
@@ -37,10 +50,17 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - uses: actions/cache/restore@v4
+        with:
+          path: .cache/regional-detail-sources-v1.json
+          key: regional-details-v1-${{ hashFiles('scripts/lib/menu-schema.ts', 'scripts/lib/detail-source-cache.ts', 'scripts/lib/official-source-loader.ts', 'scripts/lib/regional-details.ts', 'src/lib/detail-content.ts') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            regional-details-v1-${{ hashFiles('scripts/lib/menu-schema.ts', 'scripts/lib/detail-source-cache.ts', 'scripts/lib/official-source-loader.ts', 'scripts/lib/regional-details.ts', 'src/lib/detail-content.ts') }}-
       - uses: supabase/setup-cli@v1
         with:
           version: latest
       - name: Apply additive regional pool migration
+        id: migrate
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
@@ -55,3 +75,15 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           REGIONAL_SOURCE_REQUEST_LIMIT: ${{ inputs.source_requests || '6' }}
           REGIONAL_BATCH_LIMIT: '6'
+      - name: Enrich regional official menus and photos
+        if: ${{ !cancelled() && steps.migrate.outcome == 'success' }}
+        run: npx --yes tsx scripts/sync-regional-details.ts
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          REGIONAL_DETAIL_REQUEST_LIMIT: ${{ inputs.detail_requests || '30' }}
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: .cache/regional-detail-sources-v1.json
+          key: regional-details-v1-${{ hashFiles('scripts/lib/menu-schema.ts', 'scripts/lib/detail-source-cache.ts', 'scripts/lib/official-source-loader.ts', 'scripts/lib/regional-details.ts', 'src/lib/detail-content.ts') }}-${{ github.run_id }}-${{ github.run_attempt }}

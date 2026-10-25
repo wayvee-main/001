@@ -7,6 +7,9 @@ export type RegionalPlaceRow = Database['public']['Tables']['places']['Row'] & {
   source_url: string | null;
   source_license: string | null;
   source_data_at: string | null;
+  detail_next_check_at: string;
+  detail_checked_at: string | null;
+  detail_failure_count: number;
 };
 export type NearbyRegionalPlace = Pick<RegionalPlaceRow,
   'id' | 'name' | 'category' | 'cuisine' | 'address' | 'lat' | 'lon' | 'website' |
@@ -335,6 +338,7 @@ export type Database = {
         Insert: Database['public']['Tables']['places']['Insert'] & {
           region?: string; county?: string | null; source_osm_ids?: string[];
           source_url?: string | null; source_license?: string | null; source_data_at?: string | null;
+          detail_next_check_at?: string; detail_checked_at?: string | null; detail_failure_count?: number;
         };
         Update: Partial<RegionalPlaceRow>;
         Relationships: [];

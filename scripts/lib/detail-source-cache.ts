@@ -64,4 +64,9 @@ export class DetailSourceCache {
   }
 
   snapshot() { return { version: VERSION, records: this.records }; }
+
+  status(key: string): { checkedAt: number; nextCheckAt: number; failures: number } | undefined {
+    const record = this.records[key];
+    return record ? { checkedAt: record.checkedAt, nextCheckAt: record.nextCheckAt, failures: record.failures } : undefined;
+  }
 }
