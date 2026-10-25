@@ -9,7 +9,17 @@ const isRecord=(value:unknown):value is Record<string,unknown>=>!!value&&typeof 
 const values=(value:unknown)=>Array.isArray(value)?value:value?[value]:[];
 const typeIs=(node:Record<string,unknown>,type:string)=>values(node['@type']).some(value=>typeof value==='string'&&value.split('/').pop()===type);
 const absolute=(url:unknown,base:string)=>{try{return typeof url==='string'?new URL(decode(url),base).href:undefined;}catch{return;}};
-const imageUrl=(image:unknown,base:string):string|undefined=>absolute(typeof image==='string'?image:isRecord(image)?image.url||image.contentUrl:undefined,base);
+const photoUrl=(raw:unknown,base:string):string|undefined=>{
+  const value=absolute(raw,base);if(!value)return;
+  const url=new URL(value);
+  // Wix SSR sends blurred lazy-load previews. Its media path before /v1/ is
+  // the same named source photograph at native quality, without the crop.
+  if(url.hostname==='static.wixstatic.com'&&url.pathname.startsWith('/media/')){
+    url.pathname=url.pathname.split('/v1/')[0];url.search='';return url.href;
+  }
+  return value;
+};
+const imageUrl=(image:unknown,base:string):string|undefined=>photoUrl(typeof image==='string'?image:isRecord(image)?image.url||image.contentUrl:undefined,base);
 
 function tree(html:string):{root:Element;nodes:Element[]} {
   const root:Element={tag:'root',attrs:{},children:[]},stack=[root],nodes:Element[]=[];
@@ -57,7 +67,7 @@ export function extractOfficialMenu(html:string,url:string,identity:{name:string
       const currency=plain(product.price?.currency),amount=product.price?.value;
       const photo=find(element,node=>node.tag==='img');
       // Only a published product block supplies its own name/price/photo.
-      if(name)add({name,price:amount==null?undefined:(currency==='USD'?'$':currency+' ')+String(amount),desc:plain(product.description)||undefined,image:absolute(photo?.attrs['data-src']||photo?.attrs.src,url),categories:['Featured']});
+      if(name)add({name,price:amount==null?undefined:(currency==='USD'?'$':currency+' ')+String(amount),desc:plain(product.description)||undefined,image:photoUrl(photo?.attrs['data-src']||photo?.attrs.src,url),categories:['Featured']});
     }catch{/* Malformed product metadata is not a menu item. */}
   }
   const roots=nodes.filter(node=>hook(node,'item.root')||cls(node,'menu-item'));
@@ -68,7 +78,7 @@ export function extractOfficialMenu(html:string,url:string,identity:{name:string
     let section=root.parent;while(section&&!hook(section,'section.container')&&!cls(section,'menu-section'))section=section.parent;
     const category=section?textOf(find(section,node=>hook(node,'section.name')||cls(node,'menu-section-title'))):'';
     const photo=find(root,node=>node.tag==='img'),wix=find(root,node=>Boolean(node.attrs['data-image-info']));
-    let image=absolute(photo?.attrs['data-src']||photo?.attrs.src,url);
+    let image=photoUrl(photo?.attrs['data-src']||photo?.attrs.src,url);
     if(!image&&wix){try{const info=JSON.parse(wix.attrs['data-image-info']);if(info.imageData?.uri)image='https://static.wixstatic.com/media/'+info.imageData.uri;}catch{/* No association means no dish photo. */}}
     if(image?.startsWith('data:'))image=undefined;
     add({name,desc,price,image,categories:[category||'Menu']});
@@ -77,7 +87,7 @@ export function extractOfficialMenu(html:string,url:string,identity:{name:string
   // OG images are often logos. Keep only explicit content photography and
   // dish associations; never paint a brand mark as a venue photograph.
   const photos=nodes.filter(node=>node.tag==='img'&&(node.attrs['data-src']||node.attrs.src)&&!/logo|icon|badge|award|runner|bestcoffee|winner|payment/i.test(node.attrs.alt||''))
-    .map(node=>({url:absolute(node.attrs['data-src']||node.attrs.src,url)!,caption:node.attrs.alt||undefined}))
+    .map(node=>({url:photoUrl(node.attrs['data-src']||node.attrs.src,url)!,caption:node.attrs.alt||undefined}))
     .filter(photo=>photo.url?.startsWith('https://')&&!/unsplash|pexels|pixabay|wikimedia/i.test(photo.url)&&!/logo|icon|\.svg|\.gif|\.ico|payment|gravatar/i.test(photo.url)).filter((photo,index,array)=>array.findIndex(other=>other.url===photo.url)===index).slice(0,6);
   if(!items.length&&!photos.length)return;
   return parseDetailContent({version:1,sourceUrl:url,verifiedAt:now.toISOString(),description:description?plain(description):undefined,photos:[...items.filter(item=>item.image).map(item=>({url:item.image!,caption:item.name})),...photos].filter((photo,index,all)=>all.findIndex(other=>other.url===photo.url)===index).slice(0,12),
