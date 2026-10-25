@@ -1,5 +1,30 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
+export type RegionalPlaceRow = Database['public']['Tables']['places']['Row'] & {
+  region: string;
+  county: string | null;
+  source_osm_ids: string[];
+  source_url: string | null;
+  source_license: string | null;
+  source_data_at: string | null;
+};
+export type NearbyRegionalPlace = Pick<RegionalPlaceRow,
+  'id' | 'name' | 'category' | 'cuisine' | 'address' | 'lat' | 'lon' | 'website' |
+  'phone' | 'image' | 'opening_hours' | 'confidence' | 'needs_review' | 'detail_content' | 'city'
+> & { distance_miles: number };
+type RegionalBatchRow = {
+  id: string; region: string; county: string;
+  min_lat: number; min_lon: number; max_lat: number; max_lon: number;
+  priority: number; depth: number; status: string; attempts: number;
+  place_count: number; next_attempt_at: string; last_completed_at: string | null;
+  last_error: string | null; updated_at: string;
+};
+type RegionalRunRow = {
+  id: number; region: string; started_at: string; finished_at: string;
+  status: string; source_requests: number; source_bytes: number;
+  batches_completed: number; rows_written: number; detail: string | null;
+};
+
 export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
@@ -304,6 +329,27 @@ export type Database = {
             referencedColumns: ["slug"];
           },
         ];
+      };
+      regional_places: {
+        Row: RegionalPlaceRow;
+        Insert: Database['public']['Tables']['places']['Insert'] & {
+          region?: string; county?: string | null; source_osm_ids?: string[];
+          source_url?: string | null; source_license?: string | null; source_data_at?: string | null;
+        };
+        Update: Partial<RegionalPlaceRow>;
+        Relationships: [];
+      };
+      regional_collection_batches: {
+        Row: RegionalBatchRow;
+        Insert: Pick<RegionalBatchRow, 'id' | 'county' | 'min_lat' | 'min_lon' | 'max_lat' | 'max_lon'> & Partial<RegionalBatchRow>;
+        Update: Partial<RegionalBatchRow>;
+        Relationships: [];
+      };
+      regional_collection_runs: {
+        Row: RegionalRunRow;
+        Insert: Pick<RegionalRunRow, 'started_at' | 'status'> & Partial<Omit<RegionalRunRow, 'id'>> & { id?: never };
+        Update: Partial<Omit<RegionalRunRow, 'id'>> & { id?: never };
+        Relationships: [];
       };
       profiles: {
         Row: {
@@ -640,7 +686,22 @@ export type Database = {
       };
     };
     Functions: {
-      [_ in never]: never;
+      nearby_regional_places: {
+        Args: { p_lat: number; p_lon: number; p_radius_miles?: number; p_limit?: number; p_offset?: number };
+        Returns: NearbyRegionalPlace[];
+      };
+      regional_identity_candidates: {
+        Args: { p_bounds: Json; p_source_ids: string[]; p_offset?: number };
+        Returns: Pick<RegionalPlaceRow, 'id' | 'name' | 'category' | 'address' | 'lat' | 'lon' | 'website' | 'phone' | 'city' | 'source_osm_id' | 'source_osm_ids' | 'source_overture_id' | 'needs_review'>[];
+      };
+      upsert_regional_places: {
+        Args: { p_rows: Json };
+        Returns: number;
+      };
+      seed_regional_places_from_catalog: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
     };
     Enums: {
       [_ in never]: never;

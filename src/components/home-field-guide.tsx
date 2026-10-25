@@ -41,7 +41,7 @@ export function HomeGuideScreen({children,now,backLabel='Back',search=true,conte
     <ScreenScroll gap={18} keyboardShouldPersistTaps="handled">
       {header?<View className="flex-row items-center justify-between gap-x-3 py-2">
         <TouchableOpacity accessibilityRole="button" accessibilityLabel={backLabel} onPress={()=>router.canGoBack()?router.back():router.replace('/')} hitSlop={10} className="min-h-9 flex-row items-center gap-x-1.5">
-          <Glyph name="back" size={16} color={colors.fg} /><Text className="font-dm text-label text-ink">{backLabel}</Text>
+          <Glyph name="chevronLeft" size={16} color={colors.fg} /><Text className="font-dm text-label text-ink">{backLabel}</Text>
         </TouchableOpacity>
         <WayveeWordmark size={search?17:21} mark={false} />
         {search?<TouchableOpacity accessibilityRole="button" accessibilityLabel="Search Home" onPress={()=>router.push('/search')}
@@ -114,7 +114,7 @@ export function HomeGuideLead({entry}: {entry:HomeGuideEntry}) {
     </View>
     <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Take a closer look at ${entry.name}`} onPress={()=>router.push(homeGuideHref(entry) as never)} activeOpacity={.78}
       style={[control,{minHeight:38,borderRadius:999,alignItems:'center',justifyContent:'center',flexDirection:'row',gap:6}]}>
-      <Text className="font-dm text-fine text-ink">Take a closer look</Text><Glyph name="arrow" size={13} color={colors['surface-accent']} />
+      <Text className="font-dm text-fine text-ink">Take a closer look</Text><Glyph name="chevron" size={13} color={colors['surface-accent']} />
     </TouchableOpacity>
   </View>;
 }

@@ -508,3 +508,20 @@ live-now dot) stays scarce so it still reads as meaningful when it appears.
 - A lint rule banning raw hex in `src/app`
 
 Each is a separate, screen-by-screen pass — do not batch them into one diff.
+
+## Home secondary pages — Easy Chapters and Quick Peek
+
+For You intention pages and collection contents use Easy Chapters (A3): a quiet
+numbered spine, short section headings and real source-backed entries. Eat,
+Bars, Routes and Events stay four separate Quick Peek (B5) pages. The lead
+poster can show a real menu preview, event imagery, or the app's illustrated
+bar/walking guide. Illustration is atmospheric, never fabricated venue evidence
+or a geographic map. Missing source goods remain missing.
+
+Every following result uses `HomeResultCard`: exactly 72px high, 72×56px
+thumbnail, shared padding and typography, and 10px gaps. Metadata cannot grow
+one category's row; it truncates with a full accessible label. Use chevrons for
+Home secondary navigation. Menu mini-windows retain their compact 52px images.
+Smoke & Bone and Nightfall both use the existing app surface tokens. Measure
+actual app card rectangles to verify size equality; generated images are only
+concept references.

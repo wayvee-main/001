@@ -1,0 +1,59 @@
+import { RESTAURANTS } from '@/lib/data';
+import { restaurantJournalMenu, type JournalMenuItem } from '@/lib/detail-journal';
+import type { HomeIdea } from '@/lib/home-discovery';
+import { entriesForHomeIdea, type HomeGuideCatalog, type HomeGuideCategory, type HomeGuideEntry } from '@/lib/home-guide';
+
+/** One native geometry shared by all four categories. Never content-dependent. */
+export const HOME_RESULT = { height:72, thumbnailWidth:72, thumbnailHeight:56, inset:8, gap:10, textGap:12, radius:13 } as const;
+export const shortHomeTitle=(name:string)=>{const words=name.trim().split(/\s+/);return words.length>5?words.slice(0,5).join(' ')+'…':name;};
+
+export function homeEntryCategory(entry:HomeGuideEntry):HomeGuideCategory {
+  if(entry.kind==='event'||entry.kind==='venue')return 'events';
+  if(entry.kind==='crawl'||entry.kind==='outdoor')return 'routes';
+  if(entry.kind==='night'||['bar','pub','wine_bar','brewery','night_club'].includes(entry.category||''))return 'bars';
+  return 'eat';
+}
+
+export function homeMenuItems(entry:HomeGuideEntry):readonly JournalMenuItem[] {
+  if(entry.detailContent?.menu?.items.length)return entry.detailContent.menu.items;
+  const restaurant=entry.kind==='restaurant'?RESTAURANTS[entry.id]:undefined;
+  return restaurant?restaurantJournalMenu(restaurant).items:[];
+}
+
+export function homeEntryMetadata(entry:HomeGuideEntry):{primary:string;secondary?:string;glyph:string} {
+  const category=homeEntryCategory(entry),offer=entry.detailContent?.offers?.[0];
+  if(offer){
+    const minimum=offer.description.match(/\bmin(?:imum)?(?:\s+order)?(?:\s+of)?\s*(\d+)/i)?.[1];
+    const price=offer.description.match(/\$\d+(?:\.\d{2})?\s+[^·.]+/)?.[0]?.trim();
+    return {primary:offer.label,secondary:price?[price,minimum?'min '+minimum:undefined].filter(Boolean).join(' · '):offer.title,glyph:'clock'};
+  }
+  if(category==='events')return {primary:entry.facts.filter(fact=>['calendar','clock'].includes(fact.glyph)).map(fact=>fact.value).join(' · ')||entry.caption,secondary:entry.caption,glyph:'calendar'};
+  if(category==='routes')return {primary:entry.facts.filter(fact=>['route','walk','car'].includes(fact.glyph)).map(fact=>fact.value).join(' · ')||entry.caption,glyph:entry.facts.some(fact=>fact.glyph==='car')?'car':'walk'};
+  const distance=entry.facts.find(fact=>fact.glyph==='pin'&&/\bmi(?:les?)?\b/.test(fact.value));
+  const priceFact=entry.facts.find(fact=>fact.glyph==='wallet');
+  return {primary:entry.caption||'Explore the venue',secondary:[priceFact?.value,distance?.value].filter(Boolean).join(' · ')||undefined,glyph:category==='bars'?'drink':entry.glyph};
+}
+
+export type HomeChapter={id:string;title:string;entries:HomeGuideEntry[]};
+const chapterTitles:Record<HomeGuideCategory,string>={eat:'A good table',bars:'One more stop',events:'A room with a stage',routes:'A little wandering'};
+
+/** A collection keeps every current member, once, grouped into readable chapters. */
+export function collectionChapters(entries:readonly HomeGuideEntry[]):HomeChapter[] {
+  return (['eat','events','bars','routes'] as const).flatMap(category=>{
+    const members=entries.filter(entry=>homeEntryCategory(entry)===category);
+    return members.length?[{id:category,title:chapterTitles[category],entries:members}]:[];
+  });
+}
+
+export function ideaChapters(idea:HomeIdea,catalog:HomeGuideCatalog):HomeChapter[] {
+  const entries=entriesForHomeIdea(idea,catalog);if(!entries.length)return [];
+  const category=homeEntryCategory(entries[0]),food=category==='eat';
+  const firstTitle=food?(idea.query==='coffee'?'A little pause':idea.query==='breakfast'?'Start the day':'Something to start'):chapterTitles[category];
+  const moreTitle=food?(idea.query==='coffee'?'More good coffee':idea.query==='breakfast'?'More good mornings':'Make it a meal'):category==='events'?'More on stage':category==='routes'?'Keep wandering':'More after dark';
+  const result:HomeChapter[]=[{id:'start',title:firstTitle,entries:entries.slice(0,1)}];
+  if(entries.length>1)result.push({id:'more',title:moreTitle,entries:entries.slice(1)});
+  // Optional related choices remain real local records; there is no inferred
+  // showtime, opening status or forced itinerary attached to a dinner idea.
+  if(food&&!idea.query&&catalog.categories.bars.length)result.push({id:'after',title:'One more stop',entries:catalog.categories.bars.slice(0,3)});
+  return result;
+}

@@ -13,7 +13,7 @@ import { useScoper } from '@/lib/store';
 import { useThemeColors } from '@/lib/theme';
 
 /** A sibling of the scroll view: always available above the detail navigation. */
-export function DetailAssistantDock({context}: {context:DetailContext}) {
+export function DetailAssistantDock({context,chevron=false}: {context:DetailContext;chevron?:boolean}) {
   const [open,setOpen]=useState(false),[draft,setDraft]=useState('');
   const [conversation,setConversation]=useState<{question:string;answer:DetailAnswer}[]>([]);
   const input=useRef<TextInput>(null),scroll=useRef<ScrollView>(null),trigger=useRef<ComponentRef<typeof TouchableOpacity>>(null),router=useRouter();
@@ -39,7 +39,7 @@ export function DetailAssistantDock({context}: {context:DetailContext}) {
     <View testID="detail-assistant-dock" style={{width:'100%',maxWidth:720,alignSelf:'center',paddingHorizontal:gutter,paddingTop:6,paddingBottom:4}}>
       <TouchableOpacity ref={trigger} testID="detail-ask-vee" accessibilityRole="button" accessibilityLabel={`Ask Vee about ${context.name}`}
         activeOpacity={.75} onPress={()=>setOpen(true)} style={[control,{backgroundColor:colors['surface-ribbon'],minHeight:46,borderRadius:14,paddingHorizontal:11,paddingVertical:8,flexDirection:'row',alignItems:'center',gap:8}]}>
-        <VeeMark size={26} variant="compact" /><Text className="font-dm text-fine text-ink" style={{flex:1}}>A little help with this {context.kind==='event'?'show':context.kind==='crawl'?'route':'place'}?</Text><Glyph name="arrow" size={13} color={colors['surface-accent']} />
+        <VeeMark size={26} variant="compact" /><Text className="font-dm text-fine text-ink" style={{flex:1}}>A little help with this {context.kind==='event'?'show':context.kind==='crawl'?'route':'place'}?</Text><Glyph name={chevron?'chevron':'arrow'} size={13} color={colors['surface-accent']} />
       </TouchableOpacity>
     </View>
     <Modal visible={open} transparent animationType="fade" onRequestClose={close} onShow={()=>input.current?.focus()}>
