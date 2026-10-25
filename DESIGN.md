@@ -139,30 +139,45 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   Existing `/home/browse?category=…` links redirect to the corresponding page,
   forwarding query text; generic browse/search links open Quiet index.
   For you, Collections and Discover retain their browse layouts.
-- Detail pages use **Marquee** in both themes, including existing
-  restaurant, place, nightlife, event, venue, route and experience entry routes.
-  Begin with a full-width photo and a dark readability scrim. Overlay a small
-  category/city eyebrow, serif title and one-line caption at its lower edge;
-  put Back and the actual Save/plan action in 40px circular controls above.
-  Missing or failed photos keep the category glyph beneath the scrim, so the
-  title remains legible. Never invent a rating or destination to fill the hero.
-  Use only supplied price, distance, duration and other compact metadata below
-  the photo. Price uses dollar text without a wallet glyph. A source-backed
-  snapshot uses the full row, followed by a quiet raised fact panel for address,
-  listed hours and service. The understated Directions and primary action share
-  matching navigation-paper fill, a faint edge, normal ink and a small orange
-  glyph. They retain source-specific labels, links and handlers. A thin-underlined
-  Visit tab holds these actions and any booking selectors. When source menu
-  content exists, Menu opens its flat source-backed items and links. More holds
-  remaining details, source links and planning controls in compact sections.
-  Omit empty tabs. Preserve existing authentication,
-  saves, plans, following, calls and booking selectors.
-  Ask Vee stays outside the scroll view, just above navigation, on every
-  detail page. Its gradient spiral stays static. The sheet keeps the current
-  listing visible as context and answers from its actual facts and official
-  links; missing policies and live availability remain unknown. Closing the
-  sheet returns to the same scroll position. Planning carries the supported
-  restaurant/event/venue/nightlife/route ID into the existing Vee planner.
+- Detail pages use the approved **Open Dossier / Menu Journal** in both
+  themes, with **Event Journal** for shows. The small category/city row keeps
+  Back and the actual Save/plan control. The serif name and supplied caption
+  precede an inset, rounded photo: 124px for places, 182px for events. No
+  full-bleed Marquee scrim or numbered metadata blocks remain. Missing/failed
+  photos use the category glyph. Never invent a rating, price or destination.
+- A short description is followed immediately by compact glyph metadata.
+  Address, hours and service share **one inline flow**, wrapping only when the
+  available phone width requires it. Address opens the existing directions
+  handler. Full source values remain in About & visit and Vee's context.
+  Event date/showtime/admission and doors/venue use the same inline flow;
+  only published door times and age policies can appear.
+- Menu Journal puts menu exploration on the page: source category pills,
+  two photographic dish cards, then compact additional dish rows. Filters
+  include all items exactly once; a category with one result has no empty
+  More dishes section. Dish taps open a native detail sheet and official-menu
+  handoff. Only explicit dish photos are used, with food glyphs for absent
+  images. A source-backed lunch combo or other special can use the quiet
+  ribbon material; never generate a discount to fill space. Shooting Star's
+  illustrated lunch-combo items retain their menu/time context and prices,
+  with current ordering availability left to its official ordering page.
+- Event Journal shows the real bill, a quiet official tickets/listing control,
+  optional verified upgrades, the venue and evening-planning actions. Artist
+  photos, support/headliner roles, age rules and upgrades need explicit source
+  data. Unenriched listings retain their supplied lineup without invented
+  biographies, roles, ticket prices, doors or inventory. Event-specific extras
+  never transfer to another event at the same venue.
+- All existing restaurant, place, nightlife, event, venue, route and experience
+  routes share the same shell, including Home's entry routes. Additional source
+  content, hours, calls, following, planning and booking controls remain in
+  About & visit / Before you go. Experience date and guest selectors stay
+  directly accessible. Directions and primary handoffs keep quiet neutral
+  fills, faint edges and small orange glyphs. The source-specific labels and
+  handlers remain intact. Existing authentication, saves and plans are retained.
+  Ask Vee is an always-available ribbon outside the scroll view, above navigation,
+  with the static gradient spiral. Its sheet answers from the open listing's
+  facts and official links; missing policies and live availability stay unknown.
+  Closing returns to the same scroll position. Planning carries the existing
+  supported restaurant/event/venue/nightlife/route ID into the Vee planner.
 - For you is **three vertical intention cards**, selected by guest-local time:
   breakfast, lunch, coffee, dinner, outdoor ideas, shows or late-night plans.
   Cards name suggestions rather than specific establishments. See all opens

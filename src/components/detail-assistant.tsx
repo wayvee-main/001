@@ -36,10 +36,10 @@ export function DetailAssistantDock({context}: {context:DetailContext}) {
     setConversation(current=>[...current,{question,answer:answerDetailQuestion(context,question)}].slice(-8));setDraft('');input.current?.focus();
   };
   return <>
-    <View testID="detail-assistant-dock" style={{width:'100%',maxWidth:720,alignSelf:'center',paddingHorizontal:gutter,paddingTop:6,paddingBottom:4,alignItems:'flex-end'}}>
+    <View testID="detail-assistant-dock" style={{width:'100%',maxWidth:720,alignSelf:'center',paddingHorizontal:gutter,paddingTop:6,paddingBottom:4}}>
       <TouchableOpacity ref={trigger} testID="detail-ask-vee" accessibilityRole="button" accessibilityLabel={`Ask Vee about ${context.name}`}
-        activeOpacity={.75} onPress={()=>setOpen(true)} style={[control,{backgroundColor:colors['surface-navigation'],minHeight:44,borderRadius:999,paddingLeft:9,paddingRight:14,flexDirection:'row',alignItems:'center',gap:7}]}>
-        <VeeMark size={26} variant="compact" /><Text className="font-dm text-label text-ink">Ask Vee</Text>
+        activeOpacity={.75} onPress={()=>setOpen(true)} style={[control,{backgroundColor:colors['surface-ribbon'],minHeight:46,borderRadius:14,paddingHorizontal:11,paddingVertical:8,flexDirection:'row',alignItems:'center',gap:8}]}>
+        <VeeMark size={26} variant="compact" /><Text className="font-dm text-fine text-ink" style={{flex:1}}>A little help with this {context.kind==='event'?'show':context.kind==='crawl'?'route':'place'}?</Text><Glyph name="arrow" size={13} color={colors['surface-accent']} />
       </TouchableOpacity>
     </View>
     <Modal visible={open} transparent animationType="fade" onRequestClose={close} onShow={()=>input.current?.focus()}>

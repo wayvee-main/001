@@ -3,7 +3,7 @@
 // ISO timestamp, advance recurring series to their next occurrence, and DELETE
 // past entries rather than archiving them. Every entry keeps sourceUrl +
 // verifiedLabel so the audit trail survives each refresh.
-// Last refreshed: Aug 1, 2026.
+// Bundle refreshed Aug 1, 2026; Bonobo added from the official listing Oct 25.
 
 export type EventCategory = 'Tonight' | 'Upcoming' | 'Live music' | 'Outdoor' | 'Movies';
 
@@ -250,6 +250,17 @@ export const EVENTS: Record<string, ScoperEvent> = {
     ticketUrl: 'https://yoshis.com/events/buy-tickets/spyro-gyra-6/detail', ticketProvider: 'Yoshi’s',
     sourceUrl: 'https://yoshis.com/events/buy-tickets/spyro-gyra-6/detail', verifiedLabel: 'Verified Jul 20 on Yoshi’s official calendar',
     image: 'https://yoshis.com/userfiles/events/images/2941/thumb_spyro-gyra-2-copy.jpeg',
+  },
+  // Official Fox listing checked Oct 25, 2026. No ticket price or distance is inferred.
+  bonobo: {
+    id: 'bonobo', startsAt: '2026-11-14T20:00:00-08:00', name: 'Bonobo', time: '8 PM', priceLabel: 'Check current options', travel: '',
+    vibeTags: ['Electronic', 'All ages'], cats: ['Upcoming', 'Live music'],
+    date: 'Sat Nov 14, 2026 · Doors 7 PM · Show 8 PM', venue: 'Fox Theater', venueId: 'fox', addr: '1807 Telegraph Avenue, Oakland, CA 94612',
+    lineup: 'Bonobo · Sofia Kourtesis', know: 'Full-band electronica, guest vocals, and immersive visuals.',
+    priceFrom: 'See site', allIn: 'Official ticketing', ticketed: true,
+    ticketUrl: 'https://www.ticketmaster.com/bonobo-distance-in-static-live-north-oakland-california-11-14-2026/event/1C0064C3371EDBB0', ticketProvider: 'Ticketmaster',
+    sourceUrl: 'https://thefoxoakland.com/events/bonobo-261114', verifiedLabel: 'Checked Oct 25, 2026 on the Fox official listing',
+    image: 'https://thefoxoakland.com/wp-content/uploads/2026/06/bonobo_1024x576.png',
   },
   musiqSoulchild: {
     id: 'musiqSoulchild', startsAt: '2026-10-09T19:30:00-07:00', name: 'Musiq Soulchild', time: '7:30 PM', priceLabel: '$79–$145', travel: 'ride 6 min',

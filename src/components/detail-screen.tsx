@@ -6,9 +6,12 @@ import { Text, TouchableOpacity, View } from 'react-native';
 import type { DetailDisclosure } from '@/components/disclosure-rows';
 import type { HubFact } from '@/components/fact-strip';
 import { Glyph } from '@/components/glyph';
+import { EventJournal, RestaurantJournal } from '@/components/detail-journal';
 import { LedgerCompanionScreen, type LedgerChip, type LedgerFact, type LedgerFold } from '@/components/ledger-companion';
 import { Icon } from '@/components/ui';
 import type { DetailContext } from '@/lib/detail-assistant';
+import { EVENTS, RESTAURANTS } from '@/lib/data';
+import { eventJournalDetails, eventJournalFacts, restaurantJournalMenu } from '@/lib/detail-journal';
 import type { LiveLine } from '@/lib/detail-facts';
 import { homeGuideKey } from '@/lib/home-guide';
 import { DETAIL_LABELS, ledgerContext, ledgerEssentials, ledgerMetadata, factLabel } from '@/lib/detail-ledger';
@@ -30,14 +33,20 @@ export function DetailScreen({image,heroActions,title,rating,meta,address,onAddr
   const pathname=usePathname(),params=useLocalSearchParams<{id?:string|string[]}>(),{catalog}=useHomeGuide();
   const id=Array.isArray(params.id)?params.id[0]||'':params.id||'',kind=pathname.split('/').filter(Boolean)[0]||'venue';
   const entry=catalog.entries[homeGuideKey(kind,id)],s=useScoper(),colors=useThemeColors();
+  const restaurant=kind==='restaurant'?RESTAURANTS[id]:undefined,event=kind==='event'?EVENTS[id]:undefined;
+  const menu=restaurant?restaurantJournalMenu(restaurant):undefined,eventDetails=event?eventJournalDetails(event):undefined;
   const fromEntry=entry?ledgerContext(entry):null;
-  const context:DetailContext={kind,id,name:title,caption:meta||fromEntry?.caption,snapshot:fromEntry?.snapshot||lede,
-    facts:[...(fromEntry?.facts||[]),...(address?[{label:'Address',value:address}]:[]),...(live?[{label:'Right now',value:live.label}]:[]),...facts.map(fact=>({label:factLabel(fact.glyph),value:fact.label}))],
+  const context:DetailContext={kind,id,name:title,caption:event?(eventDetails?.subtitle||event.venue):meta||fromEntry?.caption,snapshot:event?lede||event.know:fromEntry?.snapshot||lede,
+    facts:[...(menu?[{label:'Menu highlights',value:menu.items.map(item=>[item.name,item.price,item.note].filter(Boolean).join(' · ')).join('\n')},...menu.specials.map(special=>({label:special.title,value:special.label+' · '+special.description}))]:[]),
+      ...(event?.lineup?[{label:'Lineup',value:event.lineup}]:[]),
+      ...(eventDetails?.ageLabel?[{label:'Age policy',value:eventDetails.ageLabel}]:[]),
+      ...(eventDetails?.policies?[{label:'Before you go',value:eventDetails.policies.text}]:[]),
+      ...(fromEntry?.facts||[]).filter(fact=>!menu||!entry?.sections?.some(section=>section.title===fact.label)),...(address?[{label:'Address',value:address}]:[]),...(live?[{label:'Right now',value:live.label}]:[]),...facts.map(fact=>({label:factLabel(fact.glyph),value:fact.label}))],
     links:fromEntry?.links|| (sourceUrl?[{label:sourceLabel||'Official site',url:sourceUrl}]:[])};
   const essentials:LedgerFact[]=entry?ledgerEssentials(entry):address?[{label:'Address',value:address}]:[];
   if(live){const index=essentials.findIndex(fact=>/hours/i.test(fact.label));if(index>=0)essentials.splice(index,1);essentials.splice(Math.min(1,essentials.length),0,{label:'Right now',value:live.label,glyph:'clock'});}
   const metadata=entry?ledgerMetadata(entry):facts.filter(fact=>/dollar|wallet|route|walk|ticket/.test(fact.glyph)).slice(0,2).map(fact=>({glyph:fact.glyph,value:fact.label}));
-  const chips:LedgerChip[]=metadata.map((fact,index)=>({key:'fact-'+index,label:['wallet','dollar'].includes(fact.glyph)?fact.value.split(' · ')[0]:fact.value,glyph:['wallet','dollar'].includes(fact.glyph)?undefined:fact.glyph}));
+  const chips:LedgerChip[]=(event?[]:metadata).map((fact,index)=>({key:'fact-'+index,label:['wallet','dollar'].includes(fact.glyph)?fact.value.split(' · ')[0]:fact.value,glyph:['wallet','dollar'].includes(fact.glyph)?undefined:fact.glyph}));
   const saveKind=entry?.saveKind || (['restaurant','night','venue','place'].includes(kind)?kind as 'restaurant'|'night'|'venue'|'place':undefined);
   const planKind=entry?.planKind || (['event','crawl','pick'].includes(kind)?kind as 'event'|'crawl'|'pick':undefined);
   const saved=saveKind?s.isSaved(saveKind,id):planKind?s.isPlanned(planKind,id):false;
@@ -50,7 +59,11 @@ export function DetailScreen({image,heroActions,title,rating,meta,address,onAddr
   for(const fact of secondaryFacts){if(essentials.length>=3)break;if(!essentials.some(item=>item.value===fact.label))essentials.push({label:factLabel(fact.glyph),value:fact.label,glyph:fact.glyph});}
   const primaryAction:LedgerChip|undefined=actions[0]?{key:'primary',label:actions[0].label,glyph:'arrow',onPress:actions[0].onPress}:undefined;
   const isMenu=(label:string)=>kind==='restaurant'&&/menu|dish|food|drink/i.test(label);
-  const folds:LedgerFold[]=rows.map(row=>({key:row.key,label:row.label,glyph:row.glyph,chapter:isMenu(row.label)?'menu':'more',children:row.children}));
+  const folds:LedgerFold[]=rows.filter(row=>!restaurant||row.key!=='menu').map(row=>({key:row.key,label:row.label,glyph:row.glyph,chapter:isMenu(row.label)?'menu':'more',children:row.children}));
+  if(eventDetails?.policies)folds.unshift({key:'policies',label:'Venue policies',glyph:'shield',children:<View style={{gap:8}}>
+    <Text className="font-dm text-label text-taupe" style={{lineHeight:19}}>{eventDetails.policies.text}</Text>
+    <TouchableOpacity accessibilityRole="link" accessibilityLabel="Official venue policies" onPress={()=>open(eventDetails.policies!.url)} style={{minHeight:36,justifyContent:'center'}}><Text className="font-dm text-fine text-peach">Official venue policies →</Text></TouchableOpacity>
+  </View>});
   for(const section of sections)folds.push({key:'section-'+section.key,label:section.title||'More about this '+(kind==='event'?'show':'place'),glyph:kind==='event'?'ticket':'compass',chapter:isMenu(section.title||'')?'menu':'more',children:<View style={{gap:10}}>
     {section.note?<Text className="font-dm text-fine text-taupe">{section.note}</Text>:null}{section.children}
     {section.action&&section.onAction?<TouchableOpacity accessibilityRole="button" accessibilityLabel={section.action} onPress={section.onAction} style={{minHeight:36,justifyContent:'center'}}><Text className="font-dm text-label text-peach">{section.action}</Text></TouchableOpacity>:null}
@@ -65,5 +78,7 @@ export function DetailScreen({image,heroActions,title,rating,meta,address,onAddr
     {sourceNote?<Text className="font-dm text-fine text-taupe" style={{lineHeight:18}}>{sourceNote}</Text>:null}
     {typeof rating==='number'?<Text className="font-dm text-fine text-taupe">Listed rating: {rating}</Text>:null}
   </View>});
-  return <LedgerCompanionScreen key={kind+':'+id} context={context} image={image||entry?.image} glyph={entry?.glyph||'landmark'} eyebrow={DETAIL_LABELS[kind]} chips={chips} primaryAction={primaryAction} essentials={essentials} folds={folds} navActive={navActive} />;
+  return <LedgerCompanionScreen key={kind+':'+id} context={context} image={image||entry?.image} glyph={entry?.glyph||'landmark'} eyebrow={DETAIL_LABELS[kind]} headingEyebrow={event?.venue}
+    chips={chips} primaryAction={primaryAction} essentials={essentials} compactFacts={event?eventJournalFacts(event):undefined} folds={folds} navActive={navActive}
+    journal={restaurant?<RestaurantJournal key={restaurant.id} restaurant={restaurant} />:event?<EventJournal key={event.id} event={event} />:undefined} />;
 }
