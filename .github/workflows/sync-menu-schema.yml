@@ -14,11 +14,13 @@ on:
     paths:
       - 'scripts/sync-menu-schema.ts'
       - 'scripts/lib/menu-schema.ts'
+      - 'scripts/lib/detail-source-cache.ts'
       - 'scripts/lib/ticketmaster-details.ts'
       - 'scripts/sync-ticketmaster.ts'
       - 'scripts/sync-events.ts'
       - 'src/lib/events.ts'
       - 'src/lib/detail-content.ts'
+      - 'src/lib/catalog-identity.ts'
       - 'src/lib/detail-journal.ts'
       - 'src/lib/verified-menu-details.ts'
       - 'supabase/migrations/20261025000000_detail_content.sql'
@@ -37,6 +39,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - uses: actions/cache/restore@v4
+        with:
+          path: .cache/detail-sources-v1.json
+          key: detail-sources-v1-${{ hashFiles('scripts/lib/menu-schema.ts', 'scripts/lib/detail-source-cache.ts', 'src/lib/detail-content.ts', 'src/lib/catalog-identity.ts') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            detail-sources-v1-${{ hashFiles('scripts/lib/menu-schema.ts', 'scripts/lib/detail-source-cache.ts', 'src/lib/detail-content.ts', 'src/lib/catalog-identity.ts') }}-
       - run: npm ci
       - uses: supabase/setup-cli@v1
         with:
@@ -67,3 +75,8 @@ jobs:
           WAYVEE_CITY: ${{ inputs.city }}
           SUPABASE_URL: ${{ vars.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: .cache/detail-sources-v1.json
+          key: detail-sources-v1-${{ hashFiles('scripts/lib/menu-schema.ts', 'scripts/lib/detail-source-cache.ts', 'src/lib/detail-content.ts', 'src/lib/catalog-identity.ts') }}-${{ github.run_id }}-${{ github.run_attempt }}

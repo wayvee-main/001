@@ -37,6 +37,19 @@ not invent missing data or promise that every place publishes a readable menu.
 Manual run: `npx --yes tsx scripts/sync-menu-schema.ts` with the same service-role
 environment as the other sync jobs. No credentials reach the mobile bundle.
 
+Collection uses deterministic extractors, with **no LLM calls or raw-page dumps**.
+GitHub Actions persists extracted fields, menu links, body hashes and HTTP
+validators in a versioned cache. Successful sources are fresh for seven days;
+due sources use ETag/Last-Modified and unchanged bodies are not parsed again.
+Unavailable sources retry after 1, 2, 4, then 7 days while retaining prior goods.
+City, place ID, street identity and URL scope each cache entry. Parser changes
+invalidate the Actions cache. A run allows at most 100 actual HTTP requests,
+including redirects and menu subpages (`DETAIL_MENU_FETCH_LIMIT`, maximum 500).
+Fresh/failed cached sources free the budget to reach further unpopulated places.
+Unchanged backend records are not rewritten. Logs contain one compact coverage,
+request/cache and write-count summary per city; inspect individual sources only
+to resolve a concrete extraction failure. No source HTML enters model context.
+
 Home and existing detail routes consume the same payload. Map-sourced places
 can open Menu Journal as well as curated restaurants. Photos remain associated
 with the named dish/venue. Full menu browsing and item details stay in the app;
