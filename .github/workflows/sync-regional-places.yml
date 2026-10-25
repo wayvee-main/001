@@ -1,0 +1,57 @@
+name: Collect Bay Area places
+
+on:
+  schedule:
+    - cron: '23 */3 * * *'
+  workflow_dispatch:
+    inputs:
+      source_requests:
+        description: 'Maximum source HTTP requests, including retries (0 = seed/coverage only)'
+        required: false
+        default: '6'
+        type: choice
+        options: ['0', '3', '6', '12']
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/sync-regional-places.ts'
+      - 'scripts/lib/regional-places.ts'
+      - 'supabase/migrations/20261025010000_regional_places.sql'
+      - '.github/workflows/sync-regional-places.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: regional-places-collector
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Apply additive regional pool migration
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          REGIONAL_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+        run: |
+          supabase link --project-ref "$REGIONAL_PROJECT_REF"
+          supabase db push
+      - name: Collect bounded regional batches
+        run: npx --yes tsx scripts/sync-regional-places.ts
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          REGIONAL_SOURCE_REQUEST_LIMIT: ${{ inputs.source_requests || '6' }}
+          REGIONAL_BATCH_LIMIT: '6'
