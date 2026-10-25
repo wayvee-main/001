@@ -8,8 +8,6 @@ import { Glyph } from '@/components/glyph';
 import { CityChip, CitySearchBar } from '@/components/city-controls';
 import { HomeDoorCard } from '@/components/home-field-guide';
 import { SectionHeading } from '@/components/section-heading';
-import { BUNDLE_CITY, useActiveCityName } from '@/lib/city';
-import { CRAWLS, NIGHTLIFE_SPOTS, currentEventListings } from '@/lib/data';
 import { homeCollectionGlyph, homeDiscoveryIdeas } from '@/lib/home-discovery';
 import { homeGuideHrefFromLegacy, homeIdeaPhoto } from '@/lib/home-guide';
 import { HOME_LEDGERS } from '@/lib/home-ledger';
@@ -25,7 +23,7 @@ import { hydrateWeatherFromBackend } from '@/lib/weather';
 
 export default function HomeScreen() {
   const router = useRouter(), colors = useThemeColors(), s = useScoper();
-  const city = useActiveCityName(), {catalog,now,city:citySlug,nearest} = useHomeGuide();
+  const {catalog,now,nearest,displayCity:city,refreshRegional} = useHomeGuide();
   const control = useControlSurface();
   const quickActions = useHomeQuickActions(now);
   const [refreshing, setRefreshing] = useState(false);
@@ -33,13 +31,12 @@ export default function HomeScreen() {
   const ideas = homeDiscoveryIdeas(now);
   const onRefresh = async () => {
     setRefreshing(true);
-    try { await Promise.all([hydrateEventsFromBackend(true), hydratePlacesFromBackend(true), hydrateWeatherFromBackend(true), s.refreshLocation()]); }
+    try { await Promise.all([hydrateEventsFromBackend(true), hydratePlacesFromBackend(true), hydrateWeatherFromBackend(true), s.refreshLocation(),refreshRegional()]); }
     finally { setRefreshing(false); }
   };
-  const local = citySlug === BUNDLE_CITY;
-  const nightlife = local ? NIGHTLIFE_SPOTS : [];
-  const crawls = local ? Object.values(CRAWLS) : [];
-  const events = currentEventListings(now);
+  const nightlife = catalog.categories.bars;
+  const crawls = catalog.categories.routes;
+  const events = catalog.categories.events;
   const tiles: CountTile[] = [
     { key:'eat', count:String(nearest.length), glyph:'food', label:'Eat', hint:'Nearby places', tint:'tile-eat', ink:'fg', onPress:()=>router.push(HOME_LEDGERS.eat.href) },
     { key:'bars', count:String(nightlife.length), glyph:'drink', label:'Bars', hint:'After dinner', tint:'tile-bars', ink:'fg', onPress:()=>router.push(HOME_LEDGERS.bars.href) },

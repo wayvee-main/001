@@ -85,8 +85,39 @@ Incoming identities cannot erase rich content, images, nonnull fields, or
 prior typed aliases. The old catalog is never modified. Neither missing
 results nor an outage causes automatic deletion; stale closures still need
 source confirmation/review. Identity coverage is separate from menu/photo
-coverage. Existing official-source enrichment can be extended separately,
-with its own request budget, without blocking identity collection.
+coverage.
+
+### Regional official-source detail queue
+
+The same workflow runs `scripts/sync-regional-details.ts` after identity
+collection, using the existing deterministic schema.org/Wix/Squarespace
+extractors. It checks up to 40 due records with four workers and a **hard
+30-request total**, including redirects and up to two published menu links.
+`REGIONAL_DETAIL_REQUEST_LIMIT` can lower this to zero; it cannot exceed 30.
+The workflow's `detail_requests` input controls this separately from OSM's
+six-request identity budget. There are no LLM calls, browser crawls, paid API
+calls, PDF guesses, or generated menus/photos.
+
+`detail_next_check_at`, `detail_checked_at`, and `detail_failure_count` form an
+indexed durable queue. Successful sources, including readable pages without
+supported detail goods, advance seven days. Unavailable sources retry after
+1, 2, 4, then 7 days. Untouched records remain due when the shared request
+budget is exhausted; partly read menu sources retry after one hour. This
+prevents the first records from monopolizing subsequent runs. With no due
+records the job succeeds with zero goods writes and zero HTTP requests.
+The initial migration prioritizes SF records with no goods, then other empty
+Bay records, before seeded Oakland records with existing goods. Subsequent
+due timestamps keep the queue fair as more places arrive.
+
+Legacy and regional enrichment share a server-only loader: public DNS/IP
+validation at each redirect, HTTPS, 12-second requests, four-hop redirect cap,
+4 MB HTML bodies, and conditional ETag/Last-Modified requests. The regional
+Actions cache retains extracted goods, links, body hashes and validators,
+never source HTML; parser/loader changes invalidate its key. The database
+queue remains durable if the cache is unavailable. Both pipelines keep prior
+goods when a source fails, preserve venue photos and retain known fields
+when a new parsed payload is incomplete. A separate compact goods summary
+reports actual HTTP/check/cache/menu/dish/photo/write counts per run.
 
 Source attribution is retained per row (`source_url`, `source_license`,
 `source_data_at`). OSM data is ODbL 1.0; retained Overture data is

@@ -6,8 +6,8 @@ export type JournalFact = { label: string; value: string; glyph?: string; fullVa
 export type JournalMenuItem = DetailMenuItem;
 export type MenuJournalListing = {id:string;name:string;sourceUrl:string;menuUrl:string;menuHighlights:readonly JournalMenuItem[];image?:string;primaryAction:{label:string;url:string};orderUrl?:string;reserveUrl?:string};
 
-export function menuListingForPlace(place:{id:string;name:string;address?:string|null;detailContent?:DetailContent},restaurants:readonly Restaurant[],city:string):MenuJournalListing|undefined {
-  const curated=restaurantForPlace(place,restaurants,city);
+export function menuListingForPlace(place:{id:string;name:string;address?:string|null;city?:string;detailContent?:DetailContent},restaurants:readonly Restaurant[],city:string):MenuJournalListing|undefined {
+  const curated=restaurantForPlace(place,restaurants,place.city||city);
   if(curated)return curated;
   const menu=place.detailContent?.menu;if(!menu)return;
   return {id:place.id,name:place.name,sourceUrl:place.detailContent!.sourceUrl,menuUrl:menu.url,menuHighlights:menu.items,primaryAction:{label:'Official menu',url:menu.url}};

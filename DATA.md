@@ -276,3 +276,16 @@ Discover retains its own routes and presentation.
 - Ratings appear only where a licensed/attributable source is represented —
   omit rather than estimate.
 - Prices, hours, and lineups carry the date they were checked.
+
+## Regional reads on Home
+
+The regional pool is stored separately and collected across all nine Bay Area
+counties, independent of a guest's location. Home reads up to three 200-row
+pages within five miles of a supported phone position, or the selected-city
+anchor when location is unavailable. Results are distance sorted and cached in
+memory for 15 minutes per nearby area. Legacy verified goods survive a sparse
+identity refresh. No device position is written into the collector's tables.
+Oakland curation does not fill an SF device feed. Source-tagged parks and venues
+can appear as place guides; they never imply an invented trail length or show.
+Saved regional place IDs can hydrate directly outside the nearby window.
+Official site enrichment is bounded and independent of the app's read path.

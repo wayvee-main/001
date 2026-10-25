@@ -21,7 +21,7 @@ export function HomeEntryLedger({entry}: {entry:HomeGuideEntry}) {
   const s=useScoper(),colors=useThemeColors(),context=ledgerContext(entry),essentials=ledgerEssentials(entry),router=useRouter();
   const content=entry.detailContent;
   context.facts=[...detailContentFacts(content),...context.facts];
-  const restaurant=entry.kind==='restaurant'?RESTAURANTS[entry.id]:(entry.kind==='place'||entry.kind==='night')?menuListingForPlace({id:entry.id,name:entry.name,address:entry.details.find(fact=>/address/i.test(fact.label))?.value,detailContent:content},Object.values(RESTAURANTS),activeCity()):undefined,event=entry.kind==='event'?EVENTS[entry.id]:undefined;
+  const restaurant=entry.kind==='restaurant'?RESTAURANTS[entry.id]:(entry.kind==='place'||entry.kind==='night')?menuListingForPlace({id:entry.id,name:entry.name,city:entry.city,address:entry.details.find(fact=>/address/i.test(fact.label))?.value,detailContent:content},Object.values(RESTAURANTS),activeCity()):undefined,event=entry.kind==='event'?EVENTS[entry.id]:undefined;
   if(restaurant){const menu=restaurantJournalMenu(restaurant,content);context.facts=[...context.facts.filter(fact=>!entry.sections?.some(section=>section.title===fact.label)),
     {label:'Menu highlights',value:menu.items.slice(0,12).map(item=>[item.name,item.price,item.note].filter(Boolean).join(' · ')).join('\n')},...menu.specials.map(special=>({label:special.title,value:special.label+' · '+special.description}))];}
   if(event){const detail=eventJournalDetails(event);context.caption=detail.subtitle||event.venue;context.facts=[...context.facts,{label:'Lineup',value:event.lineup},...(detail.ageLabel?[{label:'Age policy',value:detail.ageLabel}]:[]),...(detail.policies?[{label:'Before you go',value:detail.policies.text}]:[])];}

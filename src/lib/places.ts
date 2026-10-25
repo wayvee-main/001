@@ -18,6 +18,9 @@ import { getStoredItem, setStoredItem } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
 
 export interface Place {
+  city?:string;
+  sourceUrl?:string;
+  sourceLicense?:string;
   detailContent?: DetailContent;
   id: string;
   name: string;
@@ -37,7 +40,10 @@ export interface Place {
   needsReview: boolean;
 }
 
-interface PlaceRow {
+export interface PlaceRow {
+  city?:string;
+  source_url?:string|null;
+  source_license?:string|null;
   detail_content?: unknown;
   id: string;
   name: string;
@@ -54,9 +60,10 @@ interface PlaceRow {
   needs_review: boolean;
 }
 
-function rowToPlace(row: PlaceRow): Place {
+export function rowToPlace(row: PlaceRow): Place {
   return {
     id: row.id,
+    city:row.city,sourceUrl:row.source_url||undefined,sourceLicense:row.source_license||undefined,
     detailContent: parseDetailContent(row.detail_content),
     name: row.name,
     category: row.category,

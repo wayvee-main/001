@@ -16,6 +16,7 @@ import { detailContentFacts } from '@/lib/detail-content';
 import { activeCity } from '@/lib/city';
 import { placeForRestaurant, placeForListing } from '@/lib/catalog-identity';
 import { useAllPlaces } from '@/lib/places';
+import { useRegionalPlace } from '@/lib/use-regional-places';
 import { detailPlanHref } from '@/lib/detail-assistant';
 import type { LiveLine } from '@/lib/detail-facts';
 import { usableHomePhoto } from '@/lib/home-tile-previews';
@@ -41,7 +42,9 @@ export function DetailScreen({image,heroActions,title,rating,meta,address,onAddr
   const id=Array.isArray(params.id)?params.id[0]||'':params.id||'',kind=pathname.split('/').filter(Boolean)[0]||'venue';
   useDetailRefresh(kind);
   const entry=catalog.entries[homeGuideKey(kind,id)],s=useScoper(),colors=useThemeColors();
-  const places=useAllPlaces(),place=kind==='place'?places.find(item=>item.id===id):kind==='night'?placeForListing({name:title,address},places,activeCity()):undefined;
+  const places=useAllPlaces(),localPlace=kind==='place'?places.find(item=>item.id===id):undefined;
+  const regional=useRegionalPlace(kind==='place'&&!localPlace?id:undefined);
+  const place=kind==='place'?localPlace||regional.place:kind==='night'?placeForListing({name:title,address},places,activeCity()):undefined;
   const restaurant=kind==='restaurant'?RESTAURANTS[id]:place?menuListingForPlace(place,Object.values(RESTAURANTS),activeCity()):undefined,event=kind==='event'?EVENTS[id]:undefined;
   const content=place?.detailContent||event?.detailContent||(kind==='restaurant'&&RESTAURANTS[id]?placeForRestaurant(RESTAURANTS[id],places,activeCity())?.detailContent:undefined);
   const menu=restaurant?restaurantJournalMenu(restaurant,content):undefined,eventDetails=event?eventJournalDetails(event):undefined;

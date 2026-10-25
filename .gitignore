@@ -60,4 +60,3 @@ output/
 .verify-export/
 .verify-web.*.log
 .redeploy
-.cache/detail-sources-v1.json

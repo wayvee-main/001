@@ -8,8 +8,8 @@ export const HOME_RESULT = { height:72, thumbnailWidth:72, thumbnailHeight:56, i
 export const shortHomeTitle=(name:string)=>{const words=name.trim().split(/\s+/);return words.length>5?words.slice(0,5).join(' ')+'…':name;};
 
 export function homeEntryCategory(entry:HomeGuideEntry):HomeGuideCategory {
-  if(entry.kind==='event'||entry.kind==='venue')return 'events';
-  if(entry.kind==='crawl'||entry.kind==='outdoor')return 'routes';
+  if(entry.kind==='event'||entry.kind==='venue'||['theatre','cinema','arts_centre','events_venue','music_venue','museum','gallery'].includes(entry.category||''))return 'events';
+  if(entry.kind==='crawl'||entry.kind==='outdoor'||['park','nature_reserve','garden','trailhead','viewpoint'].includes(entry.category||''))return 'routes';
   if(entry.kind==='night'||['bar','pub','wine_bar','brewery','night_club'].includes(entry.category||''))return 'bars';
   return 'eat';
 }
@@ -27,8 +27,8 @@ export function homeEntryMetadata(entry:HomeGuideEntry):{primary:string;secondar
     const price=offer.description.match(/\$\d+(?:\.\d{2})?\s+[^·.]+/)?.[0]?.trim();
     return {primary:offer.label,secondary:price?[price,minimum?'min '+minimum:undefined].filter(Boolean).join(' · '):offer.title,glyph:'clock'};
   }
-  if(category==='events')return {primary:entry.facts.filter(fact=>['calendar','clock'].includes(fact.glyph)).map(fact=>fact.value).join(' · ')||entry.caption,secondary:entry.caption,glyph:'calendar'};
-  if(category==='routes')return {primary:entry.facts.filter(fact=>['route','walk','car'].includes(fact.glyph)).map(fact=>fact.value).join(' · ')||entry.caption,glyph:entry.facts.some(fact=>fact.glyph==='car')?'car':'walk'};
+  if(category==='events')return entry.kind==='event'?{primary:entry.facts.filter(fact=>['calendar','clock'].includes(fact.glyph)).map(fact=>fact.value).join(' · ')||entry.caption,secondary:entry.caption,glyph:'calendar'}:{primary:entry.caption,secondary:entry.facts.find(fact=>fact.glyph==='pin')?.value,glyph:'landmark'};
+  if(category==='routes')return {primary:entry.facts.filter(fact=>['route','walk','car'].includes(fact.glyph)).map(fact=>fact.value).join(' · ')||entry.caption,secondary:entry.facts.find(fact=>fact.glyph==='pin')?.value,glyph:entry.facts.some(fact=>fact.glyph==='car')?'car':'walk'};
   const distance=entry.facts.find(fact=>fact.glyph==='pin'&&/\bmi(?:les?)?\b/.test(fact.value));
   const priceFact=entry.facts.find(fact=>fact.glyph==='wallet');
   return {primary:entry.caption||'Explore the venue',secondary:[priceFact?.value,distance?.value].filter(Boolean).join(' · ')||undefined,glyph:category==='bars'?'drink':entry.glyph};

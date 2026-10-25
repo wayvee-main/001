@@ -11,6 +11,7 @@ import { hoursSummary, openStateFor, openStateLabel } from '@/lib/hours';
 import { mapsDirectionsLink } from '@/lib/links';
 import { placeCategoryLabel, useAllPlaces } from '@/lib/places';
 import { useScoper } from '@/lib/store';
+import { useRegionalPlace } from '@/lib/use-regional-places';
 
 const PHONE = 'M5 4h4l2 5l-3 2a11 11 0 0 0 5 5l2-3l5 2v4a2 2 0 0 1 -2 2c-8.3 0 -15 -6.7 -15 -15a2 2 0 0 1 2 -2';
 
@@ -20,7 +21,8 @@ export default function PlaceScreen() {
   const router = useRouter();
   const { deviceLocation, showToast } = useScoper();
   const places = useAllPlaces();
-  const place = places.find((p) => p.id === id);
+  const localPlace=places.find((p)=>p.id===id),regional=useRegionalPlace(localPlace?undefined:id);
+  const place = localPlace||regional.place;
 
   if (!place) {
     return (
@@ -28,8 +30,8 @@ export default function PlaceScreen() {
         <View style={{ paddingHorizontal: gutter }} className="mx-auto w-full max-w-[720px] flex-1">
           <BackButton />
           <View className="flex-1 items-center justify-center px-6 pb-16">
-            <Text className="font-fraunces text-[25px] text-ink">Place unavailable</Text>
-            <Text className="mt-2 text-center font-dm text-[13.5px] leading-5 text-taupe">Browse the Oakland food hub instead.</Text>
+            <Text className="font-fraunces text-[25px] text-ink">{regional.pending?'Opening this place…':'Place unavailable'}</Text>
+            <Text className="mt-2 text-center font-dm text-[13.5px] leading-5 text-taupe">{regional.pending?'Checking its latest listing.':'Browse nearby places from Home.'}</Text>
             <TouchableOpacity onPress={() => router.replace('/featured')} className="mt-5 rounded-full bg-ember px-6 py-3 border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
               <Text className="font-dm-medium text-[14px] text-on-accent">Open food hub</Text>
             </TouchableOpacity>

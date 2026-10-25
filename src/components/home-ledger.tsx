@@ -11,17 +11,17 @@ import { DetailAssistantDock } from '@/components/detail-assistant';
 import { ledgerContext } from '@/lib/detail-ledger';
 import { EmptyState } from '@/components/ui';
 import { useContentHydrating } from '@/lib/bootstrap';
-import { useActiveCityName } from '@/lib/city';
 import { homeGuideKey, type HomeGuideCatalog, type HomeGuideCategory } from '@/lib/home-guide';
 import { HOME_LEDGERS, homeLedgerEntries, homeLedgerFilters } from '@/lib/home-ledger';
 import { useThemeColors } from '@/lib/theme';
+import { useControlSurface } from '@/lib/shadows';
 import { useHomeGuide } from '@/lib/use-home-guide';
 
 function LedgerContents({category,catalog,cityName,initialQuery,hydrating,onLeadChange}: {
   category:HomeGuideCategory;catalog:HomeGuideCatalog;cityName:string;initialQuery:string;hydrating:boolean;onLeadChange:(key:string)=>void;
 }) {
   const [query,setQuery]=useState(initialQuery),[filter,setFilter]=useState('all');
-  const router=useRouter(),colors=useThemeColors(),definition=HOME_LEDGERS[category];
+  const router=useRouter(),colors=useThemeColors(),control=useControlSurface(),definition=HOME_LEDGERS[category];
   const entries=homeLedgerEntries(catalog,category,query,filter),filters=homeLedgerFilters(catalog.categories[category],category,filter);
   const narrowed=Boolean(query.trim()||filter!=='all');
   const richIndex=category==='eat'?entries.findIndex(entry=>homeMenuItems(entry).some(item=>item.image)):-1;
@@ -30,7 +30,7 @@ function LedgerContents({category,catalog,cityName,initialQuery,hydrating,onLead
   useEffect(()=>onLeadChange(leadKey),[leadKey,onLeadChange]);
   return <View testID={`home-ledger-${category}`}>
     <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
-      <TouchableOpacity accessibilityRole="button" accessibilityLabel="Back to Home" onPress={()=>router.canGoBack()?router.back():router.replace('/')} style={{width:34,height:34,justifyContent:'center',alignItems:'center',borderRadius:17,backgroundColor:colors['surface-control']}}><Glyph name="chevronLeft" size={16} color={colors.fg} /></TouchableOpacity>
+      <TouchableOpacity accessibilityRole="button" accessibilityLabel="Back to Home" onPress={()=>router.canGoBack()?router.back():router.replace('/')} style={[control,{width:34,height:34,justifyContent:'center',alignItems:'center',borderRadius:17}]}><Glyph name="chevronLeft" size={16} color={colors.fg} /></TouchableOpacity>
       <Text className="font-dm text-fine text-taupe">{cityName}</Text>
       <View style={{width:34}} />
     </View>
@@ -56,8 +56,8 @@ function LedgerContents({category,catalog,cityName,initialQuery,hydrating,onLead
 
 /** Mounted independently by each of the four Home tile routes. */
 export function HomeLedgerScreen({category}: {category:HomeGuideCategory}) {
-  const {q}=useLocalSearchParams<{q?:string|string[]}>(),{catalog,now,city}=useHomeGuide();
-  const cityName=useActiveCityName(),hydrating=useContentHydrating(),query=Array.isArray(q)?q[0] || '':q || '';
+  const {q}=useLocalSearchParams<{q?:string|string[]}>(),{catalog,now,city,displayCity}=useHomeGuide();
+  const cityName=displayCity,hydrating=useContentHydrating(),query=Array.isArray(q)?q[0] || '':q || '';
   const [leadKey,setLeadKey]=useState(''),first=catalog.entries[leadKey]||catalog.categories[category][0];
   return <HomeGuideScreen now={now} backLabel="Home" search={false} context={false} header={false} beforeNav={first?<DetailAssistantDock chevron context={ledgerContext(first)} />:undefined}>
     <LedgerContents key={`${city}:${category}:${query}`} category={category} catalog={catalog} cityName={cityName} initialQuery={query} hydrating={hydrating} onLeadChange={setLeadKey} />

@@ -11,11 +11,13 @@ import type { ViatorPick } from '@/lib/viator';
 import { hoursSummary } from '@/lib/hours';
 import { placeForRestaurant, placeForListing } from '@/lib/catalog-identity';
 import type { DetailContent } from '@/lib/detail-content';
+import { formatMiles, milesBetween, type GeoPoint } from '@/lib/geo';
 
 export type HomeGuideKind = 'restaurant' | 'place' | 'night' | 'crawl' | 'event' | 'venue' | 'pick' | 'outdoor' | 'collection';
 export type HomeGuideCategory = 'eat' | 'bars' | 'routes' | 'events';
 export type HomeGuideFact = { glyph: string; value: string; label?: string };
 export type HomeGuideEntry = {
+  city?:string;
   detailContent?:DetailContent;
   kind: HomeGuideKind; id: string; name: string; caption: string; description: string;
   glyph: string; image?: string; facts: HomeGuideFact[]; searchText: string; category?: string; foodTags?: string; tags?: string[];
@@ -54,32 +56,36 @@ const directions = (name: string, city: string, address?: string | null) => ({la
 const compactVenue = (name: string) => /\bfox theater\b/i.test(name) ? 'Fox Theater' : /\bparamount\b/i.test(name) ? 'Paramount' : name;
 
 /** Home's own view models. No Discover component, source record or shared style is modified. */
-export function buildHomeGuide({city,nearest,places,events,picks,now}: {
+export function buildHomeGuide({city,nearest,places,events,picks,now,anchor,includeOakland=true,locationBased=false}: {
   city: string; nearest: readonly NearestPick[]; places: readonly Place[];
   events: readonly ScoperEvent[]; picks: readonly ViatorPick[]; now: Date;
+  anchor?:GeoPoint|null;includeOakland?:boolean;locationBased?:boolean;
 }): HomeGuideCatalog {
-  const local = city === 'oakland', entries: Record<string, HomeGuideEntry> = {};
+  const local = city === 'oakland'&&includeOakland, entries: Record<string, HomeGuideEntry> = {};
   const add = (entry: HomeGuideEntry) => {
     const key=homeGuideKey(entry.kind,entry.id);
     entries[key] = {...entry,image:usableHomePhoto(entry.image) || HOME_GUIDE_PHOTOS[key]?.image,searchText:normalized(entry.name+' '+entry.caption+' '+entry.searchText)};
   };
-  if (local) for (const r of Object.values(RESTAURANTS)) add({
-    detailContent:placeForRestaurant(r,places,city)?.detailContent,kind:'restaurant',id:r.id,name:r.name,caption:r.cuisine,description:FOOD_HUB_REASON_BY_ID[r.id] || r.cuisine,
+  if (local) for (const r of Object.values(RESTAURANTS)) {
+    const matched=placeForRestaurant(r,places,city);
+    if(locationBased&&!matched)continue;
+    add({
+    detailContent:matched?.detailContent,kind:'restaurant',id:r.id,name:r.name,caption:r.cuisine,description:FOOD_HUB_REASON_BY_ID[r.id] || r.cuisine,
     image:r.image,glyph:'food',facts:[{glyph:'wallet',value:r.price},{glyph:'food',value:r.cuisine}],
     foodTags:normalized([r.name,r.cuisine,...(r.searchTags||[])].join(' ')),
     searchText:[r.cuisine,...(r.searchTags||[]),...r.popularDishes.map(x=>x.name)].join(' '),
     details:[{label:'Address',value:r.address},...r.detailFacts],
     sections:r.menuHighlights.length?[{title:r.highlightsLabel || 'Menu highlights',lines:r.menuHighlights.slice(0,8).map(x=>[x.name,x.price,x.desc].filter(Boolean).join(' · '))}]:[],
     links:links({label:r.primaryAction.label,url:r.primaryAction.url},{label:'Menu',url:r.menuUrl},r.reserveUrl?{label:'Reservations',url:r.reserveUrl}:undefined,{label:'Official site',url:r.sourceUrl},directions(r.name,city,r.address)),saveKind:'restaurant',
-  });
+  });}
   for (const p of places.filter(item=>!item.needsReview)) add({
-    detailContent:p.detailContent,kind:'place',id:p.id,name:p.name,caption:[p.cuisine,p.category.replace(/_/g,' ')].filter(Boolean).join(' · '),
+    city:p.city,detailContent:p.detailContent,kind:'place',id:p.id,name:p.name,caption:[p.cuisine,p.category.replace(/_/g,' ')].filter(Boolean).join(' · '),
     description:p.detailContent?.description||[p.cuisine,p.category.replace(/_/g,' ')].filter(Boolean).join(' · '),image:p.image||p.detailContent?.photos?.[0]?.url,
-    glyph:/cafe|bakery/.test(p.category)?'coffee':'food',category:p.category,facts:[{glyph:'pin',value:p.address?.split(',')[0] || p.category.replace(/_/g,' ')}],
+    glyph:/cafe|bakery/.test(p.category)?'coffee':/park|reserve|garden|trailhead|viewpoint/.test(p.category)?'walk':/theatre|cinema|museum|gallery|venue|arts_centre|attraction/.test(p.category)?'landmark':/bar|pub|brewery/.test(p.category)?'drink':'food',category:p.category,facts:[{glyph:'pin',value:anchor?formatMiles(milesBetween(anchor,{latitude:p.lat,longitude:p.lon})):p.address?.split(',')[0] || p.category.replace(/_/g,' ')}],
     foodTags:normalized([p.name,p.category,p.cuisine].filter(Boolean).join(' ')),
     searchText:[p.category,p.cuisine,p.address,p.category==='cafe'?'coffee espresso':''].filter(Boolean).join(' '),
-    details:[p.address?{label:'Address',value:p.address}:null,p.openingHours?{label:'Listed hours',value:hoursSummary(p.openingHours)||p.openingHours}:null,p.phone?{label:'Phone',value:p.phone}:null].filter((x):x is {label:string;value:string}=>!!x),
-    links:links(p.website?{label:'Official site',url:p.website}:undefined,directions(p.name,city,p.address)),saveKind:'place',
+    details:[p.address?{label:'Address',value:p.address}:null,p.openingHours?{label:'Listed hours',value:hoursSummary(p.openingHours)||p.openingHours}:null,p.phone?{label:'Phone',value:p.phone}:null,p.sourceLicense?{label:'Map data',value:p.sourceLicense}:null].filter((x):x is {label:string;value:string}=>!!x),
+    links:links(p.website?{label:'Official site',url:p.website}:undefined,p.sourceUrl?{label:'Map data source',url:p.sourceUrl}:undefined,directions(p.name,p.city||city,p.address)),saveKind:'place',
   });
   // The exact same measured/estimated pool supplies both Eat's count and its list.
   const eat = nearest.flatMap(pick=>{
@@ -94,6 +100,7 @@ export function buildHomeGuide({city,nearest,places,events,picks,now}: {
   });
   const bars: HomeGuideEntry[] = [], routes: HomeGuideEntry[] = [], shows: HomeGuideEntry[] = [];
   if (local) for (const bar of NIGHTLIFE_SPOTS) {
+    if(locationBased&&!placeForListing(bar,places,city))continue;
     add({detailContent:placeForListing(bar,places,city)?.detailContent,kind:'night',id:bar.id,name:bar.name,caption:bar.kind,description:bar.desc,image:bar.image,glyph:'drink',
       facts:[{glyph:'pin',value:bar.address.split(',')[0]},{glyph:'clock',value:bar.hours}],searchText:bar.kind+' '+bar.desc,
       details:[{label:'Address',value:bar.address},{label:'Listed hours',value:bar.hours}],links:links({label:'Official site',url:bar.url},directions(bar.name,city,bar.address)),saveKind:'night'});
@@ -126,7 +133,7 @@ export function buildHomeGuide({city,nearest,places,events,picks,now}: {
     searchText:pick.description+' '+pick.flags.join(' '),details:[{label:'Destination',value:pick.destination}],
     sections:pick.inclusions.length?[{title:'Included',lines:pick.inclusions}]:[],links:links({label:'View experience',url:pick.bookingUrl}),planKind:'pick',
   });
-  for (const park of HOME_OUTDOORS.filter(item=>item.city===city)) add({
+  for (const park of HOME_OUTDOORS.filter(item=>item.city===city&&(item.city!=='oakland'||includeOakland))) add({
     kind:'outdoor',id:park.id,name:park.name,caption:park.caption,description:park.description,glyph:park.glyph,
     facts:[{glyph:park.glyph,value:park.caption.split(' · ')[0]},{glyph:'pin',value:park.caption.split(' · ')[1]}],
     searchText:'outdoors hiking trails parks walking '+park.caption,details:[{label:'Before you go',value:'Use the official park page for current access, closures and trail conditions.'}],
@@ -137,6 +144,13 @@ export function buildHomeGuide({city,nearest,places,events,picks,now}: {
     const image=usableHomePhoto(current.coverImage) || current.items.map(item=>entries[homeGuideKey(item.type,item.id)]?.image).find(Boolean);
     add({kind:'collection',id:current.id,name:current.title,caption:current.subtitle,description:current.description,image,glyph:homeCollectionGlyph(current.id),
       facts:[{glyph:'compass',value:current.items.length+' picks'}],searchText:current.eyebrow+' '+current.description,details:[],links:[],members:current.items.map(item=>({kind:item.type,id:item.id}))});
+  }
+  const matchedBarIds=new Set(local?NIGHTLIFE_SPOTS.flatMap(bar=>{const match=placeForListing(bar,places,city);return match?[match.id]:[];}):[]);
+  for(const place of places.filter(place=>!place.needsReview)){
+    const entry=entries[homeGuideKey('place',place.id)];if(!entry)continue;
+    if(['bar','pub','wine_bar','brewery','night_club'].includes(place.category)&&!matchedBarIds.has(place.id))bars.push(entry);
+    if(['park','nature_reserve','garden','trailhead','viewpoint'].includes(place.category))routes.push(entry);
+    if(['theatre','cinema','arts_centre','events_venue','music_venue','museum','gallery'].includes(place.category))shows.push(entry);
   }
   return {entries,categories:{eat,bars,routes,events:shows},collections:local?homeDiscoveryCollections(now).map(collection=>({...collection,coverImage:entries[homeGuideKey('collection',collection.id)]?.image || ''})):[]};
 }
@@ -162,7 +176,7 @@ export function buildHomeSearchIndex(catalog: HomeGuideCatalog): SearchCandidate
 export function entriesForHomeIdea(idea: HomeIdea, catalog: HomeGuideCatalog): HomeGuideEntry[] {
   if(idea.topic==='events')return catalog.categories.events;
   if(idea.topic==='bars')return catalog.categories.bars;
-  if(idea.topic==='outdoors')return Object.values(catalog.entries).filter(x=>x.kind==='outdoor');
+  if(idea.topic==='outdoors')return Object.values(catalog.entries).filter(x=>x.kind==='outdoor'||['park','nature_reserve','garden','trailhead','viewpoint'].includes(x.category||''));
   if(idea.topic==='late-food'){
     return entriesForHomeCollection(catalog,'late-night');
   }

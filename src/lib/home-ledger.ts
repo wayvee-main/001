@@ -19,7 +19,7 @@ export const HOME_LEDGERS: Record<HomeGuideCategory, LedgerDefinition> = {
   routes: { title:'Routes', href:'/home/routes', singular:'route', plural:'routes', search:'Search routes', filters:[
     {id:'all',label:'All',glyph:'filter'}, {id:'walking',label:'Walking',glyph:'walk'}, {id:'rides',label:'Rides',glyph:'car'},
   ] },
-  events: { title:'Events', href:'/home/events', singular:'show', plural:'shows', search:'Search shows', filters:[
+  events: { title:'Events', href:'/home/events', singular:'listing', plural:'listings', search:'Search events', filters:[
     {id:'all',label:'All',glyph:'filter'}, {id:'music',label:'Music',glyph:'music'},
     {id:'outdoors',label:'Outdoors',glyph:'hike'}, {id:'movies',label:'Movies',glyph:'film'},
   ] },

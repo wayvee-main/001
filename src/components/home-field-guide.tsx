@@ -34,8 +34,8 @@ export function HomeDoorCard({title,meta,image,glyph='compass',width,onPress,tes
 }
 
 /** Shared frame for Home guides and Ledger companion detail routes. */
-export function HomeGuideScreen({children,now,backLabel='Back',search=true,context=true,header=true,beforeNav,activeTab='home'}: {children:ReactNode;now:Date;backLabel?:string;search?:boolean;context?:boolean;header?:boolean;beforeNav?:ReactNode;activeTab?:'home'|'discover'|'create'|'profile'}) {
-  const router=useRouter(),colors=useThemeColors(),city=useActiveCityName();
+export function HomeGuideScreen({children,now,backLabel='Back',search=true,context=true,header=true,beforeNav,activeTab='home',cityLabel}: {children:ReactNode;now:Date;backLabel?:string;search?:boolean;context?:boolean;header?:boolean;beforeNav?:ReactNode;activeTab?:'home'|'discover'|'create'|'profile';cityLabel?:string}) {
+  const router=useRouter(),colors=useThemeColors(),activeCityName=useActiveCityName(),city=cityLabel||activeCityName;
   const period={morning:'This morning',midday:'This afternoon',afternoon:'This afternoon',evening:'This evening',lateNight:'After hours'}[currentDaypart(now)];
   return <Screen><View testID="home-field-guide" style={{flex:1}}>
     <ScreenScroll gap={18} keyboardShouldPersistTaps="handled">
