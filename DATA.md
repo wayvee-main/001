@@ -16,6 +16,36 @@ runtime. This file records the split and the daily workflow.
 | Sync health | Supabase `sync_runs` (+ `sync_status` view) | Every run | One row per sync run: rows written/pruned, duration, ok/partial/failed. |
 | User data | Supabase | Runtime | Saves, follows, plans, taste preferences. Never in the repo. |
 
+## Source-backed detail goods
+
+`places.detail_content` and `events.detail_content` are versioned public JSON
+payloads validated by `src/lib/detail-content.ts`. They carry menu items,
+associated dish photos, prices as listed, source links, dated offers, artist
+photos, venue imagery and complete source notes. The existing public-read and
+service-write policies also protect these columns. Invalid payloads are ignored;
+unsafe URLs and expired offers never become app controls.
+
+`Populate detail content` applies the additive migration, fills place goods
+using `scripts/sync-menu-schema.ts`, publishes current curated events and refreshes Ticketmaster's rich event
+payloads before the longer menu crawl. The menu job uses already verified curated menus for matching city,
+name and full street addresses, plus published schema.org, Wix and Squarespace
+menu/product metadata from the establishment's official site. It follows at
+most two published menu links, has bounded concurrency, request time and body
+size, and rejects private-network sources. A failed source retains cached
+verified content. It reports actual menus, items and photos populated; it does
+not invent missing data or promise that every place publishes a readable menu.
+Manual run: `npx --yes tsx scripts/sync-menu-schema.ts` with the same service-role
+environment as the other sync jobs. No credentials reach the mobile bundle.
+
+Home and existing detail routes consume the same payload. Map-sourced places
+can open Menu Journal as well as curated restaurants. Photos remain associated
+with the named dish/venue. Full menu browsing and item details stay in the app;
+the official source is still available for ordering and current availability.
+Detail focus refreshes the real catalog with a short shared throttle, so a menu
+populated after launch reaches an already running app. Screenshots shown for
+this implementation come from the app with live data, without substituted
+fixture responses or independent mockup copy.
+
 ## Why store events in the repo instead of pulling from the web
 
 - **Runtime scraping is brittle**: venue calendars are JS-rendered, CORS-blocked,
@@ -27,6 +57,7 @@ runtime. This file records the split and the daily workflow.
 
 **Backend population (live)**: the Supabase `events` table
 (`supabase/migrations/20260929000000_wayvee_initial.sql`) mirrors `events.ts`.
+The publisher validates current entries and filters expired legacy IDs before writing; an old bundled bookmark cannot block valid current content. The full maintenance audit still reports expired bundle entries.
 At launch the app overlays backend rows onto the bundled snapshot
 (`src/lib/events-remote.ts`) — the bundle is the offline/first-paint fallback,
 so a missing or partial table can never blank the app. After editing

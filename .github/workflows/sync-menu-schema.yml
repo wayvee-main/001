@@ -1,33 +1,68 @@
-name: Sync menu schema data
-
-# Reads schema.org/Menu structured data from each place's own official
-# website. NOT YET BUILT: scripts/sync-menu-schema.ts and the sync:menus
-# script it needs do not exist, so running this fails with "Missing script".
-# The workflow is kept as the shape the job will take. Manual dispatch only,
-# and when it is built it will depend on public.places already being
-# populated (run "Sync places" first).
+name: Populate detail content
 
 on:
   workflow_dispatch:
     inputs:
       city:
-        description: 'One city slug to sync (blank = every launched city)'
+        description: 'One launched city (blank = all)'
         required: false
         type: string
+  schedule:
+    - cron: '13 10 * * 2'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/sync-menu-schema.ts'
+      - 'scripts/lib/menu-schema.ts'
+      - 'scripts/lib/ticketmaster-details.ts'
+      - 'scripts/sync-ticketmaster.ts'
+      - 'scripts/sync-events.ts'
+      - 'src/lib/events.ts'
+      - 'src/lib/detail-content.ts'
+      - 'src/lib/detail-journal.ts'
+      - 'src/lib/verified-menu-details.ts'
+      - 'supabase/migrations/20261025000000_detail_content.sql'
+      - '.github/workflows/sync-menu-schema.yml'
+
+concurrency:
+  group: detail-content-sync
+  cancel-in-progress: false
 
 jobs:
-  sync:
+  populate:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-
       - run: npm ci
-
-      - run: npm run sync:menus
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Apply detail content columns
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          DETAIL_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+        run: |
+          supabase link --project-ref "$DETAIL_PROJECT_REF"
+          supabase db push
+      - name: Publish current curated event content
+        run: npm run sync:events
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Retain event artist and venue content
+        run: npm run sync:ticketmaster
+        env:
+          WAYVEE_CITY: ${{ inputs.city }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
+      - name: Populate official menus and place photos
+        run: npx --yes tsx scripts/sync-menu-schema.ts
         env:
           WAYVEE_CITY: ${{ inputs.city }}
           SUPABASE_URL: ${{ vars.SUPABASE_URL }}

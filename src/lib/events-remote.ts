@@ -6,8 +6,10 @@ import { activeCity, BUNDLE_CITY, cityCacheKey } from '@/lib/city';
 import { EVENTS, type EventCategory, type EventSource, type ScoperEvent } from '@/lib/events';
 import { getStoredItem, setStoredItem } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
+import { parseDetailContent } from '@/lib/detail-content';
 
 interface EventRow {
+  detail_content?: unknown;
   id: string;
   starts_at: string;
   name: string;
@@ -36,6 +38,7 @@ interface EventRow {
 function rowToEvent(row: EventRow): ScoperEvent {
   return {
     id: row.id,
+    detailContent: parseDetailContent(row.detail_content),
     startsAt: row.starts_at,
     name: row.name,
     time: row.time_label,
@@ -97,7 +100,7 @@ async function loadEventsFromCache(): Promise<boolean> {
     let changed = false;
     for (const event of rows as ScoperEvent[]) {
       if (!event?.id || !event.startsAt || !event.name || !event.image || !event.sourceUrl) continue;
-      EVENTS[event.id] = event;
+      EVENTS[event.id] = {...event,detailContent:parseDetailContent(event.detailContent)};
       changed = true;
     }
     return changed;
@@ -122,6 +125,7 @@ export async function hydrateEventsFromBackend(force = false): Promise<boolean> 
   if (!supabase) return hydrated ? false : loadEventsFromCache();
   try {
     const { data, error } = await supabase.from('events').select('*').eq('city', city);
+    if(activeCity()!==city)return false;
     if (error || !data?.length) return hydrated ? false : loadEventsFromCache();
     for (const row of data as unknown as EventRow[]) {
       if (!row?.id || !row.starts_at || !row.name || !row.image || !row.source_url) continue;

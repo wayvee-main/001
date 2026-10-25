@@ -151,6 +151,18 @@ inline palette and Tailwind tokens together with `npm run tokens`.
   handler. Full source values remain in About & visit and Vee's context.
   Event date/showtime/admission and doors/venue use the same inline flow;
   only published door times and age policies can appear.
+- Detail renders are captures of the running app with the same backend payload
+  used on Android. Approval previews must not present invented dishes, offers,
+  prices, photos or artist biographies as implemented content. Report actual
+  data coverage and missing-source cases. A styled scaffold is not a populated
+  detail page.
+- Map IDs and curated restaurant IDs share verified goods only after an exact
+  city/name/street match. Backend `detail_content` supplies menus, named dish
+  photos, source prices, artist/venue content and complete listing notes.
+  These appear directly in the Journal body. Full menu opens inside the app;
+  the external official menu remains a secondary handoff. Missing dish photos
+  use text rows rather than large empty photographic cards. Refresh detail
+  payloads on entry, preserving the device cache when the network is unavailable.
 - Menu Journal puts menu exploration on the page: source category pills,
   two photographic dish cards, then compact additional dish rows. Filters
   include all items exactly once; a category with one result has no empty

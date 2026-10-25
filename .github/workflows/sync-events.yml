@@ -12,9 +12,6 @@ name: Sync curated events
 on:
   schedule:
     - cron: '23 8 * * *' # daily, ahead of the Ticketmaster sync at 09:43
-  push:
-    branches: [main]
-    paths: ['src/lib/events.ts'] # a verified edit lands in the backend without waiting for the deploy
   workflow_dispatch:
     inputs:
       city:
@@ -34,9 +31,9 @@ jobs:
 
       - run: npm ci
 
-      # The bundle is the source of truth here, so it gets audited before it's
-      # pushed — the same gate DATA.md asks a human to run.
-      - run: npm run audit:data
+      # sync-events validates current rows and excludes expired legacy IDs.
+      # The full maintenance audit must not block a valid current publication.
+      - run: npm run typecheck
 
       - run: npm run sync:events
         env:

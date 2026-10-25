@@ -12,11 +12,13 @@ import { useCallback, useSyncExternalStore } from 'react';
 import { activeCity, BUNDLE_CITY, cityCacheKey } from '@/lib/city';
 import { NEARBY_OAKLAND } from '@/lib/nearby-oakland';
 import { imageForPlace } from '@/lib/place-images';
+import { parseDetailContent, type DetailContent } from '@/lib/detail-content';
 import type { GeoPoint } from '@/lib/geo';
 import { getStoredItem, setStoredItem } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
 
 export interface Place {
+  detailContent?: DetailContent;
   id: string;
   name: string;
   category: string;
@@ -36,6 +38,7 @@ export interface Place {
 }
 
 interface PlaceRow {
+  detail_content?: unknown;
   id: string;
   name: string;
   category: string;
@@ -54,6 +57,7 @@ interface PlaceRow {
 function rowToPlace(row: PlaceRow): Place {
   return {
     id: row.id,
+    detailContent: parseDetailContent(row.detail_content),
     name: row.name,
     category: row.category,
     cuisine: row.cuisine,
@@ -259,7 +263,7 @@ async function loadPlacesFromCache(): Promise<void> {
       if (!place?.id || !place.name || place.lat == null || place.lon == null) continue;
       // A cache written before opening_hours existed has no such field; normalize
       // it to null so a stale cache reads as "hours unknown", not as undefined.
-      PLACES[place.id] = { ...place, image: imageForPlace(place) ?? null, openingHours: place.openingHours ?? null };
+      PLACES[place.id] = { ...place, image: imageForPlace(place) ?? null, detailContent:parseDetailContent(place.detailContent), openingHours: place.openingHours ?? null };
     }
     notify();
   } catch {
@@ -291,6 +295,7 @@ export async function hydratePlacesFromBackend(force = false): Promise<boolean> 
   }
   try {
     const { data, error } = await supabase.from('places').select('*').eq('city', city);
+    if(activeCity()!==city)return false;
     if (error || !data?.length) {
       if (!hydrated) await loadPlacesFromCache();
       return false;

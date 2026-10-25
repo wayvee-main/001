@@ -1,3 +1,4 @@
+import { useDetailRefresh } from '@/lib/use-detail-refresh';
 import * as Linking from 'expo-linking';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Text, TouchableOpacity, View } from 'react-native';
@@ -27,6 +28,7 @@ export async function generateStaticParams(): Promise<{ id: string }[]> {
 }
 
 export default function VenueScreen() {
+  useDetailRefresh('venue');
   const gutter = useAppGutter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();

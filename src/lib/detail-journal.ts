@@ -1,7 +1,17 @@
-import type { Restaurant, RestaurantMenuItem, ScoperEvent } from '@/lib/data';
+import type { ScoperEvent, Restaurant } from '@/lib/data';
+import { restaurantForPlace } from '@/lib/catalog-identity';
+import type { DetailContent, DetailMenuItem } from '@/lib/detail-content';
 
 export type JournalFact = { label: string; value: string; glyph?: string; fullValue?: string };
-export type JournalMenuItem = Omit<RestaurantMenuItem, 'categories'> & { categories: readonly string[] };
+export type JournalMenuItem = DetailMenuItem;
+export type MenuJournalListing = {id:string;name:string;sourceUrl:string;menuUrl:string;menuHighlights:readonly JournalMenuItem[];image?:string;primaryAction:{label:string;url:string};orderUrl?:string;reserveUrl?:string};
+
+export function menuListingForPlace(place:{id:string;name:string;address?:string|null;detailContent?:DetailContent},restaurants:readonly Restaurant[],city:string):MenuJournalListing|undefined {
+  const curated=restaurantForPlace(place,restaurants,city);
+  if(curated)return curated;
+  const menu=place.detailContent?.menu;if(!menu)return;
+  return {id:place.id,name:place.name,sourceUrl:place.detailContent!.sourceUrl,menuUrl:menu.url,menuHighlights:menu.items,primaryAction:{label:'Official menu',url:menu.url}};
+}
 export type JournalSpecial = { title: string; label: string; description: string; url: string };
 export type JournalArtist = { name: string; role?: string; image?: string; description?: string; url?: string };
 
@@ -10,9 +20,10 @@ const bonoboSource = 'https://thefoxoakland.com/events/bonobo-261114';
 
 /** The selected render used the restaurant's lunch-combo menu. Keep those
  * prices attached to that menu, not to the dinner menu or live inventory. */
-export function restaurantJournalMenu(restaurant: Restaurant): {
+export function restaurantJournalMenu(restaurant: MenuJournalListing, content?:DetailContent): {
   items: readonly JournalMenuItem[]; note?: string; specials: readonly JournalSpecial[];
 } {
+  if(content?.menu?.items.length)return {items:content.menu.items,note:content.menu.note,specials:content.offers||[]};
   if (restaurant.id === 'shootingstar' && canonical(restaurant.sourceUrl) === 'https://www.shootingstarhkcafe.com') {
     return {
       note: 'Lunch-combo prices · check the official menu for availability.',
@@ -53,6 +64,8 @@ export function eventJournalDetails(event: ScoperEvent): {
   subtitle?: string; ageLabel?: string; artists: JournalArtist[];
   upgrade?: JournalSpecial; policies?: { text: string; url: string };
 } {
+  const content=event.detailContent;
+  if(content?.artists?.length)return {subtitle:content.subtitle,ageLabel:content.ageLabel,artists:content.artists,upgrade:content.offers?.[0]};
   if (canonical(event.sourceUrl) === bonoboSource) return {
     subtitle: 'Distance in Static · Live tour', ageLabel: 'All ages',
     artists: [
@@ -62,9 +75,9 @@ export function eventJournalDetails(event: ScoperEvent): {
     upgrade: { title: 'The Telegraph Room', label: 'Optional upgrade', description: 'A lounge before, during & after. Additional fee; subject to availability. A show ticket is also required.', url: 'https://thefoxoakland.com/venue-info/the-telegraph-room/' },
     policies: { text: 'All ages. The venue is cashless. Check official policies for bags, accessible seating and show updates.', url: 'https://thefoxoakland.com/faq/' },
   };
-  const names = [...new Set((event.lineup || event.name).split(/\s*[·•]\s*/).map(name => name.trim()).filter(Boolean))];
+  const names = [...new Set((event.lineup&&!/^lineup is (on|available)/i.test(event.lineup)?event.lineup:event.name).split(/\s*[·•]\s*/).map(name => name.trim()).filter(Boolean))];
   return {
-    ageLabel: event.vibeTags?.find(tag => /^(all ages|\d{2}\+)$/i.test(tag)),
+    ageLabel: content?.ageLabel||event.vibeTags?.find(tag => /^(all ages|\d{2}\+)$/i.test(tag)),
     artists: names.map(name => ({ name, image: name.toLowerCase() === event.name.toLowerCase() ? event.image : undefined, url: event.sourceUrl })),
   };
 }

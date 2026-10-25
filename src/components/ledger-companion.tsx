@@ -42,8 +42,8 @@ export function JournalFold({label,children,testID}: {label:string;children:Reac
 
 /** Open Dossier identity, inline facts and the selected Journal content.
  * Source-specific controls remain real native components. */
-export function LedgerCompanionScreen({context,image,glyph='landmark',eyebrow,headingEyebrow,chips=[],primaryAction,essentials=[],compactFacts,folds=[],journal,children,navActive='home'}: {
-  context:DetailContext;image?:string;glyph?:string;eyebrow?:string;headingEyebrow?:string;chips?:LedgerChip[];primaryAction?:LedgerChip;essentials?:LedgerFact[];compactFacts?:LedgerFact[];folds?:LedgerFold[];journal?:ReactNode;children?:ReactNode;
+export function LedgerCompanionScreen({context,image,glyph='landmark',eyebrow,headingEyebrow,chips=[],primaryAction,essentials=[],compactFacts,folds=[],journal,journalHandlesActions=false,children,navActive='home'}: {
+  context:DetailContext;image?:string;glyph?:string;eyebrow?:string;headingEyebrow?:string;chips?:LedgerChip[];primaryAction?:LedgerChip;essentials?:LedgerFact[];compactFacts?:LedgerFact[];folds?:LedgerFold[];journal?:ReactNode;journalHandlesActions?:boolean;children?:ReactNode;
   navActive?:'home'|'discover'|'create'|'profile';
 }) {
   const colors=useThemeColors(),now=useNow(),city=useActiveCityName(),router=useRouter();
@@ -90,7 +90,7 @@ export function LedgerCompanionScreen({context,image,glyph='landmark',eyebrow,he
       </View>
       {journal}
       {children}
-      {!journal&&(directions||mainAction)?<View style={{flexDirection:'row',gap:8}}>
+      {(!journal||!journalHandlesActions)&&(directions||mainAction)?<View style={{flexDirection:'row',gap:8}}>
         {directions?<JournalQuietAction chip={directions} />:null}
         {mainAction?<JournalQuietAction chip={mainAction} />:null}
       </View>:null}

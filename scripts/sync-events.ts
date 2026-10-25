@@ -6,6 +6,8 @@
 // Requires env: SUPABASE_URL (or EXPO_PUBLIC_SUPABASE_URL) and
 // SUPABASE_SERVICE_ROLE_KEY (never checked in, never shipped to the client).
 import { EVENTS } from '../src/lib/events';
+import { isCurrentEvent } from '../src/lib/data';
+import { eventJournalDetails } from '../src/lib/detail-journal';
 import { withSyncRun, serviceClient, type SyncOutcome } from './lib/sync-run';
 
 // The curated bundle in src/lib/events.ts is Oakland's, so this sync writes
@@ -20,8 +22,21 @@ void withSyncRun(
   client,
   'events',
   async (): Promise<SyncOutcome> => {
-    const rows = Object.values(EVENTS).map((event) => ({
+    const now=new Date();
+    const current=Object.values(EVENTS).filter(event=>isCurrentEvent(event,now));
+    for(const event of current){
+      for(const key of ['name','startsAt','time','date','venue','addr','sourceUrl','verifiedLabel','image'] as const)if(!event[key])throw new Error(`current event ${event.id} is missing ${key}`);
+      if(!/^https:\/\//.test(event.sourceUrl)||!/^https:\/\//.test(event.image))throw new Error(`current event ${event.id} has an invalid source or photo`);
+    }
+    const rows = current.map((event) => ({
       id: event.id,
+      detail_content: event.detailContent || (()=>{
+        const verified=event.verifiedLabel.match(/\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2},?\s+\d{4}\b/)?.[0];
+        if(!verified)return undefined;
+        const date=new Date(verified);if(!Number.isFinite(date.getTime()))return undefined;
+        const detail=eventJournalDetails(event);
+        return {version:1,sourceUrl:event.sourceUrl,verifiedAt:date.toISOString(),description:event.know,subtitle:detail.subtitle,ageLabel:detail.ageLabel,artists:detail.artists,offers:detail.upgrade?[detail.upgrade]:[],notes:detail.policies?[{title:'Venue policies',body:detail.policies.text,url:detail.policies.url}]:[]};
+      })(),
       starts_at: event.startsAt,
       name: event.name,
       time_label: event.time,
@@ -51,7 +66,7 @@ void withSyncRun(
     // An empty snapshot would build `not('id','in','()')`, which PostgREST
     // rejects — and, if it didn't, the prune below would wipe every curated row
     // on the strength of a bundle that failed to load. Refuse instead.
-    if (!rows.length) throw new Error('events bundle is empty — refusing to sync (this would prune every curated row)');
+    if (!rows.length) throw new Error('current events bundle is empty — refusing to sync (this would prune every curated row)');
 
     const { error: upsertError } = await client.from('events').upsert(rows);
     if (upsertError) throw new Error(`upsert failed: ${upsertError.message}`);

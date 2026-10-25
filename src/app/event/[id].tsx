@@ -17,6 +17,7 @@ import { RaisedView } from '@/components/raised-surface';
 import { BackButton, EmptyState } from '@/components/ui';
 import { DaylightBudgetBar, RunOfShowRail } from '@/components/visual-depictions';
 import { useNow } from '@/lib/clock';
+import { useDetailRefresh } from '@/lib/use-detail-refresh';
 import { ICON_PATHS } from '@/lib/icons';
 import { EVENTS, RESTAURANTS, currentEventListings, eventDayGroupLabel, isCurrentEvent } from '@/lib/data';
 import { eventFacts, eventLiveLine } from '@/lib/detail-facts';
@@ -56,6 +57,7 @@ export async function generateStaticParams(): Promise<{ id: string }[]> {
 }
 
 export default function EventScreen() {
+  useDetailRefresh('event');
   const gutter = useAppGutter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();

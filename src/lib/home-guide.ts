@@ -9,11 +9,14 @@ import type { Place } from '@/lib/places';
 import type { PlanKind, SavedPlaceKind } from '@/lib/user-data';
 import type { ViatorPick } from '@/lib/viator';
 import { hoursSummary } from '@/lib/hours';
+import { placeForRestaurant, placeForListing } from '@/lib/catalog-identity';
+import type { DetailContent } from '@/lib/detail-content';
 
 export type HomeGuideKind = 'restaurant' | 'place' | 'night' | 'crawl' | 'event' | 'venue' | 'pick' | 'outdoor' | 'collection';
 export type HomeGuideCategory = 'eat' | 'bars' | 'routes' | 'events';
 export type HomeGuideFact = { glyph: string; value: string; label?: string };
 export type HomeGuideEntry = {
+  detailContent?:DetailContent;
   kind: HomeGuideKind; id: string; name: string; caption: string; description: string;
   glyph: string; image?: string; facts: HomeGuideFact[]; searchText: string; category?: string; foodTags?: string; tags?: string[];
   members?: {kind: 'restaurant' | 'event'; id: string}[];
@@ -61,7 +64,7 @@ export function buildHomeGuide({city,nearest,places,events,picks,now}: {
     entries[key] = {...entry,image:usableHomePhoto(entry.image) || HOME_GUIDE_PHOTOS[key]?.image,searchText:normalized(entry.name+' '+entry.caption+' '+entry.searchText)};
   };
   if (local) for (const r of Object.values(RESTAURANTS)) add({
-    kind:'restaurant',id:r.id,name:r.name,caption:r.cuisine,description:FOOD_HUB_REASON_BY_ID[r.id] || r.cuisine,
+    detailContent:placeForRestaurant(r,places,city)?.detailContent,kind:'restaurant',id:r.id,name:r.name,caption:r.cuisine,description:FOOD_HUB_REASON_BY_ID[r.id] || r.cuisine,
     image:r.image,glyph:'food',facts:[{glyph:'wallet',value:r.price},{glyph:'food',value:r.cuisine}],
     foodTags:normalized([r.name,r.cuisine,...(r.searchTags||[])].join(' ')),
     searchText:[r.cuisine,...(r.searchTags||[]),...r.popularDishes.map(x=>x.name)].join(' '),
@@ -70,8 +73,8 @@ export function buildHomeGuide({city,nearest,places,events,picks,now}: {
     links:links({label:r.primaryAction.label,url:r.primaryAction.url},{label:'Menu',url:r.menuUrl},r.reserveUrl?{label:'Reservations',url:r.reserveUrl}:undefined,{label:'Official site',url:r.sourceUrl},directions(r.name,city,r.address)),saveKind:'restaurant',
   });
   for (const p of places.filter(item=>!item.needsReview)) add({
-    kind:'place',id:p.id,name:p.name,caption:[p.cuisine,p.category.replace(/_/g,' ')].filter(Boolean).join(' · '),
-    description:[p.cuisine,p.category.replace(/_/g,' ')].filter(Boolean).join(' · '),image:p.image || undefined,
+    detailContent:p.detailContent,kind:'place',id:p.id,name:p.name,caption:[p.cuisine,p.category.replace(/_/g,' ')].filter(Boolean).join(' · '),
+    description:p.detailContent?.description||[p.cuisine,p.category.replace(/_/g,' ')].filter(Boolean).join(' · '),image:p.image||p.detailContent?.photos?.[0]?.url,
     glyph:/cafe|bakery/.test(p.category)?'coffee':'food',category:p.category,facts:[{glyph:'pin',value:p.address?.split(',')[0] || p.category.replace(/_/g,' ')}],
     foodTags:normalized([p.name,p.category,p.cuisine].filter(Boolean).join(' ')),
     searchText:[p.category,p.cuisine,p.address,p.category==='cafe'?'coffee espresso':''].filter(Boolean).join(' '),
@@ -91,7 +94,7 @@ export function buildHomeGuide({city,nearest,places,events,picks,now}: {
   });
   const bars: HomeGuideEntry[] = [], routes: HomeGuideEntry[] = [], shows: HomeGuideEntry[] = [];
   if (local) for (const bar of NIGHTLIFE_SPOTS) {
-    add({kind:'night',id:bar.id,name:bar.name,caption:bar.kind,description:bar.desc,image:bar.image,glyph:'drink',
+    add({detailContent:placeForListing(bar,places,city)?.detailContent,kind:'night',id:bar.id,name:bar.name,caption:bar.kind,description:bar.desc,image:bar.image,glyph:'drink',
       facts:[{glyph:'pin',value:bar.address.split(',')[0]},{glyph:'clock',value:bar.hours}],searchText:bar.kind+' '+bar.desc,
       details:[{label:'Address',value:bar.address},{label:'Listed hours',value:bar.hours}],links:links({label:'Official site',url:bar.url},directions(bar.name,city,bar.address)),saveKind:'night'});
     bars.push(entries[homeGuideKey('night',bar.id)]);
@@ -105,7 +108,7 @@ export function buildHomeGuide({city,nearest,places,events,picks,now}: {
     routes.push(entries[homeGuideKey('crawl',route.id)]);
   }
   for (const event of events.filter(item=>isCurrentEvent(item,now))) {
-    add({kind:'event',id:event.id,name:event.name,caption:compactVenue(event.venue),description:event.know,image:event.image,glyph:'ticket',
+    add({detailContent:event.detailContent,kind:'event',id:event.id,name:event.name,caption:compactVenue(event.venue),description:event.know,image:event.image,glyph:'ticket',
       facts:[{glyph:'calendar',value:eventDayGroupLabel(event,now),label:event.date},{glyph:'clock',value:event.time}],searchText:event.venue+' '+event.lineup+' '+event.cats.join(' '),tags:[...event.cats],
       details:[{label:'When',value:event.date},{label:'Showtime',value:event.time},{label:'Venue',value:event.venue},...(event.addr?[{label:'Address',value:event.addr}]:[]),{label:'Tickets',value:event.priceLabel}],
       sections:event.runOfShow?.length?[{title:'Run of show',lines:event.runOfShow.map(x=>x.time+' · '+x.label)}]:[],

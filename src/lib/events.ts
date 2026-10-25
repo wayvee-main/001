@@ -1,3 +1,5 @@
+import type { DetailContent } from './detail-content';
+
 // Wayvee events — the daily-refresh surface (see DATA.md).
 // This file is regenerated as listings change: add new events with a startsAt
 // ISO timestamp, advance recurring series to their next occurrence, and DELETE
@@ -13,6 +15,7 @@ export type EventCategory = 'Tonight' | 'Upcoming' | 'Live music' | 'Outdoor' | 
 export type EventSource = 'curated' | 'ticketmaster';
 
 export interface ScoperEvent {
+  detailContent?: DetailContent;
   id: string;
   /** ISO timestamp in Oakland time. Missing timestamps are treated as archived listings. */
   startsAt?: string;

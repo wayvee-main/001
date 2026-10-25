@@ -5,6 +5,7 @@ export const DETAIL_LABELS: Record<string,string> = {restaurant:'Eat',place:'Eat
 export const factLabel=(glyph:string)=>({wallet:'Price',dollar:'Price',pin:'Distance',calendar:'When',clock:'Time',route:'Stops',walk:'Travel',car:'Travel',food:'Cuisine',ticket:'Tickets'}[glyph] || 'Details');
 
 export function ledgerSnapshot(entry:HomeGuideEntry): string | undefined {
+  if(entry.detailContent?.description)return entry.detailContent.description;
   if(/^shooting star caf[eé]$/i.test(entry.name)&&entry.details.some(fact=>/1022 webster/i.test(fact.value)))return 'An all-day Hong Kong café with a late dinner menu.';
   return entry.description && entry.description!==entry.caption?entry.description:undefined;
 }

@@ -14,7 +14,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 import { launchedCities, type City } from './cities';
 
-export type SyncJob = 'events' | 'ticketmaster' | 'viator' | 'places' | 'weather';
+export type SyncJob = 'events' | 'ticketmaster' | 'viator' | 'places' | 'weather' | 'menus';
 export type SyncStatus = 'ok' | 'partial' | 'failed';
 
 /** What a sync run reports about itself. `partial` means the run wrote real

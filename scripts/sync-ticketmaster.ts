@@ -22,6 +22,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 import { EVENTS } from '../src/lib/events';
+import { ticketmasterDetailContent } from './lib/ticketmaster-details';
+import type { DetailContent } from '../src/lib/detail-content';
 import { formatMiles, milesBetween, type GeoPoint } from '../src/lib/geo';
 import type { City } from './lib/cities';
 import { withCitySyncRuns, withSyncRun, serviceClient, type SyncOutcome } from './lib/sync-run';
@@ -123,6 +125,7 @@ interface DiscoveryResponse {
 }
 
 interface EventRow {
+  detail_content?: DetailContent;
   id: string;
   city: string;
   starts_at: string;
@@ -272,6 +275,7 @@ function toRow(event: TicketmasterEvent, now: Date, pulledLabel: string, city: C
 
   return {
     id: `tm_${event.id}`,
+    detail_content: ticketmasterDetailContent(event,now),
     starts_at: startsAt.toISOString(),
     name: event.name,
     time_label: time,

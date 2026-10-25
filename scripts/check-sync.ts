@@ -28,6 +28,7 @@ const MAX_AGE_HOURS: Record<string, number> = {
   weather: 3, // hourly
   events: 50, // daily
   ticketmaster: 50, // daily
+  menus: 15 * 24, // weekly official detail goods
   places: 15 * 24, // weekly
   viator: 15 * 24, // weekly
 };

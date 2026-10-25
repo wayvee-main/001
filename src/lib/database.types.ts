@@ -141,6 +141,7 @@ export type Database = {
       };
       events: {
         Row: {
+          detail_content: Json | null;
           addr: string;
           all_in: string;
           cats: string[];
@@ -168,6 +169,7 @@ export type Database = {
           vibe_tags: string[];
         };
         Insert: {
+          detail_content?: Json | null;
           addr: string;
           all_in: string;
           cats?: string[];
@@ -195,6 +197,7 @@ export type Database = {
           vibe_tags?: string[];
         };
         Update: {
+          detail_content?: Json | null;
           addr?: string;
           all_in?: string;
           cats?: string[];
@@ -233,6 +236,7 @@ export type Database = {
       };
       places: {
         Row: {
+          detail_content: Json | null;
           address: string | null;
           category: string;
           city: string;
@@ -252,6 +256,7 @@ export type Database = {
           website: string | null;
         };
         Insert: {
+          detail_content?: Json | null;
           address?: string | null;
           category: string;
           city?: string;
@@ -271,6 +276,7 @@ export type Database = {
           website?: string | null;
         };
         Update: {
+          detail_content?: Json | null;
           address?: string | null;
           category?: string;
           city?: string;
