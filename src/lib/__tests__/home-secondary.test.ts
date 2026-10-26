@@ -1,6 +1,7 @@
 import { collectionChapters, homeEntryMetadata, homeMenuItems, ideaChapters } from '@/lib/home-secondary';
 import { buildHomeGuide, type HomeGuideEntry } from '@/lib/home-guide';
 import { homeDiscoveryIdea } from '@/lib/home-discovery';
+import { EVENTS } from '@/lib/data';
 
 const place=(id:string,kind:HomeGuideEntry['kind']='place'):HomeGuideEntry=>({id,kind,name:id,caption:'Café',description:'',glyph:'coffee',facts:[],searchText:id,details:[],links:[]});
 
@@ -30,4 +31,38 @@ it('leaves an empty city empty instead of borrowing Oakland chapters or menus',(
  const catalog=buildHomeGuide({city:'san-francisco',nearest:[],places:[],events:[],picks:[],now:new Date('2026-10-25T20:00:00Z')});
  const idea=homeDiscoveryIdea('dinner')!;
  expect(ideaChapters(idea,catalog)).toEqual([]);
+});
+
+it('features available source photographs while keeping every sparse listing reachable',()=>{
+ const sparse={...place('sparse','restaurant')},photo={...place('photo','restaurant'),image:'https://venue.example/owned.jpg'};
+ const catalog={entries:{sparse,photo},categories:{eat:[sparse,photo],events:[],bars:[],routes:[]},collections:[]};
+ const chapters=ideaChapters(homeDiscoveryIdea('dinner')!,catalog);
+ expect(chapters[0].entries).toEqual([photo]);
+ expect(chapters.flatMap(chapter=>chapter.entries).map(entry=>entry.id)).toEqual(['photo','sparse']);
+});
+
+it('keeps the evening chapter tied to a real upcoming event within seven days',()=>{
+ const now=new Date('2026-10-25T12:00:00Z'),source=Object.values(EVENTS)[0];
+ const event={...source,id:'a3-upcoming-test',startsAt:'2026-10-27T19:00:00-07:00'};
+ EVENTS[event.id]=event;
+ try{
+  const food={...place('meal'),kind:'restaurant' as const},show={...place(event.id,'event'),caption:event.venue};
+  const catalog={entries:{meal:food,show},categories:{eat:[food],events:[show],bars:[],routes:[]},collections:[]};
+  const chapters=ideaChapters(homeDiscoveryIdea('dinner')!,catalog,now);
+  expect(chapters.at(-1)).toMatchObject({title:'Keep the evening open',entries:[show]});
+  expect(ideaChapters(homeDiscoveryIdea('dinner')!,catalog,new Date('2026-11-20')).some(chapter=>chapter.entries.includes(show))).toBe(false);
+ }finally{delete EVENTS[event.id];}
+});
+
+it('creates the rendered mixed collection only from real local members and source imagery',()=>{
+ const coords={lat:37.7749,lon:-122.4194};
+ const raw=(id:string,category:string)=>({id,name:id,...coords,category,cuisine:null,address:null,website:null,phone:null,image:null,openingHours:null,confidence:'osm_only' as const,needsReview:false});
+ const food={...raw('local-table','restaurant'),image:'https://venue.example/owned.jpg'},venue=raw('local-stage','theatre'),park=raw('local-walk','park');
+ const nearest=[{id:food.id,name:food.name,cuisine:'Restaurant',thumbnailGlyph:'food' as const,href:`/place/${food.id}` as const,miles:0,estimated:false,distanceLabel:'<0.1 mi'}];
+ const catalog=buildHomeGuide({city:'san-francisco',places:[food,venue,park],nearest,events:[],picks:[],now:new Date('2026-10-25T19:00:00')});
+ const mixed=catalog.collections.find(collection=>collection.id==='a-little-of-everything')!;
+ expect(mixed.title).toBe('A little of everything');expect(mixed.items.map(item=>item.id)).toEqual(expect.arrayContaining([food.id,venue.id,park.id]));
+ expect(mixed.items.length).toBeLessThanOrEqual(8);
+ expect(collectionChapters(mixed.items.map(item=>catalog.entries[item.type+':'+item.id])).map(chapter=>chapter.id)).toEqual(['eat','events','routes']);
+ expect(catalog.collections.every(collection=>collection.items.every(item=>catalog.entries[item.type+':'+item.id]))).toBe(true);
 });

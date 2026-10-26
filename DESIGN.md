@@ -525,3 +525,15 @@ Home secondary navigation. Menu mini-windows retain their compact 52px images.
 Smoke & Bone and Nightfall both use the existing app surface tokens. Measure
 actual app card rectangles to verify size equality; generated images are only
 concept references.
+
+### A3 fidelity and category search
+
+A3 is distinct from B5: For You uses orange timeline dots, horizontal photo
+cards and facts beneath each card. Collections use numbered chapters and
+photo-first cards. Both use the compact city/bookmark toolbar, editorial title
+and one feature per chapter, with other real entries reached through See all.
+The mixed A little of everything collection is composed from current nearby
+food, culture and walking records only, and requires source imagery.
+B5 category search starts as a toolbar glyph; tapping mounts and focuses the
+normal 53px search input. Closing clears the query. Category posters have no
+menu-item mini-windows; the menu remains available on the real detail page.

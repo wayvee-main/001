@@ -1,4 +1,4 @@
-import { RESTAURANTS } from '@/lib/data';
+import { EVENTS, RESTAURANTS } from '@/lib/data';
 import { restaurantJournalMenu, type JournalMenuItem } from '@/lib/detail-journal';
 import type { HomeIdea } from '@/lib/home-discovery';
 import { entriesForHomeIdea, type HomeGuideCatalog, type HomeGuideCategory, type HomeGuideEntry } from '@/lib/home-guide';
@@ -41,12 +41,16 @@ const chapterTitles:Record<HomeGuideCategory,string>={eat:'A good table',bars:'O
 export function collectionChapters(entries:readonly HomeGuideEntry[]):HomeChapter[] {
   return (['eat','events','bars','routes'] as const).flatMap(category=>{
     const members=entries.filter(entry=>homeEntryCategory(entry)===category);
-    return members.length?[{id:category,title:chapterTitles[category],entries:members}]:[];
+    const title=category==='events'&&members.every(entry=>entry.kind!=='event'&&['museum','gallery'].includes(entry.category||''))?'A little culture':chapterTitles[category];
+    return members.length?[{id:category,title,entries:members}]:[];
   });
 }
 
-export function ideaChapters(idea:HomeIdea,catalog:HomeGuideCatalog):HomeChapter[] {
-  const entries=entriesForHomeIdea(idea,catalog);if(!entries.length)return [];
+export function ideaChapters(idea:HomeIdea,catalog:HomeGuideCatalog,now=new Date()):HomeChapter[] {
+  // Feature the actual menu/venue photographs already in the local pool.
+  // Sparse listings remain in See all, without borrowing another place's image.
+  const photoScore=(entry:HomeGuideEntry)=>homeMenuItems(entry).some(item=>item.image)?3:entry.detailContent?.photos?.length?2:entry.image?1:0;
+  const entries=[...entriesForHomeIdea(idea,catalog)].sort((a,b)=>photoScore(b)-photoScore(a));if(!entries.length)return [];
   const category=homeEntryCategory(entries[0]),food=category==='eat';
   const firstTitle=food?(idea.query==='coffee'?'A little pause':idea.query==='breakfast'?'Start the day':'Something to start'):chapterTitles[category];
   const moreTitle=food?(idea.query==='coffee'?'More good coffee':idea.query==='breakfast'?'More good mornings':'Make it a meal'):category==='events'?'More on stage':category==='routes'?'Keep wandering':'More after dark';
@@ -54,6 +58,11 @@ export function ideaChapters(idea:HomeIdea,catalog:HomeGuideCatalog):HomeChapter
   if(entries.length>1)result.push({id:'more',title:moreTitle,entries:entries.slice(1)});
   // Optional related choices remain real local records; there is no inferred
   // showtime, opening status or forced itinerary attached to a dinner idea.
-  if(food&&!idea.query&&catalog.categories.bars.length)result.push({id:'after',title:'One more stop',entries:catalog.categories.bars.slice(0,3)});
+  if(food&&!idea.query){
+    const horizon=now.getTime()+7*86400000;
+    const shows=catalog.categories.events.filter(entry=>entry.kind==='event'&&Boolean(EVENTS[entry.id]?.startsAt)&&Date.parse(EVENTS[entry.id].startsAt!)>=now.getTime()&&Date.parse(EVENTS[entry.id].startsAt!)<=horizon);
+    const after=shows.length?shows:catalog.categories.bars;
+    if(after.length)result.push({id:'after',title:'Keep the evening open',entries:after});
+  }
   return result;
 }

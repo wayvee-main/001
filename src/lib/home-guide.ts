@@ -1,4 +1,4 @@
-import { CRAWLS, CURATED_COLLECTIONS, FOOD_HUB_REASON_BY_ID, NIGHTLIFE_SPOTS, RESTAURANTS, VENUES, eventDayGroupLabel, isCurrentEvent, type ScoperEvent } from '@/lib/data';
+import { CRAWLS, CURATED_COLLECTIONS, FOOD_HUB_REASON_BY_ID, NIGHTLIFE_SPOTS, RESTAURANTS, VENUES, eventDayGroupLabel, isCurrentEvent, type CuratedCollection, type ScoperEvent } from '@/lib/data';
 import { homeCollectionGlyph, homeDiscoveryCollections, timelyHomeCollection, type HomeIdea } from '@/lib/home-discovery';
 import { HOME_OUTDOORS } from '@/lib/home-outdoors';
 import { HOME_GUIDE_PHOTOS } from '@/lib/home-guide-photos';
@@ -12,6 +12,7 @@ import { hoursSummary } from '@/lib/hours';
 import { placeForRestaurant, placeForListing } from '@/lib/catalog-identity';
 import type { DetailContent } from '@/lib/detail-content';
 import { formatMiles, milesBetween, type GeoPoint } from '@/lib/geo';
+import { currentDaypart } from '@/lib/daypart';
 
 export type HomeGuideKind = 'restaurant' | 'place' | 'night' | 'crawl' | 'event' | 'venue' | 'pick' | 'outdoor' | 'collection';
 export type HomeGuideCategory = 'eat' | 'bars' | 'routes' | 'events';
@@ -21,7 +22,7 @@ export type HomeGuideEntry = {
   detailContent?:DetailContent;
   kind: HomeGuideKind; id: string; name: string; caption: string; description: string;
   glyph: string; image?: string; facts: HomeGuideFact[]; searchText: string; category?: string; foodTags?: string; tags?: string[];
-  members?: {kind: 'restaurant' | 'event'; id: string}[];
+  members?: {kind:Exclude<HomeGuideKind,'collection'>; id: string}[];
   details: {label: string; value: string}[];
   sections?: {title: string; lines: string[]}[];
   links: {label: string; url: string}[];
@@ -30,7 +31,7 @@ export type HomeGuideEntry = {
 export type HomeGuideCatalog = {
   entries: Record<string, HomeGuideEntry>;
   categories: Record<HomeGuideCategory, HomeGuideEntry[]>;
-  collections: ReturnType<typeof homeDiscoveryCollections>;
+  collections: (Omit<CuratedCollection,'id'|'items'> & {id:string;items:{type:Exclude<HomeGuideKind,'collection'>;id:string;note?:string}[]})[];
 };
 
 export const homeGuideKey = (kind: string, id: string) => kind + ':' + id;
@@ -152,7 +153,29 @@ export function buildHomeGuide({city,nearest,places,events,picks,now,anchor,incl
     if(['park','nature_reserve','garden','trailhead','viewpoint'].includes(place.category))routes.push(entry);
     if(['theatre','cinema','arts_centre','events_venue','music_venue','museum','gallery'].includes(place.category))shows.push(entry);
   }
-  return {entries,categories:{eat,bars,routes,events:shows},collections:local?homeDiscoveryCollections(now).map(collection=>({...collection,coverImage:entries[homeGuideKey('collection',collection.id)]?.image || ''})):[]};
+  const collections:HomeGuideCatalog['collections']=local?homeDiscoveryCollections(now).map(collection=>({...collection,coverImage:entries[homeGuideKey('collection',collection.id)]?.image || ''})):[];
+  // A3's mixed collection is an actual, location-scoped door. Its members are
+  // current source records, not the mockup's fixed establishments or dates.
+  const morning=['morning','midday'].includes(currentDaypart(now));
+  const candidates=Object.values(entries);
+  const foodPool=morning?candidates.filter(entry=>entry.kind==='place'&&['cafe','bakery'].includes(entry.category||'')):eat;
+  const food=foodPool.find(entry=>entry.detailContent?.menu?.items.some(item=>item.image))||foodPool.find(entry=>entry.image)||foodPool[0];
+  const horizon=now.getTime()+7*86400000;
+  const soon=events.filter(event=>event.startsAt&&isCurrentEvent(event,now)&&Date.parse(event.startsAt)>=now.getTime()&&Date.parse(event.startsAt)<=horizon).sort((a,b)=>Date.parse(a.startsAt!)-Date.parse(b.startsAt!));
+  const culturePool=[...soon.flatMap(event=>{const entry=entries[homeGuideKey('event',event.id)];return entry?[entry]:[];}),...shows.filter(entry=>entry.kind==='place'&&['theatre','arts_centre','music_venue','events_venue','museum','gallery'].includes(entry.category||'')),...candidates.filter(entry=>entry.kind==='venue')];
+  const culture=culturePool[0];
+  const walks=candidates.filter(entry=>entry.kind==='outdoor'||['park','nature_reserve','garden','trailhead','viewpoint'].includes(entry.category||''));
+  const wander=walks.find(entry=>/lake|downtown/i.test(entry.name))||walks[0];
+  const cover=food?.image||food?.detailContent?.photos?.[0]?.url||culture?.image||wander?.image;
+  if(food&&culture&&wander&&cover){
+    const unique=(pool:HomeGuideEntry[])=>pool.filter((entry,index)=>pool.findIndex(other=>other.kind===entry.kind&&other.id===entry.id)===index);
+    const members=[...unique([food,...foodPool]).slice(0,3),...unique(culturePool).slice(0,2),...unique([wander,...walks]).slice(0,3)].map(entry=>({kind:entry.kind as Exclude<HomeGuideKind,'collection'>,id:entry.id}));
+    const mixed={id:'a-little-of-everything',title:'A little of everything',shortTitle:'A little of everything',eyebrow:'Nearby collection',subtitle:morning?'A table · culture · fresh air':'A table · culture · a little wandering',description:'Three local chapters to dip into.',coverImage:cover,
+      items:members.map(member=>({type:member.kind,id:member.id})),sourceNote:'Built from current nearby listings; each place retains its own source details.'};
+    add({kind:'collection',id:mixed.id,name:mixed.title,caption:mixed.subtitle,description:mixed.description,image:cover,glyph:'compass',facts:[{glyph:'compass',value:members.length+' picks'}],searchText:mixed.subtitle,details:[],links:[],members});
+    collections.unshift(mixed);
+  }
+  return {entries,categories:{eat,bars,routes,events:shows},collections};
 }
 
 export function searchHomeGuide(catalog: HomeGuideCatalog, query: string, pool: readonly HomeGuideEntry[] = Object.values(catalog.entries)): HomeGuideEntry[] {

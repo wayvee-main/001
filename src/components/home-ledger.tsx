@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Keyboard, Text, TouchableOpacity, View } from 'react-native';
 
 import { CityChip, CitySearchBar } from '@/components/city-controls';
 import { Glyph } from '@/components/glyph';
@@ -20,7 +20,7 @@ import { useHomeGuide } from '@/lib/use-home-guide';
 function LedgerContents({category,catalog,cityName,initialQuery,hydrating,onLeadChange}: {
   category:HomeGuideCategory;catalog:HomeGuideCatalog;cityName:string;initialQuery:string;hydrating:boolean;onLeadChange:(key:string)=>void;
 }) {
-  const [query,setQuery]=useState(initialQuery),[filter,setFilter]=useState('all');
+  const [query,setQuery]=useState(initialQuery),[filter,setFilter]=useState('all'),[searchOpen,setSearchOpen]=useState(Boolean(initialQuery.trim()));
   const router=useRouter(),colors=useThemeColors(),control=useControlSurface(),definition=HOME_LEDGERS[category];
   const entries=homeLedgerEntries(catalog,category,query,filter),filters=homeLedgerFilters(catalog.categories[category],category,filter);
   const narrowed=Boolean(query.trim()||filter!=='all');
@@ -32,15 +32,18 @@ function LedgerContents({category,catalog,cityName,initialQuery,hydrating,onLead
     <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
       <TouchableOpacity accessibilityRole="button" accessibilityLabel="Back to Home" onPress={()=>router.canGoBack()?router.back():router.replace('/')} style={[control,{width:34,height:34,justifyContent:'center',alignItems:'center',borderRadius:17}]}><Glyph name="chevronLeft" size={16} color={colors.fg} /></TouchableOpacity>
       <Text className="font-dm text-fine text-taupe">{cityName}</Text>
-      <View style={{width:34}} />
+      <TouchableOpacity testID="home-ledger-search-toggle" accessibilityRole="button" accessibilityLabel={searchOpen?'Close category search':`Search ${definition.title}`} accessibilityState={{expanded:searchOpen}}
+        onPress={()=>{if(searchOpen){setQuery('');Keyboard.dismiss();}setSearchOpen(value=>!value);}}
+        style={[control,{width:34,height:34,justifyContent:'center',alignItems:'center',borderRadius:17}]}>
+        <Glyph name={searchOpen?'close':'search'} size={16} color={colors.fg} />
+      </TouchableOpacity>
     </View>
     <View style={{flexDirection:'row',alignItems:'baseline',justifyContent:'space-between',gap:10,paddingTop:10}}>
       <Text accessibilityRole="header" className="font-fraunces text-ink" style={{fontSize:30,lineHeight:34.5,letterSpacing:-.65}}>{definition.title}</Text>
       <Text testID="home-ledger-count" accessibilityLiveRegion="polite" className="font-dm text-label text-taupe">{entries.length} {entries.length===1?definition.singular:definition.plural}</Text>
     </View>
-    <View style={{height:14}} />
-    <CitySearchBar testID="home-guide-search-bar" inputTestID="home-guide-search" city={cityName} value={query} onChangeText={setQuery}
-      inputLabel={`Search ${definition.title} in ${cityName}`} placeholder={`${definition.search} in ${/^san francisco$/i.test(cityName)?'SF':cityName}`} />
+    {searchOpen?<View style={{marginTop:14}}><CitySearchBar autoFocus testID="home-guide-search-bar" inputTestID="home-guide-search" city={cityName} value={query} onChangeText={setQuery}
+      inputLabel={`Search ${definition.title} in ${cityName}`} placeholder={`${definition.search} in ${/^san francisco$/i.test(cityName)?'SF':cityName}`} /></View>:null}
     {filters.length>1?<View testID="home-ledger-filters" style={{flexDirection:'row',flexWrap:'wrap',gap:6,marginTop:15}}>
       {filters.map(item=><CityChip key={item.id} testID={`home-ledger-filter-${item.id}`} label={item.label} glyph={item.glyph}
         selected={filter===item.id} onPress={()=>setFilter(item.id)} />)}
