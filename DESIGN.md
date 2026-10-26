@@ -537,3 +537,16 @@ food, culture and walking records only, and requires source imagery.
 B5 category search starts as a toolbar glyph; tapping mounts and focuses the
 normal 53px search input. Closing clears the query. Category posters have no
 menu-item mini-windows; the menu remains available on the real detail page.
+
+### B5 material fidelity
+
+The four category pages use borderless matte cards, including their image
+frames. Light uses the existing near-white `surface-control` fill against the
+Smoke & Bone background; dark uses its paired Nightfall surface. Separation
+comes from the soft outer shadow and 10px gaps, without gloss or inset shine.
+Loading photos use a quiet neutral well; food posters prefer an actual menu
+photograph when the source provides one, rather than a logo or stock image.
+Their text-only filter pills and circular toolbar controls also have no outline.
+Keep the uppercase city/category toolbar and the uncluttered editorial title.
+The following cards stay exactly 72px high with 72×56px thumbnails. This
+category-specific treatment must not change other app surfaces.

@@ -36,13 +36,13 @@ export function CitySearchBar({city,testID,labelTestID,inputTestID,inputLabel,pl
 }
 
 /** Home's venue chips and Discover's filters share the same quiet material. */
-export function CityChip({label,glyph,icon,onPress,selected=false,maxWidth,testID,accessibilityLabel}: {
-  label:string;glyph?:string;icon?:ReactNode;onPress:()=>void;selected?:boolean;maxWidth?:number;testID?:string;accessibilityLabel?:string;
+export function CityChip({label,glyph,icon,onPress,selected=false,borderless=false,maxWidth,testID,accessibilityLabel}: {
+  label:string;glyph?:string;icon?:ReactNode;onPress:()=>void;selected?:boolean;borderless?:boolean;maxWidth?:number;testID?:string;accessibilityLabel?:string;
 }) {
   const colors=useThemeColors(),control=useControlSurface(selected),{colorScheme}=useColorScheme();
   return <TouchableOpacity testID={testID} accessibilityRole="button" accessibilityLabel={accessibilityLabel || label}
     accessibilityState={{selected}} onPress={onPress} activeOpacity={.72} hitSlop={{top:6,bottom:6}}
-    style={[control,{backgroundColor:selected?colors['selected-surface']:colorScheme==='light'?colors['surface-search']:colors['surface-control'],maxWidth}]}
+    style={[control,{backgroundColor:selected?colors['selected-surface']:colorScheme==='light'?colors['surface-search']:colors['surface-control'],maxWidth},borderless?{borderWidth:0}:undefined]}
     className="min-h-[34px] flex-row items-center gap-x-1.5 rounded-full px-2.5 py-[7px] border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
     {icon || (glyph?<Glyph name={glyph} size={13} color={selected?colors['selected-glyph']:colors['fg-muted']} />:null)}
     <Text numberOfLines={1} className="min-w-0 shrink font-dm text-fine" style={{color:selected?colors['on-selected']:colors.fg}}>{label}</Text>

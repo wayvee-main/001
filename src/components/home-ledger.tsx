@@ -30,27 +30,26 @@ function LedgerContents({category,catalog,cityName,initialQuery,hydrating,onLead
   useEffect(()=>onLeadChange(leadKey),[leadKey,onLeadChange]);
   return <View testID={`home-ledger-${category}`}>
     <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
-      <TouchableOpacity accessibilityRole="button" accessibilityLabel="Back to Home" onPress={()=>router.canGoBack()?router.back():router.replace('/')} style={[control,{width:34,height:34,justifyContent:'center',alignItems:'center',borderRadius:17}]}><Glyph name="chevronLeft" size={16} color={colors.fg} /></TouchableOpacity>
-      <Text className="font-dm text-fine text-taupe">{cityName}</Text>
+      <TouchableOpacity accessibilityRole="button" accessibilityLabel="Back to Home" onPress={()=>router.canGoBack()?router.back():router.replace('/')} style={[control,{width:36,height:36,justifyContent:'center',alignItems:'center',borderRadius:18,borderWidth:0}]}><Glyph name="chevronLeft" size={16} color={colors.fg} /></TouchableOpacity>
+      <Text numberOfLines={1} className="font-dm text-fine text-taupe" style={{letterSpacing:.7,textTransform:'uppercase',flexShrink:1}}>{cityName} · {definition.title}</Text>
       <TouchableOpacity testID="home-ledger-search-toggle" accessibilityRole="button" accessibilityLabel={searchOpen?'Close category search':`Search ${definition.title}`} accessibilityState={{expanded:searchOpen}}
         onPress={()=>{if(searchOpen){setQuery('');Keyboard.dismiss();}setSearchOpen(value=>!value);}}
-        style={[control,{width:34,height:34,justifyContent:'center',alignItems:'center',borderRadius:17}]}>
+        style={[control,{width:36,height:36,justifyContent:'center',alignItems:'center',borderRadius:18,borderWidth:0}]}>
         <Glyph name={searchOpen?'close':'search'} size={16} color={colors.fg} />
       </TouchableOpacity>
     </View>
-    <View style={{flexDirection:'row',alignItems:'baseline',justifyContent:'space-between',gap:10,paddingTop:10}}>
-      <Text accessibilityRole="header" className="font-fraunces text-ink" style={{fontSize:30,lineHeight:34.5,letterSpacing:-.65}}>{definition.title}</Text>
-      <Text testID="home-ledger-count" accessibilityLiveRegion="polite" className="font-dm text-label text-taupe">{entries.length} {entries.length===1?definition.singular:definition.plural}</Text>
+    <View style={{paddingTop:10}}>
+      <Text accessibilityRole="header" accessibilityLabel={`${definition.title}. ${entries.length} ${entries.length===1?definition.singular:definition.plural}`} className="font-fraunces text-ink" style={{fontSize:34,lineHeight:38,letterSpacing:-.7}}>{definition.title}</Text>
     </View>
     {searchOpen?<View style={{marginTop:14}}><CitySearchBar autoFocus testID="home-guide-search-bar" inputTestID="home-guide-search" city={cityName} value={query} onChangeText={setQuery}
       inputLabel={`Search ${definition.title} in ${cityName}`} placeholder={`${definition.search} in ${/^san francisco$/i.test(cityName)?'SF':cityName}`} /></View>:null}
-    {filters.length>1?<View testID="home-ledger-filters" style={{flexDirection:'row',flexWrap:'wrap',gap:6,marginTop:15}}>
-      {filters.map(item=><CityChip key={item.id} testID={`home-ledger-filter-${item.id}`} label={item.label} glyph={item.glyph}
+    {filters.length>1?<View testID="home-ledger-filters" style={{flexDirection:'row',flexWrap:'wrap',gap:6,marginTop:10}}>
+      {filters.map(item=><CityChip key={item.id} testID={`home-ledger-filter-${item.id}`} label={item.label} borderless
         selected={filter===item.id} onPress={()=>setFilter(item.id)} />)}
     </View>:null}
-    {lead?<View testID="home-result-list" style={{marginTop:18,gap:HOME_RESULT.gap}}>
+    {lead?<View testID="home-result-list" style={{marginTop:14,gap:HOME_RESULT.gap}}>
       <HomePoster entry={lead} category={category} />
-      {rest.map(entry=><HomeResultCard key={entry.kind+':'+entry.id} entry={entry} />)}
+      {rest.map(entry=><HomeResultCard key={entry.kind+':'+entry.id} entry={entry} borderless />)}
     </View>:<EmptyState compact title={hydrating?'Checking the city…':'Nothing here just yet'}
       message={narrowed?'Try another word or filter.':hydrating?'Local listings are loading.':`No current ${definition.plural} are listed for ${cityName}. Check back as the local catalog grows.`}
       {...(narrowed?{actionLabel:'Show all',onAction:()=>{setQuery('');setFilter('all');}}:{})} />}
