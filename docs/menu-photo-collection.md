@@ -69,6 +69,11 @@ Required existing GitHub configuration: `SUPABASE_ACCESS_TOKEN`,
 `SUPABASE_DB_PASSWORD`, `SUPABASE_SERVICE_ROLE_KEY` secrets and `SUPABASE_URL`,
 `SUPABASE_PROJECT_REF` variables. PDF/OCR tools and pinned Playwright are
 installed in the runner, outside native app dependencies. No APK reinstall.
+Tool setup is bounded and optional: HTML/photo collection continues when PDF
+or browser installation is unavailable, while unparsed documents stay partial.
+Browser tooling is cached and uses an installed Chrome executable when present.
+Superseded runs can be cancelled safely; saved fields/checkpoints remain and
+expired leases resume on the next run.
 
 The first workflow push uses the normal 200-request ceiling; dispatch supports
 0/20/100/200. A zero-budget dispatch seeds and reports the queue without

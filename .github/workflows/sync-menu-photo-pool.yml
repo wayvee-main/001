@@ -30,7 +30,7 @@ permissions:
   contents: read
 concurrency:
   group: menu-photo-collector
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   enrich:
@@ -62,12 +62,33 @@ jobs:
             if [ "$attempt" = 3 ]; then exit 1; fi
             sleep 5
           done
-      - name: Install isolated document and browser tools
+      - name: Prepare document tools
+        timeout-minutes: 6
+        continue-on-error: true
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends poppler-utils tesseract-ocr tesseract-ocr-eng
-          npm install --prefix "$RUNNER_TEMP/wayvee-enrichment-browser" --no-package-lock --ignore-scripts playwright@1.64.1
-          "$RUNNER_TEMP/wayvee-enrichment-browser/node_modules/.bin/playwright" install --with-deps chromium
+          if ! command -v pdftotext >/dev/null || ! command -v tesseract >/dev/null; then
+            timeout 210s sudo apt-get update -qq
+            timeout 150s sudo apt-get install -y --no-install-recommends poppler-utils tesseract-ocr tesseract-ocr-eng
+          fi
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ${{ runner.temp }}/wayvee-enrichment-browser
+            ~/.cache/ms-playwright
+          key: menu-photo-browser-${{ runner.os }}-1.64.1
+      - name: Prepare optional browser fallback
+        timeout-minutes: 3
+        continue-on-error: true
+        run: |
+          if [ ! -f "$RUNNER_TEMP/wayvee-enrichment-browser/node_modules/playwright/package.json" ]; then
+            timeout 90s npm install --prefix "$RUNNER_TEMP/wayvee-enrichment-browser" --no-package-lock --ignore-scripts playwright@1.64.1
+          fi
+          browser_path="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          if [ -n "$browser_path" ]; then
+            echo "MENU_PHOTO_BROWSER_EXECUTABLE=$browser_path" >> "$GITHUB_ENV"
+          else
+            timeout 120s "$RUNNER_TEMP/wayvee-enrichment-browser/node_modules/.bin/playwright" install chromium
+          fi
       - uses: actions/cache/restore@v4
         with:
           path: ${{ runner.temp }}/wayvee-menu-photo-sources-v2.json

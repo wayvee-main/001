@@ -9,7 +9,7 @@ export async function renderedMenu(url:string,loader:CollectionLoader):Promise<s
  await loader.canRead(url);
  const require=createRequire(directory+'/package.json');
  const {chromium}=require('playwright') as {chromium:{launch:(options:unknown)=>Promise<any>}};
- const browser=await chromium.launch({headless:true,args:['--disable-background-networking','--disable-component-update','--disable-sync','--disable-quic','--dns-prefetch-disable','--force-webrtc-ip-handling-policy=disable_non_proxied_udp']});let sent=0,exhausted=false;
+ const browser=await chromium.launch({headless:true,...(process.env.MENU_PHOTO_BROWSER_EXECUTABLE?{executablePath:process.env.MENU_PHOTO_BROWSER_EXECUTABLE}:{}),args:['--disable-background-networking','--disable-component-update','--disable-sync','--disable-quic','--dns-prefetch-disable','--force-webrtc-ip-handling-policy=disable_non_proxied_udp']});let sent=0,exhausted=false;
  try{
   const context=await browser.newContext({userAgent:'WayveeMenuPhotoSync/2.0 (+https://github.com/wayvee-main/001)',serviceWorkers:'block'});
   await context.routeWebSocket('**/*',(socket:any)=>socket.close());
