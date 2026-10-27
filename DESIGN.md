@@ -554,13 +554,23 @@ category-specific treatment must not change other app surfaces.
 ### B4 Open Index replaces B5 on the four tile destinations
 
 Eat, Bars, Routes and Events use open image-led index rows, with a shared
-108px row height, 112×84px media column, editorial venue names and faint rules.
-Routes use a 22px index number and an 84px thumbnail within that same column.
+86.4px row height, 89.6×67.2px media column, editorial venue names and faint rules
+(20% smaller than the original B4 rows and photos). Names stay on one line with
+ellipses; retain both compact metadata lines and the 10px inter-row gap.
+Routes use a 17.6px index number and a 67.2px thumbnail within that same column.
 There is no lead poster, menu mini-window strip or floating assistant dock on
 these category indexes. The detail page retains its always-available Vee action.
-Keep the toolbar city/category label, text-only scrolling filters and search
-glyph which reveals the standard focused 53px field. Use actual source metadata,
-menus and photos as they arrive; do not fill gaps with invented venue content.
+Remove the top back/city/category toolbar. The serif category heading starts at
+the same 10px top inset as Home, followed by the permanently visible standard
+53px search field and text-only scrolling filters. Do not autofocus on entry.
+Every row requires a real photograph: try its own bundled photo, listing cover,
+source gallery and dish photos, with successive fallback if a URL fails. Exclude
+logo/icon assets and vector marks from photographic thumbnails. A route
+may show a photo from a named stop only when the stop's street address matches.
+Do not render photo-less or fully failed rows in these four indexes; reveal them
+when their photo sources become available. Never substitute a glyph, blank well,
+stock image or another venue's photo. This is scoped to the four tile pages;
+the full source inventory and other app screens remain available unchanged.
 
 ### Shared menu and photo browsing
 
