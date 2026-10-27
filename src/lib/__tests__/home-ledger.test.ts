@@ -2,7 +2,7 @@ import { BUNDLE_CITY } from '@/lib/city';
 import { applyCurationForCity } from '@/lib/curation';
 import { EVENTS, RESTAURANTS } from '@/lib/data';
 import { buildHomeGuide } from '@/lib/home-guide';
-import { HOME_LEDGERS, homeLedgerEntries, homeLedgerFilters, homeLedgerSummary, isHomeLedgerCategory } from '@/lib/home-ledger';
+import { HOME_LEDGERS, homeLedgerEntries, homeLedgerFilters, homeLedgerSummary, homeOpenLedgerContent, isHomeLedgerCategory } from '@/lib/home-ledger';
 import type { NearestPick } from '@/lib/nearest-pool';
 
 const now=new Date(2026,9,22,18);
@@ -16,6 +16,28 @@ const build=(overrides:Partial<Parameters<typeof buildHomeGuide>[0]>={})=>buildH
 afterEach(()=>applyCurationForCity(BUNDLE_CITY));
 
 describe('Independent Home ledgers',()=>{
+  it('keeps Open Ledger facts source-backed without substituting dish prices or street addresses',()=>{
+    const source=build().categories.eat[0],distance={glyph:'pin',value:'~0.4 mi',label:'Estimated distance: ~0.4 mi'},price={glyph:'wallet',value:'$$'};
+    expect(homeOpenLedgerContent({...source,caption:'Californian',facts:[price,distance]},'eat')).toEqual({caption:'Californian',facts:[price,distance]});
+    expect(homeOpenLedgerContent({...source,facts:[{glyph:'pin',value:'123 Broadway'}]},'eat').facts).toEqual([]);
+    expect(homeOpenLedgerContent({...source,facts:[]},'eat').facts).toEqual([]);
+  });
+
+  it('uses supplied show date and time without replacing the venue caption',()=>{
+    const source=build().categories.eat[0],facts=[{glyph:'calendar',value:'Tonight',label:'October 27'},{glyph:'clock',value:'8 PM'},{glyph:'pin',value:'1807 Telegraph Ave'}];
+    expect(homeOpenLedgerContent({...source,kind:'event',caption:'Fox Theater',facts},'events')).toEqual({caption:'Fox Theater',facts:facts.slice(0,2)});
+  });
+
+  it('avoids repeated route captions while preserving explicit stops and ride requirements',()=>{
+    const source=build().categories.routes[0],facts=[{glyph:'route',value:'4 stops'},{glyph:'car',value:'Rides'}];
+    expect(homeOpenLedgerContent({...source,caption:'4 stops · cross-town',facts},'routes')).toEqual({caption:'Rides between stops',facts});
+  });
+
+  it('retains listed bar hours without inventing an open-now status',()=>{
+    const source=build().categories.bars[0],hours={glyph:'clock',value:'Fri–Sat until 2 AM'};
+    expect(homeOpenLedgerContent({...source,facts:[hours]},'bars').facts).toEqual([hours]);
+  });
+
   it('has four distinct destinations and rejects inherited object keys as categories',()=>{
     expect(Object.values(HOME_LEDGERS).map(item=>item.href)).toEqual(['/home/eat','/home/bars','/home/routes','/home/events']);
     for(const value of ['toString','constructor','all',undefined,null,[]])expect(isHomeLedgerCategory(value)).toBe(false);

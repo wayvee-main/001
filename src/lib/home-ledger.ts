@@ -69,3 +69,17 @@ export function homeLedgerSummary(entry: HomeGuideEntry, category: HomeGuideCate
   if(category==='bars')return {caption:entry.caption,glyph:'drink',facts:factsByGlyph('clock').slice(0,1)};
   return {caption:entry.caption,glyph:entry.glyph,facts:factsByGlyph('wallet','pin').slice(0,2)};
 }
+
+/** Open Ledger keeps venue identity separate from its compact, supplied facts. */
+export function homeOpenLedgerContent(entry:HomeGuideEntry,category:HomeGuideCategory):{caption:string;facts:HomeGuideFact[]} {
+  const distance=entry.facts.find(fact=>fact.glyph==='pin'&&/\b(?:mi|miles?)\b/i.test(fact.value));
+  const price=entry.facts.find(fact=>['wallet','dollar'].includes(fact.glyph));
+  if(category==='events'&&entry.kind==='event')return {caption:entry.caption,facts:entry.facts.filter(fact=>['calendar','clock'].includes(fact.glyph)).slice(0,2)};
+  if(category==='routes'){
+    const route=entry.kind==='crawl';
+    const facts=entry.facts.filter(fact=>['route','walk','car'].includes(fact.glyph));
+    return {caption:route?homeLedgerSummary(entry,category).caption:entry.caption,facts:[...facts,...(distance?[distance]:[])].filter(fact=>route||!entry.caption.includes(fact.value)).slice(0,2)};
+  }
+  const hours=category==='bars'?entry.facts.find(fact=>fact.glyph==='clock'):undefined;
+  return {caption:entry.caption,facts:[price,distance||hours].filter((fact):fact is HomeGuideFact=>Boolean(fact)).slice(0,2)};
+}

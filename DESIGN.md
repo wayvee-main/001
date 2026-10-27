@@ -551,18 +551,26 @@ Keep the uppercase city/category toolbar and the uncluttered editorial title.
 The following cards stay exactly 72px high with 72×56px thumbnails. This
 category-specific treatment must not change other app surfaces.
 
-### B4 Open Index replaces B5 on the four tile destinations
+### Open Ledger replaces B4 on the four tile destinations
 
-Eat, Bars, Routes and Events use open image-led index rows, with a shared
-86.4px row height, 89.6×67.2px media column, editorial venue names and faint rules
-(20% smaller than the original B4 rows and photos). Names stay on one line with
-ellipses; retain both compact metadata lines and the 10px inter-row gap.
-Routes use a 17.6px index number and a 67.2px thumbnail within that same column.
+Eat, Bars, Routes and Events use the approved **Open Ledger** preview from
+October 27: text on the left, a right-aligned **89×89px** photograph with 11px
+corners, and faint full-width dividers on the page wash. No card fill, outline,
+list backdrop or route index numbers. Rows are at least **122px** tall with
+15px vertical padding; the first row is at least **108px**, without top padding.
+Allow rows to grow for two-line titles or larger accessibility text. There is
+no inter-row gap. Titles use 22px/25px Fraunces, a five-word cap and two lines;
+captions use 11px/15px DM Sans and a single line. Compact inline facts use
+orange 12px glyphs; prices keep their dollar text. Place the orange chevron
+at the right of the facts line, before the photo. Use supplied price/distance,
+published hours, route facts or event date/time; omit unknown or duplicate facts.
 There is no lead poster, menu mini-window strip or floating assistant dock on
 these category indexes. The detail page retains its always-available Vee action.
-Remove the top back/city/category toolbar. The serif category heading starts at
-the same 10px top inset as Home, followed by the permanently visible standard
-53px search field and text-only scrolling filters. Do not autofocus on entry.
+Restore the back/city/category toolbar and circular search toggle. The title
+uses 34px Fraunces with the current result count to its right, followed by
+Home's quiet filter pills. Search opens the shared focused 53px field, preserves
+deep-link queries, and resets its text when closed. Match the preview's page
+spacing and existing app gutters in both themes.
 Every row requires a real photograph: try its own bundled photo, listing cover,
 source gallery and dish photos, with successive fallback if a URL fails. Exclude
 logo/icon assets and vector marks from photographic thumbnails. A route
