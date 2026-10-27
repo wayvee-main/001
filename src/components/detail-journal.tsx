@@ -5,10 +5,12 @@ import { Modal, Platform, Pressable, ScrollView, Text, TouchableOpacity, View, u
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Glyph } from '@/components/glyph';
+import { CitySearchBar } from '@/components/city-controls';
 import { Photo } from '@/components/photo';
 import { RaisedTouchable } from '@/components/raised-surface';
+import { EmptyState } from '@/components/ui';
 import { VENUES, type ScoperEvent } from '@/lib/data';
-import { eventJournalDetails, filterJournalMenu, journalMenuCategories, restaurantJournalMenu, type JournalArtist, type JournalMenuItem, type JournalSpecial, type MenuJournalListing } from '@/lib/detail-journal';
+import { eventJournalDetails, filterJournalMenu, journalMenuCategories, journalMenuGroups, journalMenuSource, restaurantJournalMenu, type JournalArtist, type JournalMenuItem, type JournalSpecial, type MenuJournalListing } from '@/lib/detail-journal';
 import type { DetailContent } from '@/lib/detail-content';
 import { streetAddress, ticketLink } from '@/lib/links';
 import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
@@ -66,18 +68,22 @@ function JournalSheet({title,onClose,children}: {title?:string;onClose:()=>void;
 
 export function RestaurantJournal({restaurant,content,onPlan}: {restaurant:MenuJournalListing;content?:DetailContent;onPlan?:()=>void}) {
   const colors=useThemeColors(),control=useControlSurface(),selected=useControlSurface(true),open=useJournalLink(),router=useRouter();
-  const [category,setCategory]=useState('All'),[dish,setDish]=useState<JournalMenuItem|null>(null),[menuOpen,setMenuOpen]=useState(false);
+  const [category,setCategory]=useState('All'),[dish,setDish]=useState<JournalMenuItem|null>(null),[menuOpen,setMenuOpen]=useState(false),[menuQuery,setMenuQuery]=useState('');
   const trigger=useRef<ComponentRef<typeof TouchableOpacity>|null>(null);
   const menu=restaurantJournalMenu(restaurant,content),categories=journalMenuCategories(menu.items),active=categories.includes(category)?category:'All';
+  const source=journalMenuSource(content,restaurant.menuUrl);
+  const browsedItems=filterJournalMenu(menu.items,active,menuQuery);
+  const browsedGroups=active==='All'?journalMenuGroups(browsedItems):browsedItems.length?[{title:active,items:browsedItems}]:[];
   const items=filterJournalMenu(menu.items,active),lead=items.filter(item=>item.image).slice(0,2),remaining=items.filter(item=>!lead.includes(item));
   const selectDish=(item:JournalMenuItem,button:ComponentRef<typeof TouchableOpacity>|null)=>{trigger.current=button;setMenuOpen(false);setDish(item);};
   const close=()=>{setMenuOpen(false);setDish(null);if(Platform.OS==='web')requestAnimationFrame(()=>trigger.current?.focus());};
-  const official=()=>open(content?.menu?.url||(restaurant.id==='shootingstar'?restaurant.orderUrl||restaurant.menuUrl:restaurant.menuUrl));
+  const official=()=>open(source.url);
   const openMenu=()=>{setDish(null);setMenuOpen(true);};
   const plan=onPlan||(()=>router.push(`/create?restaurantId=${encodeURIComponent(restaurant.id)}&q=${encodeURIComponent(`Night out starting at ${restaurant.name}`)}`));
   return <View testID="menu-journal" style={{gap:20}}>
     <View style={{gap:11}}>
-      <JournalHeading title="Explore the menu" action="Browse menu" onAction={openMenu} />
+      <JournalHeading title="Explore the menu" action={menu.items.length?'Browse menu':content?.menuDocuments?.length?'View menus':'View menu'} onAction={menu.items.length||content?.menuDocuments?.length?openMenu:official} />
+      {source.pricing?<Text testID="journal-pricing-context" className="font-dm-medium text-fine text-peach">{source.label} · {source.pricing}</Text>:null}
       {menu.items.length>0?<>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:6,paddingBottom:3}}>
           {categories.map(label=><TouchableOpacity key={label} testID={'journal-filter-'+label.toLowerCase()} accessibilityRole="button" accessibilityLabel={label+' menu items'} accessibilityState={{selected:active===label}} onPress={()=>setCategory(label)} activeOpacity={.74}
@@ -90,8 +96,9 @@ export function RestaurantJournal({restaurant,content,onPlan}: {restaurant:MenuJ
           {lead.map(item=><MenuCard key={item.name} item={item} onSelect={selectDish} />)}
         </View>:null}
         {menu.note?<Text className="font-dm text-fine text-taupe" style={{lineHeight:17}}>{menu.note}</Text>:null}
-      </>:<Text className="font-dm text-label text-taupe" style={{lineHeight:19}}>Explore the current menu on their official site.</Text>}
+      </>:!content?.menuDocuments?.length?<Text className="font-dm text-label text-taupe" style={{lineHeight:19}}>Explore the published menu.</Text>:null}
     </View>
+    <MenuDocuments content={content} />
     {menu.specials.map(special=><JournalSpecialCard key={special.title} special={special} />)}
     {remaining.length>0?<View style={{gap:7}}>
       <JournalHeading title={lead.length?"More dishes":"On the menu"} />
@@ -102,16 +109,30 @@ export function RestaurantJournal({restaurant,content,onPlan}: {restaurant:MenuJ
       <JournalHandoff label={restaurant.reserveUrl?'Reserve':restaurant.primaryAction.label} glyph="arrow" onPress={()=>open(restaurant.reserveUrl||restaurant.primaryAction.url)} />
       <JournalHandoff label="Plan a night" glyph="route" onPress={plan} />
     </View>
-    <DetailGoods content={content} />
+    <DetailGoods content={content} includeMenuDocuments={false} />
     <JournalSheet title={menuOpen?`Menu · ${restaurant.name}`:dish?.name} onClose={close}>
-      {menuOpen?<View testID="journal-full-menu" style={{gap:10}}>{menu.note?<Text className="font-dm text-fine text-taupe">{menu.note}</Text>:null}{menu.items.map(item=><MenuRow key={item.name} item={item} onSelect={selectDish} />)}<JournalHandoff label="Official menu & ordering" glyph="arrow" onPress={official} /></View>:null}
+      {menuOpen?<View testID="journal-full-menu" style={{gap:13}}>
+        {menu.items.length?<>
+          <CitySearchBar city={restaurant.name} testID="journal-menu-search-bar" inputTestID="journal-menu-search" inputLabel={`Search ${restaurant.name} menu`} placeholder="Search dishes or ingredients" value={menuQuery} onChangeText={setMenuQuery} />
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:7,paddingBottom:3}}>{categories.map(label=><TouchableOpacity key={label} testID={'journal-menu-category-'+label.toLowerCase()} accessibilityRole="button" accessibilityLabel={label+' menu items'} accessibilityState={{selected:active===label}} onPress={()=>setCategory(label)}
+            style={[active===label?selected:control,{minHeight:34,borderRadius:999,paddingHorizontal:12,justifyContent:'center'}]}><Text className="font-dm text-fine" style={{color:active===label?colors['on-selected']:colors.fg}}>{label}</Text></TouchableOpacity>)}</ScrollView>
+          <Text testID="journal-menu-result-count" accessibilityLiveRegion="polite" className="font-dm text-fine text-taupe">{browsedItems.length} of {menu.items.length} items</Text>
+        </>:null}
+        <TouchableOpacity accessibilityRole="link" accessibilityLabel={`Open ${source.label}`} onPress={official} style={{minHeight:34,justifyContent:'center',gap:4}}><Text className="font-dm text-fine text-peach">{source.label}</Text>{source.pricing?<Text className="font-dm text-fine text-taupe">{source.pricing}</Text>:null}</TouchableOpacity>
+        {menu.note?<Text className="font-dm text-fine text-taupe" style={{lineHeight:17}}>{menu.note}</Text>:null}
+        {browsedGroups.map(group=><View key={group.title} testID="journal-menu-section" style={{gap:5}}><Text accessibilityRole="header" className="font-fraunces text-ink" style={{fontSize:19,lineHeight:24}}>{group.title}</Text>{group.items.map(item=><MenuRow key={item.name} item={item} onSelect={selectDish} />)}</View>)}
+        {menu.items.length&&!browsedItems.length?<EmptyState compact title="No matching dishes" message="Try another dish, ingredient or category." actionLabel="Show all dishes" onAction={()=>{setMenuQuery('');setCategory('All');}} />:null}
+        <MenuDocuments content={content} />
+      </View>:null}
       {dish?<>
         <JournalHandoff label="Back to menu" glyph="back" onPress={openMenu} />
         {dish.image?<Photo uri={dish.image} fit="contain" radius={12} fallbackGlyph="food" fallbackLabel={`No dish photo for ${dish.name}`} style={{width:'100%',height:170}} stripedPlaceholder={false} />:null}
         {dish.price?<Text className="font-dm-medium text-label text-ink">{dish.price}</Text>:null}
         {dish.desc?<Text className="font-dm text-label text-taupe" style={{lineHeight:20}}>{dish.desc}</Text>:null}
         {dish.note||menu.note?<Text className="font-dm text-fine text-taupe" style={{lineHeight:18}}>{dish.note||menu.note}</Text>:null}
-        <JournalHandoff label="View official menu" glyph="arrow" onPress={official} />
+        {source.pricing?<Text className="font-dm text-fine text-peach">{source.label} · {source.pricing}</Text>:null}
+        {dish.imageSourceUrl?<JournalHandoff label="Photo source" glyph="chevron" onPress={()=>open(dish.imageSourceUrl!)} />:null}
+        <JournalHandoff label={source.label} glyph="chevron" onPress={()=>open(dish.sourceUrl||source.url)} />
       </>:null}
     </JournalSheet>
   </View>;
@@ -215,15 +236,27 @@ function EventPlanRow({label,glyph,onPress}: {label:string;glyph:string;onPress:
   </TouchableOpacity>;
 }
 
+function MenuDocuments({content}:{content?:DetailContent}) {
+  const open=useJournalLink(),colors=useThemeColors();
+  if(!content?.menuDocuments?.length)return null;
+  return <View testID="journal-menu-documents" style={{gap:8}}>{content.menuDocuments.map(document=><TouchableOpacity key={document.url} testID="journal-menu-document" accessibilityRole="link" accessibilityLabel={`${document.title}. ${document.format.toUpperCase()} menu`} onPress={()=>open(document.url)}
+    style={{minHeight:48,flexDirection:'row',alignItems:'center',gap:10,paddingVertical:9,borderBottomWidth:.5,borderBottomColor:colors['edge-faint']}}><Glyph name="book" size={17} color={colors['surface-accent']} /><View style={{flex:1,minWidth:0,gap:3}}><Text numberOfLines={2} className="font-dm-medium text-label text-ink">{document.title}</Text><Text className="font-dm text-fine text-taupe">{document.format.toUpperCase()} menu</Text></View><Glyph name="chevron" size={13} color={colors['surface-accent']} /></TouchableOpacity>)}</View>;
+}
+
 /** Actual source payload, shared by map entries and curated detail routes. */
-export function DetailGoods({content}: {content?:DetailContent}) {
+export function DetailGoods({content,includeMenuDocuments=true}: {content?:DetailContent;includeMenuDocuments?:boolean}) {
   const colors=useThemeColors(),open=useJournalLink();
   const [note,setNote]=useState<{title:string;body:string;url?:string}|null>(null);
+  const [photoIndex,setPhotoIndex]=useState<number|null>(null);
   if(!content)return null;
+  const photos=content.photos||[],photo=photoIndex==null?undefined:photos[photoIndex];
   return <View testID="detail-goods" style={{gap:18}}>
-    {(content.photos?.length||0)>1?<View style={{gap:10}}><JournalHeading title="A closer look" />
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:10}}>{content.photos!.slice(1).map(photo=><Photo key={photo.url} uri={photo.url} radius={12} fallbackGlyph="landmark" fallbackLabel="Source photo unavailable" style={{width:174,height:110}} />)}</ScrollView>
+    {photos.length?<View style={{gap:10}}><JournalHeading title="Photos" action={`${photos.length} ${photos.length===1?'photo':'photos'}`} onAction={()=>setPhotoIndex(0)} />
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:10}}>{photos.map((photo,index)=><TouchableOpacity key={photo.url} testID="journal-gallery-photo" accessibilityRole="button" accessibilityLabel={`Open photo ${index+1} of ${photos.length}${photo.caption?'. '+photo.caption:''}`} onPress={()=>setPhotoIndex(index)}>
+        <Photo uri={photo.url} radius={12} stripedPlaceholder={false} fallbackGlyph="landmark" fallbackLabel="Source photo unavailable" style={{width:174,height:110}} />
+      </TouchableOpacity>)}</ScrollView>
     </View>:null}
+    {includeMenuDocuments?<MenuDocuments content={content} />:null}
     {content.notes?.map(item=><View key={item.title} style={{gap:8}}>
       <JournalHeading title={item.title} action="Read more" onAction={()=>setNote(item)} />
       <Text numberOfLines={4} className="font-dm text-label text-taupe" style={{lineHeight:20}}>{item.body}</Text>
@@ -231,6 +264,15 @@ export function DetailGoods({content}: {content?:DetailContent}) {
     <TouchableOpacity accessibilityRole="link" accessibilityLabel="Open the source for these details" onPress={()=>open(content.sourceUrl)} style={{minHeight:34,flexDirection:'row',alignItems:'center',gap:5}}>
       <Text className="font-dm text-fine text-taupe">Details checked {new Date(content.menu?.verifiedAt||content.verifiedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</Text><Glyph name="arrow" size={12} color={colors['surface-accent']} />
     </TouchableOpacity>
+    <JournalSheet title={photo?`Photo ${photoIndex!+1} of ${photos.length}`:undefined} onClose={()=>setPhotoIndex(null)}>{photo?<View testID="journal-gallery-viewer" style={{gap:12}}>
+      <Photo uri={photo.url} fit="contain" radius={12} stripedPlaceholder={false} fallbackGlyph="landmark" fallbackLabel="Source photo unavailable" style={{height:260,width:'100%'}} />
+      {photo.caption?<Text className="font-dm text-label text-ink" style={{lineHeight:20}}>{photo.caption}</Text>:null}
+      {photo.attribution?<Text className="font-dm text-fine text-taupe" style={{lineHeight:17}}>{photo.attribution}</Text>:null}
+      <TouchableOpacity accessibilityRole="link" accessibilityLabel="Open photo source" onPress={()=>open(photo.sourceUrl||content.sourceUrl)} style={{minHeight:34,justifyContent:'center'}}><Text className="font-dm text-fine text-peach">{photo.sourceLabel||({official:'Official site',ubereats:'Uber Eats',doordash:'DoorDash',social:'Venue social page'}[photo.provider||'official'])}</Text></TouchableOpacity>
+      {photos.length>1?<View style={{flexDirection:'row',justifyContent:'space-between'}}><TouchableOpacity accessibilityRole="button" accessibilityLabel="Previous photo" onPress={()=>setPhotoIndex(index=>((index||0)-1+photos.length)%photos.length)} style={[controlForGallery(colors),{paddingHorizontal:13}]}><Glyph name="chevronLeft" size={16} color={colors.fg} /></TouchableOpacity><TouchableOpacity accessibilityRole="button" accessibilityLabel="Next photo" onPress={()=>setPhotoIndex(index=>((index||0)+1)%photos.length)} style={[controlForGallery(colors),{paddingHorizontal:13}]}><Glyph name="chevron" size={16} color={colors.fg} /></TouchableOpacity></View>:null}
+    </View>:null}</JournalSheet>
     <JournalSheet title={note?.title} onClose={()=>setNote(null)}>{note?<><Text className="font-dm text-label text-ink" style={{lineHeight:21}}>{note.body}</Text>{note.url?<JournalHandoff label="Official details" glyph="arrow" onPress={()=>open(note.url!)} />:null}</>:null}</JournalSheet>
   </View>;
 }
+
+const controlForGallery=(colors:ReturnType<typeof useThemeColors>)=>({minHeight:38,borderRadius:19,backgroundColor:colors['surface-control'],alignItems:'center' as const,justifyContent:'center' as const});

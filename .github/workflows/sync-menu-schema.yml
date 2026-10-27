@@ -56,7 +56,11 @@ jobs:
           DETAIL_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
         run: |
           supabase link --project-ref "$DETAIL_PROJECT_REF"
-          supabase db push
+          for attempt in 1 2 3; do
+            if supabase db push; then break; fi
+            if [ "$attempt" = 3 ]; then exit 1; fi
+            sleep 5
+          done
       - name: Publish current curated event content
         run: npm run sync:events
         env:

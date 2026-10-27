@@ -550,3 +550,25 @@ Their text-only filter pills and circular toolbar controls also have no outline.
 Keep the uppercase city/category toolbar and the uncluttered editorial title.
 The following cards stay exactly 72px high with 72×56px thumbnails. This
 category-specific treatment must not change other app surfaces.
+
+### B4 Open Index replaces B5 on the four tile destinations
+
+Eat, Bars, Routes and Events use open image-led index rows, with a shared
+108px row height, 112×84px media column, editorial venue names and faint rules.
+Routes use a 22px index number and an 84px thumbnail within that same column.
+There is no lead poster, menu mini-window strip or floating assistant dock on
+these category indexes. The detail page retains its always-available Vee action.
+Keep the toolbar city/category label, text-only scrolling filters and search
+glyph which reveals the standard focused 53px field. Use actual source metadata,
+menus and photos as they arrive; do not fill gaps with invented venue content.
+
+### Shared menu and photo browsing
+
+Collected menus use the existing Journal detail layout with searchable dishes,
+source category filters, grouped sections and full dish details. The menu search
+uses the same 53px field as Home. Keep delivery-platform pricing explicitly
+labelled and attach source links to menus, dishes and photographs. Original
+PDF/image menus remain accessible when structured extraction is incomplete.
+The photo row opens a full image viewer with captions, attribution and source
+links. Read the latest regional detail record on entry so new background goods
+are visible without waiting for the nearby cache to expire.

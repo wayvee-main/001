@@ -1,33 +1,27 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Keyboard, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Keyboard, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { CityChip, CitySearchBar } from '@/components/city-controls';
 import { Glyph } from '@/components/glyph';
 import { HomeGuideScreen } from '@/components/home-field-guide';
-import { HomePoster, HomeResultCard } from '@/components/home-secondary';
-import { HOME_RESULT, homeMenuItems } from '@/lib/home-secondary';
-import { DetailAssistantDock } from '@/components/detail-assistant';
-import { ledgerContext } from '@/lib/detail-ledger';
+import { HOME_INDEX, HomeIndexRow } from '@/components/home-open-index';
 import { EmptyState } from '@/components/ui';
 import { useContentHydrating } from '@/lib/bootstrap';
-import { homeGuideKey, type HomeGuideCatalog, type HomeGuideCategory } from '@/lib/home-guide';
+import { type HomeGuideCatalog, type HomeGuideCategory } from '@/lib/home-guide';
 import { HOME_LEDGERS, homeLedgerEntries, homeLedgerFilters } from '@/lib/home-ledger';
 import { useThemeColors } from '@/lib/theme';
 import { useControlSurface } from '@/lib/shadows';
 import { useHomeGuide } from '@/lib/use-home-guide';
+import { withAlpha } from '@/lib/tokens';
 
-function LedgerContents({category,catalog,cityName,initialQuery,hydrating,onLeadChange}: {
-  category:HomeGuideCategory;catalog:HomeGuideCatalog;cityName:string;initialQuery:string;hydrating:boolean;onLeadChange:(key:string)=>void;
+function LedgerContents({category,catalog,cityName,initialQuery,hydrating}: {
+  category:HomeGuideCategory;catalog:HomeGuideCatalog;cityName:string;initialQuery:string;hydrating:boolean;
 }) {
   const [query,setQuery]=useState(initialQuery),[filter,setFilter]=useState('all'),[searchOpen,setSearchOpen]=useState(Boolean(initialQuery.trim()));
   const router=useRouter(),colors=useThemeColors(),control=useControlSurface(),definition=HOME_LEDGERS[category];
   const entries=homeLedgerEntries(catalog,category,query,filter),filters=homeLedgerFilters(catalog.categories[category],category,filter);
   const narrowed=Boolean(query.trim()||filter!=='all');
-  const richIndex=category==='eat'?entries.findIndex(entry=>homeMenuItems(entry).some(item=>item.image)):-1;
-  const lead=entries[richIndex<0?0:richIndex],rest=entries.filter(entry=>entry!==lead);
-  const leadKey=lead?homeGuideKey(lead.kind,lead.id):'';
-  useEffect(()=>onLeadChange(leadKey),[leadKey,onLeadChange]);
   return <View testID={`home-ledger-${category}`}>
     <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
       <TouchableOpacity accessibilityRole="button" accessibilityLabel="Back to Home" onPress={()=>router.canGoBack()?router.back():router.replace('/')} style={[control,{width:36,height:36,justifyContent:'center',alignItems:'center',borderRadius:18,borderWidth:0}]}><Glyph name="chevronLeft" size={16} color={colors.fg} /></TouchableOpacity>
@@ -43,13 +37,12 @@ function LedgerContents({category,catalog,cityName,initialQuery,hydrating,onLead
     </View>
     {searchOpen?<View style={{marginTop:14}}><CitySearchBar autoFocus testID="home-guide-search-bar" inputTestID="home-guide-search" city={cityName} value={query} onChangeText={setQuery}
       inputLabel={`Search ${definition.title} in ${cityName}`} placeholder={`${definition.search} in ${/^san francisco$/i.test(cityName)?'SF':cityName}`} /></View>:null}
-    {filters.length>1?<View testID="home-ledger-filters" style={{flexDirection:'row',flexWrap:'wrap',gap:6,marginTop:10}}>
+    {filters.length>1?<ScrollView testID="home-ledger-filters" horizontal showsHorizontalScrollIndicator={false} style={{marginTop:10}} contentContainerStyle={{gap:6,paddingBottom:4}}>
       {filters.map(item=><CityChip key={item.id} testID={`home-ledger-filter-${item.id}`} label={item.label} borderless
         selected={filter===item.id} onPress={()=>setFilter(item.id)} />)}
-    </View>:null}
-    {lead?<View testID="home-result-list" style={{marginTop:14,gap:HOME_RESULT.gap}}>
-      <HomePoster entry={lead} category={category} />
-      {rest.map(entry=><HomeResultCard key={entry.kind+':'+entry.id} entry={entry} borderless />)}
+    </ScrollView>:null}
+    {entries.length?<View testID="home-result-list" style={{marginTop:14,gap:HOME_INDEX.gap,marginHorizontal:-14,paddingHorizontal:14,backgroundColor:withAlpha(colors['surface-control'],.3)}}>
+      {entries.map((entry,index)=><HomeIndexRow key={entry.kind+':'+entry.id} entry={entry} category={category} index={index} />)}
     </View>:<EmptyState compact title={hydrating?'Checking the city…':'Nothing here just yet'}
       message={narrowed?'Try another word or filter.':hydrating?'Local listings are loading.':`No current ${definition.plural} are listed for ${cityName}. Check back as the local catalog grows.`}
       {...(narrowed?{actionLabel:'Show all',onAction:()=>{setQuery('');setFilter('all');}}:{})} />}
@@ -60,8 +53,7 @@ function LedgerContents({category,catalog,cityName,initialQuery,hydrating,onLead
 export function HomeLedgerScreen({category}: {category:HomeGuideCategory}) {
   const {q}=useLocalSearchParams<{q?:string|string[]}>(),{catalog,now,city,displayCity}=useHomeGuide();
   const cityName=displayCity,hydrating=useContentHydrating(),query=Array.isArray(q)?q[0] || '':q || '';
-  const [leadKey,setLeadKey]=useState(''),first=catalog.entries[leadKey]||catalog.categories[category][0];
-  return <HomeGuideScreen now={now} backLabel="Home" search={false} context={false} header={false} beforeNav={first?<DetailAssistantDock chevron context={ledgerContext(first)} />:undefined}>
-    <LedgerContents key={`${city}:${category}:${query}`} category={category} catalog={catalog} cityName={cityName} initialQuery={query} hydrating={hydrating} onLeadChange={setLeadKey} />
+  return <HomeGuideScreen now={now} backLabel="Home" search={false} context={false} header={false}>
+    <LedgerContents key={`${city}:${category}:${query}`} category={category} catalog={catalog} cityName={cityName} initialQuery={query} hydrating={hydrating} />
   </HomeGuideScreen>;
 }

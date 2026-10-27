@@ -101,3 +101,5 @@ export function officialMenuLinks(html:string,base:string):string[] {
     const target=new URL(url);return target.origin===origin||target.hostname.endsWith('.'+new URL(base).hostname.replace(/^www\./,''))||/\.(square\.site|toasttab\.com)$/.test(target.hostname)?[url]:[];
   }))].slice(0,3);
 }
+
+export { tree as menuTree, textOf as menuTextOf, descendants as menuDescendants, plain as menuPlain };

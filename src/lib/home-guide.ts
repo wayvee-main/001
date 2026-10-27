@@ -65,7 +65,8 @@ export function buildHomeGuide({city,nearest,places,events,picks,now,anchor,incl
   const local = city === 'oakland'&&includeOakland, entries: Record<string, HomeGuideEntry> = {};
   const add = (entry: HomeGuideEntry) => {
     const key=homeGuideKey(entry.kind,entry.id);
-    entries[key] = {...entry,image:usableHomePhoto(entry.image) || HOME_GUIDE_PHOTOS[key]?.image,searchText:normalized(entry.name+' '+entry.caption+' '+entry.searchText)};
+    const menuText=entry.detailContent?.menu?.items.map(item=>[item.name,item.desc,...item.categories].filter(Boolean).join(' ')).join(' ')||'';
+    entries[key] = {...entry,image:usableHomePhoto(entry.image) || HOME_GUIDE_PHOTOS[key]?.image,searchText:normalized(entry.name+' '+entry.caption+' '+entry.searchText+' '+menuText)};
   };
   if (local) for (const r of Object.values(RESTAURANTS)) {
     const matched=placeForRestaurant(r,places,city);

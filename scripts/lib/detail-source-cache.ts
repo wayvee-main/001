@@ -5,7 +5,7 @@ import type { DetailContent } from '../../src/lib/detail-content';
 const DAY = 86_400_000;
 const VERSION = 1;
 export class SourceBudgetExhausted extends Error {}
-export interface SourceResult { content?: DetailContent; links: string[] }
+export interface SourceResult { content?: DetailContent; links: string[]; menuPage?:boolean }
 interface SourceRecord extends SourceResult {
   checkedAt: number; nextCheckAt: number; failures: number;
   hash?: string; etag?: string; lastModified?: string;
@@ -39,13 +39,13 @@ export class DetailSourceCache {
       if (response.status !== 200 && !(response.status === 304 && old?.hash)) throw new Error('Source unavailable');
       const hash = response.status === 304 ? old!.hash : createHash('sha256').update(response.body || '').digest('hex');
       const unchanged = !!old?.hash && hash === old.hash;
-      const result = unchanged ? { content: old.content, links: old.links } : extract(response.body || '');
+      const result = unchanged ? { content: old.content, links: old.links,menuPage:old.menuPage } : extract(response.body || '');
       if (unchanged) this.stats.unchanged++; else this.stats.parsed++;
       // A successful conditional response verifies the same published goods.
       const checked = new Date(now).toISOString();
       const content = result.content ? { ...result.content, verifiedAt: checked, menu: result.content.menu ? { ...result.content.menu, verifiedAt: checked } : undefined } : undefined;
       const record: SourceRecord = {
-        content, links: result.links, hash, checkedAt: now, nextCheckAt: now + 7 * DAY, failures: 0,
+        content, links: result.links,menuPage:result.menuPage, hash, checkedAt: now, nextCheckAt: now + 7 * DAY, failures: 0,
         etag: response.etag || (unchanged ? old?.etag : undefined),
         lastModified: response.lastModified || (unchanged ? old?.lastModified : undefined),
       };

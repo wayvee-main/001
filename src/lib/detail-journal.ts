@@ -9,8 +9,9 @@ export type MenuJournalListing = {id:string;name:string;sourceUrl:string;menuUrl
 export function menuListingForPlace(place:{id:string;name:string;address?:string|null;city?:string;detailContent?:DetailContent},restaurants:readonly Restaurant[],city:string):MenuJournalListing|undefined {
   const curated=restaurantForPlace(place,restaurants,place.city||city);
   if(curated)return curated;
-  const menu=place.detailContent?.menu;if(!menu)return;
-  return {id:place.id,name:place.name,sourceUrl:place.detailContent!.sourceUrl,menuUrl:menu.url,menuHighlights:menu.items,primaryAction:{label:'Official menu',url:menu.url}};
+  const content=place.detailContent,menu=content?.menu,document=content?.menuDocuments?.[0];if(!menu&&!document)return;
+  const url=menu?.url||document!.url;
+  return {id:place.id,name:place.name,sourceUrl:content!.sourceUrl,menuUrl:url,menuHighlights:menu?.items||[],primaryAction:{label:menu?.sourceLabel||'View menu',url}};
 }
 export type JournalSpecial = { title: string; label: string; description: string; url: string };
 export type JournalArtist = { name: string; role?: string; image?: string; description?: string; url?: string };
@@ -43,8 +44,25 @@ export function journalMenuCategories(items: readonly JournalMenuItem[]): string
   return ['All', ...new Set(items.flatMap(item => [...item.categories]))];
 }
 
-export function filterJournalMenu(items: readonly JournalMenuItem[], category: string): readonly JournalMenuItem[] {
-  return category === 'All' ? items : items.filter(item => item.categories.includes(category));
+export function filterJournalMenu(items: readonly JournalMenuItem[], category: string,query=''): readonly JournalMenuItem[] {
+  const selected=category==='All'?items:items.filter(item=>item.categories.includes(category));
+  const normalize=(text:string)=>text.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  const words=normalize(query).trim().split(/\s+/).filter(Boolean);
+  return words.length?selected.filter(item=>words.every(word=>normalize([item.name,item.desc,...item.categories].filter(Boolean).join(' ')).includes(word))):selected;
+}
+
+/** All dishes appear once, while their complete category filters remain useful. */
+export function journalMenuGroups(items:readonly JournalMenuItem[]):{title:string;items:JournalMenuItem[]}[] {
+  const groups=new Map<string,JournalMenuItem[]>();
+  for(const item of items){const title=item.categories[0]||'Menu';const group=groups.get(title)||[];group.push(item);groups.set(title,group);}
+  return [...groups].map(([title,items])=>({title,items}));
+}
+
+export function journalMenuSource(content:DetailContent|undefined,fallbackUrl:string):{label:string;url:string;pricing?:string} {
+  const menu=content?.menu;
+  const label=menu?.sourceLabel||({official:'Official menu',ubereats:'Uber Eats',doordash:'DoorDash'}[menu?.sourceKind||'official']);
+  return {label,url:menu?.url||content?.menuDocuments?.[0]?.url||fallbackUrl,
+    pricing:menu?.pricingContext==='delivery'?'Delivery prices · may differ at the venue':undefined};
 }
 
 /** Inline groups may wrap naturally. Full source values remain in About &

@@ -11,12 +11,6 @@ on:
         default: '6'
         type: choice
         options: ['0', '3', '6', '12']
-      detail_requests:
-        description: 'Maximum official-site HTTP requests, including redirects and menu pages'
-        required: false
-        default: '30'
-        type: choice
-        options: ['0', '10', '30']
   push:
     branches: [main]
     paths:
@@ -50,12 +44,6 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - uses: actions/cache/restore@v4
-        with:
-          path: .cache/regional-detail-sources-v1.json
-          key: regional-details-v1-${{ hashFiles('scripts/lib/menu-schema.ts', 'scripts/lib/detail-source-cache.ts', 'scripts/lib/official-source-loader.ts', 'scripts/lib/regional-details.ts', 'src/lib/detail-content.ts') }}-${{ github.run_id }}-${{ github.run_attempt }}
-          restore-keys: |
-            regional-details-v1-${{ hashFiles('scripts/lib/menu-schema.ts', 'scripts/lib/detail-source-cache.ts', 'scripts/lib/official-source-loader.ts', 'scripts/lib/regional-details.ts', 'src/lib/detail-content.ts') }}-
       - uses: supabase/setup-cli@v1
         with:
           version: latest
@@ -67,7 +55,11 @@ jobs:
           REGIONAL_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
         run: |
           supabase link --project-ref "$REGIONAL_PROJECT_REF"
-          supabase db push
+          for attempt in 1 2 3; do
+            if supabase db push; then break; fi
+            if [ "$attempt" = 3 ]; then exit 1; fi
+            sleep 5
+          done
       - name: Collect bounded regional batches
         run: npx --yes tsx scripts/sync-regional-places.ts
         env:
@@ -75,15 +67,3 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           REGIONAL_SOURCE_REQUEST_LIMIT: ${{ inputs.source_requests || '6' }}
           REGIONAL_BATCH_LIMIT: '6'
-      - name: Enrich regional official menus and photos
-        if: ${{ !cancelled() && steps.migrate.outcome == 'success' }}
-        run: npx --yes tsx scripts/sync-regional-details.ts
-        env:
-          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          REGIONAL_DETAIL_REQUEST_LIMIT: ${{ inputs.detail_requests || '30' }}
-      - uses: actions/cache/save@v4
-        if: always()
-        with:
-          path: .cache/regional-detail-sources-v1.json
-          key: regional-details-v1-${{ hashFiles('scripts/lib/menu-schema.ts', 'scripts/lib/detail-source-cache.ts', 'scripts/lib/official-source-loader.ts', 'scripts/lib/regional-details.ts', 'src/lib/detail-content.ts') }}-${{ github.run_id }}-${{ github.run_attempt }}

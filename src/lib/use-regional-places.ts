@@ -1,5 +1,5 @@
 import { useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useMemo, useSyncExternalStore } from 'react';
+import { useCallback, useMemo, useSyncExternalStore } from 'react';
 
 import { CITY_CENTER, milesBetween, type GeoPoint } from '@/lib/geo';
 import { useActiveCityAnchor, useActiveCityName } from '@/lib/city';
@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabase';
 const EMPTY:Place[]=[],TTL=15*60_000;
 const areas=new Map<string,{at:number;places:Place[]}>(),pending=new Map<string,Promise<void>>(),byId=new Map<string,Place>();
 const lookedUp=new Set<string>(),lookingUp=new Set<string>();
+const detailCheckedAt=new Map<string,number>();
 const listeners=new Set<()=>void>();let version=0;
 const subscribe=(listener:()=>void)=>{listeners.add(listener);return()=>listeners.delete(listener);};
 const snapshot=()=>version;
@@ -45,13 +46,16 @@ export function hydrateRegionalPlaces(point:GeoPoint,force=false):Promise<void> 
 /** A saved regional place can open even outside the current nearby window. */
 export function useRegionalPlace(id:string|undefined):{place:Place|undefined;pending:boolean} {
   useSyncExternalStore(subscribe,snapshot,()=>0);
-  useEffect(()=>{
-    if(!id||id.length>256||!supabase||byId.has(id)||lookedUp.has(id)||lookingUp.has(id))return;
+  useFocusEffect(useCallback(()=>{
+    // A place can gain a menu/photos while the app is open. A nearby snapshot
+    // must not suppress the cheap indexed detail read on entry.
+    if(!id||id.length>256||!supabase||Date.now()-(detailCheckedAt.get(id)||0)<30_000||lookingUp.has(id))return;
     const client=supabase;lookingUp.add(id);
-    void (async()=>{try{const {data}=await client.from('regional_places').select('*').eq('id',id).eq('needs_review',false).maybeSingle();if(data)byId.set(id,rowToPlace(data));}
+    void (async()=>{try{const {data,error}=await client.from('regional_places').select('*').eq('id',id).eq('needs_review',false).maybeSingle();if(error)return;
+      detailCheckedAt.set(id,Date.now());if(data){const place=rowToPlace(data);byId.set(id,place);for(const area of areas.values())area.places=area.places.map(old=>old.id===id?place:old);}}
       catch{/* A cold offline bookmark can be retried on the next app launch. */}
       finally{lookingUp.delete(id);lookedUp.add(id);notify();}})();
-  },[id]);
+  },[id]));
   return {place:id?byId.get(id):undefined,pending:!!id&&id.length<=256&&!!supabase&&!byId.has(id)&&!lookedUp.has(id)};
 }
 

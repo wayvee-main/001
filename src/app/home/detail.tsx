@@ -13,8 +13,9 @@ export default function HomeDetailScreen() {
   const kind=Array.isArray(params.kind)?params.kind[0]:params.kind,id=Array.isArray(params.id)?params.id[0]:params.id;
   useDetailRefresh(kind);
   const catalogEntry=catalog.entries[homeGuideKey(kind||'',id||'')];
-  const regional=useRegionalPlace(kind==='place'&&!catalogEntry?id:undefined);
-  const entry=catalogEntry||(regional.place?buildHomeGuide({city,now,places:[regional.place],nearest:[],picks:[],events:[],includeOakland:false}).entries[homeGuideKey('place',regional.place.id)]:undefined);
+  const regional=useRegionalPlace(kind==='place'?id:undefined);
+  const entry=catalogEntry&&regional.place?{...catalogEntry,detailContent:regional.place.detailContent||catalogEntry.detailContent,image:regional.place.image||catalogEntry.image}:
+    catalogEntry||(regional.place?buildHomeGuide({city,now,places:[regional.place],nearest:[],picks:[],events:[],includeOakland:false}).entries[homeGuideKey('place',regional.place.id)]:undefined);
   if(entry)return <HomeEntryLedger entry={entry} />;
   if(regional.pending)return <HomeGuideScreen now={now}><HomeGuideHeading title="Opening this place…" /></HomeGuideScreen>;
   return <HomeGuideScreen now={now}><HomeGuideHeading title="This one has moved on" /><EmptyState compact title="No current listing" message="Head back to Home for the latest local options." /></HomeGuideScreen>;

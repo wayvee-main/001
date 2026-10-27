@@ -33,6 +33,15 @@ describe('Actual detail goods',()=>{
   const content=parseDetailContent({...base,menu:{url:base.sourceUrl,items:[{name:'Soup'}]},artists:[{name:'An artist'}]})!;
   expect(content.menu!.items[0].price).toBeUndefined();expect(content.menu!.items[0].image).toBeUndefined();expect(content.artists![0].description).toBeUndefined();
  });
+ it('retains delivery pricing/photo provenance and a public PDF menu without inventing parsed items',()=>{
+  const content=parseDetailContent({...base,menu:{url:'https://www.doordash.com/store/real-place-123/',sourceKind:'doordash',sourceLabel:'DoorDash',pricingContext:'delivery',items:[{name:'Soup',price:'$15',categories:['Mains'],sourceUrl:'https://www.doordash.com/store/real-place-123/',imageSourceUrl:'https://www.doordash.com/store/real-place-123/'}]},photos:[{url:'https://venue.example/dish.jpg',sourceUrl:'https://venue.example/gallery',sourceLabel:'Official gallery',provider:'official',attribution:'The venue'}],menuDocuments:[{url:'https://venue.example/dinner.pdf',title:'Dinner menu',format:'pdf',sourceUrl:base.sourceUrl,verifiedAt:base.verifiedAt},{url:'javascript:alert(1)',title:'Bad',format:'pdf'}]})!;
+  expect(content.menu).toMatchObject({sourceKind:'doordash',sourceLabel:'DoorDash',pricingContext:'delivery'});
+  expect(content.menu!.items[0].imageSourceUrl).toBe(content.menu!.url);
+  expect(content.photos![0]).toMatchObject({provider:'official',attribution:'The venue'});
+  expect(content.menuDocuments).toHaveLength(1);
+  const documentOnly=parseDetailContent({...base,menuDocuments:content.menuDocuments})!;
+  expect(documentOnly.menu).toBeUndefined();expect(documentOnly.menuDocuments![0].format).toBe('pdf');
+ });
  it('extracts a semantic Wix menu with the correct item, image and section association',()=>{
   const html='<section data-hook="section.container"><h2 data-hook="section.name">Noodles</h2><div data-hook="item.root"><p data-hook="item.name">Noodle soup</p><p data-hook="item.description">Broth &amp; greens</p><p data-hook="item.price">$14.95</p><img src="/soup.jpg" alt="Noodle soup"></div></section>';
   const content=extractOfficialMenu(html,'https://venue.example/menu',{name:'A kitchen',address:'12 Main St'},now)!;
