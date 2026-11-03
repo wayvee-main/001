@@ -1,7 +1,8 @@
+import { NativePressable as Pressable } from '@/components/native-pressable';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { Glyph } from '@/components/glyph';
 import { VeeMark } from '@/components/vee-mark';
 import { useActiveCity, useActiveCityName } from '@/lib/city';

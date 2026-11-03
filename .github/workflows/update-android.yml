@@ -97,6 +97,11 @@ jobs:
       - run: npx tsc --noEmit
       - run: npx jest
 
+      # Web screenshots cannot catch native CSS interop discarding a
+      # Pressable style callback. Exercise the actual Android wrappers.
+      - name: Check Android control layouts
+        run: npx jest --preset jest-expo/android --runInBand src/components/__tests__
+
       - uses: expo/expo-github-action@v8
         with:
           eas-version: latest

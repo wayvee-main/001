@@ -6,6 +6,12 @@ this section takes precedence wherever they differ.
 
 ## Current approval — Local Perks
 
+- Inline controls with a function-valued `style` use `NativePressable` from
+  `src/components/native-pressable.tsx`. NativeWind v4's native wrapper can
+  flatten that callback into `{}`, losing layout, positioning and surfaces.
+  This primitive bypasses interop for the inline control; its children still
+  use normal NativeWind classes. Do not add `className` to this primitive.
+  Android layout regression tests must run before publishing an OTA update.
 - Apply to Android first, using the same native React components on web.
   Keep the gradient Vee spiral, Fraunces 500 headings, and DM Sans.
 - Use opaque, matte grounds to distinguish layers. No glass sheen or page

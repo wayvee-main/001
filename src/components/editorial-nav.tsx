@@ -1,4 +1,5 @@
-import { Pressable, Text, View } from 'react-native';
+import { NativePressable as Pressable } from '@/components/native-pressable';
+import { Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Glyph } from '@/components/glyph';
 import { EveningTray } from '@/components/local-perks';

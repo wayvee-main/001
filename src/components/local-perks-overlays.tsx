@@ -1,7 +1,8 @@
+import { NativePressable as Pressable } from '@/components/native-pressable';
 import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { Animated, Easing, Modal, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Glyph } from '@/components/glyph';
 import { LocalPerksCard, PerksRoundButton } from '@/components/local-perks';
