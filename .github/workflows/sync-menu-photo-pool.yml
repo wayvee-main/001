@@ -2,15 +2,15 @@ name: Collect menus and photos
 
 on:
   schedule:
-    - cron: '41 * * * *'
+    - cron: '11,26,41,56 * * * *'
   workflow_dispatch:
     inputs:
       requests:
         description: 'External HTTP ceiling (robots, redirects, PDFs, photos and browser requests all count)'
         required: true
-        default: '200'
+        default: '800'
         type: choice
-        options: ['0', '20', '100', '200']
+        options: ['0', '20', '100', '200', '800']
   push:
     branches: [main]
     paths:
@@ -20,17 +20,20 @@ on:
       - 'scripts/lib/menu-browser.ts'
       - 'scripts/lib/menu-documents.ts'
       - 'scripts/lib/menu-source-reader.ts'
+      - 'scripts/test-menu-photo-queue.mjs'
+      - 'scripts/lib/__tests__/menu-photo-queue.sql'
       - 'scripts/lib/menu-schema.ts'
       - 'scripts/lib/regional-details.ts'
       - 'src/lib/detail-content.ts'
       - 'supabase/migrations/20261027010000_menu_photo_collection.sql'
+      - 'supabase/migrations/20261103010000_menu_photo_throughput.sql'
       - '.github/workflows/sync-menu-photo-pool.yml'
 
 permissions:
   contents: read
 concurrency:
   group: menu-photo-collector
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   enrich:
@@ -47,9 +50,15 @@ jobs:
         run: |
           npx tsc --noEmit
           npx jest scripts/lib/__tests__/menu-photo-extract.test.ts scripts/lib/__tests__/collection-loader.test.ts scripts/lib/__tests__/menu-source-reader.test.ts scripts/lib/__tests__/regional-details.test.ts src/lib/__tests__/detail-content.test.ts --runInBand --forceExit
+      - name: Check queue budgets and leases in isolated PostgreSQL
+        run: |
+          npm install --prefix "$RUNNER_TEMP/wayvee-queue-tests" --no-package-lock --ignore-scripts @electric-sql/pglite@0.5.12
+          node scripts/test-menu-photo-queue.mjs
+        env:
+          MENU_PHOTO_SQL_TEST_ROOT: ${{ runner.temp }}/wayvee-queue-tests
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: v3.0.0
       - name: Apply menu/photo queue migration
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
@@ -58,7 +67,7 @@ jobs:
         run: |
           supabase link --project-ref "$REGIONAL_PROJECT_REF"
           for attempt in 1 2 3; do
-            if supabase db push; then break; fi
+            if supabase db push --remote --yes; then break; fi
             if [ "$attempt" = 3 ]; then exit 1; fi
             sleep 5
           done
@@ -100,7 +109,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ vars.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          MENU_PHOTO_REQUEST_LIMIT: ${{ inputs.requests || '200' }}
+          MENU_PHOTO_REQUEST_LIMIT: ${{ inputs.requests || '800' }}
           MENU_PHOTO_BROWSER_ROOT: ${{ runner.temp }}/wayvee-enrichment-browser
           MENU_PHOTO_CACHE_PATH: ${{ runner.temp }}/wayvee-menu-photo-sources-v2.json
       - uses: actions/cache/save@v4

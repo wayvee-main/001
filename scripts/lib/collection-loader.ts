@@ -40,7 +40,7 @@ export class CollectionLoader {
  private dns=new Map<string,Promise<string[]>>();private robots=new Map<string,Promise<string>>();
  private hosts=new Map<string,Promise<void>>();private memo=new Map<string,Promise<CollectedResource>>();
  constructor(limit:number,options:LoaderOptions={}){
-  this.limit=Math.max(0,Math.min(200,limit));this.request=options.request||fetch;
+  this.limit=Number.isFinite(limit)?Math.max(0,Math.min(800,Math.floor(limit))):0;this.request=options.request||fetch;
   this.resolve=options.resolve||(async host=>(await lookup(host,{all:true})).map(item=>item.address));
   this.delay=options.delayMs??1000;this.maxBytes=options.maxBytes??60_000_000;
  }

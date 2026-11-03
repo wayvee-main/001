@@ -4,6 +4,22 @@ import { extractOfficialMenu, menuTree, menuTextOf, menuDescendants, menuPlain }
 
 export type PlaceIdentity={name:string;address?:string|null;category?:string};
 export type SourceLink={url:string;kind:'official'|'ubereats'|'doordash'|'social';document?:'pdf'|'image';title:string;trustedLink:boolean};
+
+/** Prefer explicit item/image associations over generic gallery shots. Every
+ * returned URL must still pass the worker's network and image-header checks. */
+export function prioritizedPhotoCandidates(content?:DetailContent):DetailPhoto[] {
+ const candidates=new Map<string,DetailPhoto>();
+ for(const item of content?.menu?.items||[]){
+  if(!item.image||candidates.has(item.image))continue;
+  const photo=content?.photos?.find(value=>value.url===item.image);
+  candidates.set(item.image,{...photo,url:item.image,caption:item.name,
+   sourceUrl:item.imageSourceUrl||item.sourceUrl||content!.menu!.url,
+   sourceLabel:photo?.sourceLabel||content?.menu?.sourceLabel,
+   provider:photo?.provider||content?.menu?.sourceKind});
+ }
+ for(const photo of content?.photos||[])if(!candidates.has(photo.url))candidates.set(photo.url,photo);
+ return [...candidates.values()];
+}
 const object=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 const array=(v:unknown):unknown[]=>Array.isArray(v)?v:v?[v]:[];
 const absolute=(v:unknown,base:string)=>{try{const u=new URL(typeof v==='string'?v:'',base);return /^https:$/.test(u.protocol)&&!u.username&&!u.password?u.href:undefined;}catch{return;}};

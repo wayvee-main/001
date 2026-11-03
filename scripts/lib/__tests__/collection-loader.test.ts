@@ -14,6 +14,16 @@ it('counts robots, redirects and browser/image resources against one strict budg
  await expect(loader.resource('https://venue.example/other')).rejects.toBeInstanceOf(SourceBudgetExhausted);
  expect(request).toHaveBeenCalledTimes(3);
 });
+it('can use the larger reservation while rejecting over-budget concurrent requests',async()=>{
+ const request=jest.fn(async()=>new Response('ok'));
+ const loader=new CollectionLoader(800,{request:request as unknown as typeof fetch,resolve,delayMs:0});
+ const results=await Promise.allSettled(Array.from({length:805},(_,i)=>loader.resource(`https://venue${i}.example/menu`,{skipRobots:true})));
+ expect(results.filter(result=>result.status==='fulfilled')).toHaveLength(800);
+ expect(results.filter(result=>result.status==='rejected').every(result=>result.status==='rejected'&&result.reason instanceof SourceBudgetExhausted)).toBe(true);
+ expect(loader.requests).toBe(800);expect(request).toHaveBeenCalledTimes(800);
+ expect(new CollectionLoader(10000).limit).toBe(800);
+ expect(new CollectionLoader(Number.NaN).remaining).toBe(0);
+});
 it('memoizes identical source GETs so separate field jobs do not redownload the homepage',async()=>{
  const request=jest.fn(async(url:URL)=>new Response(url.pathname==='/robots.txt'?'User-agent: *\nAllow: /':'menu',{headers:{'content-type':'text/html'}}));
  const loader=new CollectionLoader(20,{request:request as unknown as typeof fetch,resolve,delayMs:0});

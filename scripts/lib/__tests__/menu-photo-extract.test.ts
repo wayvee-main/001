@@ -1,9 +1,26 @@
 /** @jest-environment node */
-import { discoverSources,extractMenuPhotos,menuFromText,stablePhotoUrl } from '../menu-photo-extract';
+import { discoverSources,extractMenuPhotos,menuFromText,prioritizedPhotoCandidates,stablePhotoUrl } from '../menu-photo-extract';
 import { mergeRegionalDetails } from '../regional-details';
 
 const identity={name:'A real kitchen',address:'12 Main Street',category:'restaurant'};
 const base='https://venue.example/';
+it('prioritizes explicitly linked dish photos even when the gallery window is already full',()=>{
+ const gallery=Array.from({length:16},(_,i)=>({url:base+`room-${i}.jpg`,caption:'Dining room',sourceUrl:base}));
+ const photos=prioritizedPhotoCandidates({version:1,sourceUrl:base,verifiedAt:new Date().toISOString(),photos:gallery,
+  menu:{url:base+'menu',sourceKind:'official',items:[
+   {name:'Soup',categories:[],image:base+'soup.jpg',imageSourceUrl:base+'menu'},
+   {name:'Salad',categories:[],image:base+'salad.jpg',sourceUrl:base+'menu'},
+   {name:'Soup again',categories:[],image:base+'soup.jpg'},
+   {name:'Unpictured main',categories:[]},
+  ]}});
+ expect(photos.slice(0,2)).toMatchObject([
+  {url:base+'soup.jpg',caption:'Soup',sourceUrl:base+'menu',provider:'official'},
+  {url:base+'salad.jpg',caption:'Salad',sourceUrl:base+'menu',provider:'official'},
+ ]);
+ expect(photos).toHaveLength(18);
+ expect(photos.find(photo=>photo.caption==='Unpictured main')).toBeUndefined();
+ expect(photos[2]).toEqual(gallery[0]);
+});
 it('discovers official documents, galleries and merchant-linked stores without widening to arbitrary social profiles',()=>{
  const links=discoverSources('<a href="/dinner.pdf">Dinner</a><a href="/gallery">Photos</a><a href="https://www.ubereats.com/store/real-place/123">Order</a><a href="https://www.doordash.com/store/real-place-123/">Delivery</a><a href="https://www.instagram.com/p/ownedPost/">Our food</a><a href="https://www.instagram.com/random/">Profile</a>',base);
  expect(links.find(link=>link.document==='pdf')?.url).toBe(base+'dinner.pdf');

@@ -1,6 +1,8 @@
 # Menu and photo collection
 
-`Collect menus and photos` runs hourly and on pipeline pushes. It is separate
+`Collect menus and photos` is scheduled every 15 minutes and on pipeline pushes.
+GitHub can delay or skip scheduled starts; the request ceilings remain shared
+regardless of how many runs start. It is separate
 from the existing regional identity collector. Its first run applies the
 additive migration, seeds durable jobs, then processes a bounded first batch.
 No LLM calls, model-driven browsing, raw-page commits, or paid API are used.
@@ -9,13 +11,17 @@ No LLM calls, model-driven browsing, raw-page commits, or paid API are used.
 
 - Separate menu/photo jobs per place, with pending, working, ready, partial,
   blocked, unavailable, unsupported and not-applicable states.
-- First 500 Oakland/SF eateries have priority; all other Bay sources remain
-  queued. Expired 15-minute leases can be claimed after runner loss.
-- A database reservation caps **all external requests at 200/hour and 4,800/day**,
+- First 500 Oakland/SF eateries have priority within each queue lane. Three
+  quarters of each batch favor untouched sources; one quarter retains due
+  refreshes/retries. Empty lanes donate their slots to the other lane. A known
+  blocked source cannot monopolize the untouched backlog. Expired 15-minute
+  leases can be claimed after runner loss; active sibling leases are excluded.
+- A database reservation caps **all external requests at 800/hour and 19,200/day**,
   including robots, redirects, browser subresources, PDF and image reads.
   Manual runs share these ceilings. Unused reservations are released on clean
   finish; a crashed reservation remains spent conservatively.
-- Four workers, one request per host per second, 60MB aggregate source bytes,
+- Eight distinct venue workers, up to 400 field jobs per run, one request per
+  host per second, 60MB aggregate source bytes,
   4MB HTML, 10MB PDFs, 64KB image-header validation, 15-minute collection loop.
 - Browser fallback is limited to two pages/run and 45 GET resources/page.
   Media, fonts, stylesheets, POSTs, service workers, WebSockets and WebRTC are
@@ -56,7 +62,10 @@ and the queue moves on. Social/ordering coverage is therefore source dependent.
 
 Galleries, image metadata, srcsets, inline backgrounds and actual dish-image
 associations are discovered independently of menu success. The worker checks
-up to eight candidates and publishes at most three validated photos per job.
+up to twelve candidates and publishes at most six validated photos per job.
+Explicit source-provided dish/image associations are checked first, including
+item photos outside the gallery's display window; an unrelated venue image is
+never used to fill an unpictured dish.
 Image headers must identify a usable JPEG/PNG/WebP at least 300×180 pixels.
 Logos, icons, stock-photo domains, duplicates and expiring signed links are
 excluded. Source URLs/provider labels/attribution stay attached; photo bytes
@@ -72,13 +81,22 @@ installed in the runner, outside native app dependencies. No APK reinstall.
 Tool setup is bounded and optional: HTML/photo collection continues when PDF
 or browser installation is unavailable, while unparsed documents stay partial.
 Browser tooling is cached and uses an installed Chrome executable when present.
-Superseded runs can be cancelled safely; saved fields/checkpoints remain and
-expired leases resume on the next run.
+Runs serialize instead of cancelling an active batch, preserving its source
+cache and releasing unused reservations. Expired leases still recover after
+runner loss. Collector workflows pin Supabase CLI `v3.0.0` and apply migrations
+with `supabase db push --remote --yes`: v3 defaults to a local target and requires
+explicit consent for unattended hosted mutations.
 
-The first workflow push uses the normal 200-request ceiling; dispatch supports
-0/20/100/200. A zero-budget dispatch seeds and reports the queue without
+The first workflow push uses the normal 800-request ceiling; dispatch supports
+0/20/100/200/800. A zero-budget dispatch seeds and reports the queue without
 fetching source pages. Watch the compact `menu/photo:` run summary and
 `menu/photo queue:` per-field state counts. Additions, unavailable/blocked
 sources and partial documents are distinct from successful structured menus.
 `regional_enrichment_runs` and service-only `regional_enrichment_summary()`
 retain durable observability. No service credentials enter public payloads.
+
+Queue SQL is checked in an isolated PGlite PostgreSQL runtime before hosted
+migrations. It verifies shared caps/refunds, fair first-pass/refresh allocation,
+distinct venues, active sibling exclusion and stale lease-token rejection. This
+test runtime is installed outside app dependencies. Source cache hits and
+conditional unchanged responses are included in the compact run log.

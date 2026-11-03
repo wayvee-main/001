@@ -8,14 +8,14 @@ import { parseDetailContent,type DetailContent,type DetailPhoto } from '../src/l
 import { mergeRegionalDetails } from './lib/regional-details';
 import { CollectionLoader,imageDimensions,SourceBlocked } from './lib/collection-loader';
 import { DetailSourceCache,SourceBudgetExhausted } from './lib/detail-source-cache';
-import { extractMenuPhotos,sourceKind,stablePhotoUrl,type PlaceIdentity,type SourceLink } from './lib/menu-photo-extract';
+import { extractMenuPhotos,prioritizedPhotoCandidates,sourceKind,stablePhotoUrl,type PlaceIdentity,type SourceLink } from './lib/menu-photo-extract';
 import { readMenuDocument } from './lib/menu-documents';
 import { renderedMenu } from './lib/menu-browser';
 import { readMenuSource } from './lib/menu-source-reader';
 
 const client=serviceClient('collect menu/photo pool');
-const configuredLimit=Number(process.env.MENU_PHOTO_REQUEST_LIMIT??'200');
-const requestLimit=Math.max(0,Math.min(200,Number.isFinite(configuredLimit)?configuredLimit:200));
+const configuredLimit=Number(process.env.MENU_PHOTO_REQUEST_LIMIT??'800');
+const requestLimit=Math.max(0,Math.min(800,Math.floor(Number.isFinite(configuredLimit)?configuredLimit:800)));
 const cachePath=process.env.MENU_PHOTO_CACHE_PATH||'/tmp/wayvee-menu-photo-sources-v2.json';
 const cache=new DetailSourceCache((()=>{try{return JSON.parse(readFileSync(cachePath,'utf8'));}catch{return undefined;}})());
 type Job={place_id:string;kind:'menu'|'photos';lease_token:string;attempts:number;source_urls:SourceLink[];place:PlaceIdentity&{id:string;website?:string|null;detail_content?:unknown;image?:string|null}};
@@ -82,8 +82,8 @@ async function main(){
   // Validate only a bounded set, then publish actual source photography. The
   // remaining candidate URLs stay off the public photo pool until checked.
   const verified:DetailPhoto[]=[];
-  for(const photo of (collected?.photos||[]).slice(0,8)){
-   if(!loader.remaining||verified.length>=3)break;
+  for(const photo of prioritizedPhotoCandidates(collected).slice(0,12)){
+   if(!loader.remaining||verified.length>=6)break;
    const url=stablePhotoUrl(photo.url,photo.sourceUrl||raw);if(!url)continue;
    try{const r=await loader.resource(url,{accept:'image/jpeg,image/png,image/webp',headers:{Range:'bytes=0-65535'},maxBody:65536,partial:true});
     const dimensions=imageDimensions(r.body);if(!dimensions||dimensions.width<300||dimensions.height<180||dimensions.width/dimensions.height>3||dimensions.width/dimensions.height<.45)continue;
@@ -111,8 +111,8 @@ async function main(){
   else await finish(job,lastError?'unavailable':'unsupported',sources.slice(0,12),lastError instanceof Error?lastError.message:'No confidently extracted goods');
  };
  try{
-  while(loader.remaining&&Date.now()-start<15*60_000&&stats.jobs<100){
-   const {data,error}=await client.rpc('claim_regional_enrichment',{p_limit:4});if(error)throw new Error('Queue claim: '+error.message);
+  while(loader.remaining&&Date.now()-start<15*60_000&&stats.jobs<400){
+   const {data,error}=await client.rpc('claim_regional_enrichment',{p_limit:Math.min(8,400-stats.jobs)});if(error)throw new Error('Queue claim: '+error.message);
    const jobs=(data||[]) as Job[];if(!jobs.length)break;
    const results=await Promise.allSettled(jobs.map(async job=>{
     const previous=placeLocks.get(job.place_id)||Promise.resolve();let release!:()=>void;const current=new Promise<void>(resolve=>{release=resolve;});placeLocks.set(job.place_id,current);
@@ -123,7 +123,7 @@ async function main(){
  }catch(error){fatal=error;}
  finally{
   await mkdir(dirname(cachePath),{recursive:true});await writeFile(cachePath,JSON.stringify(cache.snapshot()));
-  const detail=`menu/photo: ${stats.jobs} jobs, ${stats.menus} menus, +${stats.dishes} dishes, +${stats.photos} photos, ${stats.writes} writes; ready ${stats.ready}, partial ${stats.partial}, blocked ${stats.blocked}, unsupported ${stats.unsupported}, unavailable ${stats.unavailable}; HTTP ${loader.requests}/${run.budget}, ${loader.bytes} bytes; ${stats.browser} browser, ${stats.documents} documents`;
+  const detail=`menu/photo: ${stats.jobs} jobs, ${stats.menus} menus, +${stats.dishes} dishes, +${stats.photos} photos, ${stats.writes} writes; ready ${stats.ready}, partial ${stats.partial}, blocked ${stats.blocked}, unsupported ${stats.unsupported}, unavailable ${stats.unavailable}; HTTP ${loader.requests}/${run.budget}, ${loader.bytes} bytes; ${stats.browser} browser, ${stats.documents} documents; source cache ${cache.stats.cached} hits, ${cache.stats.unchanged} unchanged`;
   console.log(detail);
   const {error}=await client.rpc('finish_regional_enrichment',{p_run_id:run.run_id,p_requests:loader.requests,p_bytes:loader.bytes,p_detail:detail,p_status:fatal?'failed':'ok'});if(error)console.warn('Run summary could not be saved:',error.message);
   const summary=await client.rpc('regional_enrichment_summary');if(!summary.error)console.log('menu/photo queue: '+JSON.stringify(summary.data));

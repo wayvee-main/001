@@ -48,7 +48,7 @@ jobs:
       - run: npm ci
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: v3.0.0
       - name: Apply detail content columns
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
@@ -57,7 +57,7 @@ jobs:
         run: |
           supabase link --project-ref "$DETAIL_PROJECT_REF"
           for attempt in 1 2 3; do
-            if supabase db push; then break; fi
+            if supabase db push --remote --yes; then break; fi
             if [ "$attempt" = 3 ]; then exit 1; fi
             sleep 5
           done
