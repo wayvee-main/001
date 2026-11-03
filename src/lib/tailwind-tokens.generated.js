@@ -43,6 +43,9 @@ module.exports = {
   "accent-tint": 'rgb(var(--color-accent-tint) / <alpha-value>)',
   "warm-tint": 'rgb(var(--color-warm-tint) / <alpha-value>)',
   "vee-tint": 'rgb(var(--color-vee-tint) / <alpha-value>)',
+  "page-secondary": 'rgb(var(--color-page-secondary) / <alpha-value>)',
+  "page-tertiary": 'rgb(var(--color-page-tertiary) / <alpha-value>)',
+  "ribbon-ink": 'rgb(var(--color-ribbon-ink) / <alpha-value>)',
   danger: 'rgb(var(--color-danger) / <alpha-value>)',
   cream: 'rgb(var(--color-bg) / <alpha-value>)',
   ink: 'rgb(var(--color-fg) / <alpha-value>)',
@@ -93,6 +96,6 @@ module.exports = {
   },
   boxShadow: {
     'soft-light': '0 2px 7px rgba(49, 32, 57, .05)',
-    'soft-dark': '0 2.2px 8.8px rgba(16, 13, 19, 0.33)',
+    'soft-dark': '0 2.2px 8.8px rgba(23, 19, 27, 0.33)',
   },
 };

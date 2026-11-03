@@ -10,6 +10,7 @@ import { useActiveCityName } from '@/lib/city';
 import { useNow } from '@/lib/clock';
 import type { DetailContext } from '@/lib/detail-assistant';
 import { compactJournalFacts } from '@/lib/detail-journal';
+import { HOME_TILE_PREVIEW_PHOTOS } from '@/lib/home-tile-photos';
 import { useThemeColors } from '@/lib/theme';
 
 export type LedgerFact = {label:string;value:string;glyph?:string;fullValue?:string};
@@ -51,9 +52,9 @@ export function LedgerCompanionScreen({context,image,glyph='landmark',eyebrow,he
   const mainAction=primaryAction||chips.find(chip=>chip.key==='book');
   const metadata=chips.filter(chip=>!['save','directions','book'].includes(chip.key)&&!context.caption?.includes(chip.label));
   const inline=compactFacts||compactJournalFacts(essentials);
-  const caption=[context.caption,...metadata.map(chip=>chip.label)].filter(Boolean).join(' · ');
+  const caption=context.caption;
   const about=essentials.length>0||folds.length>0;
-  return <HomeGuideScreen now={now} search={false} context={false} header={false} activeTab={navActive}
+  return <HomeGuideScreen now={now} search={false} context={false} header={false} activeTab={navActive} layer="tertiary"
     beforeNav={<DetailAssistantDock key={context.kind+':'+context.id} context={context} />}>
     <View testID="ledger-companion" style={{gap:22,paddingBottom:4}}>
       <View style={{gap:18}}>
@@ -73,11 +74,16 @@ export function LedgerCompanionScreen({context,image,glyph='landmark',eyebrow,he
           <Text testID="ledger-title" accessibilityRole="header" accessibilityLabel={context.name} numberOfLines={2} className="font-fraunces text-ink" style={{fontSize:32,lineHeight:35,letterSpacing:-.75}}>{shortTitle(context.name)}</Text>
           {caption?<Text testID="ledger-chip-row" numberOfLines={2} className="font-dm text-fine text-taupe" style={{lineHeight:17}}>{caption}</Text>:null}
         </View>
-        <View testID="ledger-photo" style={{height:context.kind==='event'?182:124,borderRadius:13,overflow:'hidden'}}>
-          <Photo uri={image} fit="cover" radius={13} stripedPlaceholder={false} fallbackGlyph={glyph} fallbackLabel={`Photo unavailable for ${context.name}`} style={{height:'100%',width:'100%'}} />
+        <View testID="ledger-photo" style={{height:context.kind==='event'?170:160,borderRadius:13,overflow:'hidden'}}>
+          <Photo uri={image} source={HOME_TILE_PREVIEW_PHOTOS[`/${context.kind}/${context.id}`]?.source} fit="cover" radius={13} stripedPlaceholder={false} fallbackGlyph={glyph} fallbackLabel={`Photo unavailable for ${context.name}`} style={{height:'100%',width:'100%'}} />
         </View>
-        <View style={{gap:9}}>
+        <View style={{gap:12}}>
           {context.snapshot?<Text testID="ledger-snapshot" numberOfLines={3} ellipsizeMode="tail" className="font-dm text-label text-taupe" style={{width:'100%',lineHeight:19}}>{context.snapshot}</Text>:null}
+          <View testID="perks-detail-actions" style={{flexDirection:'row',flexWrap:'wrap',gap:8}}>{[...metadata,...(save?[save]:[]),...(directions?[directions]:[])].map(chip=>{
+            const content=<>{chip.glyph?<Glyph name={chip.glyph} size={12} color={colors['fg-muted']} />:null}<Text className="font-dm text-fine text-ink">{chip.label}</Text></>;
+            const style={minHeight:32,borderRadius:18,paddingHorizontal:10,backgroundColor:colors['surface-control'],borderWidth:1,borderColor:colors['edge-card'],flexDirection:'row' as const,alignItems:'center' as const,gap:5};
+            return chip.onPress?<TouchableOpacity key={chip.key} accessibilityRole="button" accessibilityLabel={chip.accessibilityLabel||chip.label} accessibilityState={{selected:chip.selected}} onPress={chip.onPress} style={style}>{content}</TouchableOpacity>:<View key={chip.key} style={style}>{content}</View>;
+          })}</View>
           {inline.length?<View testID="ledger-facts" style={{flexDirection:'row',flexWrap:'wrap',alignItems:'center',columnGap:12,rowGap:2}}>{inline.map((fact,index)=>{
             const onPress=/address|location|venue|destination/i.test(fact.label)?directions?.onPress:undefined;
             const content=<><Glyph name={fact.glyph||ledgerFactGlyph(fact.label)} size={12} color={colors['surface-accent']} />

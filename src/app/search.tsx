@@ -101,7 +101,7 @@ export default function SearchScreen() {
   };
   const reset=()=>{setQuery('');setScope('all');setBrowse(null);inputRef.current?.focus();};
 
-  return <Screen><ScreenScroll gap={0} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
+  return <Screen layer="secondary"><ScreenScroll gap={0} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
     <View testID="search-page" style={{paddingTop:4}}>
       <View className="mb-[17px] flex-row items-center justify-between">
         <TouchableOpacity accessibilityRole="button" accessibilityLabel="Back" activeOpacity={.7}

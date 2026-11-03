@@ -11,6 +11,7 @@ import type { ViatorPick } from '@/lib/viator';
 import { hoursSummary } from '@/lib/hours';
 import { placeForRestaurant, placeForListing } from '@/lib/catalog-identity';
 import type { DetailContent } from '@/lib/detail-content';
+import { VERIFIED_MENU_DETAILS } from '@/lib/verified-menu-details';
 import { formatMiles, milesBetween, type GeoPoint } from '@/lib/geo';
 import { currentDaypart } from '@/lib/daypart';
 
@@ -81,7 +82,7 @@ export function buildHomeGuide({city,nearest,places,events,picks,now,anchor,incl
     links:links({label:r.primaryAction.label,url:r.primaryAction.url},{label:'Menu',url:r.menuUrl},r.reserveUrl?{label:'Reservations',url:r.reserveUrl}:undefined,{label:'Official site',url:r.sourceUrl},directions(r.name,city,r.address)),saveKind:'restaurant',
   });}
   for (const p of places.filter(item=>!item.needsReview)) add({
-    city:p.city,detailContent:p.detailContent,kind:'place',id:p.id,name:p.name,caption:[p.cuisine,p.category.replace(/_/g,' ')].filter(Boolean).join(' · '),
+    city:p.city,detailContent:p.detailContent || VERIFIED_MENU_DETAILS[p.id],kind:'place',id:p.id,name:p.name,caption:[p.cuisine,p.category.replace(/_/g,' ')].filter(Boolean).join(' · '),
     description:p.detailContent?.description||[p.cuisine,p.category.replace(/_/g,' ')].filter(Boolean).join(' · '),image:p.image||p.detailContent?.photos?.[0]?.url,
     glyph:/cafe|bakery/.test(p.category)?'coffee':/park|reserve|garden|trailhead|viewpoint/.test(p.category)?'walk':/theatre|cinema|museum|gallery|venue|arts_centre|attraction/.test(p.category)?'landmark':/bar|pub|brewery/.test(p.category)?'drink':'food',category:p.category,facts:[{glyph:'pin',value:anchor?formatMiles(milesBetween(anchor,{latitude:p.lat,longitude:p.lon})):p.address?.split(',')[0] || p.category.replace(/_/g,' ')}],
     foodTags:normalized([p.name,p.category,p.cuisine].filter(Boolean).join(' ')),

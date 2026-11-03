@@ -1,8 +1,74 @@
 # Wayvee design system
 
-The approved Smoke & Bone light palette, Nightfall dark palette and editorial refinements are the current UI contract.
-Palette and dimensions come from `src/lib/tokens.ts`; regenerate the CSS,
-inline palette and Tailwind tokens together with `npm run tokens`.
+The approved **Local Perks** system is the current UI contract, including
+compact promo ribbons. The earlier iteration notes below are historical;
+this section takes precedence wherever they differ.
+
+## Current approval — Local Perks
+
+- Apply to Android first, using the same native React components on web.
+  Keep the gradient Vee spiral, Fraunces 500 headings, and DM Sans.
+- Use opaque, matte grounds to distinguish layers. No glass sheen or page
+  gradients in this direction. Generate all palettes from `src/lib/tokens.ts`.
+
+| Role | Light | Dark |
+| --- | --- | --- |
+| Primary | `#F6F3EC` | `#100E13` |
+| Secondary | `#E8E2D8` | `#17131B` |
+| Detail/sheet | `#FFFDF8` | `#201B22` |
+| Card | `#FFFFFF` | `#2B242B` |
+| Ribbon | `#EBD4BD` | `#2C222C` |
+| Search/input | `#FFFFFF` | `#2E252F` |
+| Navigation | `#FFFCF7` | `#1A141D` |
+| Action fill | `#AE512E` | `#E6AA78` |
+
+- Home opens with the Vee/Wayvee lockup, local offers/profile actions, city
+  and actual available weather, the shared 53px search, and four circular
+  photo shortcuts: Eat, Bars, Routes, Events. All four retain separate routes
+  and their existing location-scoped inventories.
+- **Promos are ribbons, not hero cards:** 110px total card height on Home,
+  100px on Discover. One short serif headline, one concise detail line,
+  small source photo at right, and a quiet action. Never restore a tall
+  multi-paragraph promo. Manual swiping, dots and arrows; no autoplay.
+- A few good tables uses photo cards with a trailing peek. After dinner uses
+  three vertical rows. For you remains time-dependent suggestions, and
+  Collections remain current editorial sets. Both keep the same 83px door
+  height. Preserve the nearest pool's existing radius and distance ordering.
+- Shared venue cards: white/charcoal, 18px corners, soft outer elevation,
+  faint perimeter, Fraunces names (five words maximum), quiet metadata,
+  separate save heart and add-to-evening action. Use verified photos; show
+  an explicit glyph while a remote photo is loading or unavailable. Bundled
+  photos must belong to that exact place, never another branch or stock.
+- The four category secondaries use the same row cards with 10px gaps,
+  always-visible shared search, real filters, result count and Back action.
+  Preserve source/photo filtering and the honest empty state.
+- Discover uses the same card family, source pools and section sequence:
+  On stage; More on stage; Find a good table; More good tables; After dinner;
+  A little wandering; Rooms worth knowing. Rows swipe horizontally where
+  approved. Keep See all on More good tables, not Find a good table.
+- Detail uses the lighter/deeper tertiary ground, name above a compact
+  photo, short snapshot, inline price/distance/Save/Directions chips,
+  existing full Menu Journal/Event Journal, official actions and persistent
+  Vee assistance. Retain source-backed menus, verified dish photographs,
+  photo galleries and provider pricing labels.
+- Vee retains its actual planner and search behavior, a light input surface,
+  the modern composer, and gradient mark. You retains real identity,
+  authenticated saves, location, appearance and account settings.
+- Navigation is opaque and full width, with four equal tabs and one small
+  underline for the active tab. No floating glass or rectangular active box.
+  Content uses 20px gutters through 400px and 24px above that.
+- The evening tray appears only after adding a stop. Its device-local draft
+  is scoped by city and today, survives a restart, allows up to eight stops,
+  and never implies a booking. Account saves keep existing authentication.
+- Offers come only from source records in the current catalog, with official
+  terms and availability caveat. Saved offers are device-local. Missing
+  offers use the Vee/stay feature ribbons, never invented promotions.
+- Vee's quiet Easter eggs: double-tap its Home mark for a real nearby wildcard;
+  Another cycles distinct catalog entries. A third explicit saved place can
+  reveal the note once. Motion respects the system preference; no reward or
+  purchase is implied.
+
+## Earlier iteration notes (superseded where different)
 
 ## Approved rules
 

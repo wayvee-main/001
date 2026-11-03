@@ -1,6 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from 'expo-router';
-import { useColorScheme } from 'nativewind';
 import { useCallback, useState, type ReactNode } from 'react';
 
 import { reportNavScroll, resetNavVisibility } from '@/lib/nav-visibility';
@@ -8,7 +7,6 @@ import {
   Platform,
   RefreshControl,
   ScrollView,
-  StyleSheet,
   Text,
   View,
   useWindowDimensions,
@@ -21,65 +19,38 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BackButton } from '@/components/ui';
 import { Glyph } from '@/components/glyph';
 import { useThemeColors } from '@/lib/theme';
-import { BACKDROP_GRADIENTS } from '@/lib/tokens';
+import { useLocalPerks } from '@/lib/local-perks-store';
+import { useActiveCity } from '@/lib/city';
+import { todayIso } from '@/lib/stay';
+import { perksAreaKey } from '@/lib/local-perks';
+import { useScoper } from '@/lib/store';
 
 const EDGE_FADE_WIDTH = 28;
 
-/** Match the original CSS angle at every aspect ratio. The projected diagonal
- * also gives native gradients the same stop positions as CSS's magic corners. */
-function gradientLine(angle: number, width: number, height: number) {
-  width = Math.max(1, width);
-  height = Math.max(1, height);
-  const radians = angle * Math.PI / 180;
-  const dx = Math.sin(radians), dy = -Math.cos(radians);
-  const length = Math.abs(width * dx) + Math.abs(height * dy);
-  return {
-    start: { x: 0.5 - dx * length / (2 * width), y: 0.5 - dy * length / (2 * height) },
-    end: { x: 0.5 + dx * length / (2 * width), y: 0.5 + dy * length / (2 * height) },
-  };
-}
-
-/** Theme-specific layered wash shared by screens, details and onboarding. The wash
- * stays behind content, never intercepts touches, and follows manual themes. */
-export function AppBackdrop({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
+/** Opaque Local Perks grounds distinguish primary, browse and detail layers. */
+export function AppBackdrop({ children, style, layer = 'primary' }: { children: ReactNode; style?: StyleProp<ViewStyle>; layer?: 'primary' | 'secondary' | 'tertiary' }) {
   const colors = useThemeColors();
-  const { colorScheme } = useColorScheme();
-  const theme = colorScheme === 'light' ? 'light' : 'dark';
-  const viewport = useWindowDimensions();
-  const [size, setSize] = useState({ width: viewport.width, height: viewport.height });
-  return (
-    <View style={[{ flex: 1, backgroundColor: colors.bg, overflow: 'hidden' }, style]}
-      onLayout={({ nativeEvent: { layout } }) => {
-        if (layout.width > 0 && layout.height > 0) setSize(current => current.width === layout.width && current.height === layout.height ? current : { width: layout.width, height: layout.height });
-      }}>
-      <View testID="app-background-gradient" pointerEvents="none" accessible={false} style={StyleSheet.absoluteFill}>
-        {BACKDROP_GRADIENTS[theme].map(layer => <LinearGradient key={layer.angle} pointerEvents="none"
-          colors={layer.colors} locations={layer.locations}
-          {...gradientLine(layer.angle, size.width, size.height)}
-          style={StyleSheet.absoluteFill} />)}
-      </View>
-      {children}
-    </View>
-  );
+  const backgroundColor = layer === 'secondary' ? colors['page-secondary'] : layer === 'tertiary' ? colors['page-tertiary'] : colors.bg;
+  return <View style={[{ flex: 1, backgroundColor, overflow: 'hidden' }, style]}>{children}</View>;
 }
 
-/** The approved extra 14px on each side, including narrow phones. */
+/** Local Perks content gutters, including narrow phones. */
 export function useAppGutter(): number {
   const { width } = useWindowDimensions();
-  return width <= 400 ? 30 : 34;
+  return width <= 400 ? 20 : 24;
 }
 
 /** Full-height app background with safe-area top padding. */
-export function Screen({ children }: { children: ReactNode }) {
+export function Screen({ children, layer = 'primary' }: { children: ReactNode; layer?: 'primary' | 'secondary' | 'tertiary' }) {
   const insets = useSafeAreaInsets();
   return (
-    <AppBackdrop style={{ paddingTop: insets.top + 8 }}>
+    <AppBackdrop layer={layer} style={{ paddingTop: insets.top + 8 }}>
       {children}
     </AppBackdrop>
   );
 }
 
-/** Standard scrolling body: approved 30/34px gutters, spaced sections. Pass refreshing/onRefresh to enable pull-to-refresh. */
+/** Standard scrolling body: Local Perks 20/24px gutters and spaced sections. Pass refreshing/onRefresh to enable pull-to-refresh. */
 /** Height of the tab bar above the safe-area inset, so a tab screen's last
  * element can be scrolled clear of it: 9pt of top padding, the 5pt active dot,
  * a 21pt glyph, a 15pt label, the 3pt gaps between them and 2pt under the label
@@ -87,7 +58,7 @@ export function Screen({ children }: { children: ReactNode }) {
  * all of it, plus the bar's own bottom pad, or the control is unreachable. */
 const TAB_BAR_SPACE = 64;
 /** The floor (tabs)/_layout.tsx puts under the bar's bottom padding. */
-const TAB_BAR_MIN_BOTTOM = 18;
+
 
 export function ScreenScroll({
   children,
@@ -118,6 +89,9 @@ export function ScreenScroll({
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const gutter = useAppGutter();
+  const activeCity = useActiveCity(), draft = useLocalPerks(), device = useScoper(state => state.deviceLocation);
+  const city = perksAreaKey(activeCity, device);
+  const traySpace = draft.date === todayIso() && draft.stops.some(stop => stop.city === city) ? 55 : 0;
 
   // Only tab screens have a bar over them, so only they drive it — and each
   // one hands it back on focus, or leaving a screen scrolled down would hand
@@ -142,7 +116,7 @@ export function ScreenScroll({
         maxWidth: 720,
         alignSelf: 'center',
         paddingHorizontal: gutter,
-        paddingBottom: clearsTabBar ? 24 + TAB_BAR_SPACE + insets.bottom + TAB_BAR_MIN_BOTTOM : 24,
+        paddingBottom: clearsTabBar ? 24 + TAB_BAR_SPACE + insets.bottom + traySpace : 24,
         gap,
         ...(centerWhenShort ? { flexGrow: 1, justifyContent: 'center' as const } : null),
       }}>

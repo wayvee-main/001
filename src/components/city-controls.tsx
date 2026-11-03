@@ -15,7 +15,7 @@ export function CitySearchBar({city,testID,labelTestID,inputTestID,inputLabel,pl
   onChangeText?:(text:string)=>void;onPress?:()=>void;onSubmit?:(query:string)=>void;
 }) {
   const colors=useThemeColors(),control=useControlSurface(),primary=useControlSurface(false,true);
-  const label=placeholder || `Search the city of ${/^san francisco$/i.test(city)?'SF':city}`;
+  const label=placeholder || `Search ${/^san francisco$/i.test(city)?'SF':city}`;
   const submit=()=>{Keyboard.dismiss();onSubmit?.(value.trim());};
   const arrow=<View style={[primary,{width:37,height:37,borderRadius:999,alignItems:'center',justifyContent:'center'}]}>
     <Glyph name="arrow" size={17} color={colors['on-accent']} />

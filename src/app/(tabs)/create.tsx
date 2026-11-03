@@ -33,6 +33,7 @@ import {
 } from 'react-native';
 import { useConstraintPicker } from '@/components/constraint-picker';
 import { Glyph } from '@/components/glyph';
+import { LocalPerksHeader } from '@/components/local-perks';
 import { NoteFact } from '@/components/field-notes';
 import { WorkingVee } from '@/components/vee-mark';
 import { Screen, ScreenScroll } from '@/components/layout';
@@ -68,7 +69,6 @@ import { currentNightIso, isStayActive, parseDateOnly, stayArcPosition } from '@
 import { useScoper } from '@/lib/store';
 import { tasteVocabulary } from '@/lib/taste';
 import { useThemeColors } from '@/lib/theme';
-import { withAlpha } from '@/lib/tokens';
 import { useViatorPicks } from '@/lib/viator';
 import { useWeatherNow } from '@/lib/weather';
 
@@ -777,6 +777,7 @@ export default function CreateScreen() {
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
           automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}>
+          <LocalPerksHeader />
           {/* The plan being refined, kept on the screen you refine it from.
             * Refine used to land here with nothing on it, so a guest described
             * a change to something they could no longer see — and the merge
@@ -829,16 +830,16 @@ export default function CreateScreen() {
             * controls restating defaults made the assumptions look like the
             * point of the screen. */}
           {!showingLiveMatches ? (
-            <View testID="vee-open-letter" style={{marginTop:askPlan?18:46,alignItems:'flex-start'}}>
+            <View testID="vee-open-letter" style={{marginTop:askPlan?18:42,alignItems:'flex-start'}}>
               <WorkingVee size={47} animate={screenFocused} label="Vee" />
               <Text className="font-fraunces text-ink" style={{marginTop:18,fontSize:screenWidth<=360?26:28,lineHeight:34,letterSpacing:-.45}}>
-                {askPlan ? 'What should change?' : 'Where to?'}
+                {askPlan ? 'What should change?' : 'Let’s make a little evening.'}
               </Text>
               {/* Only under the opening question. Beneath "What should change?"
                 * it would introduce Vee to someone already mid-conversation. */}
               {askPlan ? null : (
                 <Text className="font-dm text-fine text-taupe" style={{marginTop:6}}>
-                  Tell Vee the night you want. Vee finds it.
+                  Your city, with a little help.
                 </Text>
               )}
             </View>
@@ -851,7 +852,7 @@ export default function CreateScreen() {
                 marginTop: showingLiveMatches ? 20 : 30,
               }}>
             <View testID="vee-composer-box" style={[raisedSurface,{
-              backgroundColor:colorScheme==='light'?colors['surface-input']:withAlpha(colors['surface-raised'],.8),
+              backgroundColor:colors['surface-input'],
               ...(colorScheme==='light'?{boxShadow:'0 2px 7px rgba(49,32,57,.045)'}:{}),
               borderRadius:18,paddingHorizontal:10,paddingTop:5,paddingBottom:12,
             }]}>
@@ -872,7 +873,7 @@ export default function CreateScreen() {
               returnKeyType="send"
               onSubmitEditing={() => void submitAsk(promptReady ? promptText : askExampleLabel)}
               className="min-w-0 font-dm text-ink"
-              style={{ height:105.6,fontSize:16,lineHeight:23.2,paddingVertical:8,paddingHorizontal:4,
+              style={{ height:119,fontSize:16,lineHeight:23.2,paddingVertical:8,paddingHorizontal:4,
                 backgroundColor:'transparent',borderWidth:0,textAlignVertical:'top',
                 ...(Platform.OS === 'web' ? { outlineWidth:0,caretColor:colors['accent-fill'] } as any : {}) }}
             />
@@ -882,10 +883,6 @@ export default function CreateScreen() {
                 <Glyph name="plus" size={14} color={colors['fg-muted']} /><Text className="font-dm text-fine text-taupe">Details</Text>
               </TouchableOpacity>
               <View className="flex-row items-center" style={{gap:9}}>
-                <TouchableOpacity testID="vee-composer-mic" accessibilityRole="button" accessibilityLabel="Focus the Vee composer" onPress={() => focusedInputRef.current?.focus()} hitSlop={4}
-                  style={control} className="h-9 w-9 items-center justify-center rounded-full">
-                  <Glyph name="mic" size={16} color={colors.fg} />
-                </TouchableOpacity>
             <Animated.View style={{ transform: [{ scale: sendMotion.interpolate({ inputRange: [0, 1], outputRange: [0.94, 1] }) }] }}>
               {/* Live on an empty field, not disabled. The placeholder is a
                 * real, answerable ask built from tonight's anchor, so Send

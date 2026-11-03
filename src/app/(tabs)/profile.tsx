@@ -4,23 +4,22 @@ import { useEffect, useState } from 'react';
 import { Linking, Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Glyph } from '@/components/glyph';
+import { LocalPerksHeader } from '@/components/local-perks';
 import { Screen, ScreenScroll, useAppGutter } from '@/components/layout';
 import { APPEARANCE_OPTIONS, restoreAppearance, saveAppearance, type AppearancePreference } from '@/lib/appearance';
 import { initialsFor } from '@/lib/auth';
 import { switchCity } from '@/lib/bootstrap';
 import { useActiveCity, useActiveCityName, useCityOptions } from '@/lib/city';
-import { useNow } from '@/lib/clock';
-import { EVENTS, isCurrentEvent } from '@/lib/data';
 import { stayProgress } from '@/lib/stay';
 import { useScoper } from '@/lib/store';
-import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
+import { useControlSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
 
 function Setting({label,note,glyph,onPress}:{label:string;note:string;glyph:string;onPress:()=>void}) {
-  const colors=useThemeColors(),surface=useRaisedSurface(1);
+  const colors=useThemeColors();
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`${label}. ${note}`} onPress={onPress} activeOpacity={.78}
-    className="flex-row items-center gap-x-2.5 rounded-setting bg-surface-raised px-3 py-[13px] border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark"
-    style={[surface,{minHeight:62}]}>
+    className="flex-row items-center gap-x-2.5 py-[13px]"
+    style={{minHeight:54,borderBottomWidth:1,borderBottomColor:colors['edge-card']}}>
     <Glyph name={glyph} size={18} color={colors['fg-muted']} />
     <View className="min-w-0 flex-1"><Text className="font-dm text-[13px] leading-[18px] text-ink">{label}</Text>
       <Text className="mt-[3px] font-dm text-fine text-taupe">{note}</Text></View>
@@ -31,17 +30,11 @@ function Setting({label,note,glyph,onPress}:{label:string;note:string;glyph:stri
 export default function ProfileScreen() {
   const router=useRouter(),s=useScoper(),colors=useThemeColors(),control=useControlSurface();
   const city=useActiveCity(),cityName=useActiveCityName(),cityOptions=useCityOptions();
-  const gutter=useAppGutter(),insets=useSafeAreaInsets(),now=useNow();
+  const gutter=useAppGutter(),insets=useSafeAreaInsets();
   const [appearance,setAppearance]=useState<AppearancePreference>('system');
   const [picker,setPicker]=useState<'city'|'appearance'|null>(null);
   useEffect(()=>{restoreAppearance().then(setAppearance).catch(()=>undefined);},[]);
   const displayName=s.session?.user.name||'Hello, wanderer.';
-  const currentPlanCount=s.plans.filter(id=>EVENTS[id]&&isCurrentEvent(EVENTS[id],now)).length;
-  const stats=[
-    {value:s.savedPlaceKeys.length,label:'Saved',href:'/saved'},
-    {value:currentPlanCount,label:'Plans',href:'/plans'},
-    {value:s.followedVenues.length,label:'Following',href:'/following'},
-  ];
   const progress=s.stay?stayProgress(s.stay):null;
   const locationNote=s.locationStatus==='granted'
     ?s.deviceLocation?.label||'Device location enabled'
@@ -63,7 +56,9 @@ export default function ProfileScreen() {
     setPicker(null);void switchCity(slug).catch(()=>s.showToast('Could not switch city'));
   };
   return <Screen><ScreenScroll gap={20} clearsTabBar>
-    <View className="mt-2 flex-row items-center gap-x-3">
+    <LocalPerksHeader profile={false} />
+    <Text accessibilityRole="header" className="font-fraunces text-ink" style={{fontSize:30,lineHeight:35,letterSpacing:-.7}}>Your kind of city.</Text>
+    <View className="flex-row items-center gap-x-3" style={{backgroundColor:colors['surface-raised'],borderWidth:1,borderColor:colors['edge-card'],borderRadius:20,padding:16}}>
       <View className="items-center justify-center rounded-full bg-surface-raised border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark" style={{width:44,height:44,borderWidth:1,borderColor:colors['edge-card'],borderBottomColor:colors['edge-card-bottom'],overflow:'hidden'}}>
         {s.profileAvatarUrl?<Image source={{uri:s.profileAvatarUrl}} contentFit="cover" style={{width:44,height:44}} />:
           <Text className="font-dm-medium text-[17px] text-ink">{s.session?initialsFor(displayName):'G'}</Text>}
@@ -83,15 +78,11 @@ export default function ProfileScreen() {
         <Glyph name="arrow" size={14} color={colors['fg-accent']} />
       </TouchableOpacity>
     </View>:null}
-    <View className="flex-row border-y border-edge-faint py-3.5">
-      {stats.map((x,index)=><TouchableOpacity key={x.label} accessibilityRole="button" accessibilityLabel={`${x.label}: ${x.value}`} onPress={()=>router.push(x.href as never)} activeOpacity={.78}
-        className="min-w-0 flex-1 items-center px-[5px]" style={{borderColor:colors['edge-faint'],borderLeftWidth:index?1:0,minHeight:44}}>
-        <Text className="font-fraunces text-[23px] leading-[28px] text-ink">{x.value}</Text>
-        <Text className="mt-1 font-dm text-fine text-taupe">{x.label}</Text>
-      </TouchableOpacity>)}
-    </View>
     <View className="gap-y-2">
-      <Text className="mb-1 font-fraunces text-section text-ink">Your starting point</Text>
+      <Text className="mb-1 font-fraunces text-section text-ink">Keep the good ones close</Text>
+      <Setting label="Saved places" note={`${s.savedPlaceKeys.length} good finds`} glyph="heart" onPress={()=>router.push('/saved')} />
+      <Setting label="Your evening" note="The places you’re keeping in mind" glyph="route" onPress={()=>router.push('/evening')} />
+      <Setting label="Local offers" note="A little extra, from the venue" glyph="tag" onPress={()=>router.push('/offers')} />
       <Setting label={s.stay?.propertyName||'Link your stay'} note={progress?`Night ${progress.currentNight} of ${progress.totalNights}`:'Hotel, Airbnb, wherever you call home'} glyph="briefcase" onPress={s.openStaySheet} />
       <Setting label="Your taste" note="The things you gravitate toward" glyph="spark" onPress={()=>router.push('/taste')} />
       <Setting label="My plans" note="Saved evenings and upcoming stops" glyph="calendar" onPress={()=>router.push('/plans')} />

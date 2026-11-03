@@ -17,6 +17,7 @@ import { AppErrorBoundary } from '@/components/error-boundary';
 import { AppBackdrop } from '@/components/layout';
 import { LaunchScreen } from '@/components/onboarding';
 import { GlobalOverlays } from '@/components/overlays';
+import { LocalPerksOverlays } from '@/components/local-perks-overlays';
 import { applyAppearance, restoreAppearance } from '@/lib/appearance';
 import { startContentHydration, useContentHydrating } from '@/lib/bootstrap';
 import { checkWeatherRecovery, markRecoveryNotified, shouldNotifyRecovery } from '@/lib/concierge/recovery';
@@ -177,6 +178,7 @@ function AppShell() {
           <Stack.Screen name="answer" options={{ animation: 'fade_from_bottom', gestureEnabled: true }} />
         </Stack>
         <GlobalOverlays />
+        <LocalPerksOverlays />
       </FadeIn>
       {opening}
     </AppBackdrop>

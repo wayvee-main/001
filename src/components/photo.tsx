@@ -12,6 +12,7 @@ import { useThemeColors } from '@/lib/theme';
  */
 export function Photo({
   uri,
+  source,
   radius = 9,
   fit = 'cover',
   stripedPlaceholder = true,
@@ -21,6 +22,7 @@ export function Photo({
   children,
 }: {
   uri?: string;
+  source?: number;
   radius?: number;
   fit?: 'cover' | 'contain';
   stripedPlaceholder?: boolean;
@@ -33,7 +35,7 @@ export function Photo({
   const colors = useThemeColors();
   const frame = radius > 0 ? {borderWidth:1,borderColor:colors['edge-card'],borderBottomColor:colors['edge-card-bottom']} : {};
   const [failedUri,setFailedUri]=useState<string|null>(null);
-  if (!uri || failedUri===uri) {
+  if (!source && (!uri || failedUri===uri)) {
     if(fallbackGlyph)return <View accessible accessibilityRole="image" accessibilityLabel={fallbackLabel} testID="place-photo-fallback"
       style={[frame,{borderRadius:radius,overflow:'hidden',backgroundColor:colors['surface-soft'],alignItems:'center',justifyContent:'center'},style]}>
       <Glyph name={fallbackGlyph} size={23} color={colors['fg-muted']} />{children}
@@ -53,12 +55,12 @@ export function Photo({
         <Stripes radius={radius} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
       ) : null}
       <Image
-        source={{ uri }}
+        source={source || { uri }}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
         contentFit={fit}
         transition={200}
         cachePolicy="memory-disk"
-        onError={fallbackGlyph?()=>setFailedUri(uri):undefined}
+        onError={fallbackGlyph?()=>setFailedUri(uri ?? null):undefined}
       />
       {children}
     </View>

@@ -11,8 +11,8 @@
  * aliases are kept pointing at the same hex so existing className strings in src/app
  * and src/components keep working; new code should reach for the semantic name.
  *
- * Palette: Smoke & Bone wash and matte cards in light, the original
- * Nightfall wash in dark, with restrained orange accents.
+ * Palette: Local Perks warm paper, white matte cards and compact apricot ribbons;
+ * opaque Nightfall grounds in dark, with restrained orange accents.
  * Filled controls use the smoke/light and peach/dark pairing with
  * theme-specific on-accent ink. Legacy color aliases follow the same orange
  * family; the original gradient mark keeps its brand colors.
@@ -36,94 +36,63 @@ export function withAlpha(hex: string, alpha: number): string {
  * space-separated RGB triples so Tailwind's <alpha-value> opacity modifier
  * (bg-surface/50) keeps working. */
 export const ROLES: Record<string, ThemeValue> = {
-  bg: { light: '#EFEEEB', dark: '#151117' }, // mineral paper beneath the wash
-  // Smoke & Bone carries through cards and sheets. Search and
+  bg: { light: '#F6F3EC', dark: '#100E13' }, // Local Perks primary ground
+  // Local Perks cards use a dedicated matte surface. Search and
   // navigation have separate roles so their lighter treatment stays consistent.
-  surface: { light: '#E3E1DE', dark: '#29252A' },
-  'surface-raised': { light: '#E3E1DE', dark: '#29252A' },
-  'surface-soft': { light: '#E3E1DE', dark: '#29252A' },
-  'surface-control': { light: '#FFFEFA', dark: '#29252A' },
-  'surface-input': { light: '#FFFEFA', dark: '#29252A' }, // text fields stay lighter than cards
-  'surface-ribbon': { light: '#DBD8D4', dark: '#100D13' }, // Home ribbon and stay anchor
-  'surface-search': { light: '#FFFEFA', dark: '#28372F' },
-  'surface-navigation': { light: '#F9F8F5', dark: '#29252A' },
-  'surface-sunk': { light: '#D4D0CB', dark: '#100D13' }, // input wells, sheet track
-  fg: { light: '#28252A', dark: '#FAF2E8' }, // aubergine editorial ink
-  'fg-muted': { light: '#615C60', dark: '#BDAFBD' },
-  'card-ink': { light: '#28252A', dark: '#F5EDE3' },
-  'card-muted': { light: '#615C60', dark: '#C3B9AF' },
-  'surface-accent': { light: '#AA5034', dark: '#F0835C' },
-  'control-edge': { light: '#CDC9C5', dark: '#4F444D' },
-  'selected-surface': { light: '#302832', dark: '#29192E' },
-  'on-selected': { light: '#FFF8F1', dark: '#FFF7ED' },
-  'selected-glyph': { light: '#F5BCA7', dark: '#F0835C' },
-  'navigation-muted': { light: '#D8C7DD', dark: '#D8C7DD' },
+  surface: { light: '#FFFFFF', dark: '#2B242B' },
+  'surface-raised': { light: '#FFFFFF', dark: '#2B242B' },
+  'surface-soft': { light: '#FFFFFF', dark: '#2B242B' },
+  'surface-control': { light: '#FFFFFF', dark: '#2E252F' },
+  'surface-input': { light: '#FFFFFF', dark: '#2E252F' }, // text fields stay lighter than cards
+  'surface-ribbon': { light: '#EBD4BD', dark: '#2C222C' }, // Home ribbon and stay anchor
+  'surface-search': { light: '#FFFFFF', dark: '#2E252F' },
+  'surface-navigation': { light: '#FFFCF7', dark: '#1A141D' },
+  'surface-sunk': { light: '#E8E2D8', dark: '#17131B' }, // input wells, sheet track
+  fg: { light: '#2D2925', dark: '#F6ECE0' }, // aubergine editorial ink
+  'fg-muted': { light: '#64584F', dark: '#BDAFBA' },
+  'card-ink': { light: '#2D2925', dark: '#F6ECE0' },
+  'card-muted': { light: '#64584F', dark: '#BDAFBA' },
+  'surface-accent': { light: '#AE512E', dark: '#E6AA78' },
+  'control-edge': { light: '#D5C8B8', dark: '#4C3D49' },
+  'selected-surface': { light: '#302923', dark: '#E6AA78' },
+  'on-selected': { light: '#FFF9EF', dark: '#2B1C12' },
+  'selected-glyph': { light: '#FFF9EF', dark: '#2B1C12' },
+  'navigation-muted': { light: '#FFF9EF', dark: '#2B1C12' },
   // Home's reference glyph cards use off-white; other card materials stay separate.
-  'home-tile': { light: '#F8F7F4', dark: '#29252A' },
-  'surface-discovery': { light: '#E3E1DE', dark: '#29252A' },
-  'home-tile-glyph': { light: '#AA5034', dark: '#F0835C' },
-  'home-tile-well': { light: '#DBD8D4', dark: '#48312E' },
-  'tile-eat': { light: '#F8F7F4', dark: '#29252A' },
-  'tile-bars': { light: '#F8F7F4', dark: '#29252A' },
-  'tile-routes': { light: '#F8F7F4', dark: '#29252A' },
-  'tile-events': { light: '#F8F7F4', dark: '#29252A' },
-  'fg-accent': { light: '#8F3F29', dark: '#F0835C' }, // deeper accent keeps small text readable on tints
+  'home-tile': { light: '#FFFFFF', dark: '#2B242B' },
+  'surface-discovery': { light: '#FFFFFF', dark: '#2B242B' },
+  'home-tile-glyph': { light: '#AE512E', dark: '#E6AA78' },
+  'home-tile-well': { light: '#F0DDC7', dark: '#392A2B' },
+  'tile-eat': { light: '#FFFFFF', dark: '#2B242B' },
+  'tile-bars': { light: '#FFFFFF', dark: '#2B242B' },
+  'tile-routes': { light: '#FFFFFF', dark: '#2B242B' },
+  'tile-events': { light: '#FFFFFF', dark: '#2B242B' },
+  'fg-accent': { light: '#98431F', dark: '#E6AA78' }, // deeper accent keeps small text readable on tints
   // One theme-specific orange for action fills, icons, rails and active tabs.
-  accent: { light: '#AA5034', dark: '#F0835C' }, // brand accent — icons, borders, rails
-  'accent-fill': { light: '#AA5034', dark: '#F0835C' }, // approved editorial control fill
-  'on-accent': { light: '#FFFAF4', dark: '#2C1811' }, // theme-paired CTA ink
-  open: { light: '#8F3F29', dark: '#F0835C' }, // open-now / confirmed / live; status stays explicit in its label
-  warm: { light: '#AA5034', dark: '#F0835C' }, // legacy category fill, now the shared orange
-  'warm-strong': { light: '#FFFAF4', dark: '#2C1811' }, // ink on the legacy category fill
+  accent: { light: '#AE512E', dark: '#E6AA78' }, // brand accent — icons, borders, rails
+  'accent-fill': { light: '#AE512E', dark: '#E6AA78' }, // approved editorial control fill
+  'on-accent': { light: '#FFF9F0', dark: '#2C1D13' }, // theme-paired CTA ink
+  open: { light: '#98431F', dark: '#E6AA78' }, // open-now / confirmed / live; status stays explicit in its label
+  warm: { light: '#AE512E', dark: '#E6AA78' }, // legacy category fill, now the shared orange
+  'warm-strong': { light: '#FFF9F0', dark: '#2C1D13' }, // ink on the legacy category fill
   // Readable ink for legacy category tints.
-  'warm-ink': { light: '#8F3F29', dark: '#F0835C' }, // text on warm-tint
-  vee: { light: '#AA5034', dark: '#F0835C' }, // legacy Vee accents, now the shared orange
-  'vee-strong': { light: '#8F3F29', dark: '#F0835C' }, // legacy Vee text, now the shared readable orange
-  'accent-tint': { light: '#E3E1DE', dark: '#29252A' },
-  'warm-tint': { light: '#E3E1DE', dark: '#29252A' },
-  'vee-tint': { light: '#E3E1DE', dark: '#29252A' },
+  'warm-ink': { light: '#98431F', dark: '#E6AA78' }, // text on warm-tint
+  vee: { light: '#AE512E', dark: '#E6AA78' }, // legacy Vee accents, now the shared orange
+  'vee-strong': { light: '#98431F', dark: '#E6AA78' }, // legacy Vee text, now the shared readable orange
+  'accent-tint': { light: '#F0DDC7', dark: '#392A2B' },
+  'warm-tint': { light: '#F0DDC7', dark: '#392A2B' },
+  'vee-tint': { light: '#F0DDC7', dark: '#392A2B' },
+  'page-secondary': { light: '#E8E2D8', dark: '#17131B' },
+  'page-tertiary': { light: '#FFFDF8', dark: '#201B22' },
+  'ribbon-ink': { light: '#3D2B20', dark: '#F8EADC' },
   danger: { light: '#A02F38', dark: '#FF6B6D' }, // closed / sold out / error — the one functional red
 };
 
-/** App-wide washes, painted back to front. Light matches the selected
- * Smoke & Bone preview; dark keeps the original Nightfall layers. Angles
- * are CSS angles, with hue-matched transparent endpoints for native fades. */
-export const BACKDROP_GRADIENTS = {
-  light: [
-    {
-      angle: 160,
-      locations: [0, 0.52, 1],
-      colors: ['#EFEEEB00', '#EFEEEB26', '#EFEEEB00'],
-    },
-    {
-      angle: 135,
-      locations: [0, 0.5, 1],
-      colors: ['#B895831A', '#B895830A', '#B8958300'],
-    },
-    {
-      angle: 230,
-      locations: [0, 0.62, 1],
-      colors: ['#71678A00', '#71678A1A', '#71678A00'],
-    },
-  ],
-  dark: [
-    {
-      angle: 230,
-      locations: [0, 0.42, 1],
-      colors: ['#E85D2C1C', '#E85D2C09', '#E85D2C00'],
-    },
-    {
-      angle: 121,
-      locations: [0.16, 0.52, 0.9],
-      colors: ['#6F5BD100', '#6F5BD11B', '#6F5BD100'],
-    },
-    {
-      angle: 226,
-      locations: [0.08, 0.48, 0.88],
-      colors: ['#FFC75700', '#FF92710E', '#FFC75700'],
-    },
-  ],
-} as const;
+/** Local Perks uses opaque, matte page grounds. Retain this typed export for
+ * the contrast audit and any previous gradient-aware consumers. */
+export const BACKDROP_GRADIENTS: Record<'light' | 'dark', readonly {
+  angle: number; locations: readonly [number, number, number]; colors: readonly [string, string, string];
+}[]> = { light: [], dark: [] };
 
 /** Roles with fixed opacity baked in (not run through <alpha-value>). Base
  * hue is fg, since edge = "a hairline of ink/paper", not its own color. */
@@ -131,8 +100,8 @@ export const EDGE_ROLES: Record<string, { base: 'fg'; alpha: number; lightBase?:
   edge: { base: 'fg', alpha: 0.12 }, // borders / dividers
   'edge-soft': { base: 'fg', alpha: 0.08 }, // placeholder stripe C
   'edge-faint': { base: 'fg', alpha: 0.04 }, // quiet dividers and decorative rules
-  'edge-card': { base: 'fg', alpha: 0.04, lightBase: '#2E2B2F', lightAlpha: 0.13 },
-  'edge-card-bottom': { base: 'fg', alpha: 0.04, lightBase: '#2E2B2F', lightAlpha: 0.17 },
+  'edge-card': { base: 'fg', alpha: 0.12, lightBase: '#8A715C', lightAlpha: 0.22 },
+  'edge-card-bottom': { base: 'fg', alpha: 0.12, lightBase: '#8A715C', lightAlpha: 0.22 },
 };
 
 /** Same value in both themes — either brand hue or a translucent tint over

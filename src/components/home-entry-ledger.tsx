@@ -2,6 +2,7 @@ import * as Linking from 'expo-linking';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 import { Glyph } from '@/components/glyph';
+import { PerksEveningAction } from '@/components/local-perks';
 import { EventJournal, RestaurantJournal, DetailGoods, JournalHeading } from '@/components/detail-journal';
 import { LedgerCompanionScreen, type LedgerChip, type LedgerFold } from '@/components/ledger-companion';
 import { useRouter } from 'expo-router';
@@ -52,7 +53,7 @@ export function HomeEntryLedger({entry}: {entry:HomeGuideEntry}) {
   </View>;
   return <LedgerCompanionScreen key={entry.kind+':'+entry.id} context={context} image={content?.photos?.[0]?.url||entry.image||restaurant?.image} glyph={entry.glyph} eyebrow={DETAIL_LABELS[entry.kind]} headingEyebrow={event?.venue}
     chips={chips} primaryAction={primaryAction} essentials={essentials} compactFacts={event?eventJournalFacts(event):undefined} folds={folds}
-    journalHandlesActions={Boolean(restaurant||event)} journal={restaurant||event||content||entry.sections?.length||entry.kind==='venue'?goods:undefined} />;
+    journalHandlesActions={Boolean(restaurant||event)} journal={restaurant||event||content||entry.sections?.length||entry.kind==='venue'?goods:undefined}><PerksEveningAction entry={entry} /></LedgerCompanionScreen>;
 }
 
 function VenueListings({id}: {id:string}) {
