@@ -6,6 +6,7 @@ import { DetailAssistantDock } from '@/components/detail-assistant';
 import { Glyph } from '@/components/glyph';
 import { HomeGuideScreen } from '@/components/home-field-guide';
 import { Photo } from '@/components/photo';
+import type { PhotoCandidate } from '@/components/reliable-image';
 import { useActiveCityName } from '@/lib/city';
 import { useNow } from '@/lib/clock';
 import type { DetailContext } from '@/lib/detail-assistant';
@@ -43,8 +44,8 @@ export function JournalFold({label,children,testID}: {label:string;children:Reac
 
 /** Open Dossier identity, inline facts and the selected Journal content.
  * Source-specific controls remain real native components. */
-export function LedgerCompanionScreen({context,image,glyph='landmark',eyebrow,headingEyebrow,chips=[],primaryAction,essentials=[],compactFacts,folds=[],journal,journalHandlesActions=false,children,navActive='home'}: {
-  context:DetailContext;image?:string;glyph?:string;eyebrow?:string;headingEyebrow?:string;chips?:LedgerChip[];primaryAction?:LedgerChip;essentials?:LedgerFact[];compactFacts?:LedgerFact[];folds?:LedgerFold[];journal?:ReactNode;journalHandlesActions?:boolean;children?:ReactNode;
+export function LedgerCompanionScreen({context,image,photos,glyph='landmark',eyebrow,headingEyebrow,chips=[],primaryAction,essentials=[],compactFacts,folds=[],journal,journalHandlesActions=false,children,navActive='home'}: {
+  context:DetailContext;image?:string;photos?:readonly PhotoCandidate[];glyph?:string;eyebrow?:string;headingEyebrow?:string;chips?:LedgerChip[];primaryAction?:LedgerChip;essentials?:LedgerFact[];compactFacts?:LedgerFact[];folds?:LedgerFold[];journal?:ReactNode;journalHandlesActions?:boolean;children?:ReactNode;
   navActive?:'home'|'discover'|'create'|'profile';
 }) {
   const colors=useThemeColors(),now=useNow(),city=useActiveCityName(),router=useRouter();
@@ -75,7 +76,7 @@ export function LedgerCompanionScreen({context,image,glyph='landmark',eyebrow,he
           {caption?<Text testID="ledger-chip-row" numberOfLines={2} className="font-dm text-fine text-taupe" style={{lineHeight:17}}>{caption}</Text>:null}
         </View>
         <View testID="ledger-photo" style={{height:context.kind==='event'?170:160,borderRadius:13,overflow:'hidden'}}>
-          <Photo uri={image} source={HOME_TILE_PREVIEW_PHOTOS[`/${context.kind}/${context.id}`]?.source} fit="cover" radius={13} stripedPlaceholder={false} fallbackGlyph={glyph} fallbackLabel={`Photo unavailable for ${context.name}`} style={{height:'100%',width:'100%'}} />
+          <Photo uri={image} source={HOME_TILE_PREVIEW_PHOTOS[`/${context.kind}/${context.id}`]?.source} candidates={photos} fit="cover" radius={13} stripedPlaceholder={false} fallbackGlyph={glyph} fallbackLabel={`Photo unavailable for ${context.name}`} style={{height:'100%',width:'100%'}} />
         </View>
         <View style={{gap:12}}>
           {context.snapshot?<Text testID="ledger-snapshot" numberOfLines={3} ellipsizeMode="tail" className="font-dm text-label text-taupe" style={{width:'100%',lineHeight:19}}>{context.snapshot}</Text>:null}

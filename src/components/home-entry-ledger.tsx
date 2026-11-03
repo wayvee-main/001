@@ -51,7 +51,9 @@ export function HomeEntryLedger({entry}: {entry:HomeGuideEntry}) {
     {entry.kind==='venue'?<VenueListings id={entry.id} />:null}
     {!restaurant?(entry.sections||[]).map(section=><View key={section.title} style={{gap:10}}><JournalHeading title={section.title} />{section.lines.map((line,index)=><Text key={index} className="font-dm text-label text-taupe" style={{lineHeight:20}}>{line}</Text>)}</View>):null}
   </View>;
-  return <LedgerCompanionScreen key={entry.kind+':'+entry.id} context={context} image={content?.photos?.[0]?.url||entry.image||restaurant?.image} glyph={entry.glyph} eyebrow={DETAIL_LABELS[entry.kind]} headingEyebrow={event?.venue}
+  return <LedgerCompanionScreen key={entry.kind+':'+entry.id} context={context} image={content?.photos?.[0]?.url||entry.image||restaurant?.image}
+    photos={[...(content?.photos||[]).slice(0,5).map(photo=>({source:photo.url,label:photo.caption||`Photo from ${entry.name}`})),
+      ...[entry.image,restaurant?.image].flatMap(source=>source?[{source,label:`Photo from ${entry.name}`}]:[])]} glyph={entry.glyph} eyebrow={DETAIL_LABELS[entry.kind]} headingEyebrow={event?.venue}
     chips={chips} primaryAction={primaryAction} essentials={essentials} compactFacts={event?eventJournalFacts(event):undefined} folds={folds}
     journalHandlesActions={Boolean(restaurant||event)} journal={restaurant||event||content||entry.sections?.length||entry.kind==='venue'?goods:undefined}><PerksEveningAction entry={entry} /></LedgerCompanionScreen>;
 }

@@ -1,9 +1,9 @@
-import { Image } from 'expo-image';
-import { useState, type ReactNode } from 'react';
-import { View, type StyleProp, type ViewStyle } from 'react-native';
+import { type ReactNode } from 'react';
+import { type StyleProp, type ViewStyle } from 'react-native';
 
 import { Stripes } from '@/components/ui';
-import { Glyph, type GlyphName } from '@/components/glyph';
+import { type GlyphName } from '@/components/glyph';
+import { ReliableImage, type PhotoCandidate } from '@/components/reliable-image';
 import { useThemeColors } from '@/lib/theme';
 
 /**
@@ -13,6 +13,7 @@ import { useThemeColors } from '@/lib/theme';
 export function Photo({
   uri,
   source,
+  candidates = [],
   radius = 9,
   fit = 'cover',
   stripedPlaceholder = true,
@@ -20,9 +21,11 @@ export function Photo({
   fallbackLabel = 'Photo unavailable',
   style,
   children,
+  onUnavailable,
 }: {
   uri?: string;
   source?: number;
+  candidates?: readonly PhotoCandidate[];
   radius?: number;
   fit?: 'cover' | 'contain';
   stripedPlaceholder?: boolean;
@@ -31,38 +34,14 @@ export function Photo({
   fallbackLabel?: string;
   style?: StyleProp<ViewStyle>;
   children?: ReactNode;
+  onUnavailable?: () => void;
 }) {
   const colors = useThemeColors();
   const frame = radius > 0 ? {borderWidth:1,borderColor:colors['edge-card'],borderBottomColor:colors['edge-card-bottom']} : {};
-  const [failedUri,setFailedUri]=useState<string|null>(null);
-  if (!source && (!uri || failedUri===uri)) {
-    if(fallbackGlyph)return <View accessible accessibilityRole="image" accessibilityLabel={fallbackLabel} testID="place-photo-fallback"
-      style={[frame,{borderRadius:radius,overflow:'hidden',backgroundColor:colors['surface-soft'],alignItems:'center',justifyContent:'center'},style]}>
-      <Glyph name={fallbackGlyph} size={23} color={colors['fg-muted']} />{children}
-    </View>;
-    if (!stripedPlaceholder) {
-      return <View style={[frame,{ borderRadius: radius, overflow: 'hidden', backgroundColor: colors.shell }, style]}>{children}</View>;
-    }
-    return (
-      <Stripes radius={radius} style={[frame,style]}>
-        {children}
-      </Stripes>
-    );
-  }
-  return (
-    <View style={[frame,{ position: 'relative', borderRadius: radius, overflow: 'hidden', backgroundColor: colors.shell }, style]}>
-      {stripedPlaceholder ? (
-        <Stripes radius={radius} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
-      ) : null}
-      <Image
-        source={source || { uri }}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-        contentFit={fit}
-        transition={200}
-        cachePolicy="memory-disk"
-        onError={fallbackGlyph?()=>setFailedUri(uri ?? null):undefined}
-      />
-      {children}
-    </View>
-  );
+  const sources = [...(source ? [{ source }] : []), ...candidates, ...(uri ? [{ source: uri }] : [])];
+  return <ReliableImage candidates={sources} label={fallbackLabel} fallbackGlyph={fallbackGlyph} fit={fit} onUnavailable={onUnavailable}
+    style={[frame, { borderRadius: radius, backgroundColor: colors.shell }, style]}
+    placeholder={stripedPlaceholder ? <Stripes radius={radius} style={{ width: '100%', height: '100%' }} /> : undefined}>
+    {children}
+  </ReliableImage>;
 }

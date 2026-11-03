@@ -1,9 +1,8 @@
-import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 import { Glyph } from '@/components/glyph';
+import { Photo } from '@/components/photo';
 import { homeGuideHref, type HomeGuideCategory, type HomeGuideEntry } from '@/lib/home-guide';
 import type { HomeIndexPhoto } from '@/lib/home-index-photos';
 import { homeOpenLedgerContent } from '@/lib/home-ledger';
@@ -14,12 +13,8 @@ import { useThemeColors } from '@/lib/theme';
 export const HOME_INDEX = {height:122,firstHeight:108,mediaWidth:89,mediaHeight:89,gap:0} as const;
 
 function IndexPhoto({photos,onUnavailable}: {photos:readonly HomeIndexPhoto[];onUnavailable:()=>void}) {
-  const [index,setIndex]=useState(0),photo=photos[index];
-  if(!photo)return null;
-  return <Image key={String(photo.source)} testID="home-index-photo" accessibilityLabel={photo.label}
-    source={typeof photo.source==='string'?{uri:photo.source}:photo.source} contentFit="cover" cachePolicy="memory-disk" transition={150}
-    style={{width:HOME_INDEX.mediaWidth,height:HOME_INDEX.mediaHeight,borderRadius:11}}
-    onError={()=>{if(index+1<photos.length)setIndex(index+1);else onUnavailable();}} />;
+  return <Photo candidates={photos} onUnavailable={onUnavailable} fallbackLabel="Photo unavailable" radius={11} stripedPlaceholder={false}
+    style={{width:HOME_INDEX.mediaWidth,height:HOME_INDEX.mediaHeight}} />;
 }
 
 export function HomeIndexRow({entry,category,index,photos,onPhotoUnavailable}:{entry:HomeGuideEntry;category:HomeGuideCategory;index:number;photos:readonly HomeIndexPhoto[];onPhotoUnavailable:()=>void}) {

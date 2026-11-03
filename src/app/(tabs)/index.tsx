@@ -7,6 +7,7 @@ import { HRow, Screen, ScreenScroll } from '@/components/layout';
 import { HomeTimelyRecommendations, LocalCategoryShelf, LocalPerksBanners, LocalPerksCard, LocalPerksHeader, PerksHeading, PerksRail, PerksVeeRibbon } from '@/components/local-perks';
 import { homeCollectionGlyph, homeDiscoveryIdeas } from '@/lib/home-discovery';
 import { homeIdeaPhoto } from '@/lib/home-guide';
+import { homeCollectionPhotos, homeIdeaPhotos } from '@/lib/home-index-photos';
 import { HOME_LEDGERS } from '@/lib/home-ledger';
 import { perksEntries } from '@/lib/local-perks';
 import { hydrateEventsFromBackend } from '@/lib/events-remote';
@@ -45,11 +46,11 @@ export default function HomeScreen() {
     </View> : null}
     <View><PerksHeading title="For you" action="See all" onPress={() => router.push('/home/ideas')} />
       <View style={{ gap: 10 }}>{ideas.map(idea => <HomeDoorCard key={idea.id} testID={`home-idea-${idea.id}`} title={idea.title} meta={idea.detail}
-        image={homeIdeaPhoto(idea, catalog)} glyph={idea.glyph} onPress={() => router.push(idea.href as never)} />)}</View>
+        image={homeIdeaPhoto(idea, catalog)} photos={homeIdeaPhotos(idea, catalog)} glyph={idea.glyph} onPress={() => router.push(idea.href as never)} />)}</View>
     </View>
     {catalog.collections.length ? <View><PerksHeading title="Collections" action="See all" onPress={() => router.push('/home/collections')} />
       <HRow gap={10}>{catalog.collections.map(collection => <HomeDoorCard key={collection.id} testID={`home-collection-${collection.id}`} width={252}
-        title={collection.title} meta={`${collection.items.length} picks · ${collection.subtitle.split(' · ').slice(-1)[0]}`} image={collection.coverImage} glyph={homeCollectionGlyph(collection.id)}
+        title={collection.title} meta={`${collection.items.length} picks · ${collection.subtitle.split(' · ').slice(-1)[0]}`} image={collection.coverImage} photos={homeCollectionPhotos(collection.id, catalog)} glyph={homeCollectionGlyph(collection.id)}
         onPress={() => router.push(`/home/collection?id=${encodeURIComponent(collection.id)}` as never)} />)}</HRow>
     </View> : null}
   </ScreenScroll></Screen>;

@@ -27,6 +27,7 @@ function LedgerContents({category,catalog,cityName,initialQuery,hydrating}: {
   const entries=homeLedgerEntries(photoCatalog,category,query,filter),filters=homeLedgerFilters(inventory,category,filter);
   const photosByEntry=new Map(available.map(item=>[item.entry,item]));
   const photosPending=!inventory.length&&catalog.categories[category].length>0;
+  const photosFailed=photographed.length>0&&available.length===0;
   const narrowed=Boolean(query.trim()||filter!=='all');
   return <View testID={`home-ledger-${category}`} style={{paddingTop:6}}>
     <View testID="home-ledger-toolbar" style={{height:38,flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:12}}>
@@ -48,9 +49,9 @@ function LedgerContents({category,catalog,cityName,initialQuery,hydrating}: {
     {entries.length?<View testID="home-result-list" style={{marginTop:19,gap:10}}>
       {entries.slice(0,limit).map(entry=>{const item=photosByEntry.get(entry)!;return <LocalPerksCard key={item.key} entry={entry} catalog={catalog} photos={item.photos} onPhotoUnavailable={()=>setUnavailablePhotos(previous=>new Set(previous).add(item.key))} />;})}
       {entries.length>limit?<TouchableOpacity accessibilityRole="button" accessibilityLabel="Show more places" onPress={()=>setLimit(value=>value+24)} style={{minHeight:44,alignItems:'center',justifyContent:'center'}}><Text className="font-dm text-label text-peach">Show more</Text></TouchableOpacity>:null}
-    </View>:<EmptyState compact title={hydrating?'Checking the city…':photosPending?'More photos on the way':'Nothing here just yet'}
-      message={narrowed?'Try another word or filter.':hydrating?'Local listings are loading.':photosPending?'Photos are still being collected for these local listings.':`No current ${definition.plural} are listed for ${cityName}. Check back as the local catalog grows.`}
-      {...(narrowed?{actionLabel:'Show all',onAction:()=>{setQuery('');setFilter('all');}}:{})} />}
+    </View>:<EmptyState compact title={hydrating?'Checking the city…':photosFailed?'Photos couldn’t load':photosPending?'More photos on the way':'Nothing here just yet'}
+      message={photosFailed?'Try loading these photos again.':narrowed?'Try another word or filter.':hydrating?'Local listings are loading.':photosPending?'Photos are still being collected for these local listings.':`No current ${definition.plural} are listed for ${cityName}. Check back as the local catalog grows.`}
+      {...(photosFailed?{actionLabel:'Retry photos',onAction:()=>setUnavailablePhotos(new Set())}:narrowed?{actionLabel:'Show all',onAction:()=>{setQuery('');setFilter('all');}}:{})} />}
   </View>;
 }
 

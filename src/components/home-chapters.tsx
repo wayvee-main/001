@@ -4,6 +4,7 @@ import { Text, TouchableOpacity, View } from 'react-native';
 
 import { Glyph } from '@/components/glyph';
 import { Photo } from '@/components/photo';
+import type { PhotoCandidate } from '@/components/reliable-image';
 import { RaisedTouchable } from '@/components/raised-surface';
 import { HomeResultCard } from '@/components/home-secondary';
 import { homeGuideHref, type HomeGuideEntry } from '@/lib/home-guide';
@@ -32,10 +33,10 @@ export function HomeChapterHeader({city,category}:{city:string;category?:string}
 }
 
 /** The indexes use the same horizontal editorial door as A3's idea cards. */
-export function HomeChapterDoor({title,summary,image,glyph,onPress,testID}:{title:string;summary:string;image?:string;glyph:string;onPress:()=>void;testID?:string}) {
+export function HomeChapterDoor({title,summary,image,photos,glyph,onPress,testID}:{title:string;summary:string;image?:string;photos?:readonly PhotoCandidate[];glyph:string;onPress:()=>void;testID?:string}) {
   const colors=useThemeColors();
   return <RaisedTouchable testID={testID} accessibilityRole="button" accessibilityLabel={title+'. '+summary} onPress={onPress} activeOpacity={.78} style={{padding:7,borderRadius:13,flexDirection:'row',alignItems:'center',gap:11,minHeight:104}}>
-    <Photo uri={image} radius={8} fallbackGlyph={glyph} style={{width:'40%',height:90,flexShrink:0}} />
+    <Photo uri={image} candidates={photos} radius={8} fallbackGlyph={glyph} style={{width:'40%',height:90,flexShrink:0}} />
     <View style={{flex:1,minWidth:0,gap:7}}><Text numberOfLines={2} className="font-fraunces text-ink" style={{fontSize:19,lineHeight:23,letterSpacing:-.3}}>{title}</Text>
       <Text numberOfLines={2} className="font-dm text-fine text-taupe" style={{lineHeight:17}}>{summary}</Text></View>
     <Glyph name="chevron" size={14} color={colors['surface-accent']} />

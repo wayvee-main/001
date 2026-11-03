@@ -6,6 +6,7 @@ import { EditorialNav } from '@/components/editorial-nav';
 import { Glyph } from '@/components/glyph';
 import { Screen, ScreenScroll } from '@/components/layout';
 import { Photo } from '@/components/photo';
+import type { PhotoCandidate } from '@/components/reliable-image';
 import { WayveeWordmark } from '@/components/wayvee-wordmark';
 import { EmptyState } from '@/components/ui';
 import { useActiveCityName } from '@/lib/city';
@@ -18,13 +19,13 @@ export const HOME_DOOR_HEIGHT = 83;
 const briefTitle = (name: string) => {const words=name.trim().split(/\s+/);return words.length>5?words.slice(0,5).join(' ')+'…':name;};
 
 /** Same exact height, inset, typography and chevron for For you and Collections. */
-export function HomeDoorCard({title,meta,image,glyph='compass',width,onPress,testID}: {
-  title:string;meta:string;image?:string;glyph?:string;width?:number;onPress:()=>void;testID?:string;
+export function HomeDoorCard({title,meta,image,photos,glyph='compass',width,onPress,testID}: {
+  title:string;meta:string;image?:string;photos?:readonly PhotoCandidate[];glyph?:string;width?:number;onPress:()=>void;testID?:string;
 }) {
   const colors=useThemeColors(),surface=useRaisedSurface(1);
   return <TouchableOpacity testID={testID} accessibilityRole="button" accessibilityLabel={`${title}. ${meta}`} activeOpacity={.78} onPress={onPress}
     style={[surface,{height:HOME_DOOR_HEIGHT,width,flexShrink:0,padding:11,borderRadius:15,flexDirection:'row',alignItems:'center',gap:12}]}>
-    <Photo uri={image} radius={11} fallbackGlyph={glyph} fallbackLabel={`Photo unavailable for ${title}`} style={{width:58,height:58,backgroundColor:colors['surface-sunk']}} />
+    <Photo uri={image} candidates={photos} radius={11} fallbackGlyph={glyph} fallbackLabel={`Photo unavailable for ${title}`} style={{width:58,height:58,backgroundColor:colors['surface-sunk']}} />
     <View className="min-w-0 flex-1">
       <Text numberOfLines={2} className="font-dm-medium text-card-name text-ink">{title}</Text>
       <Text numberOfLines={1} className="mt-1 font-dm text-fine text-taupe">{meta}</Text>

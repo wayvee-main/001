@@ -1,5 +1,6 @@
 import { CRAWLS } from '@/lib/data';
-import type { HomeGuideCatalog, HomeGuideEntry } from '@/lib/home-guide';
+import { entriesForHomeCollection, entriesForHomeIdea, type HomeGuideCatalog, type HomeGuideEntry } from '@/lib/home-guide';
+import type { HomeIdea } from '@/lib/home-discovery';
 import { HOME_TILE_PREVIEW_PHOTOS } from '@/lib/home-tile-photos';
 import { usableHomePhoto } from '@/lib/home-tile-previews';
 
@@ -41,3 +42,23 @@ export function homeIndexPhotos(entry: HomeGuideEntry, catalog: HomeGuideCatalog
 }
 
 export const homeIndexPhotoKey = (photos: readonly HomeIndexPhoto[]) => JSON.stringify(photos.map(photo => photo.source));
+
+/** Intent/collection covers may use another member of that same shortlist.
+ * Venue cards above always stay tied to the exact venue's own photographs. */
+export function homeIdeaPhotos(idea: HomeIdea, catalog: HomeGuideCatalog): HomeIndexPhoto[] {
+  return shortlistPhotos(entriesForHomeIdea(idea, catalog), catalog);
+}
+
+export function homeCollectionPhotos(id: string, catalog: HomeGuideCatalog): HomeIndexPhoto[] {
+  return shortlistPhotos(entriesForHomeCollection(catalog, id), catalog);
+}
+
+function shortlistPhotos(entries: readonly HomeGuideEntry[], catalog: HomeGuideCatalog): HomeIndexPhoto[] {
+  const photos: HomeIndexPhoto[] = [], seen = new Set<string | number>();
+  for (const entry of entries) for (const photo of homeIndexPhotos(entry, catalog)) {
+    if (seen.has(photo.source)) continue;
+    seen.add(photo.source); photos.push(photo);
+    if (photos.length === 8) return photos;
+  }
+  return photos;
+}

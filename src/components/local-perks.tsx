@@ -1,9 +1,9 @@
 import { NativePressable as Pressable } from '@/components/native-pressable';
-import { Image } from 'expo-image';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Animated, AppState, Easing, ScrollView, Text, View } from 'react-native';
 import { Glyph } from '@/components/glyph';
+import { Photo } from '@/components/photo';
 import { VeeMark } from '@/components/vee-mark';
 import { useActiveCity, useActiveCityName } from '@/lib/city';
 import { useNow } from '@/lib/clock';
@@ -69,17 +69,9 @@ export function LocalPerksHeader({ title, profile = true }: { title?: string; pr
 export function PerksPhoto({ entry, catalog, photos: provided, radius = 13, height, width, onUnavailable }: {
   entry?: HomeGuideEntry; catalog: HomeGuideCatalog; photos?: readonly HomeIndexPhoto[]; radius?: number; height: number; width?: number; onUnavailable?: () => void;
 }) {
-  const colors = useThemeColors(), [index, setIndex] = useState(0), [loaded, setLoaded] = useState(false);
-  const photos = provided || (entry ? homeIndexPhotos(entry, catalog) : []), photo = photos[index];
-  const photoKey = photos.map(item => String(item.source)).join('|'), [seed, setSeed] = useState(photoKey);
-  if (seed !== photoKey) { setSeed(photoKey); setIndex(0); setLoaded(false); }
-  return <View accessibilityRole="image" accessibilityLabel={photo?.label || `${entry?.name || 'Local category'} photo unavailable`}
-    style={{ width: width || '100%', height, borderRadius: radius, overflow: 'hidden', backgroundColor: colors['surface-soft'], alignItems: 'center', justifyContent: 'center' }}>
-    <Glyph name={entry?.glyph || 'compass'} size={24} color={colors['fg-muted']} />
-    {photo ? <Image key={String(photo.source)} source={typeof photo.source === 'string' ? { uri: photo.source } : photo.source} contentFit="cover" cachePolicy="memory-disk" transition={150}
-      style={{ position:'absolute',top:0,left:0,width:'100%',height:'100%',opacity:loaded?1:0 }} onLoad={() => setLoaded(true)}
-      onError={() => { setLoaded(false); if(index + 1 >= photos.length) onUnavailable?.(); setIndex(current => current + 1); }} /> : null}
-  </View>;
+  const photos = provided || (entry ? homeIndexPhotos(entry, catalog) : []);
+  return <Photo candidates={photos} fallbackGlyph={entry?.glyph || 'compass'} fallbackLabel={`${entry?.name || 'Local category'} photo unavailable`}
+    radius={radius} stripedPlaceholder={false} onUnavailable={onUnavailable} style={{ width: width || '100%', height }} />;
 }
 
 export function LocalCategoryShelf({ catalog, active, onSelect }: { catalog: HomeGuideCatalog; active?: HomeGuideCategory; onSelect?: (category: HomeGuideCategory) => void }) {

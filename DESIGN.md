@@ -681,3 +681,21 @@ preserving “Live music” in its accessible label and search query. A small or
 dot pulses softly beside the label; keep words stable and readable. Pause motion when Home loses focus, the
 app backgrounds or reduced motion is enabled. Use native-driver opacity only.
 Both themes use their existing Local Perks tokens and Android-safe pressables.
+
+### Image loading reliability
+
+All shared photos use one source-aware loader. Prefer the exact venue's bundled
+asset where available, then its own cover, gallery and dish images. Intent and
+collection covers can use another eligible member of that same shortlist.
+Never use another venue's photograph to fill a venue or dish-specific image.
+Try distinct candidates in order, bounded to eight. Advance failed or stalled
+loads after 12 active seconds without progress; background time does not
+exhaust a photograph and slow progressing native downloads keep loading.
+Cached images remain visible without a manual opacity gate. Both successful
+load and display events settle the placeholder. Source changes and explicit
+retries isolate late callbacks and reset the native recycling key.
+Show a deliberate Retry action after failures; missing source data remains an
+honest unavailable state. Required-photo lists remove exhausted rows through
+their existing callback and offer “Retry photos” if every sourced row fails.
+Do not label failed requests as uncollected data. No automatic infinite retries
+or invented imagery.

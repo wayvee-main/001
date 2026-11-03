@@ -4,6 +4,7 @@ import { HomeGuideScreen } from '@/components/home-field-guide';
 import { HomeChapterDoor, HomeChapterHeader, HomeChapterTitle, HomeChapters } from '@/components/home-chapters';
 import { homeDiscoveryIdea, homeDiscoveryIdeas } from '@/lib/home-discovery';
 import { homeIdeaPhoto } from '@/lib/home-guide';
+import { homeIdeaPhotos } from '@/lib/home-index-photos';
 import { ideaChapters } from '@/lib/home-secondary';
 import { EmptyState } from '@/components/ui';
 import { useHomeGuide } from '@/lib/use-home-guide';
@@ -19,6 +20,6 @@ export default function HomeIdeasScreen() {
     <HomeChapterHeader city={displayCity} category={category} />
     <HomeChapterTitle title={idea?.id==='dinner'?'Dinner, without\nthe debate':idea?.title || 'For you'} subtitle={`For you · ${period}`} />
     {idea?(chapters.length?<HomeChapters key={idea.id} variant="ideas" chapters={chapters} />:<EmptyState compact title="Local options are on the way" message="Try another idea as the local catalog updates." />):
-      <View style={{gap:10}}>{homeDiscoveryIdeas(now).map(item=><HomeChapterDoor key={item.id} testID={`home-idea-list-${item.id}`} title={item.title} summary={item.detail} image={homeIdeaPhoto(item,catalog)} glyph={item.glyph} onPress={()=>router.push(item.href as never)} />)}</View>}
+      <View style={{gap:10}}>{homeDiscoveryIdeas(now).map(item=><HomeChapterDoor key={item.id} testID={`home-idea-list-${item.id}`} title={item.title} summary={item.detail} image={homeIdeaPhoto(item,catalog)} photos={homeIdeaPhotos(item,catalog)} glyph={item.glyph} onPress={()=>router.push(item.href as never)} />)}</View>}
   </HomeGuideScreen>;
 }

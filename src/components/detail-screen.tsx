@@ -97,7 +97,9 @@ export function DetailScreen({image,heroActions,title,rating,meta,address,onAddr
       {section.footnote?<Text className="font-dm text-fine text-taupe" style={{lineHeight:18}}>{section.footnote}</Text>:null}
     </View>)}
   </View>;
-  return <LedgerCompanionScreen key={kind+':'+id} context={context} image={content?.photos?.[0]?.url||usableHomePhoto(image)||entry?.image||usableHomePhoto(restaurant?.image)} glyph={entry?.glyph||'landmark'} eyebrow={DETAIL_LABELS[kind]} headingEyebrow={event?.venue}
+  return <LedgerCompanionScreen key={kind+':'+id} context={context} image={content?.photos?.[0]?.url||usableHomePhoto(image)||entry?.image||usableHomePhoto(restaurant?.image)}
+    photos={[...(content?.photos||[]).slice(0,5).map(photo=>({source:photo.url,label:photo.caption||`Photo from ${context.name}`})),
+      ...[usableHomePhoto(image),entry?.image,usableHomePhoto(restaurant?.image)].flatMap(source=>source?[{source,label:`Photo from ${context.name}`}]:[])]} glyph={entry?.glyph||'landmark'} eyebrow={DETAIL_LABELS[kind]} headingEyebrow={event?.venue}
     chips={chips} primaryAction={primaryAction} essentials={essentials} compactFacts={event?eventJournalFacts(event):undefined} folds={folds} navActive={navActive}
     journalHandlesActions={Boolean(restaurant||event)} journal={restaurant||event||content||sections.length?goods:undefined} />;
 }

@@ -1,4 +1,5 @@
-import { homeIndexPhotos } from '@/lib/home-index-photos';
+import { homeCollectionPhotos, homeIdeaPhotos, homeIndexPhotos } from '@/lib/home-index-photos';
+import { homeDiscoveryIdea } from '@/lib/home-discovery';
 import type { HomeGuideCatalog, HomeGuideEntry } from '@/lib/home-guide';
 
 const entry = (overrides: Partial<HomeGuideEntry> = {}): HomeGuideEntry => ({
@@ -11,6 +12,17 @@ const catalog = (...entries: HomeGuideEntry[]): HomeGuideCatalog => ({
 });
 
 describe('Required photos on the four Home indexes', () => {
+  it('gives suggestions and collections photo alternatives from their own eligible members', () => {
+    const itani = entry({ kind: 'restaurant', id: 'itani', name: 'Itani Ramen', image: 'https://itani.example/cover.jpg' });
+    const other = entry({ id: 'unrelated', category: 'museum', image: 'https://museum.example/room.jpg' });
+    const collection = entry({ kind: 'collection', id: 'dinner', members: [{ kind: 'restaurant', id: 'itani' }] });
+    const pool = catalog(itani, other, collection), idea = homeDiscoveryIdea('dinner', new Date(2026, 10, 3, 19))!;
+    for (const photos of [homeIdeaPhotos(idea, pool), homeCollectionPhotos('dinner', pool)]) {
+      expect(photos[0].source).toBe(require('../../../assets/images/local-perks/itani.jpg'));
+      expect(photos.map(photo => photo.source)).toContain(itani.image);
+      expect(photos.map(photo => photo.source)).not.toContain(other.image);
+    }
+  });
   it('tries independent photos from the same record and deduplicates shared URLs', () => {
     const place = entry({ image: 'https://venue.example/room.jpg', detailContent: {
       version: 1, sourceUrl: 'https://venue.example', verifiedAt: '2026-10-27T00:00:00Z',
