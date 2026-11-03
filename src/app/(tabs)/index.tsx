@@ -28,11 +28,13 @@ export default function HomeScreen() {
   };
   return <Screen><ScreenScroll gap={18} clearsTabBar refreshing={refreshing} onRefresh={onRefresh}>
     <LocalPerksHeader />
-    <View>
-      <CitySearchBar testID="home-search" labelTestID="home-search-label" city={displayCity} onPress={() => router.push('/search')} />
-      <HomeTimelyRecommendations now={now} />
+    <View style={{ gap: 5 }}>
+      <View>
+        <CitySearchBar testID="home-search" labelTestID="home-search-label" city={displayCity} onPress={() => router.push('/search')} />
+        <HomeTimelyRecommendations now={now} />
+      </View>
+      <LocalCategoryShelf catalog={catalog} />
     </View>
-    <LocalCategoryShelf catalog={catalog} />
     <LocalPerksBanners catalog={catalog} />
     {tables.length ? <View><PerksHeading title="A few good tables" action="See all" onPress={() => router.push(HOME_LEDGERS.eat.href)} />
       <PerksRail entries={tables.slice(0, 6)} catalog={catalog} />
