@@ -4,7 +4,7 @@ import { View } from 'react-native';
 import { CitySearchBar } from '@/components/city-controls';
 import { HomeDoorCard } from '@/components/home-field-guide';
 import { HRow, Screen, ScreenScroll } from '@/components/layout';
-import { LocalCategoryShelf, LocalPerksBanners, LocalPerksCard, LocalPerksHeader, PerksHeading, PerksRail, PerksVeeRibbon } from '@/components/local-perks';
+import { HomeTimelyRecommendations, LocalCategoryShelf, LocalPerksBanners, LocalPerksCard, LocalPerksHeader, PerksHeading, PerksRail, PerksVeeRibbon } from '@/components/local-perks';
 import { homeCollectionGlyph, homeDiscoveryIdeas } from '@/lib/home-discovery';
 import { homeIdeaPhoto } from '@/lib/home-guide';
 import { HOME_LEDGERS } from '@/lib/home-ledger';
@@ -28,7 +28,10 @@ export default function HomeScreen() {
   };
   return <Screen><ScreenScroll gap={18} clearsTabBar refreshing={refreshing} onRefresh={onRefresh}>
     <LocalPerksHeader />
-    <CitySearchBar testID="home-search" labelTestID="home-search-label" city={displayCity} onPress={() => router.push('/search')} />
+    <View>
+      <CitySearchBar testID="home-search" labelTestID="home-search-label" city={displayCity} onPress={() => router.push('/search')} />
+      <HomeTimelyRecommendations now={now} />
+    </View>
     <LocalCategoryShelf catalog={catalog} />
     <LocalPerksBanners catalog={catalog} />
     {tables.length ? <View><PerksHeading title="A few good tables" action="See all" onPress={() => router.push(HOME_LEDGERS.eat.href)} />

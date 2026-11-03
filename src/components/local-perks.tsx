@@ -1,17 +1,19 @@
 import { NativePressable as Pressable } from '@/components/native-pressable';
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { Animated, AppState, Easing, ScrollView, Text, View } from 'react-native';
 import { Glyph } from '@/components/glyph';
 import { VeeMark } from '@/components/vee-mark';
 import { useActiveCity, useActiveCityName } from '@/lib/city';
 import { useNow } from '@/lib/clock';
+import { homeSuggestions } from '@/lib/daypart';
 import { homeGuideHref, type HomeGuideCatalog, type HomeGuideCategory, type HomeGuideEntry } from '@/lib/home-guide';
 import { homeIndexPhotos, type HomeIndexPhoto } from '@/lib/home-index-photos';
 import { HOME_LEDGERS } from '@/lib/home-ledger';
 import { compactOffer, eveningStopKey, localOffers, MAX_EVENING_STOPS, perksAreaKey } from '@/lib/local-perks';
 import { useLocalPerks } from '@/lib/local-perks-store';
+import { useReducedMotionPreference } from '@/lib/motion';
 import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
 import { useScoper } from '@/lib/store';
 import { todayIso } from '@/lib/stay';
@@ -82,19 +84,50 @@ export function PerksPhoto({ entry, catalog, photos: provided, radius = 13, heig
 
 export function LocalCategoryShelf({ catalog, active, onSelect }: { catalog: HomeGuideCatalog; active?: HomeGuideCategory; onSelect?: (category: HomeGuideCategory) => void }) {
   const router = useRouter(), colors = useThemeColors();
-  return <View testID="home-category-shelf" style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 7, paddingVertical: 1 }}>
+  return <View testID="home-category-shelf" style={{ flexDirection: 'row', gap: 7 }}>
     {(['eat', 'bars', 'routes', 'events'] as const).map(category => {
-      const pool = catalog.categories[category], preferred = category === 'eat' ? 'itani' : category === 'bars' ? 'bar-shiru' : undefined;
-      const entry = pool.find(item => item.id === preferred) || Object.values(catalog.entries).find(item => item.id === preferred) || pool.find(item => homeIndexPhotos(item, catalog).length) || pool[0];
+      const pool = catalog.categories[category], selected = active === category;
       return <Pressable key={category} testID={`home-category-${category}`} accessibilityRole="button" accessibilityLabel={`${HOME_LEDGERS[category].title}. ${pool.length} local options`}
-        accessibilityState={{ selected: category === active }} onPress={() => onSelect ? onSelect(category) : router.push(HOME_LEDGERS[category].href)}
-        style={({ pressed }) => ({ flex: 1, minWidth: 0, alignItems: 'center', gap: 7, opacity: pressed ? .72 : 1 })}>
-        <View style={{ borderRadius: 32, padding: 2, borderWidth: 1, borderColor: active === category ? colors['accent-fill'] : colors['edge-card'], backgroundColor: colors['surface-control'] }}>
-          <PerksPhoto key={entry?.kind + ':' + entry?.id} entry={entry} catalog={catalog} width={52} height={52} radius={26} />
-        </View>
-        <Text className="font-dm text-fine text-ink">{HOME_LEDGERS[category].title}</Text>
+        accessibilityState={{ selected }} onPress={() => onSelect ? onSelect(category) : router.push(HOME_LEDGERS[category].href)}
+        style={({ pressed }) => ({ flex: 1, minWidth: 0, minHeight: 44, paddingHorizontal: 8, paddingVertical: 10, borderRadius: 999,
+          borderWidth: 1, borderColor: colors['control-edge'], backgroundColor: selected ? colors['selected-surface'] : colors['surface-control'],
+          alignItems: 'center', justifyContent: 'center', opacity: pressed ? .72 : 1 })}>
+        <Text numberOfLines={1} className="font-dm-medium text-fine" style={{ color: selected ? colors['on-selected'] : colors.fg }}>{HOME_LEDGERS[category].title}</Text>
       </Pressable>;
     })}
+  </View>;
+}
+
+/** A quiet, live daypart cue beneath search. The words stay still while the
+ * small accent breathes; each intent opens the current city's search results. */
+export function HomeTimelyRecommendations({ now }: { now: Date }) {
+  const router = useRouter(), colors = useThemeColors(), reduced = useReducedMotionPreference();
+  const [pulse] = useState(() => new Animated.Value(1));
+  const [appActive, setAppActive] = useState(AppState.currentState !== 'background' && AppState.currentState !== 'inactive');
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', state => setAppActive(state === 'active'));
+    return () => subscription.remove();
+  }, []);
+  useFocusEffect(useCallback(() => {
+    pulse.setValue(1);
+    if (reduced || !appActive) return;
+    const animation = Animated.loop(Animated.sequence([
+      Animated.timing(pulse, { toValue: .35, duration: 1300, easing: Easing.inOut(Easing.ease), useNativeDriver: true, isInteraction: false }),
+      Animated.timing(pulse, { toValue: 1, duration: 1300, easing: Easing.inOut(Easing.ease), useNativeDriver: true, isInteraction: false }),
+    ]));
+    animation.start();
+    return () => { animation.stop(); pulse.setValue(1); };
+  }, [appActive, pulse, reduced]));
+  return <View testID="home-timely-recommendations" style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+    <Animated.View testID="home-recommendation-pulse" accessible={false}
+      style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: colors['fg-accent'], opacity: pulse }} />
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flex: 1 }} contentContainerStyle={{ alignItems: 'center', gap: 12 }}>
+      {homeSuggestions(now).map(suggestion => <Pressable key={suggestion.label} testID={`home-recommendation-${suggestion.query}`} accessibilityRole="button"
+        accessibilityLabel={`Explore ${suggestion.label.toLowerCase()} nearby`} onPress={() => router.push({ pathname: '/search', params: { q: suggestion.query } })}
+        style={({ pressed }) => ({ minHeight: 44, justifyContent: 'center', opacity: pressed ? .6 : 1 })}>
+        <Text className="font-dm text-fine" style={{ color: colors['fg-muted'] }}>{suggestion.label}</Text>
+      </Pressable>)}
+    </ScrollView>
   </View>;
 }
 

@@ -662,3 +662,16 @@ PDF/image menus remain accessible when structured extraction is incomplete.
 The photo row opens a full image viewer with captions, attribution and source
 links. Read the latest regional detail record on entry so new background goods
 are visible without waiting for the nearby cache to expire.
+
+### Home pills and timely recommendations
+
+Home's Eat, Bars, Routes and Events shortcuts are four equally sized, text-only
+pills in one row, with 44px minimum touch targets, full pill corners, the shared
+control fill and a faint control edge. Each opens its own existing local guide.
+Immediately beneath Home's 53px search field, show four compact text intentions
+from the existing guest-local dayparts: morning, lunch, afternoon, evening and
+late night. Each opens search with its query in the active city's catalog.
+Recompute with Home's minute clock. A small orange dot pulses softly beside the
+row; keep labels stable and readable. Pause motion when Home loses focus, the
+app backgrounds or reduced motion is enabled. Use native-driver opacity only.
+Both themes use their existing Local Perks tokens and Android-safe pressables.

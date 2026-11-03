@@ -1,13 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import React from 'react';
 import renderer, { act } from 'react-test-renderer';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, AppState, Pressable, StyleSheet, Text, View } from 'react-native';
 import { cssInterop } from 'react-native-css-interop';
 import { EditorialNav } from '@/components/editorial-nav';
-import { LocalPerksBanners, LocalPerksCard, PerksRoundButton } from '@/components/local-perks';
+import { HomeTimelyRecommendations, LocalCategoryShelf, LocalPerksBanners, LocalPerksCard, PerksRoundButton } from '@/components/local-perks';
+import { useReducedMotionPreference } from '@/lib/motion';
 import { useThemeColors } from '@/lib/theme';
 
-jest.mock('expo-router', () => ({ useRouter: () => ({ push: jest.fn() }) }));
+const mockPush = jest.fn();
+jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }), useFocusEffect: callback => require('react').useEffect(callback, [callback]) }));
 jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 24, left: 0 }) }));
 jest.mock('@/lib/theme', () => ({ useThemeColors: jest.fn() }));
 jest.mock('@/lib/shadows', () => ({ useControlSurface: () => ({ borderWidth: 1 }), useRaisedSurface: () => ({ borderWidth: 1 }) }));
@@ -16,6 +18,7 @@ jest.mock('@/components/vee-mark', () => ({ VeeMark: () => null }));
 jest.mock('@/lib/city', () => ({ useActiveCity: () => 'oakland', useActiveCityName: () => 'Oakland' }));
 jest.mock('@/lib/clock', () => ({ useNow: () => new Date(2026, 10, 3, 19) }));
 jest.mock('@/lib/weather', () => ({ useWeatherNow: () => null, weatherLine: () => '' }));
+jest.mock('@/lib/motion', () => ({ useReducedMotionPreference: jest.fn(() => true) }));
 jest.mock('@/lib/home-index-photos', () => ({ homeIndexPhotos: () => [] }));
 jest.mock('@/lib/local-perks-store', () => {
   const state = { stops: [], date: '', openOffer: jest.fn(), toggleStop: jest.fn() };
@@ -42,11 +45,15 @@ function nodes(tree) {
   walk(tree.toJSON()); return result;
 }
 const style = (tree, id) => StyleSheet.flatten(nodes(tree).find(node => node.props.testID === id)?.props.style);
-afterEach(() => { act(() => trees.forEach(tree => tree.unmount())); trees = []; });
+afterEach(() => { act(() => trees.forEach(tree => tree.unmount())); trees = []; jest.restoreAllMocks(); });
 
 describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
   const ribbon = theme === 'light' ? '#EBD4BD' : '#2C222C';
-  beforeEach(() => useThemeColors.mockReturnValue({ fg: '#2D2925', 'fg-muted': '#64584F', 'accent-fill': '#AE512E', 'fg-accent': '#98431F', 'surface-control': '#FFFFFF', 'surface-ribbon': ribbon, 'ribbon-ink': '#3D2B20', 'surface-navigation': '#FFFCF7' }));
+  beforeEach(() => {
+    mockPush.mockClear();
+    useReducedMotionPreference.mockReturnValue(true);
+    useThemeColors.mockReturnValue({ fg: '#2D2925', 'fg-muted': '#64584F', 'accent-fill': '#AE512E', 'fg-accent': '#98431F', 'surface-control': '#FFFFFF', 'surface-ribbon': ribbon, 'ribbon-ink': '#3D2B20', 'surface-navigation': '#FFFCF7' });
+  });
 
   it('retains round action sizing', () => {
     const tree = mount(<PerksRoundButton testID="round" label="Offers" glyph="tag" onPress={() => {}} />);
@@ -69,5 +76,44 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     const tree = mount(<EditorialNav items={items} />), tabs = nodes(tree).filter(node => node.props.accessibilityRole === 'tab');
     expect(tabs).toHaveLength(4);
     tabs.forEach(tab => expect(StyleSheet.flatten(tab.props.style)).toMatchObject({ flex: 1, minHeight: 47, alignItems: 'center' }));
+  });
+  it('preserves native pill touch targets and each separate category destination', () => {
+    const tree = mount(<LocalCategoryShelf catalog={empty} />);
+    for (const category of ['eat', 'bars', 'routes', 'events']) {
+      expect(style(tree, `home-category-${category}`)).toMatchObject({ flex: 1, minWidth: 0, minHeight: 44, borderRadius: 999 });
+      act(() => tree.root.findByProps({ testID: `home-category-${category}` }).props.onPress());
+      expect(mockPush).toHaveBeenLastCalledWith('/home/' + category);
+    }
+  });
+  it('updates recommendation labels and queries when the local daypart changes', () => {
+    const tree = mount(<HomeTimelyRecommendations now={new Date(2026, 10, 3, 8)} />);
+    expect(tree.root.findByProps({ testID: 'home-recommendation-breakfast' })).toBeDefined();
+    act(() => tree.root.findByProps({ testID: 'home-recommendation-breakfast' }).props.onPress());
+    expect(mockPush).toHaveBeenLastCalledWith({ pathname: '/search', params: { q: 'breakfast' } });
+    act(() => tree.update(<HomeTimelyRecommendations now={new Date(2026, 10, 3, 12)} />));
+    expect(tree.root.findAllByProps({ testID: 'home-recommendation-breakfast' })).toHaveLength(0);
+    expect(tree.root.findByProps({ testID: 'home-recommendation-lunch' })).toBeDefined();
+    act(() => tree.update(<HomeTimelyRecommendations now={new Date(2026, 10, 3, 19)} />));
+    act(() => tree.root.findByProps({ testID: 'home-recommendation-dinner' }).props.onPress());
+    expect(mockPush).toHaveBeenLastCalledWith({ pathname: '/search', params: { q: 'dinner' } });
+  });
+  it('pauses the pulse for reduced motion, backgrounding and leaving Home', () => {
+    let appStateChanged;
+    const remove = jest.fn(), start = jest.fn(), stop = jest.fn();
+    jest.spyOn(AppState, 'addEventListener').mockImplementation((event, listener) => { appStateChanged = listener; return { remove }; });
+    const loop = jest.spyOn(Animated, 'loop').mockReturnValue({ start, stop });
+    const now = new Date(2026, 10, 3, 12), tree = mount(<HomeTimelyRecommendations now={now} />);
+    expect(loop).not.toHaveBeenCalled();
+    useReducedMotionPreference.mockReturnValue(false);
+    act(() => tree.update(<HomeTimelyRecommendations now={now} />));
+    expect(start).toHaveBeenCalledTimes(1);
+    act(() => appStateChanged('background'));
+    expect(stop).toHaveBeenCalledTimes(1);
+    act(() => appStateChanged('active'));
+    expect(start).toHaveBeenCalledTimes(2);
+    act(() => tree.unmount());
+    trees = trees.filter(item => item !== tree);
+    expect(stop).toHaveBeenCalledTimes(2);
+    expect(remove).toHaveBeenCalled();
   });
 });
