@@ -665,21 +665,26 @@ are visible without waiting for the nearby cache to expire.
 
 ### Home pills and timely recommendations
 
-Home's Eat, Bars, Routes and Events shortcuts are four equally sized pills in
-one row. The visually slim 36px capsules sit within 44px minimum touch targets,
-with 13px outline category glyphs, 12px medium DM Sans labels, full pill corners,
-the shared control fill, faint card edges and shared soft elevation. Each opens
-its own existing local guide. Group the pills with search and recommendations
-using a 5px gap, rather than treating them as a separate 18px-spaced section.
+Home uses the approved **Open Notes** treatment with two intact rows. Eat,
+Bars, Routes and Events remain four equally sized pills in one row. Their
+39px capsules sit within 44px minimum touch targets, with 16px/20px medium
+Fraunces labels (15px on phones of 350px and below), full pill corners, the page
+ground and faint card edges.
+There are no category glyphs or pill shadows. Each opens its existing local
+guide. Separate the recommendation row and category pills by 11px.
 Immediately beneath Home's 53px search field, show four compact text intentions
 from the existing guest-local dayparts: morning, lunch, afternoon, evening and
 late night. Each opens search with its query in the active city's catalog.
-Recompute with Home's minute clock. A quiet “Now” label and faint vertical rule
-introduce the recommendation row, with its first intent in the app's orange
-and remaining 12px labels muted. Use 10px spacing and compact “Music” copy,
-preserving “Live music” in its accessible label and search query. A small orange
-dot pulses softly beside the label; keep words stable and readable. Pause motion when Home loses focus, the
-app backgrounds or reduced motion is enabled. Use native-driver opacity only.
+Recompute with Home's minute clock. Recommendations are four equally sized,
+borderless actions with small outline glyphs, quiet dot separators and a faint
+full-width rule beneath. The first intent and its subtly pulsing 17px underline
+use the app's orange; other actions are muted. Use 13px glyphs and 12px DM Sans,
+reducing to 12px glyphs and 11px text at phone widths of 350px and below.
+Keep labels compact: Music, Drinks and Shows; use Happy hr and Bites on narrow
+phones. Full accessible labels and search queries stay intact. Keep all four
+actions visible in one row with 44px touch targets. Pause motion when Home
+loses focus, the app backgrounds or reduced motion is enabled. Use native-driver
+opacity only.
 Both themes use their existing Local Perks tokens and Android-safe pressables.
 
 ### Image loading reliability

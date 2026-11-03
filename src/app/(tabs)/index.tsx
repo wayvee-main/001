@@ -29,7 +29,7 @@ export default function HomeScreen() {
   };
   return <Screen><ScreenScroll gap={18} clearsTabBar refreshing={refreshing} onRefresh={onRefresh}>
     <LocalPerksHeader />
-    <View style={{ gap: 5 }}>
+    <View style={{ gap: 11 }}>
       <View>
         <CitySearchBar testID="home-search" labelTestID="home-search-label" city={displayCity} onPress={() => router.push('/search')} />
         <HomeTimelyRecommendations now={now} />

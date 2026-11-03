@@ -1,7 +1,7 @@
 import { NativePressable as Pressable } from '@/components/native-pressable';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
-import { Animated, AppState, Easing, ScrollView, Text, View } from 'react-native';
+import { Animated, AppState, Easing, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { Glyph } from '@/components/glyph';
 import { Photo } from '@/components/photo';
 import { VeeMark } from '@/components/vee-mark';
@@ -75,18 +75,17 @@ export function PerksPhoto({ entry, catalog, photos: provided, radius = 13, heig
 }
 
 export function LocalCategoryShelf({ catalog, active, onSelect }: { catalog: HomeGuideCatalog; active?: HomeGuideCategory; onSelect?: (category: HomeGuideCategory) => void }) {
-  const router = useRouter(), colors = useThemeColors(), control = useControlSurface();
-  const glyphs = { eat: 'food', bars: 'drink', routes: 'route', events: 'ticket' };
+  const router = useRouter(), colors = useThemeColors();
+  const { width } = useWindowDimensions();
   return <View testID="home-category-shelf" style={{ flexDirection: 'row', gap: 7 }}>
     {(['eat', 'bars', 'routes', 'events'] as const).map(category => {
       const pool = catalog.categories[category], selected = active === category;
       return <Pressable key={category} testID={`home-category-${category}`} accessibilityRole="button" accessibilityLabel={`${HOME_LEDGERS[category].title}. ${pool.length} local options`}
         accessibilityState={{ selected }} onPress={() => onSelect ? onSelect(category) : router.push(HOME_LEDGERS[category].href)}
         style={({ pressed }) => ({ flex: 1, minWidth: 0, minHeight: 44, borderRadius: 999, justifyContent: 'center', opacity: pressed ? .72 : 1 })}>
-        <View style={[control, { minHeight: 36, borderRadius: 999, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4,
-          paddingHorizontal: 3, paddingVertical: 8, backgroundColor: selected ? colors['selected-surface'] : colors['surface-control'] }]}>
-          <Glyph name={glyphs[category]} size={13} strokeWidth={1.6} color={selected ? colors['on-selected'] : colors['fg-muted']} />
-          <Text numberOfLines={1} className="font-dm-medium" style={{ fontSize: 12, lineHeight: 17, color: selected ? colors['on-selected'] : colors.fg }}>{HOME_LEDGERS[category].title}</Text>
+        <View style={{ minHeight: 39, borderRadius: 999, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors['edge-card'],
+          paddingHorizontal: 6, paddingVertical: 8, backgroundColor: selected ? colors['selected-surface'] : colors.bg }}>
+          <Text numberOfLines={1} className="font-fraunces-medium" style={{ fontSize: width <= 350 ? 15 : 16, lineHeight: 20, color: selected ? colors['on-selected'] : colors.fg }}>{HOME_LEDGERS[category].title}</Text>
         </View>
       </Pressable>;
     })}
@@ -97,6 +96,8 @@ export function LocalCategoryShelf({ catalog, active, onSelect }: { catalog: Hom
  * small accent breathes; each intent opens the current city's search results. */
 export function HomeTimelyRecommendations({ now }: { now: Date }) {
   const router = useRouter(), colors = useThemeColors(), reduced = useReducedMotionPreference();
+  const { width } = useWindowDimensions(), compact = width <= 350;
+  const compactLabels: Record<string, string> = { 'Live music': 'Music', 'Cocktails': 'Drinks', 'Late shows': 'Shows', ...(compact ? { 'Happy hour': 'Happy hr', 'Quick bites': 'Bites', 'Late bites': 'Bites' } : {}) };
   const [pulse] = useState(() => new Animated.Value(1));
   const [appActive, setAppActive] = useState(AppState.currentState !== 'background' && AppState.currentState !== 'inactive');
   useEffect(() => {
@@ -113,19 +114,20 @@ export function HomeTimelyRecommendations({ now }: { now: Date }) {
     animation.start();
     return () => { animation.stop(); pulse.setValue(1); };
   }, [appActive, pulse, reduced]));
-  return <View testID="home-timely-recommendations" style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingLeft: 3 }}>
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingRight: 10, borderRightWidth: 1, borderRightColor: colors['edge-faint'] }}>
-      <Animated.View testID="home-recommendation-pulse" accessible={false}
-        style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: colors['fg-accent'], opacity: pulse }} />
-      <Text className="font-dm-medium" style={{ fontSize: 11, lineHeight: 14, color: colors['fg-muted'] }}>Now</Text>
-    </View>
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flex: 1 }} contentContainerStyle={{ alignItems: 'center', gap: 10, paddingRight: 3 }}>
-      {homeSuggestions(now).map((suggestion, index) => <Pressable key={suggestion.label} testID={`home-recommendation-${suggestion.query}`} accessibilityRole="button"
+  return <View testID="home-timely-recommendations" style={{ flexDirection: 'row', alignItems: 'center', paddingBottom: 4, borderBottomWidth: 1, borderBottomColor: colors['edge-card'] }}>
+    {homeSuggestions(now).map((suggestion, index) => <View key={suggestion.label} style={{ flex: 1, minWidth: 0 }}>
+      <Pressable testID={`home-recommendation-${suggestion.query}`} accessibilityRole="button"
         accessibilityLabel={`Explore ${suggestion.label.toLowerCase()} nearby`} onPress={() => router.push({ pathname: '/search', params: { q: suggestion.query } })}
-        style={({ pressed }) => ({ minHeight: 44, justifyContent: 'center', opacity: pressed ? .6 : 1 })}>
-        <Text className={index === 0 ? 'font-dm-medium' : 'font-dm'} style={{ fontSize: 12, lineHeight: 17, color: index === 0 ? colors['fg-accent'] : colors['fg-muted'] }}>{suggestion.label === 'Live music' ? 'Music' : suggestion.label}</Text>
-      </Pressable>)}
-    </ScrollView>
+        style={({ pressed }) => ({ minHeight: 44, minWidth: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: compact ? 3 : 4, paddingHorizontal: compact ? 0 : 2, opacity: pressed ? .6 : 1 })}>
+        <View testID={`home-recommendation-glyph-${suggestion.query}`} accessible={false}>
+          <Glyph name={suggestion.glyph} size={compact ? 12 : 13} strokeWidth={1.5} color={index === 0 ? colors['fg-accent'] : colors['fg-muted']} />
+        </View>
+        <Text numberOfLines={1} className={index === 0 ? 'font-dm-medium' : 'font-dm'} style={{ flexShrink: 1, fontSize: compact ? 11 : 12, lineHeight: 17, color: index === 0 ? colors['fg-accent'] : colors['fg-muted'] }}>{compactLabels[suggestion.label] || suggestion.label}</Text>
+        {index === 0 ? <Animated.View testID="home-recommendation-pulse" accessible={false}
+          style={{ position: 'absolute', bottom: 2, left: '50%', marginLeft: -8.5, width: 17, height: 2, borderRadius: 2, backgroundColor: colors['fg-accent'], opacity: pulse }} /> : null}
+      </Pressable>
+      {index < 3 ? <Text accessible={false} className="font-dm" style={{ position: 'absolute', right: -1, top: 13, fontSize: 12, lineHeight: 17, color: colors['fg-muted'], opacity: .45 }}>·</Text> : null}
+    </View>)}
   </View>;
 }
 
