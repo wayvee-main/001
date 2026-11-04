@@ -87,6 +87,7 @@ const PAIRS: Pair[] = [
   { name: 'fg-accent on blush tint', fg: role('fg-accent'), bg: tint('blush', 'surface'), min: AA_TEXT },
   { name: 'card-ink on surface', fg: role('card-ink'), bg: role('surface'), min: AA_TEXT },
   { name: 'card-muted on surface', fg: role('card-muted'), bg: role('surface'), min: AA_TEXT },
+  ...['category', 'distance', 'menu', 'offer'].map(tone => ({ name: `Color Dock ${tone}`, fg: role(`metadata-${tone}-ink`), bg: role(`metadata-${tone}`), min: AA_TEXT })),
   { name: 'fg-muted on surface-raised', fg: role('fg-muted'), bg: role('surface-raised'), min: AA_TEXT },
   { name: 'surface-accent on surface-raised (glyph)', fg: role('surface-accent'), bg: role('surface-raised'), min: AA_LARGE },
   { name: 'fg on home-tile', fg: role('fg'), bg: role('home-tile'), min: AA_TEXT },

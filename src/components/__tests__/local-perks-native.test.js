@@ -7,6 +7,7 @@ import { EditorialNav } from '@/components/editorial-nav';
 import { HomeTimelyRecommendations, LocalCategoryShelf, LocalPerksBanners, LocalPerksCard, PerksRoundButton } from '@/components/local-perks';
 import { useReducedMotionPreference } from '@/lib/motion';
 import { useThemeColors } from '@/lib/theme';
+import { ROLES } from '@/lib/tokens';
 
 const mockPush = jest.fn();
 const mockOpenOffer = jest.fn();
@@ -60,7 +61,7 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     mockPush.mockClear();
     mockOpenOffer.mockClear();
     useReducedMotionPreference.mockReturnValue(true);
-    useThemeColors.mockReturnValue({ fg: '#2D2925', 'fg-muted': '#64584F', 'accent-fill': '#AE512E', 'fg-accent': '#98431F', 'surface-control': '#FFFFFF', 'surface-ribbon': ribbon, 'ribbon-ink': '#3D2B20', 'surface-navigation': '#FFFCF7' });
+    useThemeColors.mockReturnValue({ ...Object.fromEntries(Object.entries(ROLES).map(([key, value]) => [key, value[theme]])), fg: '#2D2925', 'fg-muted': '#64584F', 'accent-fill': '#AE512E', 'fg-accent': '#98431F', 'surface-control': '#FFFFFF', 'surface-ribbon': ribbon, 'ribbon-ink': '#3D2B20', 'surface-navigation': '#FFFCF7' });
   });
 
   it('retains round action sizing', () => {
@@ -79,6 +80,19 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     expect(style(tree, 'perks-place-open')).toMatchObject({ flexDirection: 'row', minHeight: 100, padding: 9 });
     expect(style(tree, 'perks-save-place')).toMatchObject({ position: 'absolute', top: 11, right: 11, width: 30, height: 30 });
     expect(style(tree, 'perks-add-stop')).toMatchObject({ position: 'absolute', bottom: 10, right: 11, width: 28, height: 28 });
+  });
+  it('uses regular inline metadata pills and keeps rail actions off the facts', () => {
+    const source = { ...freshEntry, facts: [{ glyph: 'pin', value: '<0.1 mi' }], detailContent: offerCatalog.entries['place:source-cafe'].detailContent };
+    const tree = mount(<LocalPerksCard entry={source} catalog={empty} format="rail" width={280} />);
+    expect(nodes(tree).filter(node => node.props.testID === 'card-photo-label')).toHaveLength(1);
+    const pills = nodes(tree).filter(node => /^card-metadata-(pin:0|menu|offer)$/.test(node.props.testID || ''));
+    expect(pills).toHaveLength(3);
+    for (const pill of pills) expect(StyleSheet.flatten(pill.props.style)).toMatchObject({ height: 32, flex: 1, flexDirection: 'row', borderRadius: 999 });
+    expect(style(tree, 'card-metadata-pin:0').backgroundColor).toBe(ROLES['metadata-distance'][theme]);
+    expect(style(tree, 'card-metadata-menu').backgroundColor).toBe(ROLES['metadata-menu'][theme]);
+    expect(style(tree, 'card-metadata-offer').backgroundColor).toBe(ROLES['metadata-offer'][theme]);
+    expect(style(tree, 'perks-add-stop')).toMatchObject({ top: 106, right: 18 });
+    expect(style(tree, 'perks-add-stop').bottom).toBeUndefined();
   });
   it('keeps four equally sized navigation tabs', () => {
     const items = ['index', 'discover', 'create', 'profile'].map(key => ({ key, label: key, glyph: 'home', selected: key === 'index', onPress: () => {} }));

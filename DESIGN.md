@@ -703,6 +703,26 @@ of 3px neutral dots in a 13px strip, with a slightly stronger current dot.
 Expose the current page and adjustable accessibility actions without adding
 visible arrow buttons. A swipe must not trigger a banner tap.
 
+### Color Dock card metadata
+
+Shared place/event/route cards on Home, Discover and category pages use Color
+Dock with regular 32px capsules: 11px DM Sans, 12px outline glyphs inline with
+the text, 6px gaps and equal-width slots. Single-fact cards use one centered
+capsule at its natural width. Distance/movement is sage, menus blue, prices/promos
+honey, and categories/timing apricot. Both themes use dedicated
+metadata fill/ink pairs generated from tokens.ts.
+Rail and wide cards put the source caption in a small pill at the photo's lower
+left. The add-to-evening control moves to the photo's lower right so the metadata
+row spans the content width. Keep existing photo dimensions and title styling.
+Rail cards have a 280px minimum width so the standard capsules remain readable
+on narrow phones; horizontal scrolling still exposes the rest of the rail.
+Rows with smaller thumbnails retain their caption below the title and show up
+to two facts in content-sized pills; rail/wide cards show up to three equal slots.
+Do not pad missing fields with
+invented ratings, open states, menus or promos. Published menu documents count
+as a menu; expired offers do not. Show a promo's schedule and restrictions below
+its pill, and keep full values available to screen readers when text truncates.
+
 ### Image loading reliability
 
 All shared photos use one source-aware loader. Prefer the exact venue's bundled

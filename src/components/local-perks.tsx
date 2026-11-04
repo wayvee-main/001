@@ -3,10 +3,12 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Animated, AppState, Easing, Platform, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { Glyph } from '@/components/glyph';
+import { CardMetadata } from '@/components/card-metadata';
 import { Photo } from '@/components/photo';
 import { VeeMark } from '@/components/vee-mark';
 import { useActiveCity, useActiveCityName } from '@/lib/city';
 import { useNow } from '@/lib/clock';
+import { cardMetadata } from '@/lib/card-metadata';
 import { homeGuideHref, type HomeGuideCatalog, type HomeGuideCategory, type HomeGuideEntry } from '@/lib/home-guide';
 import { bannerPageForId, homeRecommendations } from '@/lib/home-recommendations';
 import { homeIndexPhotos, type HomeIndexPhoto } from '@/lib/home-index-photos';
@@ -224,8 +226,8 @@ export function LocalPerksCard({ entry, catalog, format = 'row', width, photos, 
   const rail = format !== 'row', key = eveningStopKey(entry);
   const added = perks.date === todayIso() && perks.stops.some(stop => stop.city === city && eveningStopKey(stop) === key);
   const saved = entry.saveKind ? s.isSaved(entry.saveKind, entry.id) : entry.planKind ? s.isPlanned(entry.planKind, entry.id) : false;
-  const canSave = Boolean(entry.saveKind || entry.planKind), menuCount = entry.detailContent?.menu?.items.length;
-  const facts = entry.facts.filter(fact => ['wallet', 'dollar', 'pin', 'clock', 'calendar', 'walk', 'route', 'car'].includes(fact.glyph)).slice(0, 2);
+  const canSave = Boolean(entry.saveKind || entry.planKind), now = useNow();
+  const metadata = cardMetadata(entry, now, rail ? 3 : 2);
   const save = () => { if (entry.saveKind) s.toggleSaved(entry.saveKind, entry.id, entry.name); else if (entry.planKind) s.togglePlan(entry.planKind, entry.id, entry.name); };
   const add = () => {
     if (!added && perks.stops.filter(stop => stop.city === city).length >= MAX_EVENING_STOPS && perks.date === todayIso()) { s.showToast('Keep up to eight stops in an evening.'); return; }
@@ -235,23 +237,22 @@ export function LocalPerksCard({ entry, catalog, format = 'row', width, photos, 
   return <View testID="local-perks-card" style={[surface, { width, borderRadius: 18, overflow: 'hidden', flexShrink: 0 }]}>
     <Pressable testID="perks-place-open" accessibilityRole="button" accessibilityLabel={`Explore ${entry.name}. ${entry.caption}`} onPress={onOpen || (() => router.push(homeGuideHref(entry) as never))}
       style={({ pressed }) => ({ flexDirection: rail ? 'column' : 'row', gap: rail ? 0 : 11, padding: rail ? 10 : 9, opacity: pressed ? .78 : 1, alignItems: rail ? 'stretch' : 'center', minHeight: rail ? undefined : 100 })}>
-      <PerksPhoto key={key} entry={entry} catalog={catalog} photos={photos} height={rail ? 132 : 80} width={rail ? undefined : 80} onUnavailable={onPhotoUnavailable} />
-      <View style={{ flex: 1, minWidth: 0, paddingTop: rail ? 10 : 0, paddingRight: rail ? 34 : 28, paddingBottom: rail ? 4 : 0, gap: 5 }}>
+      <View style={{ width: rail ? '100%' : 80, position: 'relative' }}>
+        <PerksPhoto key={key} entry={entry} catalog={catalog} photos={photos} height={rail ? 132 : 80} width={rail ? undefined : 80} onUnavailable={onPhotoUnavailable} />
+        {rail && entry.caption ? <View testID="card-photo-label" style={{ position: 'absolute', left: 8, bottom: 8, maxWidth: '78%', paddingHorizontal: 9, paddingVertical: 4, borderRadius: 999, backgroundColor: colors['metadata-category'] }}>
+          <Text numberOfLines={1} accessibilityLabel={entry.caption} className="font-dm" style={{ fontSize: 11, lineHeight: 16, color: colors['metadata-category-ink'] }}>{entry.caption}</Text>
+        </View> : null}
+      </View>
+      <View style={{ flex: 1, minWidth: 0, paddingTop: rail ? 10 : 0, paddingRight: rail ? 0 : 40, paddingBottom: rail ? 4 : 0, gap: rail ? 8 : 5 }}>
         <Text numberOfLines={1} ellipsizeMode="tail" className="font-fraunces text-ink" style={{ fontSize: 20, lineHeight: 24, letterSpacing: -.35 }}>{brief(entry.name)}</Text>
-        <Text numberOfLines={1} className="font-dm text-fine text-taupe">{entry.caption}</Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, minHeight: 17 }}>
-          {facts.map((fact, index) => <View key={index} accessibilityLabel={fact.label || fact.value} style={{ flexDirection: 'row', alignItems: 'center', gap: 3, flexShrink: 1, minWidth: 0 }}>
-            {!['wallet', 'dollar'].includes(fact.glyph) ? <Glyph name={fact.glyph} size={11} color={colors['fg-muted']} /> : null}
-            <Text numberOfLines={1} className="font-dm text-fine text-taupe" style={{ flexShrink: 1 }}>{fact.value}</Text>
-          </View>)}
-          {menuCount && facts.length < 2 ? <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}><Glyph name="book" size={11} color={colors['fg-muted']} /><Text className="font-dm text-fine text-taupe">Menu</Text></View> : null}
-        </View>
+        {!rail ? <Text numberOfLines={1} className="font-dm text-fine text-taupe">{entry.caption}</Text> : null}
+        <CardMetadata items={metadata.items} note={metadata.note} equalWidth={rail} />
       </View>
     </Pressable>
     {canSave ? <Pressable testID="perks-save-place" accessibilityRole="button" accessibilityLabel={`${saved ? 'Unsave' : 'Save'} ${entry.name}`} accessibilityState={{ selected: saved }} onPress={save} hitSlop={5}
       style={({ pressed }) => ({ position: 'absolute', top: 11, right: 11, width: 30, height: 30, borderRadius: 15, backgroundColor: colors['surface-control'], borderWidth: 1, borderColor: colors['edge-card'], alignItems: 'center', justifyContent: 'center', opacity: pressed ? .7 : 1 })}><Glyph name={saved ? 'check' : 'heart'} size={16} color={saved ? colors['accent-fill'] : colors.fg} /></Pressable> : null}
     <Pressable testID="perks-add-stop" accessibilityRole="button" accessibilityLabel={`${added ? 'Remove' : 'Add'} ${entry.name} ${added ? 'from' : 'to'} your evening`} accessibilityState={{ selected: added }} onPress={add} hitSlop={5}
-      style={({ pressed }) => ({ position: 'absolute', bottom: 10, right: 11, width: 28, height: 28, borderRadius: 14, backgroundColor: added ? colors['accent-tint'] : colors['surface-control'], borderWidth: 1, borderColor: colors['control-edge'], alignItems: 'center', justifyContent: 'center', opacity: pressed ? .7 : 1 })}><Glyph name={added ? 'check' : 'plus'} size={14} color={colors['fg-accent']} /></Pressable>
+      style={({ pressed }) => ({ position: 'absolute', ...(rail ? { top: 106 } : { bottom: 10 }), right: rail ? 18 : 11, width: 28, height: 28, borderRadius: 14, backgroundColor: added ? colors['accent-tint'] : colors['surface-control'], borderWidth: 1, borderColor: colors['control-edge'], alignItems: 'center', justifyContent: 'center', opacity: pressed ? .7 : 1 })}><Glyph name={added ? 'check' : 'plus'} size={14} color={colors['fg-accent']} /></Pressable>
   </View>;
 }
 
@@ -264,7 +265,7 @@ export function PerksVeeRibbon() {
 }
 
 export function PerksRail({ entries, catalog }: { entries: readonly HomeGuideEntry[]; catalog: HomeGuideCatalog }) {
-  const [width, setWidth] = useState(310), cardWidth = Math.min(340, width * .82);
+  const [width, setWidth] = useState(310), cardWidth = Math.min(340, Math.max(280, width * .82));
   return <View onLayout={event => setWidth(event.nativeEvent.layout.width)}>
     <ScrollView testID="perks-place-rail" horizontal showsHorizontalScrollIndicator={false} snapToInterval={cardWidth + 11} decelerationRate="fast" contentContainerStyle={{ gap: 11, paddingVertical: 3 }}>
       {entries.map(entry => <LocalPerksCard key={eveningStopKey(entry)} entry={entry} catalog={catalog} format="rail" width={cardWidth} />)}

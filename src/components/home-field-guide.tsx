@@ -4,6 +4,7 @@ import { Text, TouchableOpacity, View } from 'react-native';
 
 import { EditorialNav } from '@/components/editorial-nav';
 import { Glyph } from '@/components/glyph';
+import { CardMetadata } from '@/components/card-metadata';
 import { Screen, ScreenScroll } from '@/components/layout';
 import { Photo } from '@/components/photo';
 import type { PhotoCandidate } from '@/components/reliable-image';
@@ -11,6 +12,7 @@ import { WayveeWordmark } from '@/components/wayvee-wordmark';
 import { EmptyState } from '@/components/ui';
 import { useActiveCityName } from '@/lib/city';
 import { currentDaypart } from '@/lib/daypart';
+import { metadataFact } from '@/lib/card-metadata';
 import { homeGuideHref, type HomeGuideEntry, type HomeGuideFact } from '@/lib/home-guide';
 import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
@@ -73,13 +75,7 @@ export function HomeGuideHeading({title,subtitle}: {title:string;subtitle?:strin
 }
 
 export function HomeGuideFacts({facts}: {facts:readonly HomeGuideFact[]}) {
-  const colors=useThemeColors();
-  return <View style={{flexDirection:'row',alignItems:'center',gap:10}}>
-    {facts.slice(0,2).map((fact,i)=><View key={i} accessibilityLabel={fact.label || fact.value} style={{flexDirection:'row',alignItems:'center',gap:4,minWidth:0,flexShrink:1}}>
-      <Glyph name={fact.glyph} size={12} color={colors['fg-muted']} />
-      <Text numberOfLines={1} className="font-dm text-fine text-taupe" style={{flexShrink:1}}>{fact.value}</Text>
-    </View>)}
-  </View>;
+  return <CardMetadata items={facts.slice(0,2).map(metadataFact)} equalWidth={false} />;
 }
 
 export function HomeGuidePills({values,value,onChange}: {values:readonly string[];value:string;onChange:(value:string)=>void}) {
