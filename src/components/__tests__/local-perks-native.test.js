@@ -99,7 +99,7 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     expect(tree.root.findAllByProps({ testID: 'home-recommendation-dish:place:source-cafe:morningtoast' })).toHaveLength(0);
     act(() => tree.root.findByProps({ testID: 'home-recommendation-dish:place:source-cafe:noodles' }).props.onPress());
     expect(mockPush).toHaveBeenLastCalledWith('/home/detail?kind=place&id=source-cafe&dish=Noodles');
-    expect(nodes(tree).filter(node => node.props.testID === 'home-recommendation-pulse')).toHaveLength(2);
+    expect(nodes(tree).filter(node => node.props.testID === 'home-recommendation-pulse')).toHaveLength(1);
   });
   it('shows an honest empty state when no recent source exists', () => {
     const tree = mount(<HomeTimelyRecommendations catalog={empty} now={new Date(2026, 10, 3, 19)} />);
@@ -112,11 +112,13 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     const position = () => tree.root.findByProps({ testID: 'perks-banner-position' }).props.accessibilityValue;
     const nativeScroll = tree.root.findByType(ScrollView).instance;
     const scrollTo = jest.spyOn(nativeScroll, 'scrollTo');
-    act(() => scroll().props.onMomentumScrollEnd({ nativeEvent: { contentOffset: { x: 300 } } }));
+    expect(StyleSheet.flatten(scroll().props.contentContainerStyle).gap).toBe(12);
+    expect(scroll().props.snapToInterval).toBe(312);
+    act(() => scroll().props.onMomentumScrollEnd({ nativeEvent: { contentOffset: { x: 312 } } }));
     expect(position().now).toBe(2);
     act(() => tree.update(<LocalPerksBanners catalog={offerCatalog} />));
     expect(position().now).toBe(3);
-    expect(scrollTo).toHaveBeenLastCalledWith({ x: 600, animated: false });
+    expect(scrollTo).toHaveBeenLastCalledWith({ x: 624, animated: false });
     act(() => tree.update(<LocalPerksBanners catalog={empty} />));
     act(() => scroll().props.onScrollBeginDrag());
     scrollTo.mockClear();
@@ -124,7 +126,7 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     expect(scrollTo).not.toHaveBeenCalled();
     act(() => scroll().props.onMomentumScrollEnd({ nativeEvent: { contentOffset: { x: 0 } } }));
     expect(position().now).toBe(2);
-    expect(scrollTo).toHaveBeenLastCalledWith({ x: 300, animated: false });
+    expect(scrollTo).toHaveBeenLastCalledWith({ x: 312, animated: false });
     expect(nodes(tree).filter(node => node.props.accessibilityRole === 'button' && /^(Next|Previous) banner$/.test(node.props.accessibilityLabel || ''))).toHaveLength(0);
   });
   it('does not open a banner when releasing a swipe', () => {

@@ -83,20 +83,22 @@ export function LocalCategoryShelf({ catalog, active, onSelect }: { catalog: Hom
       return <Pressable key={category} testID={`home-category-${category}`} accessibilityRole="button" accessibilityLabel={`${HOME_LEDGERS[category].title}. ${pool.length} local options`}
         accessibilityState={{ selected }} onPress={() => onSelect ? onSelect(category) : router.push(HOME_LEDGERS[category].href)}
         style={({ pressed }) => ({ flex: 1, minWidth: 0, minHeight: 44, borderRadius: 999, justifyContent: 'center', opacity: pressed ? .72 : 1 })}>
-        <View style={{ minHeight: 37, borderRadius: 999, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors['edge-faint'],
-          paddingHorizontal: 6, paddingVertical: 7, backgroundColor: selected ? colors['selected-surface'] : 'transparent' }}>
-          <Text numberOfLines={1} className="font-fraunces" style={{ fontSize: width <= 350 ? 14 : 15, lineHeight: 20, color: selected ? colors['on-selected'] : colors['fg-muted'] }}>{HOME_LEDGERS[category].title}</Text>
+        <View style={{ minHeight: 37, borderRadius: 999, flexDirection: 'row', gap: width <= 350 ? 3 : 5, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors['edge-faint'],
+          paddingHorizontal: width <= 350 ? 2 : 6, paddingVertical: 7, backgroundColor: selected ? colors['selected-surface'] : 'transparent' }}>
+          <Glyph name={{ eat: 'food', bars: 'drink', routes: 'route', events: 'ticket' }[category]} size={width <= 350 ? 11 : 12} strokeWidth={1.5} color={selected ? colors['on-selected'] : colors['fg-muted']} />
+          <Text numberOfLines={1} className="font-fraunces" style={{ fontSize: width <= 350 ? 13 : 15, lineHeight: 20, color: selected ? colors['on-selected'] : colors['fg-muted'] }}>{HOME_LEDGERS[category].title}</Text>
         </View>
       </Pressable>;
     })}
   </View>;
 }
 
-/** Named, source-backed picks. Only the small glyphs breathe; text stays still. */
+/** Named, source-backed picks. Only the divider dots breathe; text stays still. */
 export function HomeTimelyRecommendations({ catalog, now }: { catalog: HomeGuideCatalog; now: Date }) {
   const router = useRouter(), colors = useThemeColors(), reduced = useReducedMotionPreference();
   const openOffer = useLocalPerks(s => s.openOffer), recommendations = homeRecommendations(catalog, now);
   const hasPicks = recommendations.length > 0;
+  const hasDividers = recommendations.length > 1;
   const [pulse] = useState(() => new Animated.Value(1));
   const [appActive, setAppActive] = useState(AppState.currentState !== 'background' && AppState.currentState !== 'inactive');
   useEffect(() => {
@@ -105,26 +107,25 @@ export function HomeTimelyRecommendations({ catalog, now }: { catalog: HomeGuide
   }, []);
   useFocusEffect(useCallback(() => {
     pulse.setValue(1);
-    if (reduced || !appActive || !hasPicks) return;
+    if (reduced || !appActive || !hasDividers) return;
     const animation = Animated.loop(Animated.sequence([
       Animated.timing(pulse, { toValue: .55, duration: 1500, easing: Easing.inOut(Easing.ease), useNativeDriver: true, isInteraction: false }),
       Animated.timing(pulse, { toValue: 1, duration: 1500, easing: Easing.inOut(Easing.ease), useNativeDriver: true, isInteraction: false }),
     ]));
     animation.start();
     return () => { animation.stop(); pulse.setValue(1); };
-  }, [appActive, hasPicks, pulse, reduced]));
-  return <View testID="home-timely-recommendations" style={{ minHeight: 44 }}>
+  }, [appActive, hasDividers, pulse, reduced]));
+  return <View testID="home-timely-recommendations" style={{ minHeight: 44, borderBottomWidth: 1, borderBottomColor: colors['edge-faint'] }}>
     {hasPicks ? <ScrollView horizontal showsHorizontalScrollIndicator={false} nestedScrollEnabled directionalLockEnabled
-      contentContainerStyle={{ alignItems: 'center', gap: 22 }}>
-      {recommendations.map(suggestion => <Pressable key={suggestion.id} testID={`home-recommendation-${suggestion.id}`} accessibilityRole="button"
+      contentContainerStyle={{ alignItems: 'center' }}>
+      {recommendations.map((suggestion, index) => <View key={suggestion.id} style={{ flexDirection: 'row', alignItems: 'center' }}>
+        {index > 0 ? <Animated.View testID="home-recommendation-pulse" accessible={false} style={{ width: 3, height: 3, borderRadius: 2, marginHorizontal: 12, backgroundColor: colors['fg-muted'], opacity: pulse }} /> : null}
+        <Pressable testID={`home-recommendation-${suggestion.id}`} accessibilityRole="button"
         accessibilityLabel={`${suggestion.label}. ${suggestion.basis === 'source-popular' ? 'Popular on the published menu' : 'Recently verified nearby'}`}
         onPress={() => suggestion.offer ? openOffer(suggestion.offer) : router.push(suggestion.href as never)}
         style={({ pressed }) => ({ minHeight: 44, maxWidth: 230, flexDirection: 'row', alignItems: 'center', gap: 6, opacity: pressed ? .6 : 1 })}>
-        <Animated.View testID="home-recommendation-pulse" accessible={false} style={{ opacity: pulse }}>
-          <Glyph name={suggestion.glyph} size={13} strokeWidth={1.5} color={colors['fg-accent']} />
-        </Animated.View>
         <Text numberOfLines={1} className="font-dm" style={{ flexShrink: 1, fontSize: 12, lineHeight: 17, color: colors['fg-muted'] }}>{suggestion.label}</Text>
-      </Pressable>)}
+      </Pressable></View>)}
     </ScrollView> : <Text testID="home-recommendations-empty" className="font-dm" style={{ paddingVertical: 13, fontSize: 12, lineHeight: 17, color: colors['fg-muted'] }}>Fresh local picks are on the way.</Text>}
   </View>;
 }
@@ -146,20 +147,21 @@ export function LocalPerksBanners({ catalog, compact = false }: { catalog: HomeG
   const now = useNow(), reduced = useReducedMotionPreference();
   const offers = localOffers(catalog, now), slides = [...offers.slice(0, 3).map(offer => ({ id: offer.id, offer })), { id: 'vee', offer: undefined }, { id: 'stay', offer: undefined }];
   const ref = useRef<ScrollView>(null), [width, setWidth] = useState(300), [selectedId, setSelectedId] = useState(slides[0].id);
+  const stride = width + 12;
   const selected = useRef(selectedId), dragging = useRef(false), idleTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const pendingAlignment = useRef(false), lastSwipe = useRef(0);
   const idsKey = JSON.stringify(slides.map(slide => slide.id)), current = bannerPageForId(slides.map(slide => slide.id), selectedId), height = compact ? 100 : 110;
-  const latest = useRef({ ids: slides.map(slide => slide.id), width });
+  const latest = useRef({ ids: slides.map(slide => slide.id), width: stride });
   const gesture = useRef<typeof latest.current | null>(null);
   // selectedId is deliberately absent: aligning after each selection fights
   // native momentum. Only source/layout changes may realign the carousel.
   useEffect(() => {
-    latest.current = { ids: JSON.parse(idsKey), width };
+    latest.current = { ids: JSON.parse(idsKey), width: stride };
     if (dragging.current) { pendingAlignment.current = true; return; }
     const ids: string[] = JSON.parse(idsKey), page = bannerPageForId(ids, selected.current);
     selected.current = ids[page]; setSelectedId(ids[page]);
-    ref.current?.scrollTo({ x: page * width, animated: false });
-  }, [idsKey, width]);
+    ref.current?.scrollTo({ x: page * stride, animated: false });
+  }, [idsKey, stride]);
   useEffect(() => () => clearTimeout(idleTimer.current), []);
   const settle = (offset: number) => {
     clearTimeout(idleTimer.current);
@@ -175,10 +177,10 @@ export function LocalPerksBanners({ catalog, compact = false }: { catalog: HomeG
   const step = (next: number) => {
     const page = Math.max(0, Math.min(slides.length - 1, next));
     selected.current = slides[page].id; setSelectedId(slides[page].id);
-    ref.current?.scrollTo({ x: page * width, animated: !reduced });
+    ref.current?.scrollTo({ x: page * stride, animated: !reduced });
   };
   return <View testID="local-perks-banners" onLayout={event => { const next = event.nativeEvent.layout.width; if (next > 0) setWidth(next); }}>
-    <ScrollView ref={ref} testID="perks-banner-scroll" horizontal showsHorizontalScrollIndicator={false} decelerationRate="fast" snapToInterval={Platform.OS === 'web' ? undefined : width} pagingEnabled={Platform.OS === 'web'} nestedScrollEnabled directionalLockEnabled
+    <ScrollView ref={ref} testID="perks-banner-scroll" horizontal showsHorizontalScrollIndicator={false} decelerationRate="fast" snapToInterval={Platform.OS === 'web' ? undefined : stride} pagingEnabled={Platform.OS === 'web'} nestedScrollEnabled directionalLockEnabled contentContainerStyle={{ gap: 12 }}
       scrollEventThrottle={16} onScroll={Platform.OS === 'web' ? event => {
         if (!dragging.current) gesture.current = latest.current;
         dragging.current = true; lastSwipe.current = Date.now();
