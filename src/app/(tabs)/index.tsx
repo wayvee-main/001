@@ -2,10 +2,10 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { CitySearchBar } from '@/components/city-controls';
-import { DaybreakIntro, DaybreakPeriodPicker, DaybreakPoster, type DaybreakPeriod } from '@/components/daybreak';
+import { DaybreakHomeRow, DaybreakIntro, DaybreakPeriodPicker, DaybreakPoster, type DaybreakPeriod } from '@/components/daybreak';
 import { HomeDoorCard } from '@/components/home-field-guide';
 import { HRow, Screen, ScreenScroll } from '@/components/layout';
-import { HomeTimelyRecommendations, LocalCategoryShelf, LocalPerksBanners, LocalPerksCard, LocalPerksHeader, PerksHeading, PerksVeeRibbon } from '@/components/local-perks';
+import { HomeTimelyRecommendations, LocalCategoryShelf, LocalPerksBanners, LocalPerksHeader, PerksHeading, PerksVeeRibbon } from '@/components/local-perks';
 import { homeCollectionGlyph, homeDiscoveryIdeas } from '@/lib/home-discovery';
 import { homeIdeaPhoto } from '@/lib/home-guide';
 import { homeCollectionPhotos, homeIdeaPhotos, homeIndexPhotos } from '@/lib/home-index-photos';
@@ -47,7 +47,7 @@ export default function HomeScreen() {
     </View> : null}
     <LocalPerksBanners catalog={catalog} />
     {bars.length ? <View><PerksHeading title="Leave a little room for later" action="More" onPress={() => router.push(HOME_LEDGERS.bars.href)} />
-      <View style={{ gap: 12 }}>{bars.slice(0, 2).map(entry => <LocalPerksCard key={entry.kind + ':' + entry.id} entry={entry} catalog={catalog} />)}</View>
+      <View style={{ gap: 12 }}>{bars.slice(0, 2).map(entry => <DaybreakHomeRow key={entry.kind + ':' + entry.id} entry={entry} catalog={catalog} now={now} />)}</View>
     </View> : null}
     <PerksVeeRibbon />
     <View><PerksHeading title="For you" action="See all" onPress={() => router.push('/home/ideas')} />

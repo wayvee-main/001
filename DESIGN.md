@@ -37,9 +37,18 @@ this section takes precedence wherever they differ.
   recommendations, four glyph pills, By day/After hours, compact source-backed
   hero poster, slim promos, and compact rows. Preserve time-sensitive For you
   and Collections and the existing nearest-pool radius/distance rules.
-- The hero uses a 90px photo (84px on narrow phones), **12px rounded image
-  corners**, 10px padding and 8px separation before the metadata. Compact row
-  thumbnails use 10px corners. Card height follows the actual content.
+- **Soft Edit on Home:** the poster has no category eyebrow, a 23px name,
+  a single-line snapshot and at most two factual pastel pills, preferring a
+  published Menu and measured location. Keep narrative availability notes in
+  detail instead of squeezing them into pills. Use an 84px photo (76×80px on narrow
+  phones), **12px rounded image corners**, 12px padding (11px narrow) and an
+  11px gap before the pills. Keep offer conditions in the promo/detail.
+- Home venue rows have no perimeter border, caption or trailing chevron:
+  use soft elevation, 17px corners, a 60px photo with 10px corners (52×60px
+  narrow), 10px padding (9px narrow), an 18px name (17px narrow) and up to two
+  27px-minimum pills. Pill text stays 11px. Discover and secondary cards retain
+  their shared 30px-minimum pills and existing card layouts.
+  Card height follows the actual content and accessibility font scaling.
   Editorial features prefer records with source menus and photos. Additional
   records must have a measured distance within five miles; this selection must
   never reorder the nearest inventory or import a different city's fixtures.

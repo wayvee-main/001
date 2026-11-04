@@ -4,7 +4,7 @@ import { NativePressable as Pressable } from '@/components/native-pressable';
 import { CardMetadata } from '@/components/card-metadata';
 import { Glyph } from '@/components/glyph';
 import { PerksPhoto } from '@/components/local-perks';
-import { cardMetadata } from '@/lib/card-metadata';
+import { homeCardMetadata } from '@/lib/card-metadata';
 import { homeGuideHref, type HomeGuideCatalog, type HomeGuideEntry } from '@/lib/home-guide';
 import { useElevation } from '@/lib/shadows';
 import { useScoper } from '@/lib/store';
@@ -43,23 +43,39 @@ export function DaybreakPeriodPicker({ value, onChange }: { value: DaybreakPerio
   </View>;
 }
 
-/** The approved compact poster uses real source facts, never fixture metadata. */
+function briefName(name: string) {
+  const words = name.trim().split(/\s+/);
+  return words.length > 5 ? words.slice(0, 5).join(' ') + '…' : name;
+}
+
+/** Soft Edit is scoped to Home; Discover keeps the shared venue card. */
 export function DaybreakPoster({ entry, catalog, now }: { entry: HomeGuideEntry; catalog: HomeGuideCatalog; now: Date }) {
   const colors = useThemeColors(), elevation = useElevation(1), router = useRouter(), { width } = useWindowDimensions();
-  const imageSize = width <= 360 ? 84 : 90, metadata = cardMetadata(entry, now, 3);
-  const name = entry.name.trim().split(/\s+/).length > 5 ? entry.name.trim().split(/\s+/).slice(0, 5).join(' ') + '…' : entry.name;
-  const category = (entry.category?.replace(/_/g, ' ') || entry.caption.split(' · ')[0]).trim();
+  const narrow = width <= 360, metadata = homeCardMetadata(entry, now);
   const description = entry.detailContent?.description || entry.description || entry.caption;
-  return <Pressable testID="daybreak-poster" accessibilityRole="button" accessibilityLabel={`Explore ${entry.name}. ${entry.description}`} onPress={() => router.push(homeGuideHref(entry) as never)}
-    style={({ pressed }) => [elevation, { padding: 10, gap: 8, borderRadius: 19, borderWidth: 1, borderColor: colors['poster-edge'], backgroundColor: colors['surface-poster'], opacity: pressed ? .78 : 1 }]}>
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: width <= 360 ? 9 : 12 }}>
+  return <Pressable testID="daybreak-poster" accessibilityRole="button" accessibilityLabel={`Explore ${entry.name}. ${description}`} onPress={() => router.push(homeGuideHref(entry) as never)}
+    style={({ pressed }) => [elevation, { padding: narrow ? 11 : 12, gap: 11, borderRadius: 19, borderWidth: 1, borderColor: colors['poster-edge'], backgroundColor: colors['surface-poster'], opacity: pressed ? .78 : 1 }]}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: narrow ? 10 : 12 }}>
       <View style={{ flex: 1, minWidth: 0, gap: 5 }}>
-        {category ? <Text numberOfLines={1} className="font-dm-medium text-taupe" style={{ fontSize: 11, lineHeight: 16, letterSpacing: 1.1, textTransform: 'uppercase' }}>{category}</Text> : null}
-        <Text numberOfLines={1} ellipsizeMode="tail" className="font-dm-medium text-ink" style={{ fontSize: width <= 360 ? 25 : 26, lineHeight: 30, letterSpacing: -.8 }}>{name}</Text>
-        <Text numberOfLines={2} className="font-dm text-taupe" style={{ fontSize: width <= 360 ? 11 : 12, lineHeight: 18 }}>{description}</Text>
+        <Text numberOfLines={1} ellipsizeMode="tail" className="font-dm-medium text-ink" style={{ fontSize: 23, lineHeight: narrow ? 28 : 29, letterSpacing: -.6 }}>{briefName(entry.name)}</Text>
+        <Text numberOfLines={1} ellipsizeMode="tail" className="font-dm text-taupe" style={{ fontSize: narrow ? 11 : 12, lineHeight: narrow ? 17 : 18 }}>{description}</Text>
       </View>
-      <View testID="daybreak-poster-photo"><PerksPhoto entry={entry} catalog={catalog} width={imageSize} height={imageSize} radius={12} /></View>
+      <View testID="daybreak-poster-photo"><PerksPhoto entry={entry} catalog={catalog} width={narrow ? 76 : 84} height={narrow ? 80 : 84} radius={12} /></View>
     </View>
-    <CardMetadata items={metadata.items} />
+    <CardMetadata items={metadata} />
+  </Pressable>;
+}
+
+export function DaybreakHomeRow({ entry, catalog, now }: { entry: HomeGuideEntry; catalog: HomeGuideCatalog; now: Date }) {
+  const colors = useThemeColors(), elevation = useElevation(1), router = useRouter(), { width } = useWindowDimensions();
+  const narrow = width <= 360;
+  return <Pressable testID="daybreak-home-row" accessibilityRole="button" accessibilityLabel={`Explore ${entry.name}`} onPress={() => router.push(homeGuideHref(entry) as never)}
+    style={({ pressed }) => [elevation, { flexDirection: 'row', alignItems: 'center', padding: narrow ? 9 : 10, gap: narrow ? 10 : 12,
+      borderRadius: 17, borderWidth: 0, backgroundColor: colors['surface-raised'], opacity: pressed ? .78 : 1 }]}>
+    <PerksPhoto entry={entry} catalog={catalog} width={narrow ? 52 : 60} height={60} radius={10} />
+    <View style={{ flex: 1, minWidth: 0, gap: 6 }}>
+      <Text numberOfLines={1} ellipsizeMode="tail" className="font-dm-medium text-ink" style={{ fontSize: narrow ? 17 : 18, lineHeight: narrow ? 23 : 24, letterSpacing: -.3 }}>{briefName(entry.name)}</Text>
+      <CardMetadata items={homeCardMetadata(entry, now)} compact />
+    </View>
   </Pressable>;
 }

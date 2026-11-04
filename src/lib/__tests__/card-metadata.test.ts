@@ -1,4 +1,4 @@
-import { cardMetadata } from '@/lib/card-metadata';
+import { cardMetadata, homeCardMetadata } from '@/lib/card-metadata';
 import type { HomeGuideEntry } from '@/lib/home-guide';
 
 const now = new Date('2026-11-03T23:00:00Z');
@@ -40,4 +40,20 @@ it('keeps the two-fact row layout compact without orphaning an offer note', () =
   const result = cardMetadata(entry, now, 2);
   expect(result.items.map(item => item.text)).toEqual(['<0.1 mi', 'Menu']);
   expect(result.note).toBeUndefined();
+});
+
+it('prioritizes a published menu and location for Home without repeating the promo', () => {
+  expect(homeCardMetadata(entry, now).map(item => [item.text, item.tone])).toEqual([['Menu', 'menu'], ['<0.1 mi', 'distance']]);
+  const laterLocation = { ...entry, facts: [{ glyph: 'dollar', value: '$$' }, { glyph: 'clock', value: '6 PM' }, { glyph: 'pin', value: '0.4 mi' }] };
+  expect(homeCardMetadata(laterLocation, now).map(item => item.text)).toEqual(['Menu', '0.4 mi']);
+});
+
+it('does not duplicate or invent Home metadata when source facts are sparse', () => {
+  expect(homeCardMetadata({ ...entry, facts: [] }, now).map(item => item.key)).toEqual(['menu', 'offer']);
+  expect(homeCardMetadata({ ...entry, facts: [], detailContent: undefined }, now)).toEqual([]);
+  expect(homeCardMetadata({ ...entry, detailContent: undefined }, now).map(item => item.text)).toEqual(['<0.1 mi']);
+  const event = { ...entry, detailContent: undefined, facts: [{ glyph: 'calendar', value: 'Tomorrow' }, { glyph: 'wallet', value: 'From $35' }] };
+  expect(homeCardMetadata(event, now).map(item => item.text)).toEqual(['Tomorrow', 'From $35']);
+  const narrative = { ...entry, detailContent: undefined, facts: [{ glyph: 'pin', value: '1724 Broadway' }, { glyph: 'calendar', value: 'Nights posted on the official page' }] };
+  expect(homeCardMetadata(narrative, now).map(item => item.text)).toEqual(['1724 Broadway']);
 });

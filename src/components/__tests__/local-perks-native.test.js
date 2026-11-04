@@ -4,6 +4,7 @@ import renderer, { act } from 'react-test-renderer';
 import { Animated, AppState, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { cssInterop } from 'react-native-css-interop';
 import { EditorialNav } from '@/components/editorial-nav';
+import { DaybreakHomeRow, DaybreakPoster } from '@/components/daybreak';
 import { HomeTimelyRecommendations, LocalCategoryShelf, LocalPerksBanners, LocalPerksCard, PerksRoundButton } from '@/components/local-perks';
 import { useReducedMotionPreference } from '@/lib/motion';
 import { useThemeColors } from '@/lib/theme';
@@ -14,7 +15,7 @@ const mockOpenOffer = jest.fn();
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }), useFocusEffect: callback => require('react').useEffect(callback, [callback]) }));
 jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 24, left: 0 }) }));
 jest.mock('@/lib/theme', () => ({ useThemeColors: jest.fn() }));
-jest.mock('@/lib/shadows', () => ({ useControlSurface: () => ({ borderWidth: 1 }), useRaisedSurface: () => ({ borderWidth: 1 }) }));
+jest.mock('@/lib/shadows', () => ({ useElevation: () => ({}), useControlSurface: () => ({ borderWidth: 1 }), useRaisedSurface: () => ({ borderWidth: 1 }) }));
 jest.mock('@/components/glyph', () => ({ Glyph: () => null }));
 jest.mock('@/components/vee-mark', () => ({ VeeMark: () => null }));
 jest.mock('@/lib/city', () => ({ useActiveCity: () => 'oakland', useActiveCityName: () => 'Oakland' }));
@@ -83,6 +84,18 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     expect(tree.root.findAllByProps({ testID: 'perks-add-stop' })).toHaveLength(0);
     act(() => tree.root.findByProps({ testID: 'perks-place-open' }).props.onPress());
     expect(mockPush).toHaveBeenLastCalledWith('/home/detail?kind=place&id=source-cafe');
+  });
+  it('retains Home Soft Edit native surfaces and source-backed two-pill navigation', () => {
+    const source = { ...freshEntry, description: 'A source-backed snapshot.', facts: [{ glyph: 'pin', value: '0.4 mi' }] };
+    for (const [Component, id] of [[DaybreakPoster, 'daybreak-poster'], [DaybreakHomeRow, 'daybreak-home-row']]) {
+      const tree = mount(<Component entry={source} catalog={empty} now={new Date(2026, 10, 3, 12)} />);
+      expect(style(tree, id)).toMatchObject({ borderRadius: id === 'daybreak-poster' ? 19 : 17, backgroundColor: ROLES[id === 'daybreak-poster' ? 'surface-poster' : 'surface-raised'][theme] });
+      const pills = nodes(tree).filter(node => /^card-metadata-(pin:0|menu)$/.test(node.props.testID || ''));
+      expect(pills).toHaveLength(2);
+      pills.forEach(pill => expect(StyleSheet.flatten(pill.props.style)).toMatchObject({ minHeight: id === 'daybreak-poster' ? 30 : 27, paddingVertical: id === 'daybreak-poster' ? 5 : 4, borderWidth: 0 }));
+      act(() => tree.root.findByProps({ testID: id }).props.onPress());
+      expect(mockPush).toHaveBeenLastCalledWith('/home/detail?kind=place&id=source-cafe');
+    }
   });
   it('uses regular inline metadata pills and keeps rail actions off the facts', () => {
     const source = { ...freshEntry, facts: [{ glyph: 'pin', value: '<0.1 mi' }], detailContent: offerCatalog.entries['place:source-cafe'].detailContent };

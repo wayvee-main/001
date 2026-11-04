@@ -30,3 +30,21 @@ export function cardMetadata(entry: HomeGuideEntry, now: Date, limit: 2 | 3 = 3)
   }
   return { items: items.slice(0, limit) };
 }
+
+/** Home's Soft Edit keeps two useful facts: a published menu and location
+ * first, then the available source facts. Full offer terms stay in the ribbon
+ * and detail page rather than repeating under the venue name. */
+export function homeCardMetadata(entry: HomeGuideEntry, now: Date): CardMetadataItem[] {
+  const items = cardMetadata(entry, now).items;
+  const locationIndex = entry.facts.findIndex(fact => fact.value.trim() && ['pin', 'walk', 'route', 'car'].includes(fact.glyph));
+  const location = locationIndex >= 0 ? metadataFact(entry.facts[locationIndex], locationIndex) : undefined;
+  // Narrative availability notes belong in detail, not a shrinking Home pill.
+  const conciseFacts = items.filter(item => item.tone !== 'distance' && item.text.trim().length <= 28);
+  const candidates = [items.find(item => item.key === 'menu'), location, ...conciseFacts];
+  const result: CardMetadataItem[] = [];
+  for (const item of candidates) {
+    if (item && !result.some(existing => existing.tone === item.tone && existing.glyph === item.glyph && existing.text === item.text)) result.push(item);
+    if (result.length === 2) break;
+  }
+  return result;
+}
