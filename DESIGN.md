@@ -669,7 +669,7 @@ Home uses the approved **Open Notes** treatment with two intact rows. Eat,
 Bars, Routes and Events remain four equally sized pills in one row. Their
 37px capsules sit within 44px minimum touch targets, with 15px/20px regular
 Fraunces labels (13px on phones of 350px and below), full pill corners,
-transparent ground and the theme's faintest edges.
+transparent ground and the theme's soft edges (8% ink opacity).
 Category labels have small muted outline glyphs (food, drink, route, ticket),
 with no pill shadows. Each opens its existing local
 guide. Separate the recommendation row and category pills by 11px.
@@ -682,9 +682,9 @@ Fresh verification follows. Do not fabricate community trends or turn directory
 ingestion into a newly-opened claim. Diversify venues before a second pick from
 one venue, capped at two. Never pad an empty pool with generic Coffee/Dinner
 search intentions; show an honest quiet empty message instead.
-Use plain 12px DM Sans text, separated by subtly pulsing 3px neutral dots.
+Use plain 12px DM Sans text, separated by subtly pulsing 3px dots matching the banner background.
 The words stay still and have no glyphs or containers. Restore a single
-horizontal rule beneath this row using the theme's faintest edge token.
+horizontal rule beneath this row using the theme's soft edge token.
 Named actions keep 44px touch targets and scroll horizontally without autoplay.
 Venue/event picks open their detail; dishes open the actual menu item; promos
 open their source-linked offer. Recompute with Home's minute clock.
@@ -693,8 +693,9 @@ loses focus, the app backgrounds or reduced motion is enabled. Use native-driver
 opacity only.
 Both themes use their existing Local Perks tokens and Android-safe pressables.
 
-Promotional ribbons remain 110px on Home and 100px in compact Discover, with
-a visible 12px gap between cards. Snap offsets include that gap. Keep
+Promotional ribbons remain 110px on Home and 100px in compact Discover.
+The dedicated Vee ribbon stays outside the carousel; do not include a Vee promo slide.
+Keep a visible 12px gap between cards. Snap offsets include that gap. Keep
 native swipe momentum, preserve the visible slide by stable identity across
 source refreshes, and defer realignment until a gesture finishes. No autoplay,
 left/right controls or inline chevrons. The only pagination is a centered row

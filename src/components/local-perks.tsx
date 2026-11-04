@@ -83,7 +83,7 @@ export function LocalCategoryShelf({ catalog, active, onSelect }: { catalog: Hom
       return <Pressable key={category} testID={`home-category-${category}`} accessibilityRole="button" accessibilityLabel={`${HOME_LEDGERS[category].title}. ${pool.length} local options`}
         accessibilityState={{ selected }} onPress={() => onSelect ? onSelect(category) : router.push(HOME_LEDGERS[category].href)}
         style={({ pressed }) => ({ flex: 1, minWidth: 0, minHeight: 44, borderRadius: 999, justifyContent: 'center', opacity: pressed ? .72 : 1 })}>
-        <View style={{ minHeight: 37, borderRadius: 999, flexDirection: 'row', gap: width <= 350 ? 3 : 5, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors['edge-faint'],
+        <View style={{ minHeight: 37, borderRadius: 999, flexDirection: 'row', gap: width <= 350 ? 3 : 5, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors['edge-soft'],
           paddingHorizontal: width <= 350 ? 2 : 6, paddingVertical: 7, backgroundColor: selected ? colors['selected-surface'] : 'transparent' }}>
           <Glyph name={{ eat: 'food', bars: 'drink', routes: 'route', events: 'ticket' }[category]} size={width <= 350 ? 11 : 12} strokeWidth={1.5} color={selected ? colors['on-selected'] : colors['fg-muted']} />
           <Text numberOfLines={1} className="font-fraunces" style={{ fontSize: width <= 350 ? 13 : 15, lineHeight: 20, color: selected ? colors['on-selected'] : colors['fg-muted'] }}>{HOME_LEDGERS[category].title}</Text>
@@ -115,11 +115,11 @@ export function HomeTimelyRecommendations({ catalog, now }: { catalog: HomeGuide
     animation.start();
     return () => { animation.stop(); pulse.setValue(1); };
   }, [appActive, hasDividers, pulse, reduced]));
-  return <View testID="home-timely-recommendations" style={{ minHeight: 44, borderBottomWidth: 1, borderBottomColor: colors['edge-faint'] }}>
+  return <View testID="home-timely-recommendations" style={{ minHeight: 44, borderBottomWidth: 1, borderBottomColor: colors['edge-soft'] }}>
     {hasPicks ? <ScrollView horizontal showsHorizontalScrollIndicator={false} nestedScrollEnabled directionalLockEnabled
       contentContainerStyle={{ alignItems: 'center' }}>
       {recommendations.map((suggestion, index) => <View key={suggestion.id} style={{ flexDirection: 'row', alignItems: 'center' }}>
-        {index > 0 ? <Animated.View testID="home-recommendation-pulse" accessible={false} style={{ width: 3, height: 3, borderRadius: 2, marginHorizontal: 12, backgroundColor: colors['fg-muted'], opacity: pulse }} /> : null}
+        {index > 0 ? <Animated.View testID="home-recommendation-pulse" accessible={false} style={{ width: 3, height: 3, borderRadius: 2, marginHorizontal: 12, backgroundColor: colors['surface-ribbon'], opacity: pulse }} /> : null}
         <Pressable testID={`home-recommendation-${suggestion.id}`} accessibilityRole="button"
         accessibilityLabel={`${suggestion.label}. ${suggestion.basis === 'source-popular' ? 'Popular on the published menu' : 'Recently verified nearby'}`}
         onPress={() => suggestion.offer ? openOffer(suggestion.offer) : router.push(suggestion.href as never)}
@@ -143,9 +143,9 @@ export function PerksHeading({ title, action, onPress }: { title: string; action
 /** The complete promo, including image, is a 110px ribbon rather than a hero.
  * Preserve the visible slide across source refreshes, including during a swipe. */
 export function LocalPerksBanners({ catalog, compact = false }: { catalog: HomeGuideCatalog; compact?: boolean }) {
-  const colors = useThemeColors(), router = useRouter(), openStay = useScoper(s => s.openStaySheet), openOffer = useLocalPerks(s => s.openOffer);
+  const colors = useThemeColors(), openStay = useScoper(s => s.openStaySheet), openOffer = useLocalPerks(s => s.openOffer);
   const now = useNow(), reduced = useReducedMotionPreference();
-  const offers = localOffers(catalog, now), slides = [...offers.slice(0, 3).map(offer => ({ id: offer.id, offer })), { id: 'vee', offer: undefined }, { id: 'stay', offer: undefined }];
+  const offers = localOffers(catalog, now), slides = [...offers.slice(0, 3).map(offer => ({ id: offer.id, offer })), { id: 'stay', offer: undefined }];
   const ref = useRef<ScrollView>(null), [width, setWidth] = useState(300), [selectedId, setSelectedId] = useState(slides[0].id);
   const stride = width + 12;
   const selected = useRef(selectedId), dragging = useRef(false), idleTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -193,19 +193,19 @@ export function LocalPerksBanners({ catalog, compact = false }: { catalog: HomeG
       onMomentumScrollBegin={() => { clearTimeout(idleTimer.current); dragging.current = true; }}
       onMomentumScrollEnd={event => { lastSwipe.current = Date.now(); settle(event.nativeEvent.contentOffset.x); }} style={{ height }}>
       {slides.map(slide => {
-        const offer = slide.offer, copy = offer ? compactOffer(offer) : slide.id === 'vee' ? { title: 'Your evening, with Vee', detail: 'A table. A little music. Your kind of night.' } : { title: 'Stay here. Go somewhere.', detail: 'Your stay, a little more city.' };
+        const offer = slide.offer, copy = offer ? compactOffer(offer) : { title: 'Stay here. Go somewhere.', detail: 'Your stay, a little more city.' };
         const entry = offer ? catalog.entries[offer.venueKey] : undefined;
         return <Pressable key={slide.id} testID={`perks-banner-${offer ? 'offer' : slide.id}`} accessibilityRole="button"
           accessibilityLabel={offer ? `${offer.venue}. ${offer.title}. ${offer.label}. View offer` : copy.title}
-          onPress={() => { if (dragging.current || Date.now() - lastSwipe.current < 250) return; if (offer) openOffer(offer); else if (slide.id === 'vee') router.push('/create'); else openStay(); }}
+          onPress={() => { if (dragging.current || Date.now() - lastSwipe.current < 250) return; if (offer) openOffer(offer); else openStay(); }}
           style={({ pressed }) => ({ width, height, flexDirection: 'row', borderRadius: 18, overflow: 'hidden', borderWidth: 1, borderColor: colors['edge-card'], backgroundColor: colors['surface-ribbon'], opacity: pressed ? .78 : 1 })}>
           <View style={{ flex: 1, minWidth: 0, paddingHorizontal: 13, paddingVertical: 10, justifyContent: 'center', gap: 3 }}>
-            <Text numberOfLines={1} className="font-dm" style={{ fontSize: 9.5, lineHeight: 13, letterSpacing: .5, textTransform: 'uppercase', color: colors['ribbon-ink'] }}>{offer ? offer.venue + ' · Venue-listed offer' : slide.id === 'vee' ? 'A little more city' : 'Your home base'}</Text>
+            <Text numberOfLines={1} className="font-dm" style={{ fontSize: 9.5, lineHeight: 13, letterSpacing: .5, textTransform: 'uppercase', color: colors['ribbon-ink'] }}>{offer ? offer.venue + ' · Venue-listed offer' : 'Your home base'}</Text>
             <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={.85} className="font-fraunces" style={{ fontSize: 22, lineHeight: 26, letterSpacing: -.5, color: colors['ribbon-ink'] }}>{copy.title}</Text>
             <Text numberOfLines={1} className="font-dm" style={{ fontSize: 11, lineHeight: 15, color: colors['ribbon-ink'] }}>{copy.detail}</Text>
-            <Text className="font-dm-medium" style={{ fontSize: 10, lineHeight: 14, color: colors['ribbon-ink'] }}>{offer ? 'See offer' : slide.id === 'vee' ? 'Make an evening' : 'Link your stay'}</Text>
+            <Text className="font-dm-medium" style={{ fontSize: 10, lineHeight: 14, color: colors['ribbon-ink'] }}>{offer ? 'See offer' : 'Link your stay'}</Text>
           </View>
-          {offer ? <PerksPhoto entry={entry} catalog={catalog} width={78} height={height} radius={0} /> : <View style={{ width: 65, alignItems: 'center', justifyContent: 'center' }}>{slide.id === 'vee' ? <VeeMark size={48} /> : <Glyph name="briefcase" size={29} color={colors['ribbon-ink']} strokeWidth={1.4} />}</View>}
+          {offer ? <PerksPhoto entry={entry} catalog={catalog} width={78} height={height} radius={0} /> : <View style={{ width: 65, alignItems: 'center', justifyContent: 'center' }}><Glyph name="briefcase" size={29} color={colors['ribbon-ink']} strokeWidth={1.4} /></View>}
         </Pressable>;
       })}
     </ScrollView>

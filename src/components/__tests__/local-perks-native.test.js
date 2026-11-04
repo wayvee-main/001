@@ -9,6 +9,7 @@ import { useReducedMotionPreference } from '@/lib/motion';
 import { useThemeColors } from '@/lib/theme';
 
 const mockPush = jest.fn();
+const mockOpenOffer = jest.fn();
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }), useFocusEffect: callback => require('react').useEffect(callback, [callback]) }));
 jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 24, left: 0 }) }));
 jest.mock('@/lib/theme', () => ({ useThemeColors: jest.fn() }));
@@ -21,7 +22,7 @@ jest.mock('@/lib/weather', () => ({ useWeatherNow: () => null, weatherLine: () =
 jest.mock('@/lib/motion', () => ({ useReducedMotionPreference: jest.fn(() => true) }));
 jest.mock('@/lib/home-index-photos', () => ({ homeIndexPhotos: () => [] }));
 jest.mock('@/lib/local-perks-store', () => {
-  const state = { stops: [], date: '', openOffer: jest.fn(), toggleStop: jest.fn() };
+  const state = { stops: [], date: '', openOffer: (...args) => mockOpenOffer(...args), toggleStop: jest.fn() };
   return { useLocalPerks: selector => selector ? selector(state) : state };
 });
 jest.mock('@/lib/store', () => {
@@ -40,6 +41,7 @@ const freshEntry = { ...entry, category: 'cafe', detailContent: { version: 1, so
 const freshCatalog = { ...empty, entries: { 'place:source-cafe': freshEntry } };
 const offerCatalog = { ...empty, entries: { 'place:source-cafe': { ...freshEntry, detailContent: { ...freshEntry.detailContent,
   offers: [{ title: 'Dinner special', label: 'Daily', description: 'Venue listed', url: 'https://cafe.example/special' }] } } } };
+const refreshedCatalog = { ...offerCatalog, entries: { 'place:source-cafe': { ...offerCatalog.entries['place:source-cafe'], detailContent: { ...offerCatalog.entries['place:source-cafe'].detailContent, offers: [{ title: 'New offer', label: 'Daily', description: 'Venue listed', url: 'https://cafe.example/new' }, ...offerCatalog.entries['place:source-cafe'].detailContent.offers] } } } };
 let trees = [];
 function mount(element) {
   let tree; act(() => { tree = renderer.create(element); }); trees.push(tree); return tree;
@@ -56,6 +58,7 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
   const ribbon = theme === 'light' ? '#EBD4BD' : '#2C222C';
   beforeEach(() => {
     mockPush.mockClear();
+    mockOpenOffer.mockClear();
     useReducedMotionPreference.mockReturnValue(true);
     useThemeColors.mockReturnValue({ fg: '#2D2925', 'fg-muted': '#64584F', 'accent-fill': '#AE512E', 'fg-accent': '#98431F', 'surface-control': '#FFFFFF', 'surface-ribbon': ribbon, 'ribbon-ink': '#3D2B20', 'surface-navigation': '#FFFCF7' });
   });
@@ -67,7 +70,8 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
   it('keeps both ribbon sizes and their theme fill', () => {
     for (const compact of [false, true]) {
       const tree = mount(<LocalPerksBanners catalog={empty} compact={compact} />);
-      expect(style(tree, 'perks-banner-vee')).toMatchObject({ height: compact ? 100 : 110, flexDirection: 'row', borderRadius: 18, backgroundColor: ribbon });
+      expect(tree.root.findAllByProps({ testID: 'perks-banner-vee' })).toHaveLength(0);
+      expect(style(tree, 'perks-banner-stay')).toMatchObject({ height: compact ? 100 : 110, flexDirection: 'row', borderRadius: 18, backgroundColor: ribbon });
     }
   });
   it('keeps row alignment and overlays separate save/add actions', () => {
@@ -99,7 +103,9 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     expect(tree.root.findAllByProps({ testID: 'home-recommendation-dish:place:source-cafe:morningtoast' })).toHaveLength(0);
     act(() => tree.root.findByProps({ testID: 'home-recommendation-dish:place:source-cafe:noodles' }).props.onPress());
     expect(mockPush).toHaveBeenLastCalledWith('/home/detail?kind=place&id=source-cafe&dish=Noodles');
-    expect(nodes(tree).filter(node => node.props.testID === 'home-recommendation-pulse')).toHaveLength(1);
+    const dots = nodes(tree).filter(node => node.props.testID === 'home-recommendation-pulse');
+    expect(dots).toHaveLength(1);
+    expect(StyleSheet.flatten(dots[0].props.style).backgroundColor).toBe(ribbon);
   });
   it('shows an honest empty state when no recent source exists', () => {
     const tree = mount(<HomeTimelyRecommendations catalog={empty} now={new Date(2026, 10, 3, 19)} />);
@@ -107,7 +113,7 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     expect(tree.root.findAllByProps({ testID: 'home-recommendation-pulse' })).toHaveLength(0);
   });
   it('keeps the visible banner through refreshes and finishes an in-progress swipe', () => {
-    const tree = mount(<LocalPerksBanners catalog={empty} />);
+    const tree = mount(<LocalPerksBanners catalog={offerCatalog} />);
     const scroll = () => tree.root.findByProps({ testID: 'perks-banner-scroll' });
     const position = () => tree.root.findByProps({ testID: 'perks-banner-position' }).props.accessibilityValue;
     const nativeScroll = tree.root.findByType(ScrollView).instance;
@@ -116,13 +122,13 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     expect(scroll().props.snapToInterval).toBe(312);
     act(() => scroll().props.onMomentumScrollEnd({ nativeEvent: { contentOffset: { x: 312 } } }));
     expect(position().now).toBe(2);
-    act(() => tree.update(<LocalPerksBanners catalog={offerCatalog} />));
+    act(() => tree.update(<LocalPerksBanners catalog={refreshedCatalog} />));
     expect(position().now).toBe(3);
     expect(scrollTo).toHaveBeenLastCalledWith({ x: 624, animated: false });
-    act(() => tree.update(<LocalPerksBanners catalog={empty} />));
+    act(() => tree.update(<LocalPerksBanners catalog={offerCatalog} />));
     act(() => scroll().props.onScrollBeginDrag());
     scrollTo.mockClear();
-    act(() => tree.update(<LocalPerksBanners catalog={offerCatalog} />));
+    act(() => tree.update(<LocalPerksBanners catalog={refreshedCatalog} />));
     expect(scrollTo).not.toHaveBeenCalled();
     act(() => scroll().props.onMomentumScrollEnd({ nativeEvent: { contentOffset: { x: 0 } } }));
     expect(position().now).toBe(2);
@@ -130,10 +136,10 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     expect(nodes(tree).filter(node => node.props.accessibilityRole === 'button' && /^(Next|Previous) banner$/.test(node.props.accessibilityLabel || ''))).toHaveLength(0);
   });
   it('does not open a banner when releasing a swipe', () => {
-    const tree = mount(<LocalPerksBanners catalog={empty} />);
+    const tree = mount(<LocalPerksBanners catalog={offerCatalog} />);
     act(() => tree.root.findByProps({ testID: 'perks-banner-scroll' }).props.onScrollBeginDrag());
-    act(() => tree.root.findByProps({ testID: 'perks-banner-vee' }).props.onPress());
-    expect(mockPush).not.toHaveBeenCalled();
+    act(() => tree.root.findByProps({ testID: 'perks-banner-offer' }).props.onPress());
+    expect(mockOpenOffer).not.toHaveBeenCalled();
   });
   it('pauses the pulse for reduced motion, backgrounding and leaving Home', () => {
     let appStateChanged;
