@@ -7,7 +7,6 @@ import { PerksPhoto } from '@/components/local-perks';
 import { homeCardMetadata } from '@/lib/card-metadata';
 import { homeGuideHref, type HomeGuideCatalog, type HomeGuideEntry } from '@/lib/home-guide';
 import { useElevation } from '@/lib/shadows';
-import { useScoper } from '@/lib/store';
 import { useThemeColors } from '@/lib/theme';
 import { useWeatherNow, weatherLine } from '@/lib/weather';
 
@@ -15,18 +14,10 @@ export type DaybreakPeriod = 'day' | 'evening';
 
 export function DaybreakIntro({ city }: { city: string }) {
   const colors = useThemeColors(), { width } = useWindowDimensions(), weather = useWeatherNow();
-  const openStay = useScoper(s => s.openStaySheet);
   return <View testID="daybreak-intro" style={{ gap: 13 }}>
-    <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 5 }}>
-      <Pressable accessibilityRole="button" accessibilityLabel={`Your starting point. ${city}`} onPress={openStay} hitSlop={8}>
-        <Text numberOfLines={1} className="font-dm-medium text-taupe" style={{ fontSize: 11, lineHeight: 16, letterSpacing: .8, textTransform: 'uppercase' }}>{city} / A day well spent</Text>
-      </Pressable>
-      {weather ? <Text testID="home-weather" numberOfLines={1} className="font-dm text-taupe" style={{ fontSize: 11, lineHeight: 16 }}>{weatherLine(weather)}</Text> : null}
-    </View>
-    <View style={{ position: 'relative', paddingRight: 24 }}>
-      <Text accessibilityRole="header" className="font-dm-medium text-ink" style={{ fontSize: width <= 360 ? 32 : 36, lineHeight: width <= 360 ? 34 : 37, letterSpacing: -1.2 }}>Go on.{'\n'}Make a day of it<Text style={{ color: colors['fg-accent'] }}>.</Text></Text>
-      <View accessible={false} style={{ position: 'absolute', right: 0, bottom: 5, transform: [{ rotate: '12deg' }] }}><Glyph name="sun" size={width <= 360 ? 32 : 40} strokeWidth={1.3} color={colors['fg-accent']} /></View>
-    </View>
+    {weather ? <Text testID="home-weather" accessibilityLabel={`${city} weather. ${weatherLine(weather)}`} numberOfLines={2} className="font-dm text-taupe"
+      style={{ alignSelf: 'flex-start', fontSize: 12, lineHeight: 18 }}>{weatherLine(weather)}</Text> : null}
+    <Text accessibilityRole="header" className="font-dm-medium text-ink" style={{ fontSize: width <= 360 ? 32 : 36, lineHeight: width <= 360 ? 34 : 37, letterSpacing: -1.2 }}>Go on.{'\n'}Make a day of it<Text style={{ color: colors['fg-accent'] }}>.</Text></Text>
   </View>;
 }
 

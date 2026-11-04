@@ -37,6 +37,10 @@ this section takes precedence wherever they differ.
   recommendations, four glyph pills, By day/After hours, compact source-backed
   hero poster, slim promos, and compact rows. Preserve time-sensitive For you
   and Collections and the existing nearest-pool radius/distance rules.
+- Home's intro has no city/tagline eyebrow or decorative sun. Place the current
+  weather at the upper left above the heading, in quiet 12px/18px text with
+  13px separation. Use the actual current-hour forecast; omit the line when
+  unavailable. City remains in search and the weather accessibility label.
 - **Soft Edit on Home:** the poster has no category eyebrow, a 23px name,
   a single-line snapshot and at most two factual pastel pills, preferring a
   published Menu and measured location. Keep narrative availability notes in
