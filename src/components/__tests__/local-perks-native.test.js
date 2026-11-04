@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import React from 'react';
 import renderer, { act } from 'react-test-renderer';
-import { Animated, AppState, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, AppState, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { cssInterop } from 'react-native-css-interop';
 import { EditorialNav } from '@/components/editorial-nav';
 import { HomeTimelyRecommendations, LocalCategoryShelf, LocalPerksBanners, LocalPerksCard, PerksRoundButton } from '@/components/local-perks';
@@ -35,6 +35,11 @@ for (const component of [Pressable, Text, View]) cssInterop(component, { classNa
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 const empty = { entries: {}, categories: { eat: [], bars: [], routes: [], events: [] }, collections: [] };
 const entry = { kind: 'place', id: 'source-cafe', name: 'Source café', caption: 'Café', glyph: 'coffee', facts: [], saveKind: 'place' };
+const freshEntry = { ...entry, category: 'cafe', detailContent: { version: 1, sourceUrl: 'https://cafe.example/menu', verifiedAt: new Date(2026, 10, 2).toISOString(),
+  menu: { url: 'https://cafe.example/menu', items: [{ name: 'Morning toast', categories: ['Breakfast'] }, { name: 'Noodles', categories: ['Dinner'] }] } } };
+const freshCatalog = { ...empty, entries: { 'place:source-cafe': freshEntry } };
+const offerCatalog = { ...empty, entries: { 'place:source-cafe': { ...freshEntry, detailContent: { ...freshEntry.detailContent,
+  offers: [{ title: 'Dinner special', label: 'Daily', description: 'Venue listed', url: 'https://cafe.example/special' }] } } } };
 let trees = [];
 function mount(element) {
   let tree; act(() => { tree = renderer.create(element); }); trees.push(tree); return tree;
@@ -85,27 +90,58 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
       expect(mockPush).toHaveBeenLastCalledWith('/home/' + category);
     }
   });
-  it('updates recommendation labels and queries when the local daypart changes', () => {
-    const tree = mount(<HomeTimelyRecommendations now={new Date(2026, 10, 3, 8)} />);
-    expect(tree.root.findByProps({ testID: 'home-recommendation-breakfast' })).toBeDefined();
-    act(() => tree.root.findByProps({ testID: 'home-recommendation-breakfast' }).props.onPress());
-    expect(mockPush).toHaveBeenLastCalledWith({ pathname: '/search', params: { q: 'breakfast' } });
-    act(() => tree.update(<HomeTimelyRecommendations now={new Date(2026, 10, 3, 12)} />));
-    expect(tree.root.findAllByProps({ testID: 'home-recommendation-breakfast' })).toHaveLength(0);
-    expect(tree.root.findByProps({ testID: 'home-recommendation-lunch' })).toBeDefined();
-    act(() => tree.update(<HomeTimelyRecommendations now={new Date(2026, 10, 3, 19)} />));
-    act(() => tree.root.findByProps({ testID: 'home-recommendation-dinner' }).props.onPress());
-    expect(mockPush).toHaveBeenLastCalledWith({ pathname: '/search', params: { q: 'dinner' } });
+  it('updates named menu picks by daypart and opens the actual dish', () => {
+    const tree = mount(<HomeTimelyRecommendations catalog={freshCatalog} now={new Date(2026, 10, 3, 8)} />);
+    const morning = tree.root.findByProps({ testID: 'home-recommendation-dish:place:source-cafe:morningtoast' });
+    act(() => morning.props.onPress());
+    expect(mockPush).toHaveBeenLastCalledWith('/home/detail?kind=place&id=source-cafe&dish=Morning%20toast');
+    act(() => tree.update(<HomeTimelyRecommendations catalog={freshCatalog} now={new Date(2026, 10, 3, 19)} />));
+    expect(tree.root.findAllByProps({ testID: 'home-recommendation-dish:place:source-cafe:morningtoast' })).toHaveLength(0);
+    act(() => tree.root.findByProps({ testID: 'home-recommendation-dish:place:source-cafe:noodles' }).props.onPress());
+    expect(mockPush).toHaveBeenLastCalledWith('/home/detail?kind=place&id=source-cafe&dish=Noodles');
+    expect(nodes(tree).filter(node => node.props.testID === 'home-recommendation-pulse')).toHaveLength(2);
+  });
+  it('shows an honest empty state when no recent source exists', () => {
+    const tree = mount(<HomeTimelyRecommendations catalog={empty} now={new Date(2026, 10, 3, 19)} />);
+    expect(tree.root.findByProps({ testID: 'home-recommendations-empty' })).toBeDefined();
+    expect(tree.root.findAllByProps({ testID: 'home-recommendation-pulse' })).toHaveLength(0);
+  });
+  it('keeps the visible banner through refreshes and finishes an in-progress swipe', () => {
+    const tree = mount(<LocalPerksBanners catalog={empty} />);
+    const scroll = () => tree.root.findByProps({ testID: 'perks-banner-scroll' });
+    const position = () => tree.root.findByProps({ testID: 'perks-banner-position' }).props.accessibilityValue;
+    const nativeScroll = tree.root.findByType(ScrollView).instance;
+    const scrollTo = jest.spyOn(nativeScroll, 'scrollTo');
+    act(() => scroll().props.onMomentumScrollEnd({ nativeEvent: { contentOffset: { x: 300 } } }));
+    expect(position().now).toBe(2);
+    act(() => tree.update(<LocalPerksBanners catalog={offerCatalog} />));
+    expect(position().now).toBe(3);
+    expect(scrollTo).toHaveBeenLastCalledWith({ x: 600, animated: false });
+    act(() => tree.update(<LocalPerksBanners catalog={empty} />));
+    act(() => scroll().props.onScrollBeginDrag());
+    scrollTo.mockClear();
+    act(() => tree.update(<LocalPerksBanners catalog={offerCatalog} />));
+    expect(scrollTo).not.toHaveBeenCalled();
+    act(() => scroll().props.onMomentumScrollEnd({ nativeEvent: { contentOffset: { x: 0 } } }));
+    expect(position().now).toBe(2);
+    expect(scrollTo).toHaveBeenLastCalledWith({ x: 300, animated: false });
+    expect(nodes(tree).filter(node => node.props.accessibilityRole === 'button' && /^(Next|Previous) banner$/.test(node.props.accessibilityLabel || ''))).toHaveLength(0);
+  });
+  it('does not open a banner when releasing a swipe', () => {
+    const tree = mount(<LocalPerksBanners catalog={empty} />);
+    act(() => tree.root.findByProps({ testID: 'perks-banner-scroll' }).props.onScrollBeginDrag());
+    act(() => tree.root.findByProps({ testID: 'perks-banner-vee' }).props.onPress());
+    expect(mockPush).not.toHaveBeenCalled();
   });
   it('pauses the pulse for reduced motion, backgrounding and leaving Home', () => {
     let appStateChanged;
     const remove = jest.fn(), start = jest.fn(), stop = jest.fn();
     jest.spyOn(AppState, 'addEventListener').mockImplementation((event, listener) => { appStateChanged = listener; return { remove }; });
     const loop = jest.spyOn(Animated, 'loop').mockReturnValue({ start, stop });
-    const now = new Date(2026, 10, 3, 12), tree = mount(<HomeTimelyRecommendations now={now} />);
+    const now = new Date(2026, 10, 3, 12), tree = mount(<HomeTimelyRecommendations catalog={freshCatalog} now={now} />);
     expect(loop).not.toHaveBeenCalled();
     useReducedMotionPreference.mockReturnValue(false);
-    act(() => tree.update(<HomeTimelyRecommendations now={now} />));
+    act(() => tree.update(<HomeTimelyRecommendations catalog={freshCatalog} now={now} />));
     expect(start).toHaveBeenCalledTimes(1);
     act(() => appStateChanged('background'));
     expect(stop).toHaveBeenCalledTimes(1);

@@ -32,7 +32,7 @@ export default function HomeScreen() {
     <View style={{ gap: 11 }}>
       <View>
         <CitySearchBar testID="home-search" labelTestID="home-search-label" city={displayCity} onPress={() => router.push('/search')} />
-        <HomeTimelyRecommendations now={now} />
+        <HomeTimelyRecommendations catalog={catalog} now={now} />
       </View>
       <LocalCategoryShelf catalog={catalog} />
     </View>

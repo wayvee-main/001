@@ -66,11 +66,20 @@ function JournalSheet({title,onClose,children}: {title?:string;onClose:()=>void;
   </Modal>;
 }
 
-export function RestaurantJournal({restaurant,content,onPlan}: {restaurant:MenuJournalListing;content?:DetailContent;onPlan?:()=>void}) {
+export function RestaurantJournal({restaurant,content,onPlan,initialDish}: {restaurant:MenuJournalListing;content?:DetailContent;onPlan?:()=>void;initialDish?:string}) {
   const colors=useThemeColors(),control=useControlSurface(),selected=useControlSurface(true),open=useJournalLink(),router=useRouter();
   const [category,setCategory]=useState('All'),[dish,setDish]=useState<JournalMenuItem|null>(null),[menuOpen,setMenuOpen]=useState(false),[menuQuery,setMenuQuery]=useState('');
   const trigger=useRef<ComponentRef<typeof TouchableOpacity>|null>(null);
   const menu=restaurantJournalMenu(restaurant,content),categories=journalMenuCategories(menu.items),active=categories.includes(category)?category:'All';
+  const [openedRequest,setOpenedRequest]=useState('');
+  const request=initialDish?restaurant.id+':'+initialDish:'';
+  if(initialDish&&openedRequest!==request){
+    const normalize=(name:string)=>name.trim().replace(/^\d+[.)]\s*/,'').toLocaleLowerCase();
+    const match=menu.items.find(item=>normalize(item.name)===normalize(initialDish));
+    // Retry after detail hydration if this dish has not arrived yet. A closed
+    // sheet stays closed after the request has resolved once.
+    if(match){setOpenedRequest(request);setMenuOpen(false);setDish(match);}
+  }
   const source=journalMenuSource(content,restaurant.menuUrl);
   const browsedItems=filterJournalMenu(menu.items,active,menuQuery);
   const browsedGroups=active==='All'?journalMenuGroups(browsedItems):browsedItems.length?[{title:active,items:browsedItems}]:[];

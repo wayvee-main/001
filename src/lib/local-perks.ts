@@ -17,10 +17,11 @@ export const MAX_EVENING_STOPS = 8;
 
 /** Offers only come from this location's source records, never a city-wide
  * promo fixture. A restaurant's promotion is not a Wayvee discount. */
-export function localOffers(catalog: HomeGuideCatalog): LocalOffer[] {
+export function localOffers(catalog: HomeGuideCatalog, now = new Date()): LocalOffer[] {
   const seen = new Set<string>();
   return Object.values(catalog.entries).flatMap(entry => (entry.detailContent?.offers || []).flatMap(offer => {
     if (!offer.title || !/^https?:\/\//i.test(offer.url)) return [];
+    if (offer.expiresAt && (!Number.isFinite(Date.parse(offer.expiresAt)) || Date.parse(offer.expiresAt) <= now.getTime())) return [];
     const id = offer.url + '#' + offer.title.toLowerCase();
     if (seen.has(id)) return [];
     seen.add(id);

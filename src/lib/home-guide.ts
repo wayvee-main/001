@@ -21,6 +21,7 @@ export type HomeGuideFact = { glyph: string; value: string; label?: string };
 export type HomeGuideEntry = {
   city?:string;
   detailContent?:DetailContent;
+  openingHours?:string|null; startsAt?:string;
   kind: HomeGuideKind; id: string; name: string; caption: string; description: string;
   glyph: string; image?: string; facts: HomeGuideFact[]; searchText: string; category?: string; foodTags?: string; tags?: string[];
   members?: {kind:Exclude<HomeGuideKind,'collection'>; id: string}[];
@@ -73,7 +74,7 @@ export function buildHomeGuide({city,nearest,places,events,picks,now,anchor,incl
     const matched=placeForRestaurant(r,places,city);
     if(locationBased&&!matched)continue;
     add({
-    detailContent:matched?.detailContent,kind:'restaurant',id:r.id,name:r.name,caption:r.cuisine,description:FOOD_HUB_REASON_BY_ID[r.id] || r.cuisine,
+    detailContent:matched?.detailContent,openingHours:matched?.openingHours,kind:'restaurant',id:r.id,name:r.name,caption:r.cuisine,description:FOOD_HUB_REASON_BY_ID[r.id] || r.cuisine,
     image:r.image,glyph:'food',facts:[{glyph:'wallet',value:r.price},{glyph:'food',value:r.cuisine}],
     foodTags:normalized([r.name,r.cuisine,...(r.searchTags||[])].join(' ')),
     searchText:[r.cuisine,...(r.searchTags||[]),...r.popularDishes.map(x=>x.name)].join(' '),
@@ -82,7 +83,7 @@ export function buildHomeGuide({city,nearest,places,events,picks,now,anchor,incl
     links:links({label:r.primaryAction.label,url:r.primaryAction.url},{label:'Menu',url:r.menuUrl},r.reserveUrl?{label:'Reservations',url:r.reserveUrl}:undefined,{label:'Official site',url:r.sourceUrl},directions(r.name,city,r.address)),saveKind:'restaurant',
   });}
   for (const p of places.filter(item=>!item.needsReview)) add({
-    city:p.city,detailContent:p.detailContent || VERIFIED_MENU_DETAILS[p.id],kind:'place',id:p.id,name:p.name,caption:[p.cuisine,p.category.replace(/_/g,' ')].filter(Boolean).join(' · '),
+    city:p.city,openingHours:p.openingHours,detailContent:p.detailContent || VERIFIED_MENU_DETAILS[p.id],kind:'place',id:p.id,name:p.name,caption:[p.cuisine,p.category.replace(/_/g,' ')].filter(Boolean).join(' · '),
     description:p.detailContent?.description||[p.cuisine,p.category.replace(/_/g,' ')].filter(Boolean).join(' · '),image:p.image||p.detailContent?.photos?.[0]?.url,
     glyph:/cafe|bakery/.test(p.category)?'coffee':/park|reserve|garden|trailhead|viewpoint/.test(p.category)?'walk':/theatre|cinema|museum|gallery|venue|arts_centre|attraction/.test(p.category)?'landmark':/bar|pub|brewery/.test(p.category)?'drink':'food',category:p.category,facts:[{glyph:'pin',value:anchor?formatMiles(milesBetween(anchor,{latitude:p.lat,longitude:p.lon})):p.address?.split(',')[0] || p.category.replace(/_/g,' ')}],
     foodTags:normalized([p.name,p.category,p.cuisine].filter(Boolean).join(' ')),
@@ -104,7 +105,7 @@ export function buildHomeGuide({city,nearest,places,events,picks,now,anchor,incl
   const bars: HomeGuideEntry[] = [], routes: HomeGuideEntry[] = [], shows: HomeGuideEntry[] = [];
   if (local) for (const bar of NIGHTLIFE_SPOTS) {
     if(locationBased&&!placeForListing(bar,places,city))continue;
-    add({detailContent:placeForListing(bar,places,city)?.detailContent,kind:'night',id:bar.id,name:bar.name,caption:bar.kind,description:bar.desc,image:bar.image,glyph:'drink',
+    add({detailContent:placeForListing(bar,places,city)?.detailContent,openingHours:placeForListing(bar,places,city)?.openingHours,kind:'night',id:bar.id,name:bar.name,caption:bar.kind,description:bar.desc,image:bar.image,glyph:'drink',
       facts:[{glyph:'pin',value:bar.address.split(',')[0]},{glyph:'clock',value:bar.hours}],searchText:bar.kind+' '+bar.desc,
       details:[{label:'Address',value:bar.address},{label:'Listed hours',value:bar.hours}],links:links({label:'Official site',url:bar.url},directions(bar.name,city,bar.address)),saveKind:'night'});
     bars.push(entries[homeGuideKey('night',bar.id)]);
@@ -118,7 +119,7 @@ export function buildHomeGuide({city,nearest,places,events,picks,now,anchor,incl
     routes.push(entries[homeGuideKey('crawl',route.id)]);
   }
   for (const event of events.filter(item=>isCurrentEvent(item,now))) {
-    add({detailContent:event.detailContent,kind:'event',id:event.id,name:event.name,caption:compactVenue(event.venue),description:event.know,image:event.image,glyph:'ticket',
+    add({detailContent:event.detailContent,startsAt:event.startsAt,kind:'event',id:event.id,name:event.name,caption:compactVenue(event.venue),description:event.know,image:event.image,glyph:'ticket',
       facts:[{glyph:'calendar',value:eventDayGroupLabel(event,now),label:event.date},{glyph:'clock',value:event.time}],searchText:event.venue+' '+event.lineup+' '+event.cats.join(' '),tags:[...event.cats],
       details:[{label:'When',value:event.date},{label:'Showtime',value:event.time},{label:'Venue',value:event.venue},...(event.addr?[{label:'Address',value:event.addr}]:[]),{label:'Tickets',value:event.priceLabel}],
       sections:event.runOfShow?.length?[{title:'Run of show',lines:event.runOfShow.map(x=>x.time+' · '+x.label)}]:[],

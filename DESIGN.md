@@ -667,25 +667,37 @@ are visible without waiting for the nearby cache to expire.
 
 Home uses the approved **Open Notes** treatment with two intact rows. Eat,
 Bars, Routes and Events remain four equally sized pills in one row. Their
-39px capsules sit within 44px minimum touch targets, with 16px/20px medium
-Fraunces labels (15px on phones of 350px and below), full pill corners, the page
-ground and faint card edges.
+37px capsules sit within 44px minimum touch targets, with 15px/20px regular
+Fraunces labels (14px on phones of 350px and below), full pill corners,
+transparent ground and the theme's faintest edges.
 There are no category glyphs or pill shadows. Each opens its existing local
 guide. Separate the recommendation row and category pills by 11px.
-Immediately beneath Home's 53px search field, show four compact text intentions
-from the existing guest-local dayparts: morning, lunch, afternoon, evening and
-late night. Each opens search with its query in the active city's catalog.
-Recompute with Home's minute clock. Recommendations are four equally sized,
-borderless actions with small outline glyphs, quiet dot separators and a faint
-full-width rule beneath. The first intent and its subtly pulsing 17px underline
-use the app's orange; other actions are muted. Use 13px glyphs and 12px DM Sans,
-reducing to 12px glyphs and 11px text at phone widths of 350px and below.
-Keep labels compact: Music, Drinks and Shows; use Happy hr and Bites on narrow
-phones. Full accessible labels and search queries stay intact. Keep all four
-actions visible in one row with 44px touch targets. Pause motion when Home
+Immediately beneath Home's 53px search field, show a single horizontal row of
+up to four actual nearby venues, menu dishes, upcoming events or valid promos.
+Use only source-backed records verified within 14 days; respect known closures,
+source promo schedules, expiry and guest-local dayparts. Published Most ordered,
+Popular items and equivalent menu categories can rank first as source popularity.
+Fresh verification follows. Do not fabricate community trends or turn directory
+ingestion into a newly-opened claim. Diversify venues before a second pick from
+one venue, capped at two. Never pad an empty pool with generic Coffee/Dinner
+search intentions; show an honest quiet empty message instead.
+Use plain 12px DM Sans text and subtly pulsing 13px outline glyphs. The words
+stay still; there are no underlines, separators or recommendation containers.
+Named actions keep 44px touch targets and scroll horizontally without autoplay.
+Venue/event picks open their detail; dishes open the actual menu item; promos
+open their source-linked offer. Recompute with Home's minute clock.
+Pause motion when Home
 loses focus, the app backgrounds or reduced motion is enabled. Use native-driver
 opacity only.
 Both themes use their existing Local Perks tokens and Android-safe pressables.
+
+Promotional ribbons remain 110px on Home and 100px in compact Discover. Keep
+native swipe momentum, preserve the visible slide by stable identity across
+source refreshes, and defer realignment until a gesture finishes. No autoplay,
+left/right controls or inline chevrons. The only pagination is a centered row
+of 3px neutral dots in a 13px strip, with a slightly stronger current dot.
+Expose the current page and adjustable accessibility actions without adding
+visible arrow buttons. A swipe must not trigger a banner tap.
 
 ### Image loading reliability
 

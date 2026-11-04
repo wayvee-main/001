@@ -18,7 +18,7 @@ import { DETAIL_LABELS, ledgerContext, ledgerEssentials, ledgerMetadata } from '
 import { useScoper } from '@/lib/store';
 import { useThemeColors } from '@/lib/theme';
 
-export function HomeEntryLedger({entry}: {entry:HomeGuideEntry}) {
+export function HomeEntryLedger({entry,initialDish}: {entry:HomeGuideEntry;initialDish?:string}) {
   const s=useScoper(),colors=useThemeColors(),context=ledgerContext(entry),essentials=ledgerEssentials(entry),router=useRouter();
   const content=entry.detailContent;
   context.facts=[...detailContentFacts(content),...context.facts];
@@ -47,7 +47,7 @@ export function HomeEntryLedger({entry}: {entry:HomeGuideEntry}) {
     <Text className="font-dm text-label text-peach">{link.label}</Text><Glyph name="arrow" size={13} color={colors['surface-accent']} />
   </TouchableOpacity>)}</View>});
   const goods=<View style={{gap:22}}>
-    {restaurant?<RestaurantJournal key={restaurant.id} restaurant={restaurant} content={content} onPlan={entry.kind!=='restaurant'?()=>router.push(detailPlanHref(context) as never):undefined} />:event?<EventJournal key={event.id} event={event} />:content?<DetailGoods content={content} />:null}
+    {restaurant?<RestaurantJournal key={restaurant.id} restaurant={restaurant} content={content} initialDish={initialDish} onPlan={entry.kind!=='restaurant'?()=>router.push(detailPlanHref(context) as never):undefined} />:event?<EventJournal key={event.id} event={event} />:content?<DetailGoods content={content} />:null}
     {entry.kind==='venue'?<VenueListings id={entry.id} />:null}
     {!restaurant?(entry.sections||[]).map(section=><View key={section.title} style={{gap:10}}><JournalHeading title={section.title} />{section.lines.map((line,index)=><Text key={index} className="font-dm text-label text-taupe" style={{lineHeight:20}}>{line}</Text>)}</View>):null}
   </View>;
