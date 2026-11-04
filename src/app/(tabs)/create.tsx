@@ -15,7 +15,6 @@
 // The manual pick lists and the locked/Regenerate draft timeline live one tap
 // away at /plan-draft; this screen only leads with them.
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { useColorScheme } from 'nativewind';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -34,7 +33,6 @@ import {
 import { useConstraintPicker } from '@/components/constraint-picker';
 import { Glyph } from '@/components/glyph';
 import { LocalPerksHeader } from '@/components/local-perks';
-import { NoteFact } from '@/components/field-notes';
 import { WorkingVee } from '@/components/vee-mark';
 import { Screen, ScreenScroll } from '@/components/layout';
 import { EmptyState } from '@/components/ui';
@@ -225,12 +223,13 @@ function ShapeTile({
   selectedDateAt: Date;
   onPress: (title: string) => void;
 }) {
-  const colors = useThemeColors(), surface = useRaisedSurface(1);
+  const colors = useThemeColors();
   const { order, dinnerTimeLabel, stopCount } = useShapeFacts(solved, selectedDateAt);
   const route = shapeRoute(solved, order);
   const title = order.map(kind => kind === 'dinner' ? 'Dinner' : kind === 'event' ? 'Show' : 'Drinks').join(' · ');
   const first = order[0];
-  const name = (first === 'dinner' ? solved.restaurant?.name : first === 'event' ? solved.event?.name : solved.nightlifeSpot?.name) || title;
+  const startingPlace = first === 'dinner' ? solved.restaurant?.name : first === 'event' ? solved.event?.name : solved.nightlifeSpot?.name;
+  const label = order.length === 1 && startingPlace ? `${title} at ${startingPlace}` : title;
   const startsAt = first === 'event' ? solved.event?.time : solved.restaurant ? dinnerTimeLabel : null;
   const stops = `${stopCount} ${stopCount === 1 ? 'stop' : 'stops'}`;
 
@@ -241,21 +240,15 @@ function ShapeTile({
       accessibilityLabel={`Use ${title}. ${route}${startsAt ? `. Starts at ${startsAt}` : ''}. ${stops}`}
       activeOpacity={0.78}
       onPress={() => onPress(title)}
-      style={[surface, { minHeight: 61.2, borderRadius: 22, flexDirection: 'row', alignItems: 'stretch' }]}>
-      {/* No leading glyph. It was keyed off the shape's first stop, so three
-        * dinner-led shapes drew three identical forks down the left edge and
-        * said nothing the name and the facts did not already say. */}
-      <View className="min-w-0 flex-1 flex-row items-center" style={{ paddingHorizontal: 13, paddingVertical: 8.4 }}>
+      style={{ minHeight: 54, borderBottomWidth: 1, borderBottomColor: colors['edge-soft'], flexDirection: 'row', alignItems: 'center' }}>
+      <View className="min-w-0 flex-1 flex-row items-center" style={{ gap: 11, paddingVertical: 15 }}>
+        <Glyph name={first === 'event' ? 'music' : first === 'dinner' ? 'food' : 'drink'} size={17} strokeWidth={1.5} color={colors['fg-accent']} />
         <View className="min-w-0 flex-1">
-          <Text testID="vee-shape-title" numberOfLines={1} className="font-fraunces text-ink" style={{ fontSize: 15.3, lineHeight: 18 }}>{name}</Text>
-          <View testID="vee-shape-facts" className="mt-0.5 flex-row items-center gap-x-3">
-            {startsAt ? <NoteFact glyph="clock" value={startsAt} label={`Starts at ${startsAt}`} compact /> : null}
-            <NoteFact glyph="route" value={stops} compact />
-          </View>
+          <Text testID="vee-shape-title" numberOfLines={1} className="font-dm text-ink" style={{ fontSize: 13, lineHeight: 20 }}>{label}</Text>
         </View>
       </View>
       <View testID="vee-shape-chevron" className="items-center justify-center" style={{ width: 44 }}>
-        <Glyph name="chevron" size={16} color={colors['surface-accent']} />
+        <Glyph name="chevron" size={14} color={colors['fg-muted']} />
       </View>
     </TouchableOpacity>
   );
@@ -288,7 +281,6 @@ export default function CreateScreen() {
     savedPlaceKeys,
   } = useScoper();
   const colors = useThemeColors();
-  const { colorScheme } = useColorScheme();
   const raisedSurface = useRaisedSurface(1), control = useControlSurface(), primarySurface = useControlSurface(false, true);
   const curatedCoords = useCuratedCoords();
   const curatedHours = useCuratedHours();
@@ -777,7 +769,7 @@ export default function CreateScreen() {
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
           automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}>
-          <LocalPerksHeader />
+          <LocalPerksHeader assistant />
           {/* The plan being refined, kept on the screen you refine it from.
             * Refine used to land here with nothing on it, so a guest described
             * a change to something they could no longer see — and the merge
@@ -830,18 +822,12 @@ export default function CreateScreen() {
             * controls restating defaults made the assumptions look like the
             * point of the screen. */}
           {!showingLiveMatches ? (
-            <View testID="vee-open-letter" style={{marginTop:askPlan?18:42,alignItems:'flex-start'}}>
-              <WorkingVee size={47} animate={screenFocused} label="Vee" />
-              <Text className="font-fraunces text-ink" style={{marginTop:18,fontSize:screenWidth<=360?26:28,lineHeight:34,letterSpacing:-.45}}>
-                {askPlan ? 'What should change?' : 'Let’s make a little evening.'}
+            <View testID="vee-open-letter" style={{marginTop:askPlan?18:10,alignItems:'center',gap:10}}>
+              <WorkingVee size={58} animate={screenFocused} label="Vee" />
+              {!askPlan ? <Text className="font-dm-medium text-taupe" style={{fontSize:11,lineHeight:16,letterSpacing:1.2,marginTop:4}}>A LITTLE LOCAL KNOWLEDGE</Text> : null}
+              <Text className="font-dm-medium text-ink" style={{fontSize:screenWidth<=360?30:31,lineHeight:35,letterSpacing:-.8,textAlign:'center'}}>
+                {askPlan ? 'What should change?' : 'What’s your kind\nof evening?'}
               </Text>
-              {/* Only under the opening question. Beneath "What should change?"
-                * it would introduce Vee to someone already mid-conversation. */}
-              {askPlan ? null : (
-                <Text className="font-dm text-fine text-taupe" style={{marginTop:6}}>
-                  Your city, with a little help.
-                </Text>
-              )}
             </View>
           ) : null}
 
@@ -849,12 +835,11 @@ export default function CreateScreen() {
             testID="vee-letter-composer"
             style={{
                 opacity: asking ? 0.72 : 1,
-                marginTop: showingLiveMatches ? 20 : 30,
+                marginTop: showingLiveMatches ? 20 : 25,
               }}>
             <View testID="vee-composer-box" style={[raisedSurface,{
               backgroundColor:colors['surface-input'],
-              ...(colorScheme==='light'?{boxShadow:'0 2px 7px rgba(49,32,57,.045)'}:{}),
-              borderRadius:18,paddingHorizontal:10,paddingTop:5,paddingBottom:12,
+              borderRadius:22,padding:16,
             }]}>
             <TextInput
               testID="vee-text-input"
@@ -873,14 +858,14 @@ export default function CreateScreen() {
               returnKeyType="send"
               onSubmitEditing={() => void submitAsk(promptReady ? promptText : askExampleLabel)}
               className="min-w-0 font-dm text-ink"
-              style={{ height:119,fontSize:16,lineHeight:23.2,paddingVertical:8,paddingHorizontal:4,
+              style={{ height:105,fontSize:16,lineHeight:24,padding:0,
                 backgroundColor:'transparent',borderWidth:0,textAlignVertical:'top',
                 ...(Platform.OS === 'web' ? { outlineWidth:0,caretColor:colors['accent-fill'] } as any : {}) }}
             />
-            <View testID="vee-composer-actions" className="flex-row items-center justify-between" style={{marginTop:6}}>
+            <View testID="vee-composer-actions" className="flex-row items-center justify-between" style={{marginTop:16}}>
               <TouchableOpacity testID="vee-composer-details" accessibilityRole="button" accessibilityLabel="Add a preference" onPress={() => useScoper.getState().openSheet('addConstraint')} hitSlop={4}
-                style={control} className="h-9 flex-row items-center gap-x-1.5 rounded-full px-2.5">
-                <Glyph name="plus" size={14} color={colors['fg-muted']} /><Text className="font-dm text-fine text-taupe">Details</Text>
+                style={{minHeight:39,paddingHorizontal:12,paddingVertical:9,backgroundColor:colors['surface-sunk']}} className="flex-row items-center gap-x-1.5 rounded-full">
+                <Glyph name="filter" size={14} color={colors['fg-muted']} /><Text className="font-dm text-fine text-taupe">Details</Text>
               </TouchableOpacity>
               <View className="flex-row items-center" style={{gap:9}}>
             <Animated.View style={{ transform: [{ scale: sendMotion.interpolate({ inputRange: [0, 1], outputRange: [0.94, 1] }) }] }}>
@@ -897,12 +882,12 @@ export default function CreateScreen() {
                 hitSlop={6}
                 disabled={asking}
                 onPress={() => void submitAsk(promptReady ? promptText : askExampleLabel)}
-                style={[primarySurface,{ opacity: asking ? 0.48 : 1 }]}
-                className="h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ember border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
+                style={[primarySurface,{ height:43,width:43,borderWidth:0,opacity: asking ? 0.48 : 1 }]}
+                className="shrink-0 items-center justify-center rounded-full">
                 {asking ? (
                   <ActivityIndicator size="small" color={colors['on-accent']} />
                 ) : (
-                  <Glyph name="arrowUp" size={17} color={colors['on-accent']} strokeWidth={2.2} />
+                  <Glyph name="arrowUp" size={20} color={colors['on-accent']} strokeWidth={1.7} />
                 )}
               </TouchableOpacity>
             </Animated.View>
@@ -989,11 +974,11 @@ export default function CreateScreen() {
           {/* All three solved shapes, not one card and a reroll: they are already
            * computed on every render, and three comparable options read as a
            * choice rather than a verdict. */}
-          <View className="mt-4">
+          <View style={{marginTop:30}}>
             <TouchableOpacity testID="vee-shapes-toggle" accessibilityRole="button" accessibilityLabel="Start from a shape" accessibilityState={{expanded:showShapes}} aria-expanded={showShapes}
               onPress={()=>setShowShapes(value=>!value)} activeOpacity={.78}
               className="min-h-11 flex-row items-center justify-start">
-              <Text className="font-dm-medium text-label text-ink">Start from a shape</Text>
+              <Text className="font-dm-medium text-taupe" style={{fontSize:11,lineHeight:16,letterSpacing:1}}>START FROM A SHAPE</Text>
             </TouchableOpacity>
             {showShapes?<View className="mt-2">
             {isSolving ? (

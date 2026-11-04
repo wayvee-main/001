@@ -1,10 +1,63 @@
 # Wayvee design system
 
-The approved **Local Perks** system is the current UI contract, including
-compact promo ribbons. The earlier iteration notes below are historical;
+The approved **Daybreak** system is the current UI contract, including
+solid pastel metadata and compact promo ribbons. Earlier iteration notes are historical;
 this section takes precedence wherever they differ.
 
-## Current approval — Local Perks
+## Current approval — Daybreak
+
+- Android is the primary implementation. Use shared React Native components,
+  with `NativePressable` for function-valued inline styles; run the native
+  Android control checks before publishing an OTA update.
+- Outfit is the shared type family at regular, medium and bold weights,
+  bundled as static font assets. Keep the original gradient Vee spiral;
+  only Vee's screen animates the mark, respecting reduced motion.
+- Use opaque, matte surfaces, with subtle outer elevation and no glass sheen.
+  `src/lib/tokens.ts` remains the only hand-edited palette source.
+
+| Role | Light | Dark |
+| --- | --- | --- |
+| Primary | `#FFF8EF` | `#241912` |
+| Secondary | `#F7EDE1` | `#2C2018` |
+| Detail/sheet | `#FFFCF8` | `#32241C` |
+| Card | `#FFFFFF` | `#3B2A20` |
+| Hero poster | `#FFE7D4` | `#503222` |
+| Promo ribbon | `#FFD0A3` | `#6A3B1B` |
+| Search/input | `#FFFFFF` | `#3B2E25` |
+| Action fill | `#A83713` | `#FFA370` |
+| Menu pill | `#DDE9CF` | `#C8D9BA` |
+| Distance/location pill | `#DCE8FA` | `#BFCFE5` |
+| Offer/price pill | `#FFE7AB` | `#E7CC9D` |
+
+- In-card pills are opaque, solid pastels in **both** themes, with dark ink
+  and inline outline glyphs. Regular capsules have a 30px minimum height;
+  never shrink the type to make a card shorter. Facts must come from source
+  records: do not add ratings, open states, prices or offers to fill space.
+- Home: Wayvee lockup, location-aware heading, shared 49px search, live named
+  recommendations, four glyph pills, By day/After hours, compact source-backed
+  hero poster, slim promos, and compact rows. Preserve time-sensitive For you
+  and Collections and the existing nearest-pool radius/distance rules.
+- The hero uses a 90px photo (84px on narrow phones), **12px rounded image
+  corners**, 10px padding and 8px separation before the metadata. Compact row
+  thumbnails use 10px corners. Card height follows the actual content.
+  Editorial features prefer records with source menus and photos. Additional
+  records must have a measured distance within five miles; this selection must
+  never reorder the nearest inventory or import a different city's fixtures.
+- **Promo banners are 48px ribbons** at normal font scaling on both Home and
+  Discover; accessibility font scaling may increase their height. Keep source
+  conditions, 12px swipe gaps, subtle position dots and no autoplay/arrows.
+  Vee's assistant action stays separate from promotional slides.
+- Discover: matching top chrome/search, four category pills, a featured venue
+  and compact rows, followed by the real event, table, bar, route and room pools.
+  Use current source counts and honest empty states.
+- Vee: centered spinning gradient mark, one short question, a lighter textbox
+  with Details and circular Send inside its padding, and uncontained shape
+  rows. Preserve actual planning, refinement, search and constraint actions.
+- Navigation: one floating capsule and rounded active tabs in the shared action
+  color. Give the Vee mark its own neutral well when selected. Respect device
+  safe areas, the keyboard and the evening tray.
+
+## Previous approval — Local Perks (historical)
 
 - Inline controls with a function-valued `style` use `NativePressable` from
   `src/components/native-pressable.tsx`. NativeWind v4's native wrapper can

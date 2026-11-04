@@ -6,31 +6,27 @@ import { Glyph } from '@/components/glyph';
 import { useControlSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
 
-// Home's 37px action, 7px top/bottom insets and 1px perimeter total 53px.
-// Keep this geometry identical for launchers and editable search fields.
-export const SEARCH_BAR_HEIGHT = 53;
+// Daybreak uses the same 49px search geometry on every layer.
+export const SEARCH_BAR_HEIGHT = 49;
 export function CitySearchBar({city,testID,labelTestID,inputTestID,inputLabel,placeholder,value='',onChangeText,onPress,onSubmit,autoFocus=false,inputRef}: {
   city:string;testID:string;labelTestID?:string;inputLabel?:string;value?:string;
   inputTestID?:string;placeholder?:string;autoFocus?:boolean;inputRef?:Ref<TextInput>;
   onChangeText?:(text:string)=>void;onPress?:()=>void;onSubmit?:(query:string)=>void;
 }) {
-  const colors=useThemeColors(),control=useControlSurface(),primary=useControlSurface(false,true);
+  const colors=useThemeColors(),control=useControlSurface();
   const label=placeholder || `Search ${/^san francisco$/i.test(city)?'SF':city}`;
   const submit=()=>{Keyboard.dismiss();onSubmit?.(value.trim());};
-  const arrow=<View style={[primary,{width:37,height:37,borderRadius:999,alignItems:'center',justifyContent:'center'}]}>
-    <Glyph name="arrow" size={17} color={colors['on-accent']} />
-  </View>;
   const content=<>
     <Glyph name="search" size={17} color={colors['fg-muted']} />
     {onChangeText?<TextInput ref={inputRef} testID={inputTestID || `${testID}-input`} accessibilityLabel={inputLabel || label} value={value} onChangeText={onChangeText}
       autoFocus={autoFocus} autoCorrect={false} placeholder={label} placeholderTextColor={colors['fg-muted']} returnKeyType="search" onSubmitEditing={submit}
-      className="wayvee-search-input min-w-0 flex-1 font-dm text-label text-ink" style={{height:37,padding:0,borderWidth:0,outlineWidth:0}} />:
-      <Text testID={labelTestID} numberOfLines={1} className="min-w-0 flex-1 font-dm text-label text-taupe">{value || label}</Text>}
+      className="wayvee-search-input min-w-0 flex-1 font-dm text-ink" style={{height:33,fontSize:16,lineHeight:22,padding:0,borderWidth:0,outlineWidth:0}} />:
+      <Text testID={labelTestID} numberOfLines={1} className="min-w-0 flex-1 font-dm text-taupe" style={{fontSize:13,lineHeight:20}}>{value || label}</Text>}
     {onChangeText&&value?<TouchableOpacity accessibilityRole="button" accessibilityLabel="Clear search" hitSlop={8} onPress={()=>onChangeText('')}><Glyph name="close" size={14} color={colors['fg-muted']} /></TouchableOpacity>:null}
-    {onChangeText?<TouchableOpacity accessibilityRole="button" accessibilityLabel={inputLabel || label} onPress={submit}>{arrow}</TouchableOpacity>:arrow}
+    {onChangeText?<TouchableOpacity accessibilityRole="button" accessibilityLabel={inputLabel || label} onPress={submit} hitSlop={6} style={{width:28,height:33,alignItems:'center',justifyContent:'center'}}><Glyph name="arrow" size={16} color={colors['fg-accent']} /></TouchableOpacity>:null}
   </>;
   const style=[control,{height:SEARCH_BAR_HEIGHT,width:'100%' as const,backgroundColor:colors['surface-search'],borderRadius:999,
-    flexDirection:'row' as const,alignItems:'center' as const,gap:10,paddingLeft:14,paddingRight:7,paddingVertical:7}];
+    flexDirection:'row' as const,alignItems:'center' as const,gap:10,paddingHorizontal:14,paddingVertical:7}];
   return onPress?<TouchableOpacity testID={testID} accessibilityRole="button" accessibilityLabel={inputLabel || label} onPress={onPress} style={style}>{content}</TouchableOpacity>:
     <View testID={testID} style={style}>{content}</View>;
 }

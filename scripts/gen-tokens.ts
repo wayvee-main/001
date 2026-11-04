@@ -48,7 +48,7 @@ function genGlobalCss(): string {
 @tailwind components;
 @tailwind utilities;
 
-/* Wayvee Local Perks / Nightfall tokens, generated from src/lib/tokens.ts.
+/* Wayvee Daybreak tokens, generated from src/lib/tokens.ts.
    Light is the default (:root); .dark:root is the manual/system override.
    appearance.ts resolves the system choice on web; NativeWind resolves it
    on native. RGB triples (no commas) for tokens that
@@ -98,7 +98,7 @@ function genThemeTs(): string {
 
   return `${GENERATED_HEADER}import { useColorScheme } from 'nativewind';
 
-/** Mirrors the CSS-variable pairs in src/global.css ("Local Perks / Nightfall" palette) — kept
+/** Mirrors the CSS-variable pairs in src/global.css ("Daybreak" palette) — kept
  * here as plain hex because inline color props (Icon, placeholderTextColor,
  * SVG fills, shadow colors) can't read Tailwind's CSS variables the way
  * className does. Both semantic role names (bg, fg, accent, ...) and legacy
@@ -177,7 +177,7 @@ ${fontSizeLines}
 ${radiusLines}
   },
   boxShadow: {
-    'soft-light': '0 2px 7px rgba(49, 32, 57, .05)',
+    'soft-light': '0 3px 9px rgba(96, 48, 23, .032)',
     'soft-dark': '0 ${ELEVATION[1].y}px ${ELEVATION[1].blur}px ${rgba(ROLES['surface-sunk'].dark, Number(ELEVATION[1].opacity.dark))}',
   },
 };

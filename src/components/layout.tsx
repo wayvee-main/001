@@ -34,10 +34,10 @@ export function AppBackdrop({ children, style, layer = 'primary' }: { children: 
   return <View style={[{ flex: 1, backgroundColor, overflow: 'hidden' }, style]}>{children}</View>;
 }
 
-/** Local Perks content gutters, including narrow phones. */
+/** Daybreak content gutters match the approved phone layouts. */
 export function useAppGutter(): number {
   const { width } = useWindowDimensions();
-  return width <= 400 ? 20 : 24;
+  return width <= 360 ? 13 : width <= 430 ? 17 : 24;
 }
 
 /** Full-height app background with safe-area top padding. */

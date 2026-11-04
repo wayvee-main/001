@@ -1,4 +1,4 @@
-import { compactOffer, localOffers, perksEntries, perksAreaKey, toggleEveningStop, veeWildcard, type EveningStop } from '@/lib/local-perks';
+import { compactOffer, localOffers, perksEntries, perksFeaturedEntries, perksAreaKey, toggleEveningStop, veeWildcard, type EveningStop } from '@/lib/local-perks';
 import type { HomeGuideCatalog, HomeGuideEntry } from '@/lib/home-guide';
 
 const entry = (id: string): HomeGuideEntry => ({ kind: 'place', id, name: id, caption: 'Restaurant', description: '', searchText: id, glyph: 'food', facts: [], details: [], links: [] });
@@ -23,6 +23,30 @@ it('rejects unsafe offer URLs and deduplicates the same source promotion', () =>
 
 it('retains nearest order while removing duplicate identities in a rail', () => {
   expect(perksEntries(catalog([entry('near'), entry('next'), { ...entry('duplicate'), name: 'near' }]), 'eat').map(item => item.id)).toEqual(['near', 'next']);
+});
+
+const menuEntry = (id: string, distance: string): HomeGuideEntry => ({ ...entry(id), image: 'https://venue.example/photo.jpg', facts: [{ glyph: 'pin', value: distance }],
+  detailContent: { version: 1, sourceUrl: 'https://venue.example/menu', verifiedAt: '2026-11-04', menu: { url: 'https://venue.example/menu', items: [{ name: 'Venue dish', categories: [] }] } } });
+
+it('features a nearby complete source without changing the nearest list', () => {
+  const near = entry('nearest'), ready = menuEntry('published-menu', '0.4 mi'), pool = catalog([near]);
+  pool.entries['place:published-menu'] = ready;
+  expect(perksFeaturedEntries(pool, 'eat').map(item => item.id)).toEqual(['published-menu', 'nearest']);
+  expect(perksEntries(pool, 'eat')).toEqual([near]);
+});
+
+it('does not import distant, unmeasured or wrong-category sources into features', () => {
+  const near = entry('near'), pool = catalog([near]);
+  for (const source of [menuEntry('far', '5.1 mi'), menuEntry('address-only', '1111 Broadway'), { ...menuEntry('bar', '0.2 mi'), glyph: 'drink' }]) pool.entries['place:' + source.id] = source;
+  expect(perksFeaturedEntries(pool, 'eat')).toEqual([near]);
+  expect(perksFeaturedEntries(catalog([]), 'eat')).toEqual([]);
+});
+
+it('uses the enriched identity for a duplicate venue and retains the true detail route', () => {
+  const sparse = { ...entry('old'), name: 'A local table' }, ready = { ...menuEntry('source-id', '<0.1 mi'), name: 'A local table' }, pool = catalog([sparse]);
+  pool.entries['place:source-id'] = ready;
+  expect(perksFeaturedEntries(pool, 'eat')).toEqual([ready]);
+  expect(perksEntries(pool, 'eat')).toEqual([sparse]);
 });
 
 it('toggles a stop without duplicating it, preserving the evening order', () => {

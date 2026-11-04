@@ -32,7 +32,7 @@ export function ViatorPickCard({ pick, onPress }: { pick: ViatorPick; onPress: (
       style={[surface, { width: POSTER_WIDTH }]}
       className="overflow-hidden rounded-card">
       <View style={{ position: 'relative' }}>
-        <Photo uri={pick.image} radius={0} style={{ width: POSTER_WIDTH, height: 85 }} />
+        <Photo uri={pick.image} radius={12} style={{ width: POSTER_WIDTH, height: 85 }} />
         <TouchableOpacity
           accessibilityRole="button"
           accessibilityLabel={`Book ${pick.title} on Viator`}
@@ -84,7 +84,7 @@ export function PosterCard({
       onPress={onPress}
       style={[surface, { width: POSTER_WIDTH }]}
       className="overflow-hidden rounded-card">
-      <Photo uri={image} radius={0} style={{ width: POSTER_WIDTH, height: 85 }} />
+      <Photo uri={image} radius={12} style={{ width: POSTER_WIDTH, height: 85 }} />
       <View className="px-3 py-2.5">
         <Text numberOfLines={1} className="font-dm-bold text-[8.5px] tracking-[0.6px] text-peach">{eyebrow}</Text>
         <Text numberOfLines={2} className="mt-1 font-dm-bold text-[13px] leading-[16px] text-ink">{title}</Text>

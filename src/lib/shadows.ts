@@ -11,7 +11,7 @@ export function useElevation(level: 1 | 2 | 3 | 4 = 2): { boxShadow: string } {
   const colors = useThemeColors();
   const theme = colorScheme === 'light' ? 'light' : 'dark';
   if (theme === 'light' && level === 1) {
-    return { boxShadow: '0 2px 7px rgba(49, 32, 57, .045)' };
+    return { boxShadow: '0 3px 9px rgba(96, 48, 23, .032)' };
   }
   const { blur, y, opacity } = ELEVATION[level];
   const [r, g, b] = hexToRgb(theme === 'light' ? colors.fg : colors['surface-sunk']);
@@ -41,5 +41,5 @@ export function useControlSurface(selected = false, primary = false): ViewStyle 
   const surface = useRaisedSurface(1);
   const fill = primary ? colors['accent-fill'] : selected ? colors['selected-surface'] : colors['surface-control'];
   return { ...surface, backgroundColor: fill,
-    ...(colorScheme === 'light' ? { boxShadow: '0 2px 7px rgba(49, 32, 57, .045)' } : {}) };
+    ...(colorScheme === 'light' ? { boxShadow: '0 3px 9px rgba(96, 48, 23, .032)' } : {}) };
 }

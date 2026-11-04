@@ -11,8 +11,8 @@
  * aliases are kept pointing at the same hex so existing className strings in src/app
  * and src/components keep working; new code should reach for the semantic name.
  *
- * Palette: Local Perks warm paper, white matte cards and compact apricot ribbons;
- * opaque Nightfall grounds in dark, with restrained orange accents.
+ * Palette: Daybreak cream and warm brown, matte cards and compact apricot ribbons.
+ * Solid pastel metadata pills use dark, high-contrast ink in both themes.
  * Filled controls use the smoke/light and peach/dark pairing with
  * theme-specific on-accent ink. Legacy color aliases follow the same orange
  * family; the original gradient mark keeps its brand colors.
@@ -36,64 +36,66 @@ export function withAlpha(hex: string, alpha: number): string {
  * space-separated RGB triples so Tailwind's <alpha-value> opacity modifier
  * (bg-surface/50) keeps working. */
 export const ROLES: Record<string, ThemeValue> = {
-  bg: { light: '#F6F3EC', dark: '#100E13' }, // Local Perks primary ground
+  bg: { light: '#FFF8EF', dark: '#241912' }, // Daybreak primary ground
   // Local Perks cards use a dedicated matte surface. Search and
   // navigation have separate roles so their lighter treatment stays consistent.
-  surface: { light: '#FFFFFF', dark: '#2B242B' },
-  'surface-raised': { light: '#FFFFFF', dark: '#2B242B' },
-  'surface-soft': { light: '#FFFFFF', dark: '#2B242B' },
-  'surface-control': { light: '#FFFFFF', dark: '#2E252F' },
-  'surface-input': { light: '#FFFFFF', dark: '#2E252F' }, // text fields stay lighter than cards
-  'surface-ribbon': { light: '#EBD4BD', dark: '#2C222C' }, // Home ribbon and stay anchor
-  'surface-search': { light: '#FFFFFF', dark: '#2E252F' },
-  'surface-navigation': { light: '#FFFCF7', dark: '#1A141D' },
-  'surface-sunk': { light: '#E8E2D8', dark: '#17131B' }, // input wells, sheet track
-  fg: { light: '#2D2925', dark: '#F6ECE0' }, // aubergine editorial ink
-  'fg-muted': { light: '#64584F', dark: '#BDAFBA' },
-  'card-ink': { light: '#2D2925', dark: '#F6ECE0' },
-  'card-muted': { light: '#64584F', dark: '#BDAFBA' },
-  // Color Dock metadata: color follows the fact's meaning across every card.
-  'metadata-category': { light: '#F8DECA', dark: '#493428' },
-  'metadata-category-ink': { light: '#7F452A', dark: '#F2CAB0' },
-  'metadata-distance': { light: '#DFECDC', dark: '#2B3F32' },
-  'metadata-distance-ink': { light: '#3A6048', dark: '#BFDBBF' },
-  'metadata-menu': { light: '#DFE9F6', dark: '#2B3B51' },
-  'metadata-menu-ink': { light: '#3C5E84', dark: '#C5D8F2' },
-  'metadata-offer': { light: '#F5E6B5', dark: '#4A3F26' },
-  'metadata-offer-ink': { light: '#70541E', dark: '#F2DCA0' },
-  'surface-accent': { light: '#AE512E', dark: '#E6AA78' },
-  'control-edge': { light: '#D5C8B8', dark: '#4C3D49' },
-  'selected-surface': { light: '#302923', dark: '#E6AA78' },
-  'on-selected': { light: '#FFF9EF', dark: '#2B1C12' },
-  'selected-glyph': { light: '#FFF9EF', dark: '#2B1C12' },
-  'navigation-muted': { light: '#FFF9EF', dark: '#2B1C12' },
+  surface: { light: '#FFFFFF', dark: '#3B2A20' },
+  'surface-raised': { light: '#FFFFFF', dark: '#3B2A20' },
+  'surface-soft': { light: '#FFFFFF', dark: '#3B2A20' },
+  'surface-control': { light: '#FFFFFF', dark: '#3B2E25' },
+  'surface-input': { light: '#FFFFFF', dark: '#3B2E25' }, // text fields stay lighter than cards
+  'surface-ribbon': { light: '#FFD0A3', dark: '#6A3B1B' }, // Home ribbon and stay anchor
+  'surface-poster': { light: '#FFE7D4', dark: '#503222' },
+  'poster-edge': { light: '#F0DAC8', dark: '#6A4330' },
+  'surface-search': { light: '#FFFFFF', dark: '#3B2E25' },
+  'surface-navigation': { light: '#FFFFFF', dark: '#3B2A20' },
+  'surface-sunk': { light: '#F1EBE4', dark: '#2C2018' }, // input wells, sheet track
+  fg: { light: '#3F261D', dark: '#FFF1DE' }, // aubergine editorial ink
+  'fg-muted': { light: '#70584A', dark: '#CEB19B' },
+  'card-ink': { light: '#3F261D', dark: '#FFF1DE' },
+  'card-muted': { light: '#70584A', dark: '#CEB19B' },
+  // Solid pastel metadata: color follows meaning, with dark ink in both themes.
+  'metadata-category': { light: '#F4D4C0', dark: '#D8B7A0' },
+  'metadata-category-ink': { light: '#704125', dark: '#4D2E1C' },
+  'metadata-distance': { light: '#DCE8FA', dark: '#BFCFE5' },
+  'metadata-distance-ink': { light: '#334C70', dark: '#293E5C' },
+  'metadata-menu': { light: '#DDE9CF', dark: '#C8D9BA' },
+  'metadata-menu-ink': { light: '#354B2B', dark: '#293F21' },
+  'metadata-offer': { light: '#FFE7AB', dark: '#E7CC9D' },
+  'metadata-offer-ink': { light: '#654719', dark: '#50370F' },
+  'surface-accent': { light: '#A83713', dark: '#FFA370' },
+  'control-edge': { light: '#EDDDD0', dark: '#5B4030' },
+  'selected-surface': { light: '#A83713', dark: '#FFA370' },
+  'on-selected': { light: '#FFFFFF', dark: '#3C1D0E' },
+  'selected-glyph': { light: '#FFFFFF', dark: '#3C1D0E' },
+  'navigation-muted': { light: '#FFFFFF', dark: '#3C1D0E' },
   // Home's reference glyph cards use off-white; other card materials stay separate.
-  'home-tile': { light: '#FFFFFF', dark: '#2B242B' },
-  'surface-discovery': { light: '#FFFFFF', dark: '#2B242B' },
-  'home-tile-glyph': { light: '#AE512E', dark: '#E6AA78' },
-  'home-tile-well': { light: '#F0DDC7', dark: '#392A2B' },
-  'tile-eat': { light: '#FFFFFF', dark: '#2B242B' },
-  'tile-bars': { light: '#FFFFFF', dark: '#2B242B' },
-  'tile-routes': { light: '#FFFFFF', dark: '#2B242B' },
-  'tile-events': { light: '#FFFFFF', dark: '#2B242B' },
-  'fg-accent': { light: '#98431F', dark: '#E6AA78' }, // deeper accent keeps small text readable on tints
+  'home-tile': { light: '#FFFFFF', dark: '#3B2A20' },
+  'surface-discovery': { light: '#FFFFFF', dark: '#3B2A20' },
+  'home-tile-glyph': { light: '#A83713', dark: '#FFA370' },
+  'home-tile-well': { light: '#FFE5D0', dark: '#5B3420' },
+  'tile-eat': { light: '#FFFFFF', dark: '#3B2A20' },
+  'tile-bars': { light: '#FFFFFF', dark: '#3B2A20' },
+  'tile-routes': { light: '#FFFFFF', dark: '#3B2A20' },
+  'tile-events': { light: '#FFFFFF', dark: '#3B2A20' },
+  'fg-accent': { light: '#A83713', dark: '#FFA370' }, // deeper accent keeps small text readable on tints
   // One theme-specific orange for action fills, icons, rails and active tabs.
-  accent: { light: '#AE512E', dark: '#E6AA78' }, // brand accent — icons, borders, rails
-  'accent-fill': { light: '#AE512E', dark: '#E6AA78' }, // approved editorial control fill
-  'on-accent': { light: '#FFF9F0', dark: '#2C1D13' }, // theme-paired CTA ink
-  open: { light: '#98431F', dark: '#E6AA78' }, // open-now / confirmed / live; status stays explicit in its label
-  warm: { light: '#AE512E', dark: '#E6AA78' }, // legacy category fill, now the shared orange
-  'warm-strong': { light: '#FFF9F0', dark: '#2C1D13' }, // ink on the legacy category fill
+  accent: { light: '#A83713', dark: '#FFA370' }, // brand accent — icons, borders, rails
+  'accent-fill': { light: '#A83713', dark: '#FFA370' }, // approved editorial control fill
+  'on-accent': { light: '#FFFFFF', dark: '#3C1D0E' }, // theme-paired CTA ink
+  open: { light: '#A83713', dark: '#FFA370' }, // open-now / confirmed / live; status stays explicit in its label
+  warm: { light: '#A83713', dark: '#FFA370' }, // legacy category fill, now the shared orange
+  'warm-strong': { light: '#FFFFFF', dark: '#3C1D0E' }, // ink on the legacy category fill
   // Readable ink for legacy category tints.
-  'warm-ink': { light: '#98431F', dark: '#E6AA78' }, // text on warm-tint
-  vee: { light: '#AE512E', dark: '#E6AA78' }, // legacy Vee accents, now the shared orange
-  'vee-strong': { light: '#98431F', dark: '#E6AA78' }, // legacy Vee text, now the shared readable orange
-  'accent-tint': { light: '#F0DDC7', dark: '#392A2B' },
-  'warm-tint': { light: '#F0DDC7', dark: '#392A2B' },
-  'vee-tint': { light: '#F0DDC7', dark: '#392A2B' },
-  'page-secondary': { light: '#E8E2D8', dark: '#17131B' },
-  'page-tertiary': { light: '#FFFDF8', dark: '#201B22' },
-  'ribbon-ink': { light: '#3D2B20', dark: '#F8EADC' },
+  'warm-ink': { light: '#A83713', dark: '#FFA370' }, // text on warm-tint
+  vee: { light: '#A83713', dark: '#FFA370' }, // legacy Vee accents, now the shared orange
+  'vee-strong': { light: '#A83713', dark: '#FFA370' }, // legacy Vee text, now the shared readable orange
+  'accent-tint': { light: '#FFE5D0', dark: '#5B3420' },
+  'warm-tint': { light: '#FFE5D0', dark: '#5B3420' },
+  'vee-tint': { light: '#FFE5D0', dark: '#5B3420' },
+  'page-secondary': { light: '#F7EDE1', dark: '#2C2018' },
+  'page-tertiary': { light: '#FFFCF8', dark: '#32241C' },
+  'ribbon-ink': { light: '#74300D', dark: '#FFDCAC' },
   danger: { light: '#A02F38', dark: '#FF6B6D' }, // closed / sold out / error — the one functional red
 };
 
@@ -109,8 +111,8 @@ export const EDGE_ROLES: Record<string, { base: 'fg'; alpha: number; lightBase?:
   edge: { base: 'fg', alpha: 0.12 }, // borders / dividers
   'edge-soft': { base: 'fg', alpha: 0.08 }, // placeholder stripe C
   'edge-faint': { base: 'fg', alpha: 0.04 }, // quiet dividers and decorative rules
-  'edge-card': { base: 'fg', alpha: 0.12, lightBase: '#8A715C', lightAlpha: 0.22 },
-  'edge-card-bottom': { base: 'fg', alpha: 0.12, lightBase: '#8A715C', lightAlpha: 0.22 },
+  'edge-card': { base: 'fg', alpha: 0.12, lightBase: '#855A40', lightAlpha: 0.10 },
+  'edge-card-bottom': { base: 'fg', alpha: 0.12, lightBase: '#855A40', lightAlpha: 0.10 },
 };
 
 /** Same value in both themes — either brand hue or a translucent tint over
@@ -128,9 +130,9 @@ export const FIXED: Record<string, string> = {
 
 /** Non-CSS-var palette entries theme.ts also needs (Stripes placeholder). */
 export const STRIPES: ThemeValue & { stripeB: ThemeValue } = {
-  light: '#E7E4E0',
-  dark: '#241D27',
-  stripeB: { light: '#D6D2CE', dark: '#2E2633' },
+  light: '#F1EBE4',
+  dark: '#3B2A20',
+  stripeB: { light: '#E8D9CA', dark: '#49392D' },
 };
 
 /** Old hue-named tokens, kept as aliases of the semantic roles above so
@@ -157,9 +159,9 @@ export const LEGACY_ALIASES: Record<string, string> = {
  * every call site. Weight comes from the font-dm/-medium/-bold or
  * font-fraunces class already in use, not from this scale. */
 export const TYPE_SCALE: Record<string, [string, { lineHeight: string; letterSpacing?: string }]> = {
-  display: ['28px', { lineHeight: '32px', letterSpacing: '-0.8px' }], // screen hero, wordmark
+  display: ['32px', { lineHeight: '36px', letterSpacing: '-0.8px' }], // screen hero, wordmark
   title: ['21px', { lineHeight: '26px', letterSpacing: '-0.4px' }], // detail page name
-  section: ['17px', { lineHeight: '22px' }], // section headers
+  section: ['20px', { lineHeight: '26px', letterSpacing: '-0.6px' }], // section headers
   body: ['14px', { lineHeight: '20px' }], // descriptions
   'body-strong': ['14px', { lineHeight: '20px' }], // card titles, buttons
   label: ['12.5px', { lineHeight: '16px' }], // chips, list rows
@@ -167,7 +169,7 @@ export const TYPE_SCALE: Record<string, [string, { lineHeight: string; letterSpa
   'card-name': ['14px', { lineHeight: '17.22px', letterSpacing: '-0.2px' }],
   'table-name': ['18px', { lineHeight: '20.16px', letterSpacing: '-0.2px' }],
   fine: ['11px', { lineHeight: '15.4px' }],
-  micro: ['9.5px', { lineHeight: '12px', letterSpacing: '0.6px' }], // eyebrows, badges (pair with uppercase)
+  micro: ['11px', { lineHeight: '15px', letterSpacing: '0.6px' }], // eyebrows, badges (pair with uppercase)
 };
 
 /** Radius scale: 4 steps replacing 9 ad-hoc rounded-[Npx] values. `pill` is
@@ -189,7 +191,7 @@ export const RADIUS: Record<string, string> = {
  * in light mode and the deepest surface in dark, preventing a bright halo. */
 /** All four elevation levels are 10% stronger: lift, blur and opacity. */
 export const ELEVATION: Record<number, { blur: number; y: number; opacity: ThemeValue }> = {
-  1: { blur: 8.8, y: 2.2, opacity: { light: '0.066', dark: '0.33' } },
+  1: { blur: 9, y: 3, opacity: { light: '0.035', dark: '0.10' } },
   2: { blur: 13.2, y: 3.3, opacity: { light: '0.077', dark: '0.418' } },
   3: { blur: 17.6, y: 4.4, opacity: { light: '0.099', dark: '0.462' } },
   4: { blur: 26.4, y: 8.8, opacity: { light: '0.132', dark: '0.55' } },

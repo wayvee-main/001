@@ -33,7 +33,7 @@ export default function FollowingScreen() {
                 activeOpacity={0.72}
                 onPress={() => router.push(`/venue/${venue.id}`)}
                 className="overflow-hidden rounded-card">
-                <Photo uri={venue.image} radius={0} style={{ width: '100%', height: 132 }} />
+                <Photo uri={venue.image} radius={12} style={{ width: '100%', height: 132 }} />
                 <View className="flex-row items-center gap-x-3 px-3.5 py-3.5">
                   <View className="min-w-0 flex-1">
                     <Text className="font-dm-bold text-[15px] text-ink">{venue.name}</Text>

@@ -14,7 +14,7 @@ export function Photo({
   uri,
   source,
   candidates = [],
-  radius = 9,
+  radius = 12,
   fit = 'cover',
   stripedPlaceholder = true,
   fallbackGlyph,

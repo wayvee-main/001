@@ -50,6 +50,26 @@ export function perksEntries(catalog: HomeGuideCatalog, category: HomeGuideCateg
   });
 }
 
+/** Editorial features prefer complete, source-backed nearby records. This
+ * never reorders the nearest pool itself or imports unmeasured distant places. */
+export function perksFeaturedEntries(catalog: HomeGuideCatalog, category: 'eat' | 'bars'): HomeGuideEntry[] {
+  const base = perksEntries(catalog, category);
+  const nearby = Object.values(catalog.entries).filter(entry => {
+    if (entry.kind !== 'place' || !(category === 'eat' ? ['food', 'coffee'].includes(entry.glyph) : entry.glyph === 'drink')) return false;
+    const distance = entry.facts.find(fact => fact.glyph === 'pin')?.value.match(/^<?\s*(\d+(?:\.\d+)?)\s*mi$/i);
+    return Boolean(distance && Number(distance[1]) <= 5);
+  });
+  const completeness = (entry: HomeGuideEntry) => (entry.detailContent?.menu?.items.length || entry.detailContent?.menuDocuments?.length ? 4 : 0)
+    + (entry.image || entry.detailContent?.photos?.length ? 2 : 0);
+  const unique = new Map<string, HomeGuideEntry>();
+  for (const entry of [...base, ...nearby]) {
+    const name = entry.name.normalize('NFKD').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const previous = unique.get(name);
+    if (!previous || completeness(entry) > completeness(previous)) unique.set(name, entry);
+  }
+  return [...unique.values()].sort((a, b) => completeness(b) - completeness(a));
+}
+
 export function toggleEveningStop(stops: readonly EveningStop[], stop: EveningStop): EveningStop[] {
   const key = eveningStopKey(stop);
   if (stops.some(item => eveningStopKey(item) === key && item.city === stop.city)) {

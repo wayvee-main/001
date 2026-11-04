@@ -9,6 +9,8 @@ module.exports = {
   "surface-control": 'rgb(var(--color-surface-control) / <alpha-value>)',
   "surface-input": 'rgb(var(--color-surface-input) / <alpha-value>)',
   "surface-ribbon": 'rgb(var(--color-surface-ribbon) / <alpha-value>)',
+  "surface-poster": 'rgb(var(--color-surface-poster) / <alpha-value>)',
+  "poster-edge": 'rgb(var(--color-poster-edge) / <alpha-value>)',
   "surface-search": 'rgb(var(--color-surface-search) / <alpha-value>)',
   "surface-navigation": 'rgb(var(--color-surface-navigation) / <alpha-value>)',
   "surface-sunk": 'rgb(var(--color-surface-sunk) / <alpha-value>)',
@@ -82,9 +84,9 @@ module.exports = {
   apricot: "rgba(184,70,36,0.20)",
   },
   fontSize: {
-  'display': ["28px", {"lineHeight":"32px","letterSpacing":"-0.8px"}],
+  'display': ["32px", {"lineHeight":"36px","letterSpacing":"-0.8px"}],
   'title': ["21px", {"lineHeight":"26px","letterSpacing":"-0.4px"}],
-  'section': ["17px", {"lineHeight":"22px"}],
+  'section': ["20px", {"lineHeight":"26px","letterSpacing":"-0.6px"}],
   'body': ["14px", {"lineHeight":"20px"}],
   'body-strong': ["14px", {"lineHeight":"20px"}],
   'label': ["12.5px", {"lineHeight":"16px"}],
@@ -92,7 +94,7 @@ module.exports = {
   'card-name': ["14px", {"lineHeight":"17.22px","letterSpacing":"-0.2px"}],
   'table-name': ["18px", {"lineHeight":"20.16px","letterSpacing":"-0.2px"}],
   'fine': ["11px", {"lineHeight":"15.4px"}],
-  'micro': ["9.5px", {"lineHeight":"12px","letterSpacing":"0.6px"}],
+  'micro': ["11px", {"lineHeight":"15px","letterSpacing":"0.6px"}],
   },
   borderRadius: {
   control: "12px",
@@ -103,7 +105,7 @@ module.exports = {
   sheet: "25px",
   },
   boxShadow: {
-    'soft-light': '0 2px 7px rgba(49, 32, 57, .05)',
-    'soft-dark': '0 2.2px 8.8px rgba(23, 19, 27, 0.33)',
+    'soft-light': '0 3px 9px rgba(96, 48, 23, .032)',
+    'soft-dark': '0 3px 9px rgba(44, 32, 24, 0.1)',
   },
 };

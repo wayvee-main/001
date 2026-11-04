@@ -1,7 +1,5 @@
 import '../global.css';
 
-import { DMSans_400Regular, DMSans_500Medium, DMSans_700Bold } from '@expo-google-fonts/dm-sans';
-import { Fraunces_500Medium, Fraunces_600SemiBold, Fraunces_700Bold } from '@expo-google-fonts/fraunces';
 import Constants from 'expo-constants';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
@@ -41,12 +39,9 @@ export default function RootLayout() {
 
 function AppShell() {
   const [fontsLoaded] = useFonts({
-    Fraunces_500Medium,
-    Fraunces_600SemiBold,
-    Fraunces_700Bold,
-    DMSans_400Regular,
-    DMSans_500Medium,
-    DMSans_700Bold,
+    Outfit_400Regular: require('../../assets/fonts/Outfit-Regular.ttf'),
+    Outfit_500Medium: require('../../assets/fonts/Outfit-Medium.ttf'),
+    Outfit_700Bold: require('../../assets/fonts/Outfit-Bold.ttf'),
   });
   // Plays once per cold start, after bootstrap resolves so it knows where it is
   // handing off to, and again between the last onboarding step and Home.

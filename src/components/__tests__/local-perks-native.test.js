@@ -56,49 +56,53 @@ const style = (tree, id) => StyleSheet.flatten(nodes(tree).find(node => node.pro
 afterEach(() => { act(() => trees.forEach(tree => tree.unmount())); trees = []; jest.restoreAllMocks(); });
 
 describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
-  const ribbon = theme === 'light' ? '#EBD4BD' : '#2C222C';
+  const ribbon = ROLES['surface-ribbon'][theme];
   beforeEach(() => {
+    jest.spyOn(require('react-native'), 'useWindowDimensions').mockReturnValue({ width: 390, height: 844, scale: 1, fontScale: 1 });
     mockPush.mockClear();
     mockOpenOffer.mockClear();
     useReducedMotionPreference.mockReturnValue(true);
-    useThemeColors.mockReturnValue({ ...Object.fromEntries(Object.entries(ROLES).map(([key, value]) => [key, value[theme]])), fg: '#2D2925', 'fg-muted': '#64584F', 'accent-fill': '#AE512E', 'fg-accent': '#98431F', 'surface-control': '#FFFFFF', 'surface-ribbon': ribbon, 'ribbon-ink': '#3D2B20', 'surface-navigation': '#FFFCF7' });
+    useThemeColors.mockReturnValue({ ...Object.fromEntries(Object.entries(ROLES).map(([key, value]) => [key, value[theme]])), 'edge-card': 'rgba(90,60,40,.1)', 'edge-soft': 'rgba(90,60,40,.08)' });
   });
 
   it('retains round action sizing', () => {
     const tree = mount(<PerksRoundButton testID="round" label="Offers" glyph="tag" onPress={() => {}} />);
     expect(style(tree, 'round')).toMatchObject({ width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' });
   });
-  it('keeps both ribbon sizes and their theme fill', () => {
+  it('keeps Home and Discover promos as compact ribbons', () => {
     for (const compact of [false, true]) {
       const tree = mount(<LocalPerksBanners catalog={empty} compact={compact} />);
       expect(tree.root.findAllByProps({ testID: 'perks-banner-vee' })).toHaveLength(0);
-      expect(style(tree, 'perks-banner-stay')).toMatchObject({ height: compact ? 100 : 110, flexDirection: 'row', borderRadius: 18, backgroundColor: ribbon });
+      expect(style(tree, 'perks-banner-stay')).toMatchObject({ height: 48, flexDirection: 'row', borderRadius: 13, backgroundColor: ribbon });
     }
   });
-  it('keeps row alignment and overlays separate save/add actions', () => {
+  it('keeps compact rows focused on the venue and opens its real detail route', () => {
     const tree = mount(<LocalPerksCard entry={entry} catalog={empty} />);
-    expect(style(tree, 'perks-place-open')).toMatchObject({ flexDirection: 'row', minHeight: 100, padding: 9 });
-    expect(style(tree, 'perks-save-place')).toMatchObject({ position: 'absolute', top: 11, right: 11, width: 30, height: 30 });
-    expect(style(tree, 'perks-add-stop')).toMatchObject({ position: 'absolute', bottom: 10, right: 11, width: 28, height: 28 });
+    expect(style(tree, 'perks-place-open')).toMatchObject({ flexDirection: 'row', minHeight: 86, padding: 8 });
+    expect(tree.root.findAllByProps({ testID: 'perks-save-place' })).toHaveLength(0);
+    expect(tree.root.findAllByProps({ testID: 'perks-add-stop' })).toHaveLength(0);
+    act(() => tree.root.findByProps({ testID: 'perks-place-open' }).props.onPress());
+    expect(mockPush).toHaveBeenLastCalledWith('/home/detail?kind=place&id=source-cafe');
   });
   it('uses regular inline metadata pills and keeps rail actions off the facts', () => {
     const source = { ...freshEntry, facts: [{ glyph: 'pin', value: '<0.1 mi' }], detailContent: offerCatalog.entries['place:source-cafe'].detailContent };
     const tree = mount(<LocalPerksCard entry={source} catalog={empty} format="rail" width={280} />);
-    expect(nodes(tree).filter(node => node.props.testID === 'card-photo-label')).toHaveLength(1);
+    expect(nodes(tree).filter(node => node.props.testID === 'card-photo-label')).toHaveLength(0);
     const pills = nodes(tree).filter(node => /^card-metadata-(pin:0|menu|offer)$/.test(node.props.testID || ''));
     expect(pills).toHaveLength(3);
-    for (const pill of pills) expect(StyleSheet.flatten(pill.props.style)).toMatchObject({ height: 32, flex: 1, flexDirection: 'row', borderRadius: 999 });
+    for (const pill of pills) expect(StyleSheet.flatten(pill.props.style)).toMatchObject({ minHeight: 30, flexDirection: 'row', borderRadius: 999, borderWidth: 0 });
     expect(style(tree, 'card-metadata-pin:0').backgroundColor).toBe(ROLES['metadata-distance'][theme]);
     expect(style(tree, 'card-metadata-menu').backgroundColor).toBe(ROLES['metadata-menu'][theme]);
     expect(style(tree, 'card-metadata-offer').backgroundColor).toBe(ROLES['metadata-offer'][theme]);
-    expect(style(tree, 'perks-add-stop')).toMatchObject({ top: 106, right: 18 });
+    expect(style(tree, 'perks-add-stop')).toMatchObject({ top: 92, right: 18 });
     expect(style(tree, 'perks-add-stop').bottom).toBeUndefined();
   });
   it('keeps four equally sized navigation tabs', () => {
     const items = ['index', 'discover', 'create', 'profile'].map(key => ({ key, label: key, glyph: 'home', selected: key === 'index', onPress: () => {} }));
     const tree = mount(<EditorialNav items={items} />), tabs = nodes(tree).filter(node => node.props.accessibilityRole === 'tab');
     expect(tabs).toHaveLength(4);
-    tabs.forEach(tab => expect(StyleSheet.flatten(tab.props.style)).toMatchObject({ flex: 1, minHeight: 47, alignItems: 'center' }));
+    tabs.forEach(tab => expect(StyleSheet.flatten(tab.props.style)).toMatchObject({ flex: 1, minHeight: 48, alignItems: 'center', borderRadius: 999 }));
+    expect(StyleSheet.flatten(tabs[0].props.style).backgroundColor).toBe(ROLES['accent-fill'][theme]);
   });
   it('preserves native pill touch targets and each separate category destination', () => {
     const tree = mount(<LocalCategoryShelf catalog={empty} />);

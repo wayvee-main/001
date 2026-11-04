@@ -14,12 +14,14 @@ module.exports = {
       borderRadius: tokens.borderRadius,
       boxShadow: tokens.boxShadow,
       fontFamily: {
-        fraunces: ['Fraunces_500Medium'],
-        'fraunces-medium': ['Fraunces_500Medium'],
-        'fraunces-bold': ['Fraunces_700Bold'],
-        dm: ['DMSans_400Regular'],
-        'dm-medium': ['DMSans_500Medium'],
-        'dm-bold': ['DMSans_700Bold'],
+        // Keep the existing semantic weight aliases while every screen uses
+        // the approved Daybreak family, including secondary/detail layers.
+        fraunces: ['Outfit_500Medium'],
+        'fraunces-medium': ['Outfit_500Medium'],
+        'fraunces-bold': ['Outfit_700Bold'],
+        dm: ['Outfit_400Regular'],
+        'dm-medium': ['Outfit_500Medium'],
+        'dm-bold': ['Outfit_700Bold'],
       },
     },
   },

@@ -8,7 +8,7 @@ import { useThemeColors } from '@/lib/theme';
  *
  * Set as live text rather than the bitmap its predecessor used. The old
  * wordmark rode along as a base64 PNG because it was lettering the app could
- * not reproduce; this one is Fraunces at a weight already loaded for every
+ * not reproduce; this one uses the shared Daybreak medium face already loaded for every
  * heading, so a bitmap would only be a blurrier copy of type the app has.
  * That also drops ~25KB of base64 from the bundle and lets the mark and the
  * word take different colours, which the single tinted bitmap could not.

@@ -133,7 +133,7 @@ export default function CuratedCollectionScreen() {
             uri={siteLogoLink(venue.sourceUrl)}
             fit="contain"
             stripedPlaceholder={false}
-            radius={0}
+            radius={12}
             style={{ width: 42, height: 42, backgroundColor: 'transparent' }}
           />
           <View className="min-w-0 flex-1">

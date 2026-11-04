@@ -834,9 +834,9 @@ function StaySheet() {
                 monthTextColor: c.ink,
                 todayTextColor: c.rust,
                 arrowColor: c.rust,
-                textDayFontFamily: 'DMSans_400Regular',
-                textMonthFontFamily: 'DMSans_700Bold',
-                textDayHeaderFontFamily: 'DMSans_500Medium',
+                textDayFontFamily: 'Outfit_400Regular',
+                textMonthFontFamily: 'Outfit_700Bold',
+                textDayHeaderFontFamily: 'Outfit_500Medium',
               }}
             />
             <View className="flex-row items-center justify-between border-t border-edge-faint px-3 py-2">

@@ -100,7 +100,7 @@ function FeaturedPickCard({ pick, onPress }: { pick: ViatorPick; onPress: () => 
       onPress={onPress}
       className="overflow-hidden rounded-card">
       <View style={{ position: 'relative' }}>
-        <Photo uri={pick.image} radius={0} style={{ width: '100%', height: 119 }} />
+        <Photo uri={pick.image} radius={12} style={{ width: '100%', height: 119 }} />
         {spotlight ? <SpotlightTag label={spotlight} /> : null}
       </View>
       <View className="gap-y-1 px-4 py-3">
