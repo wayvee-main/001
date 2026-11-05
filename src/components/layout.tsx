@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AuroraGlow } from '@/components/aurora';
 import { BackButton } from '@/components/ui';
 import { Glyph } from '@/components/glyph';
 import { useThemeColors } from '@/lib/theme';
@@ -40,11 +41,13 @@ export function useAppGutter(): number {
   return width <= 360 ? 13 : width <= 430 ? 17 : 24;
 }
 
-/** Full-height app background with safe-area top padding. */
-export function Screen({ children, layer = 'primary' }: { children: ReactNode; layer?: 'primary' | 'secondary' | 'tertiary' }) {
+/** Full-height app background with safe-area top padding. Tab screens pass
+ * `aurora` for the screen-top glow ('tall' on Vee, where it frames the mark). */
+export function Screen({ children, layer = 'primary', aurora = false }: { children: ReactNode; layer?: 'primary' | 'secondary' | 'tertiary'; aurora?: boolean | 'tall' }) {
   const insets = useSafeAreaInsets();
   return (
     <AppBackdrop layer={layer} style={{ paddingTop: insets.top + 8 }}>
+      {aurora ? <AuroraGlow height={aurora === 'tall' ? 820 : 600} /> : null}
       {children}
     </AppBackdrop>
   );

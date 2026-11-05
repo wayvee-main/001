@@ -13,6 +13,11 @@ type Props = {
   candidates: readonly PhotoCandidate[]; label: string; fallbackGlyph?: string;
   fit?: 'cover' | 'contain'; style?: StyleProp<ViewStyle>; placeholder?: ReactNode;
   children?: ReactNode; onUnavailable?: () => void; testID?: string;
+  /** Ink for the placeholder glyph and Retry label, for photos that sit on a dark fallback. */
+  inkColor?: string;
+  /** False inside another control (a card or row): a failed photo shows its placeholder
+   * glyph instead of a nested Retry button, which web cannot nest inside a button. */
+  retryable?: boolean;
 };
 
 /** A new source list gets an independent session, so late events from an old
@@ -27,8 +32,8 @@ export function ReliableImage(props: Props) {
   return <ImageSession key={JSON.stringify([props.label, candidates])} {...props} candidates={candidates} />;
 }
 
-function ImageSession({ candidates, label, fallbackGlyph = 'landmark', fit = 'cover', style, placeholder, children, onUnavailable, testID = 'reliable-image' }: Props) {
-  const colors = useThemeColors(), notified = useRef(false);
+function ImageSession({ candidates, label, fallbackGlyph = 'landmark', fit = 'cover', style, placeholder, children, onUnavailable, testID = 'reliable-image', inkColor, retryable = true }: Props) {
+  const colors = useThemeColors(), notified = useRef(false), ink = inkColor || colors['fg-muted'];
   const deadline = useRef<{ token: string; bytes: number; refresh: () => void } | undefined>(undefined);
   const [attempt, setAttempt] = useState({ index: 0, revision: 0, ready: false });
   const { index, revision, ready } = attempt, photo = candidates[index], hasPhoto = Boolean(photo), token = `${revision}:${index}`;
@@ -55,14 +60,14 @@ function ImageSession({ candidates, label, fallbackGlyph = 'landmark', fit = 'co
   }, [onUnavailable, photo]);
 
   const retry = () => { notified.current = false; setAttempt(current => ({ index: 0, revision: current.revision + 1, ready: false })); };
-  const glyph = <Glyph name={fallbackGlyph} size={23} color={colors['fg-muted']} />;
+  const glyph = <Glyph name={fallbackGlyph} size={23} color={ink} />;
   const missing = candidates.length === 0;
   return <View testID={`${testID}-frame`} style={[{ position: 'relative', overflow: 'hidden', backgroundColor: colors['surface-soft'] }, style]}>
     {!ready ? <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}>
-      {photo ? placeholder || glyph : missing ? <View accessibilityRole="image" accessible accessibilityLabel={label}>{glyph}</View> :
+      {photo ? placeholder || glyph : missing || !retryable ? <View accessibilityRole="image" accessible accessibilityLabel={label}>{glyph}</View> :
         <NativePressable testID={`${testID}-retry`} accessibilityRole="button" accessibilityLabel={`Retry photo. ${label}`} onPress={retry}
           style={{ width: '100%', height: '100%', minHeight: 44, alignItems: 'center', justifyContent: 'center', gap: 2 }}>
-          <Glyph name="refresh" size={20} color={colors['fg-muted']} /><Text className="font-dm" style={{ fontSize: 11, lineHeight: 14, color: colors['fg-muted'] }}>Retry</Text>
+          <Glyph name="refresh" size={20} color={ink} /><Text className="font-dm" style={{ fontSize: 11, lineHeight: 14, color: ink }}>Retry</Text>
         </NativePressable>}
     </View> : null}
     {photo ? <Image key={token} testID={testID} accessibilityLabel={photo.label || 'Photograph'}

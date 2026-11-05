@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import type { ReactNode } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
+import { AuroraPhotoCard } from '@/components/aurora';
 import { EditorialNav } from '@/components/editorial-nav';
 import { Glyph } from '@/components/glyph';
 import { CardMetadata } from '@/components/card-metadata';
@@ -21,10 +22,15 @@ export const HOME_DOOR_HEIGHT = 83;
 const briefTitle = (name: string) => {const words=name.trim().split(/\s+/);return words.length>5?words.slice(0,5).join(' ')+'…':name;};
 
 /** Same exact height, inset, typography and chevron for For you and Collections. */
-export function HomeDoorCard({title,meta,image,photos,glyph='compass',width,onPress,testID}: {
+export function HomeDoorCard({title,meta,image,photos,glyph='compass',width,onPress,testID,variant='row'}: {
   title:string;meta:string;image?:string;photos?:readonly PhotoCandidate[];glyph?:string;width?:number;onPress:()=>void;testID?:string;
+  /** Aurora Home: 'tile' is a portrait overlay card (For you), 'banner' a wide one (Collections). */
+  variant?:'row'|'tile'|'banner';
 }) {
   const colors=useThemeColors(),surface=useRaisedSurface(1);
+  if(variant!=='row')return <AuroraPhotoCard testID={testID} title={title} meta={meta} image={image} photos={photos} glyph={glyph}
+    width={width ?? (variant==='tile'?180:300)} height={variant==='tile'?236:170} radius={variant==='tile'?22:24} titleSize={variant==='tile'?16:18}
+    accessibilityLabel={`${title}. ${meta}`} onPress={onPress} />;
   return <TouchableOpacity testID={testID} accessibilityRole="button" accessibilityLabel={`${title}. ${meta}`} activeOpacity={.78} onPress={onPress}
     style={[surface,{height:HOME_DOOR_HEIGHT,width,flexShrink:0,padding:11,borderRadius:15,flexDirection:'row',alignItems:'center',gap:12}]}>
     <Photo uri={image} candidates={photos} radius={11} fallbackGlyph={glyph} fallbackLabel={`Photo unavailable for ${title}`} style={{width:58,height:58,backgroundColor:colors['surface-sunk']}} />

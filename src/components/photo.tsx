@@ -22,6 +22,8 @@ export function Photo({
   style,
   children,
   onUnavailable,
+  inkColor,
+  retryable,
 }: {
   uri?: string;
   source?: number;
@@ -35,11 +37,15 @@ export function Photo({
   style?: StyleProp<ViewStyle>;
   children?: ReactNode;
   onUnavailable?: () => void;
+  /** Placeholder ink for photos laid over a dark fallback (overlay cards). */
+  inkColor?: string;
+  /** See ReliableImage: false when the photo sits inside another control. */
+  retryable?: boolean;
 }) {
   const colors = useThemeColors();
   const frame = radius > 0 ? {borderWidth:1,borderColor:colors['edge-card'],borderBottomColor:colors['edge-card-bottom']} : {};
   const sources = [...(source ? [{ source }] : []), ...candidates, ...(uri ? [{ source: uri }] : [])];
-  return <ReliableImage candidates={sources} label={fallbackLabel} fallbackGlyph={fallbackGlyph} fit={fit} onUnavailable={onUnavailable}
+  return <ReliableImage candidates={sources} label={fallbackLabel} fallbackGlyph={fallbackGlyph} fit={fit} onUnavailable={onUnavailable} inkColor={inkColor} retryable={retryable}
     style={[frame, { borderRadius: radius, backgroundColor: colors.shell }, style]}
     placeholder={stripedPlaceholder ? <Stripes radius={radius} style={{ width: '100%', height: '100%' }} /> : undefined}>
     {children}

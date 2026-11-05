@@ -1,10 +1,64 @@
 # Wayvee design system
 
-The approved **Daybreak** system is the current UI contract, including
-solid pastel metadata and compact promo ribbons. Earlier iteration notes are historical;
-this section takes precedence wherever they differ.
+The approved **Aurora** system is the current UI contract for the four tab
+screens and the tab bar. Earlier iteration notes, including Daybreak, are
+historical; this section takes precedence wherever they differ. Screens not yet
+restyled (detail pages, sheets, Offers, Evening, Search) inherit Aurora's palette
+from the tokens and keep their Daybreak layouts until they are revisited.
 
-## Current approval — Daybreak
+## Current approval — Aurora
+
+- The Vee spiral's gold → ember → violet is the light source. Light theme is warm
+  paper (`#FFFAF6`) with plum-black ink (`#1F1720`); dark theme is plum night
+  (`#120E13`) with `#F7EEF3` ink. `src/lib/tokens.ts` stays the only hand-edited
+  palette source: solid roles in `ROLES`, gradients, glow, frosted surfaces and
+  section rules in `AURORA`, the photo scrim and avatar ring in `AURORA_FIXED`.
+  Components read them through `useAurora()` (`src/lib/aurora.ts`).
+- Everything Aurora draws ships over the air: gradients use `expo-linear-gradient`,
+  the glow uses `react-native-svg`. No blur library: "frosted" surfaces are
+  translucent tints (`AURORA.glass`), and the tab bar stays ~95% opaque so it
+  reads over photos.
+- **Contrast is part of the token.** Filled controls use the `fill` gradient with
+  `onFill` labels (light: deep ember → violet with white; dark: gold → lilac with
+  dark ink); gradient headline phrases use the `text` gradient, large type only.
+  `npm run tokens:contrast` checks every stop and the colours between them, plus
+  ink on glass over the strongest point of the glow. The vivid gold never carries text.
+- **Glow:** a static radial wash behind the four tab screens (`Screen aurora`;
+  `'tall'` on Vee). No motion.
+- **Headlines:** the second phrase of each tab headline is gradient type
+  ("Make a day of it.", "out there.", "evening?", "city."), coloured glyph by glyph
+  with `GradientText` so it wraps, scales and reads as one sentence.
+- **Search:** Home and Discover share one frosted launcher (`CitySearchBar
+  variant="aurora"`, 52px). The filter circle belongs to the same control and opens
+  Search, where the scope filters live.
+- **Picks row** (Home, under search): live `homeRecommendations` as plain text, venue
+  in medium weight, each led by a filled bolt. One native-driven loop pulses every
+  bolt at its own phase; it stops for reduced motion, in the background and off
+  Home. The 14-day freshness rule is unchanged; the empty state stays
+  "Fresh local picks are on the way."
+- **Categories:** four equal tiles (88px) with gradient-tinted icon badges; a
+  selected Discover filter takes the fill gradient.
+- **By day / After hours:** two pills, the selected one filled with ink. They switch
+  Home's featured section, so no rule separates them from it.
+- **Posters** (Home feature, Discover feature and On stage): full photo, one scrim
+  recipe, overlay type (gradient chip, name, one-line snapshot, up to two
+  source-backed facts), frosted save and add-to-evening actions. A missing photo
+  falls back to a dark plum ground so the type stays legible.
+- **Overlay cards:** portrait tiles (For you, carousels) and wide banners
+  (Collections, Rooms) share `AuroraPhotoCard`. Listing cards keep their real save
+  and add-to-evening actions. Photos inside a control are not retryable, which keeps
+  web from nesting buttons.
+- **Grouped lists:** opaque cards with hairline separators for "Leave a little room",
+  routes, local-list rows, Vee's shapes and every You setting. Rows show what a place
+  is and its nearest fact; a short value sits at the right, a longer note underneath.
+- **Section rules:** a 1px `AURORA.rule` hairline (`SectionRule`) between top-level
+  sections on all four tabs, about 30px each side.
+- **Offers:** 62px cards with a gradient badge; the position dot of the visible slide
+  takes the gradient. Swipe behaviour is unchanged.
+- **Navigation:** one floating capsule; the active tab takes the fill gradient and the
+  Vee mark keeps its own well. Detail routes reserve its space on an opaque ground.
+
+## Previous approval — Daybreak (historical)
 
 - Android is the primary implementation. Use shared React Native components,
   with `NativePressable` for function-valued inline styles; run the native

@@ -4,7 +4,8 @@ import renderer, { act } from 'react-test-renderer';
 import { Animated, AppState, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { cssInterop } from 'react-native-css-interop';
 import { EditorialNav } from '@/components/editorial-nav';
-import { DaybreakHomeRow, DaybreakPoster } from '@/components/daybreak';
+import { AuroraEntryRow } from '@/components/aurora';
+import { DaybreakFeature } from '@/components/daybreak';
 import { HomeTimelyRecommendations, LocalCategoryShelf, LocalPerksBanners, LocalPerksCard, PerksRoundButton } from '@/components/local-perks';
 import { useReducedMotionPreference } from '@/lib/motion';
 import { useThemeColors } from '@/lib/theme';
@@ -53,11 +54,11 @@ function nodes(tree) {
   const walk = value => { if (!value || typeof value === 'string') return; if (Array.isArray(value)) { value.forEach(walk); return; } result.push(value); value.children?.forEach(walk); };
   walk(tree.toJSON()); return result;
 }
+const pressable = (tree, id) => tree.root.findAll(node => node.props.testID === id && typeof node.props.onPress === 'function')[0];
 const style = (tree, id) => StyleSheet.flatten(nodes(tree).find(node => node.props.testID === id)?.props.style);
 afterEach(() => { act(() => trees.forEach(tree => tree.unmount())); trees = []; jest.restoreAllMocks(); });
 
 describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
-  const ribbon = ROLES['surface-ribbon'][theme];
   beforeEach(() => {
     jest.spyOn(require('react-native'), 'useWindowDimensions').mockReturnValue({ width: 390, height: 844, scale: 1, fontScale: 1 });
     mockPush.mockClear();
@@ -70,11 +71,12 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     const tree = mount(<PerksRoundButton testID="round" label="Offers" glyph="tag" onPress={() => {}} />);
     expect(style(tree, 'round')).toMatchObject({ width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' });
   });
-  it('keeps Home and Discover promos as compact ribbons', () => {
+  it('keeps Home and Discover offers as compact Aurora cards with a gradient badge', () => {
     for (const compact of [false, true]) {
       const tree = mount(<LocalPerksBanners catalog={empty} compact={compact} />);
       expect(tree.root.findAllByProps({ testID: 'perks-banner-vee' })).toHaveLength(0);
-      expect(style(tree, 'perks-banner-stay')).toMatchObject({ height: 48, flexDirection: 'row', borderRadius: 13, backgroundColor: ribbon });
+      expect(style(tree, 'perks-banner-stay')).toMatchObject({ height: 62, flexDirection: 'row', borderRadius: 20, backgroundColor: ROLES['surface-raised'][theme] });
+      expect(nodes(tree).filter(node => node.props.testID === 'aurora-fill').length).toBeGreaterThan(0);
     }
   });
   it('keeps compact rows focused on the venue and opens its real detail route', () => {
@@ -85,17 +87,20 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     act(() => tree.root.findByProps({ testID: 'perks-place-open' }).props.onPress());
     expect(mockPush).toHaveBeenLastCalledWith('/home/detail?kind=place&id=source-cafe');
   });
-  it('retains Home Soft Edit native surfaces and source-backed two-pill navigation', () => {
+  it('shows the Home poster and rows with source-backed facts and their real destinations', () => {
     const source = { ...freshEntry, description: 'A source-backed snapshot.', facts: [{ glyph: 'pin', value: '0.4 mi' }] };
-    for (const [Component, id] of [[DaybreakPoster, 'daybreak-poster'], [DaybreakHomeRow, 'daybreak-home-row']]) {
-      const tree = mount(<Component entry={source} catalog={empty} now={new Date(2026, 10, 3, 12)} />);
-      expect(style(tree, id)).toMatchObject({ borderRadius: id === 'daybreak-poster' ? 19 : 17, backgroundColor: ROLES[id === 'daybreak-poster' ? 'surface-poster' : 'surface-raised'][theme] });
-      const pills = nodes(tree).filter(node => /^card-metadata-(pin:0|menu)$/.test(node.props.testID || ''));
-      expect(pills).toHaveLength(2);
-      pills.forEach(pill => expect(StyleSheet.flatten(pill.props.style)).toMatchObject({ minHeight: id === 'daybreak-poster' ? 30 : 27, paddingVertical: id === 'daybreak-poster' ? 5 : 4, borderWidth: 0 }));
-      act(() => tree.root.findByProps({ testID: id }).props.onPress());
-      expect(mockPush).toHaveBeenLastCalledWith('/home/detail?kind=place&id=source-cafe');
-    }
+    const poster = mount(<DaybreakFeature entry={source} catalog={empty} now={new Date(2026, 10, 3, 12)} />);
+    expect(style(poster, 'daybreak-poster-frame')).toMatchObject({ height: 360, borderRadius: 26, overflow: 'hidden' });
+    const facts = poster.root.findByProps({ testID: 'aurora-poster-facts' });
+    expect(nodes(poster).filter(node => node.props.accessible && ['0.4 mi', 'Menu'].some(label => (node.props.accessibilityLabel || '').includes(label)))).not.toHaveLength(0);
+    expect(facts.props.children).toHaveLength(2);
+    act(() => pressable(poster, 'daybreak-poster').props.onPress());
+    expect(mockPush).toHaveBeenLastCalledWith('/home/detail?kind=place&id=source-cafe');
+    const row = mount(<AuroraEntryRow testID="daybreak-home-row" entry={source} catalog={empty} now={new Date(2026, 10, 3, 12)} />);
+    expect(style(row, 'daybreak-home-row')).toMatchObject({ flexDirection: 'row', minHeight: 64 });
+    expect(nodes(row).some(node => node.type === 'Text' && node.children?.includes('0.4 mi'))).toBe(true);
+    act(() => pressable(row, 'daybreak-home-row').props.onPress());
+    expect(mockPush).toHaveBeenLastCalledWith('/home/detail?kind=place&id=source-cafe');
   });
   it('uses regular inline metadata pills and keeps rail actions off the facts', () => {
     const source = { ...freshEntry, facts: [{ glyph: 'pin', value: '<0.1 mi' }], detailContent: offerCatalog.entries['place:source-cafe'].detailContent };
@@ -114,13 +119,13 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     const items = ['index', 'discover', 'create', 'profile'].map(key => ({ key, label: key, glyph: 'home', selected: key === 'index', onPress: () => {} }));
     const tree = mount(<EditorialNav items={items} />), tabs = nodes(tree).filter(node => node.props.accessibilityRole === 'tab');
     expect(tabs).toHaveLength(4);
-    tabs.forEach(tab => expect(StyleSheet.flatten(tab.props.style)).toMatchObject({ flex: 1, minHeight: 48, alignItems: 'center', borderRadius: 999 }));
-    expect(StyleSheet.flatten(tabs[0].props.style).backgroundColor).toBe(ROLES['accent-fill'][theme]);
+    tabs.forEach(tab => expect(StyleSheet.flatten(tab.props.style)).toMatchObject({ flex: 1, minHeight: 50, alignItems: 'center', borderRadius: 999 }));
+    expect(nodes(tree).filter(node => node.props.testID === 'nav-active-fill')).toHaveLength(1);
   });
-  it('preserves native pill touch targets and each separate category destination', () => {
+  it('preserves category tile touch targets and each separate category destination', () => {
     const tree = mount(<LocalCategoryShelf catalog={empty} />);
     for (const category of ['eat', 'bars', 'routes', 'events']) {
-      expect(style(tree, `home-category-${category}`)).toMatchObject({ flex: 1, minWidth: 0, minHeight: 44, borderRadius: 999 });
+      expect(style(tree, `home-category-${category}`)).toMatchObject({ flex: 1, minWidth: 0, minHeight: 88, borderRadius: 20 });
       act(() => tree.root.findByProps({ testID: `home-category-${category}` }).props.onPress());
       expect(mockPush).toHaveBeenLastCalledWith('/home/' + category);
     }
@@ -134,9 +139,10 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     expect(tree.root.findAllByProps({ testID: 'home-recommendation-dish:place:source-cafe:morningtoast' })).toHaveLength(0);
     act(() => tree.root.findByProps({ testID: 'home-recommendation-dish:place:source-cafe:noodles' }).props.onPress());
     expect(mockPush).toHaveBeenLastCalledWith('/home/detail?kind=place&id=source-cafe&dish=Noodles');
-    const dots = nodes(tree).filter(node => node.props.testID === 'home-recommendation-pulse');
-    expect(dots).toHaveLength(1);
-    expect(StyleSheet.flatten(dots[0].props.style).backgroundColor).toBe(ribbon);
+    const picks = nodes(tree).filter(node => /^home-recommendation-(?!pulse)/.test(node.props.testID || ''));
+    const bolts = nodes(tree).filter(node => node.props.testID === 'home-recommendation-pulse');
+    expect(bolts).toHaveLength(picks.length);
+    expect(bolts.length).toBeGreaterThan(0);
   });
   it('shows an honest empty state when no recent source exists', () => {
     const tree = mount(<HomeTimelyRecommendations catalog={empty} now={new Date(2026, 10, 3, 19)} />);

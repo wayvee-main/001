@@ -2,19 +2,30 @@ import { useColorScheme } from 'nativewind';
 import type { ReactNode, Ref } from 'react';
 import { Keyboard, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
+import { IconBadge, useGlass } from '@/components/aurora';
 import { Glyph } from '@/components/glyph';
 import { useControlSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
 
 // Daybreak uses the same 49px search geometry on every layer.
 export const SEARCH_BAR_HEIGHT = 49;
-export function CitySearchBar({city,testID,labelTestID,inputTestID,inputLabel,placeholder,value='',onChangeText,onPress,onSubmit,autoFocus=false,inputRef}: {
-  city:string;testID:string;labelTestID?:string;inputLabel?:string;value?:string;
+/** Home and Discover share the frosted Aurora launcher. */
+export const AURORA_SEARCH_HEIGHT = 52;
+export function CitySearchBar({city,testID,labelTestID,inputTestID,inputLabel,placeholder,value='',onChangeText,onPress,onSubmit,autoFocus=false,inputRef,variant='default'}: {
+  city:string;testID:string;labelTestID?:string;inputLabel?:string;value?:string;variant?:'default'|'aurora';
   inputTestID?:string;placeholder?:string;autoFocus?:boolean;inputRef?:Ref<TextInput>;
   onChangeText?:(text:string)=>void;onPress?:()=>void;onSubmit?:(query:string)=>void;
 }) {
-  const colors=useThemeColors(),control=useControlSurface();
+  const colors=useThemeColors(),control=useControlSurface(),glass=useGlass();
   const label=placeholder || `Search ${/^san francisco$/i.test(city)?'SF':city}`;
+  // Aurora launcher (Home and Discover): a frosted pill that opens Search, where
+  // the scope filters live, so the filter circle belongs to the same control.
+  if(variant==='aurora'&&onPress)return <TouchableOpacity testID={testID} accessibilityRole="button" accessibilityLabel={`${inputLabel || label}. Filters on the next screen`} onPress={onPress} activeOpacity={.78}
+    style={[glass,{height:AURORA_SEARCH_HEIGHT,width:'100%',borderRadius:999,flexDirection:'row',alignItems:'center',gap:12,paddingLeft:18,paddingRight:8}]}>
+    <Glyph name="search" size={20} color={colors['fg-muted']} />
+    <Text testID={labelTestID} numberOfLines={1} className="min-w-0 flex-1 font-dm text-taupe" style={{fontSize:16,lineHeight:22}}>{value || label}</Text>
+    <IconBadge testID={`${testID}-filters`} glyph="filter" size={36} iconSize={17} />
+  </TouchableOpacity>;
   const submit=()=>{Keyboard.dismiss();onSubmit?.(value.trim());};
   const content=<>
     <Glyph name="search" size={17} color={colors['fg-muted']} />

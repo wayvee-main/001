@@ -30,6 +30,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import { GradientFill, GradientText, IconBadge, SectionRule, useAuroraCard, useGlass } from '@/components/aurora';
 import { useConstraintPicker } from '@/components/constraint-picker';
 import { Glyph } from '@/components/glyph';
 import { LocalPerksHeader } from '@/components/local-perks';
@@ -45,6 +46,7 @@ import { loadDinnerHistory } from '@/lib/dinner-history';
 import type { GeoPoint } from '@/lib/geo';
 import { saveNightDraft } from '@/lib/itinerary';
 import { defaultDinnerMinutes } from '@/lib/arrival';
+import { useAurora } from '@/lib/aurora';
 import { useReducedMotionPreference } from '@/lib/motion';
 import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
 import { useAllPlaces, useCuratedCoords, useCuratedHours } from '@/lib/places';
@@ -218,13 +220,16 @@ function ShapeTile({
   solved,
   selectedDateAt,
   onPress,
+  divider = false,
 }: {
   solved: SolvedNight;
   selectedDateAt: Date;
   onPress: (title: string) => void;
+  divider?: boolean;
 }) {
   const colors = useThemeColors();
   const { order, dinnerTimeLabel, stopCount } = useShapeFacts(solved, selectedDateAt);
+  const aurora = useAurora();
   const route = shapeRoute(solved, order);
   const title = order.map(kind => kind === 'dinner' ? 'Dinner' : kind === 'event' ? 'Show' : 'Drinks').join(' · ');
   const first = order[0];
@@ -240,15 +245,15 @@ function ShapeTile({
       accessibilityLabel={`Use ${title}. ${route}${startsAt ? `. Starts at ${startsAt}` : ''}. ${stops}`}
       activeOpacity={0.78}
       onPress={() => onPress(title)}
-      style={{ minHeight: 54, borderBottomWidth: 1, borderBottomColor: colors['edge-soft'], flexDirection: 'row', alignItems: 'center' }}>
-      <View className="min-w-0 flex-1 flex-row items-center" style={{ gap: 11, paddingVertical: 15 }}>
-        <Glyph name={first === 'event' ? 'music' : first === 'dinner' ? 'food' : 'drink'} size={17} strokeWidth={1.5} color={colors['fg-accent']} />
+      style={{ minHeight: 60, borderTopWidth: divider ? 1 : 0, borderTopColor: aurora.glassEdge, flexDirection: 'row', alignItems: 'center' }}>
+      <View className="min-w-0 flex-1 flex-row items-center" style={{ gap: 12, paddingVertical: 11, paddingLeft: 12 }}>
+        <IconBadge glyph={first === 'event' ? 'music' : first === 'dinner' ? 'food' : 'drink'} size={38} iconSize={18} />
         <View className="min-w-0 flex-1">
-          <Text testID="vee-shape-title" numberOfLines={1} className="font-dm text-ink" style={{ fontSize: 13, lineHeight: 20 }}>{label}</Text>
+          <Text testID="vee-shape-title" numberOfLines={2} className="font-dm-medium text-ink" style={{ fontSize: 15, lineHeight: 20 }}>{label}</Text>
         </View>
       </View>
       <View testID="vee-shape-chevron" className="items-center justify-center" style={{ width: 44 }}>
-        <Glyph name="chevron" size={14} color={colors['fg-muted']} />
+        <Glyph name="chevron" size={16} color={colors['fg-muted']} />
       </View>
     </TouchableOpacity>
   );
@@ -281,7 +286,7 @@ export default function CreateScreen() {
     savedPlaceKeys,
   } = useScoper();
   const colors = useThemeColors();
-  const raisedSurface = useRaisedSurface(1), control = useControlSurface(), primarySurface = useControlSurface(false, true);
+  const raisedSurface = useRaisedSurface(1), control = useControlSurface(), glass = useGlass(), auroraCard = useAuroraCard(), aurora = useAurora();
   const curatedCoords = useCuratedCoords();
   const curatedHours = useCuratedHours();
   const weatherNow = useWeatherNow();
@@ -762,7 +767,7 @@ export default function CreateScreen() {
 
 
   return (
-    <Screen>
+    <Screen aurora="tall">
         <ScreenScroll
           gap={0}
           clearsTabBar
@@ -823,10 +828,10 @@ export default function CreateScreen() {
             * point of the screen. */}
           {!showingLiveMatches ? (
             <View testID="vee-open-letter" style={{marginTop:askPlan?18:10,alignItems:'center',gap:10}}>
-              <WorkingVee size={58} animate={screenFocused} label="Vee" />
+              <WorkingVee size={68} animate={screenFocused} label="Vee" />
               {!askPlan ? <Text className="font-dm-medium text-taupe" style={{fontSize:11,lineHeight:16,letterSpacing:1.2,marginTop:4}}>A LITTLE LOCAL KNOWLEDGE</Text> : null}
-              <Text className="font-dm-medium text-ink" style={{fontSize:screenWidth<=360?30:31,lineHeight:35,letterSpacing:-.8,textAlign:'center'}}>
-                {askPlan ? 'What should change?' : 'What’s your kind\nof evening?'}
+              <Text accessibilityRole="header" className="font-dm-bold text-ink" style={{fontSize:screenWidth<=360?30:32,lineHeight:screenWidth<=360?35:37,letterSpacing:-1.1,textAlign:'center'}}>
+                {askPlan ? 'What should change?' : <>What’s your kind{'\n'}of <GradientText text="evening?" /></>}
               </Text>
             </View>
           ) : null}
@@ -837,9 +842,8 @@ export default function CreateScreen() {
                 opacity: asking ? 0.72 : 1,
                 marginTop: showingLiveMatches ? 20 : 25,
               }}>
-            <View testID="vee-composer-box" style={[raisedSurface,{
-              backgroundColor:colors['surface-input'],
-              borderRadius:22,padding:16,
+            <View testID="vee-composer-box" style={[glass,{
+              borderRadius:26,paddingTop:18,paddingBottom:16,paddingLeft:20,paddingRight:16,
             }]}>
             <TextInput
               testID="vee-text-input"
@@ -882,13 +886,14 @@ export default function CreateScreen() {
                 hitSlop={6}
                 disabled={asking}
                 onPress={() => void submitAsk(promptReady ? promptText : askExampleLabel)}
-                style={[primarySurface,{ height:43,width:43,borderWidth:0,opacity: asking ? 0.48 : 1 }]}
+                style={{ height:46,width:46,borderRadius:23,overflow:'hidden',opacity: asking ? 0.48 : 1 }}
                 className="shrink-0 items-center justify-center rounded-full">
-                {asking ? (
-                  <ActivityIndicator size="small" color={colors['on-accent']} />
+                <GradientFill radius={23} />
+                <View>{asking ? (
+                  <ActivityIndicator size="small" color={aurora.onFill} />
                 ) : (
-                  <Glyph name="arrowUp" size={20} color={colors['on-accent']} strokeWidth={1.7} />
-                )}
+                  <Glyph name="arrowUp" size={20} color={aurora.onFill} strokeWidth={2} />
+                )}</View>
               </TouchableOpacity>
             </Animated.View>
               </View>
@@ -974,7 +979,8 @@ export default function CreateScreen() {
           {/* All three solved shapes, not one card and a reroll: they are already
            * computed on every render, and three comparable options read as a
            * choice rather than a verdict. */}
-          <View style={{marginTop:30}}>
+          <SectionRule spacing={26} />
+          <View>
             <TouchableOpacity testID="vee-shapes-toggle" accessibilityRole="button" accessibilityLabel="Start from a shape" accessibilityState={{expanded:showShapes}} aria-expanded={showShapes}
               onPress={()=>setShowShapes(value=>!value)} activeOpacity={.78}
               className="min-h-11 flex-row items-center justify-start">
@@ -992,12 +998,13 @@ export default function CreateScreen() {
                   opacity: planMotion,
                   transform: [{ translateY: planMotion.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) }],
                 }}>
-                <View className="gap-y-2">
-                  {readyMadeCards.map((card) => (
+                <View testID="vee-shapes-list" style={[auroraCard,{ borderRadius:22, overflow:'hidden' }]}>
+                  {readyMadeCards.map((card, index) => (
                     <ShapeTile
                       key={`${card.theme}-${card.solved.restaurant?.id ?? ''}-${card.solved.event?.id ?? ''}`}
                       solved={card.solved}
                       selectedDateAt={selectedDateAt}
+                      divider={index > 0}
                       onPress={(title) => chooseReadyMade(card.solved, title)}
                     />
                   ))}
@@ -1009,10 +1016,11 @@ export default function CreateScreen() {
                   testID="vee-other-options"
                   activeOpacity={0.72}
                   onPress={cycleSet}
-                  className="mt-3 h-11 flex-row items-center justify-start">
-                  <Text className="font-dm-medium text-meta text-taupe">
+                  className="mt-3 h-11 flex-row items-center justify-start" style={{ gap: 2, paddingLeft: 6 }}>
+                  <Text className="font-dm-medium" style={{ fontSize: 14, lineHeight: 19, color: colors['fg-accent'] }}>
                     Other options
                   </Text>
+                  <Glyph name="chevron" size={15} color={colors['fg-accent']} />
                 </TouchableOpacity>
               </Animated.View>
             ) : (

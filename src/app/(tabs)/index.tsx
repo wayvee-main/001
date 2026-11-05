@@ -2,7 +2,8 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { CitySearchBar } from '@/components/city-controls';
-import { DaybreakHomeRow, DaybreakIntro, DaybreakPeriodPicker, DaybreakPoster, type DaybreakPeriod } from '@/components/daybreak';
+import { AuroraEntryRow, AuroraList, SectionRule } from '@/components/aurora';
+import { DaybreakFeature, DaybreakIntro, DaybreakPeriodPicker, type DaybreakPeriod } from '@/components/daybreak';
 import { HomeDoorCard } from '@/components/home-field-guide';
 import { HRow, Screen, ScreenScroll } from '@/components/layout';
 import { HomeTimelyRecommendations, LocalCategoryShelf, LocalPerksBanners, LocalPerksHeader, PerksHeading, PerksVeeRibbon } from '@/components/local-perks';
@@ -31,33 +32,36 @@ export default function HomeScreen() {
     try { await Promise.all([hydrateEventsFromBackend(true), hydratePlacesFromBackend(true), hydrateWeatherFromBackend(true), refreshLocation(), refreshRegional()]); }
     finally { setRefreshing(false); }
   };
-  return <Screen><ScreenScroll gap={18} clearsTabBar refreshing={refreshing} onRefresh={onRefresh}>
+  const vee = <PerksVeeRibbon />;
+  return <Screen aurora><ScreenScroll gap={18} clearsTabBar refreshing={refreshing} onRefresh={onRefresh}>
     <LocalPerksHeader location={false} />
     <DaybreakIntro city={displayCity} />
-    <View style={{ gap: 11 }}>
-      <View>
-        <CitySearchBar testID="home-search" labelTestID="home-search-label" city={displayCity} onPress={() => router.push('/search')} />
-        <HomeTimelyRecommendations catalog={catalog} now={now} />
-      </View>
-      <LocalCategoryShelf catalog={catalog} />
+    <View style={{ gap: 6 }}>
+      <CitySearchBar variant="aurora" testID="home-search" labelTestID="home-search-label" city={displayCity} onPress={() => router.push('/search')} />
+      <HomeTimelyRecommendations catalog={catalog} now={now} />
     </View>
+    <SectionRule />
+    <LocalCategoryShelf catalog={catalog} />
     <DaybreakPeriodPicker value={period} onChange={setPeriodOverride} />
-    {feature ? <View><PerksHeading title={period === 'evening' ? 'A good way into the evening' : 'A very good place to start'} />
-      <DaybreakPoster entry={feature} catalog={catalog} now={now} />
-    </View> : null}
-    <LocalPerksBanners catalog={catalog} />
-    {bars.length ? <View><PerksHeading title="Leave a little room for later" action="More" onPress={() => router.push(HOME_LEDGERS.bars.href)} />
-      <View style={{ gap: 12 }}>{bars.slice(0, 2).map(entry => <DaybreakHomeRow key={entry.kind + ':' + entry.id} entry={entry} catalog={catalog} now={now} />)}</View>
-    </View> : null}
-    <PerksVeeRibbon />
-    <View><PerksHeading title="For you" action="See all" onPress={() => router.push('/home/ideas')} />
-      <View style={{ gap: 10 }}>{ideas.map(idea => <HomeDoorCard key={idea.id} testID={`home-idea-${idea.id}`} title={idea.title} meta={idea.detail}
-        image={homeIdeaPhoto(idea, catalog)} photos={homeIdeaPhotos(idea, catalog)} glyph={idea.glyph} onPress={() => router.push(idea.href as never)} />)}</View>
+    <View style={{ marginTop: 10, gap: 12 }}>
+      {feature ? <View><PerksHeading title={period === 'evening' ? 'A good way into the evening' : 'A very good place to start'} />
+        <DaybreakFeature entry={feature} catalog={catalog} now={now} />
+      </View> : null}
+      <LocalPerksBanners catalog={catalog} />
     </View>
-    {catalog.collections.length ? <View><PerksHeading title="Collections" action="See all" onPress={() => router.push('/home/collections')} />
-      <HRow gap={10}>{catalog.collections.map(collection => <HomeDoorCard key={collection.id} testID={`home-collection-${collection.id}`} width={252}
+    <SectionRule />
+    {bars.length ? <View style={{ gap: 12 }}><View><PerksHeading title="Leave a little room for later" action="More" onPress={() => router.push(HOME_LEDGERS.bars.href)} />
+      <AuroraList testID="home-later-list">{bars.slice(0, 2).map((entry, index) => <AuroraEntryRow key={entry.kind + ':' + entry.id} testID="daybreak-home-row" divider={index > 0} entry={entry} catalog={catalog} now={now} />)}</AuroraList>
+    </View>{vee}</View> : vee}
+    <SectionRule />
+    <View><PerksHeading title="For you" action="See all" onPress={() => router.push('/home/ideas')} />
+      <HRow gap={12}>{ideas.map(idea => <HomeDoorCard key={idea.id} variant="tile" testID={`home-idea-${idea.id}`} title={idea.title} meta={idea.detail}
+        image={homeIdeaPhoto(idea, catalog)} photos={homeIdeaPhotos(idea, catalog)} glyph={idea.glyph} onPress={() => router.push(idea.href as never)} />)}</HRow>
+    </View>
+    {catalog.collections.length ? <><SectionRule /><View><PerksHeading title="Collections" action="See all" onPress={() => router.push('/home/collections')} />
+      <HRow gap={12}>{catalog.collections.map(collection => <HomeDoorCard key={collection.id} variant="banner" testID={`home-collection-${collection.id}`}
         title={collection.title} meta={`${collection.items.length} picks · ${collection.subtitle.split(' · ').slice(-1)[0]}`} image={collection.coverImage} photos={homeCollectionPhotos(collection.id, catalog)} glyph={homeCollectionGlyph(collection.id)}
         onPress={() => router.push(`/home/collection?id=${encodeURIComponent(collection.id)}` as never)} />)}</HRow>
-    </View> : null}
+    </View></> : null}
   </ScreenScroll></Screen>;
 }

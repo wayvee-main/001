@@ -1,8 +1,10 @@
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Linking, Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AuroraList, AuroraRow, GradientFill, GradientText, IconBadge, SectionRule, useGlass } from '@/components/aurora';
 import { Glyph } from '@/components/glyph';
 import { LocalPerksHeader } from '@/components/local-perks';
 import { Screen, ScreenScroll, useAppGutter } from '@/components/layout';
@@ -12,23 +14,18 @@ import { switchCity } from '@/lib/bootstrap';
 import { useActiveCity, useActiveCityName, useCityOptions } from '@/lib/city';
 import { stayProgress } from '@/lib/stay';
 import { useScoper } from '@/lib/store';
-import { useControlSurface } from '@/lib/shadows';
+import { useAurora } from '@/lib/aurora';
 import { useThemeColors } from '@/lib/theme';
 
-function Setting({label,note,glyph,onPress}:{label:string;note:string;glyph:string;onPress:()=>void}) {
-  const colors=useThemeColors();
-  return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`${label}. ${note}`} onPress={onPress} activeOpacity={.78}
-    className="flex-row items-center gap-x-2.5 py-[13px]"
-    style={{minHeight:54,borderBottomWidth:1,borderBottomColor:colors['edge-card']}}>
-    <Glyph name={glyph} size={18} color={colors['fg-muted']} />
-    <View className="min-w-0 flex-1"><Text className="font-dm text-[13px] leading-[18px] text-ink">{label}</Text>
-      <Text className="mt-[3px] font-dm text-fine text-taupe">{note}</Text></View>
-    <Glyph name="chevron" size={14} color={colors['fg-muted']} />
-  </TouchableOpacity>;
+/** One preference or destination row: gradient-tinted glyph, label, and either a
+ * short value at the right or a longer note underneath. */
+function Setting({label,note,glyph,onPress,divider=false,value=false}:{label:string;note:string;glyph:string;onPress:()=>void;divider?:boolean;value?:boolean}) {
+  return <AuroraRow divider={divider} accessibilityLabel={`${label}. ${note}`} onPress={onPress} title={label}
+    subtitle={value?undefined:note} trailing={value?note:undefined} leading={<IconBadge glyph={glyph} size={38} iconSize={18} />} />;
 }
 
 export default function ProfileScreen() {
-  const router=useRouter(),s=useScoper(),colors=useThemeColors(),control=useControlSurface();
+  const router=useRouter(),s=useScoper(),colors=useThemeColors(),glass=useGlass(),aurora=useAurora();
   const city=useActiveCity(),cityName=useActiveCityName(),cityOptions=useCityOptions();
   const gutter=useAppGutter(),insets=useSafeAreaInsets();
   const [appearance,setAppearance]=useState<AppearancePreference>('system');
@@ -55,45 +52,56 @@ export default function ProfileScreen() {
   const chooseCity=(slug:string)=>{
     setPicker(null);void switchCity(slug).catch(()=>s.showToast('Could not switch city'));
   };
-  return <Screen><ScreenScroll gap={20} clearsTabBar>
+  return <Screen aurora><ScreenScroll gap={20} clearsTabBar>
     <LocalPerksHeader profile={false} />
-    <Text accessibilityRole="header" className="font-fraunces text-ink" style={{fontSize:30,lineHeight:35,letterSpacing:-.7}}>Your kind of city.</Text>
-    <View className="flex-row items-center gap-x-3" style={{backgroundColor:colors['surface-raised'],borderWidth:1,borderColor:colors['edge-card'],borderRadius:20,padding:16}}>
-      <View className="items-center justify-center rounded-full bg-surface-raised border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark" style={{width:44,height:44,borderWidth:1,borderColor:colors['edge-card'],borderBottomColor:colors['edge-card-bottom'],overflow:'hidden'}}>
-        {s.profileAvatarUrl?<Image source={{uri:s.profileAvatarUrl}} contentFit="cover" style={{width:44,height:44}} />:
-          <Text className="font-dm-medium text-[17px] text-ink">{s.session?initialsFor(displayName):'G'}</Text>}
+    <Text accessibilityRole="header" className="font-dm-bold text-ink" style={{fontSize:32,lineHeight:37,letterSpacing:-1.1}}>Your kind of <GradientText text="city." /></Text>
+    <View testID="profile-card" style={[glass,{borderRadius:26,padding:18,gap:16}]}>
+      <View className="flex-row items-center gap-x-3.5">
+        <View style={{width:58,height:58,borderRadius:29,overflow:'hidden',alignItems:'center',justifyContent:'center'}}>
+          <LinearGradient colors={[...aurora.ring]} start={{x:0,y:1}} end={{x:1,y:0}} style={{position:'absolute',top:0,right:0,bottom:0,left:0}} />
+          <View style={{width:53,height:53,borderRadius:27,overflow:'hidden',alignItems:'center',justifyContent:'center',backgroundColor:colors['surface-raised']}}>
+            {s.profileAvatarUrl?<Image source={{uri:s.profileAvatarUrl}} contentFit="cover" style={{width:53,height:53}} />:
+              <Text className="font-dm-bold text-ink" style={{fontSize:21,lineHeight:26}}>{s.session?initialsFor(displayName):'G'}</Text>}
+          </View>
+        </View>
+        <View className="min-w-0 flex-1"><Text numberOfLines={1} className="font-dm-medium text-ink" style={{fontSize:20,lineHeight:25,letterSpacing:-.3}}>{displayName}</Text>
+          <Text className="font-dm" style={{marginTop:1,fontSize:13,lineHeight:18,color:colors['fg-muted']}}>{cityName}</Text></View>
+        <TouchableOpacity accessibilityRole="button" accessibilityLabel="Open notifications" onPress={()=>router.push('/notifications')}
+          className="h-11 w-11 items-center justify-center rounded-full" style={{backgroundColor:colors['surface-sunk']}}>
+          <Glyph name="bell" size={19} color={colors.fg} />
+        </TouchableOpacity>
       </View>
-      <View className="min-w-0 flex-1"><Text className="font-fraunces text-ink" style={{fontSize:22,lineHeight:27}}>{displayName}</Text>
-        <Text className="mt-1 font-dm text-fine text-taupe">{cityName}</Text></View>
-      <TouchableOpacity accessibilityRole="button" accessibilityLabel="Open notifications" onPress={()=>router.push('/notifications')}
-        className="h-11 w-11 items-center justify-center rounded-full">
-        <Glyph name="bell" size={18} color={colors['fg-muted']} />
-      </TouchableOpacity>
+      {!s.session?<View className="flex-row items-center gap-x-3" style={{paddingTop:16,borderTopWidth:1,borderTopColor:aurora.glassEdge}}>
+        <Text className="min-w-0 flex-1 font-dm" style={{fontSize:14,lineHeight:19,color:colors['fg-muted']}}>Sign in to save places and plans.</Text>
+        <TouchableOpacity accessibilityRole="button" accessibilityLabel="Sign in or create account" onPress={()=>s.openSheet('auth')} activeOpacity={.78}
+          className="h-11 flex-row items-center gap-x-1.5 rounded-full px-4" style={{overflow:'hidden'}}>
+          <GradientFill />
+          <Text className="font-dm-medium" style={{fontSize:14,lineHeight:19,color:aurora.onFill}}>Sign in</Text>
+          <View><Glyph name="arrow" size={15} color={aurora.onFill} /></View>
+        </TouchableOpacity>
+      </View>:null}
     </View>
-    {!s.session?<View className="flex-row items-center gap-x-3">
-      <Text className="min-w-0 flex-1 font-dm text-label text-taupe">Sign in to save places and plans.</Text>
-      <TouchableOpacity accessibilityRole="button" accessibilityLabel="Sign in or create account" onPress={()=>s.openSheet('auth')} activeOpacity={.78}
-        style={control} className="h-11 flex-row items-center gap-x-2 rounded-full bg-surface-raised px-4 border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
-        <Text className="font-dm-medium text-label" style={{color:colors['fg-accent']}}>Sign in</Text>
-        <Glyph name="arrow" size={14} color={colors['fg-accent']} />
-      </TouchableOpacity>
-    </View>:null}
-    <View className="gap-y-2">
-      <Text className="mb-1 font-fraunces text-section text-ink">Keep the good ones close</Text>
-      <Setting label="Saved places" note={`${s.savedPlaceKeys.length} good finds`} glyph="heart" onPress={()=>router.push('/saved')} />
-      <Setting label="Your evening" note="The places you’re keeping in mind" glyph="route" onPress={()=>router.push('/evening')} />
-      <Setting label="Local offers" note="A little extra, from the venue" glyph="tag" onPress={()=>router.push('/offers')} />
-      <Setting label={s.stay?.propertyName||'Link your stay'} note={progress?`Night ${progress.currentNight} of ${progress.totalNights}`:'Hotel, Airbnb, wherever you call home'} glyph="briefcase" onPress={s.openStaySheet} />
-      <Setting label="Your taste" note="The things you gravitate toward" glyph="spark" onPress={()=>router.push('/taste')} />
-      <Setting label="My plans" note="Saved evenings and upcoming stops" glyph="calendar" onPress={()=>router.push('/plans')} />
+    <View style={{marginTop:8}}>
+      <Text accessibilityRole="header" className="font-dm-medium text-ink" style={{fontSize:20,lineHeight:25,letterSpacing:-.4,marginBottom:14}}>Keep the good ones close</Text>
+      <AuroraList>
+        <Setting label="Saved places" note={`${s.savedPlaceKeys.length} good finds`} glyph="heart" onPress={()=>router.push('/saved')} />
+        <Setting divider label="Your evening" note="The places you’re keeping in mind" glyph="route" onPress={()=>router.push('/evening')} />
+        <Setting divider label="Local offers" note="A little extra, from the venue" glyph="tag" onPress={()=>router.push('/offers')} />
+        <Setting divider label={s.stay?.propertyName||'Link your stay'} note={progress?`Night ${progress.currentNight} of ${progress.totalNights}`:'Hotel, Airbnb, wherever you call home'} glyph="briefcase" onPress={s.openStaySheet} />
+        <Setting divider label="Your taste" note="The things you gravitate toward" glyph="spark" onPress={()=>router.push('/taste')} />
+        <Setting divider label="My plans" note="Saved evenings and upcoming stops" glyph="calendar" onPress={()=>router.push('/plans')} />
+      </AuroraList>
     </View>
-    <View className="gap-y-2">
-      <Text className="mb-1 font-fraunces text-section text-ink">Preferences</Text>
-      <Setting label="City" note={cityName} glyph="pin" onPress={()=>setPicker('city')} />
-      <Setting label="Appearance" note={APPEARANCE_OPTIONS.find(x=>x.value===appearance)?.label||'System'} glyph="sun" onPress={()=>setPicker('appearance')} />
-      <Setting label="Location" note={locationNote} glyph="compass" onPress={()=>void manageLocation()} />
-      <Setting label="Notifications" note="Plan and checkout nudges" glyph="bell" onPress={()=>router.push('/notifications')} />
-      {s.session?<Setting label="Log out" note="You can keep exploring as a guest" glyph="logout" onPress={()=>s.openSheet('logout')} />:null}
+    <SectionRule spacing={10} />
+    <View>
+      <Text accessibilityRole="header" className="font-dm-medium text-ink" style={{fontSize:20,lineHeight:25,letterSpacing:-.4,marginBottom:14}}>Preferences</Text>
+      <AuroraList>
+        <Setting value label="City" note={cityName} glyph="pin" onPress={()=>setPicker('city')} />
+        <Setting divider value label="Appearance" note={APPEARANCE_OPTIONS.find(x=>x.value===appearance)?.label||'System'} glyph="sun" onPress={()=>setPicker('appearance')} />
+        <Setting divider label="Location" note={locationNote} glyph="compass" onPress={()=>void manageLocation()} />
+        <Setting divider label="Notifications" note="Plan and checkout nudges" glyph="bell" onPress={()=>router.push('/notifications')} />
+        {s.session?<Setting divider label="Log out" note="You can keep exploring as a guest" glyph="logout" onPress={()=>s.openSheet('logout')} />:null}
+      </AuroraList>
     </View>
   </ScreenScroll>
   <Modal visible={picker!==null} transparent animationType="slide" onRequestClose={()=>setPicker(null)}>
