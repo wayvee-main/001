@@ -827,9 +827,11 @@ export default function CreateScreen() {
             * controls restating defaults made the assumptions look like the
             * point of the screen. */}
           {!showingLiveMatches ? (
-            <View testID="vee-open-letter" style={{marginTop:askPlan?18:10,alignItems:'center',gap:10}}>
+            // With no plan above it, the mark rises level with the appearance
+            // toggle (it sits centred, clear of the toggle). box-none keeps the
+            // overlapping strip from swallowing taps meant for the toggle.
+            <View testID="vee-open-letter" pointerEvents="box-none" style={{marginTop:askPlan?18:-20,alignItems:'center',gap:10}}>
               <WorkingVee size={68} animate={screenFocused} label="Vee" />
-              {!askPlan ? <Text className="font-dm-medium text-taupe" style={{fontSize:11,lineHeight:16,letterSpacing:1.2,marginTop:4}}>A LITTLE LOCAL KNOWLEDGE</Text> : null}
               <Text accessibilityRole="header" className="font-dm-bold text-ink" style={{fontSize:screenWidth<=360?30:32,lineHeight:screenWidth<=360?35:37,letterSpacing:-1.1,textAlign:'center'}}>
                 {askPlan ? 'What should change?' : <>What’s your kind{'\n'}of <GradientText text="evening?" /></>}
               </Text>
