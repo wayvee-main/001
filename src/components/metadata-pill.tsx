@@ -13,8 +13,8 @@ export function MetadataPill({ text, glyph, label, compact = true, testID, equal
     style={{ flex: equalWidth ? 1 : undefined, flexShrink: 1, minWidth: 0, maxWidth: '100%', minHeight: compact ? 27 : 30,
       paddingHorizontal: 8, paddingVertical: compact ? 4 : 5, borderRadius: 999, borderWidth: 0,
       backgroundColor: colors['accent-tint'], flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-    {glyph ? <Glyph name={glyph} size={12} strokeWidth={1.5} color={colors['fg-accent']} /> : null}
-    <Text numberOfLines={1} ellipsizeMode="tail" className="font-dm" style={{ flexShrink: 1, fontSize: 11, lineHeight: compact ? 17 : 16, color: colors['fg-accent'] }}>{compactCardText(numericDistanceLabel(text), CARD_METADATA_LIMIT)}</Text>
+    {glyph ? <Glyph name={glyph} size={12} strokeWidth={1.5} color={colors['pill-ink']} /> : null}
+    <Text numberOfLines={1} ellipsizeMode="tail" className="font-dm" style={{ flexShrink: 1, fontSize: 11, lineHeight: compact ? 17 : 16, color: colors['pill-ink'] }}>{compactCardText(numericDistanceLabel(text), CARD_METADATA_LIMIT)}</Text>
   </View>;
 }
 

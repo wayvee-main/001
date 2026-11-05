@@ -90,6 +90,7 @@ const PAIRS: Pair[] = [
   ...['category', 'distance', 'menu', 'offer'].map(tone => ({ name: `Daybreak pastel ${tone}`, fg: role(`metadata-${tone}-ink`), bg: role(`metadata-${tone}`), min: AA_TEXT })),
   ...['fg', 'fg-muted'].map(ink => ({ name: `${ink} on compact poster`, fg: role(ink), bg: role('surface-poster'), min: AA_TEXT })),
   { name: 'promo conditions on ribbon', fg: role('ribbon-ink'), bg: role('surface-ribbon'), min: AA_TEXT },
+  { name: 'pill-ink on accent-tint (metadata pill)', fg: role('pill-ink'), bg: role('accent-tint'), min: AA_TEXT },
   { name: 'fg-muted on surface-raised', fg: role('fg-muted'), bg: role('surface-raised'), min: AA_TEXT },
   { name: 'surface-accent on surface-raised (glyph)', fg: role('surface-accent'), bg: role('surface-raised'), min: AA_LARGE },
   { name: 'fg on home-tile', fg: role('fg'), bg: role('home-tile'), min: AA_TEXT },

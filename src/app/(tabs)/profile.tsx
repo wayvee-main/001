@@ -16,6 +16,7 @@ import { stayProgress } from '@/lib/stay';
 import { useScoper } from '@/lib/store';
 import { useAurora } from '@/lib/aurora';
 import { useThemeColors } from '@/lib/theme';
+import { headingStyle } from '@/lib/typography';
 
 /** One preference or destination row: gradient-tinted glyph, label, and either a
  * short value at the right or a longer note underneath. */
@@ -82,7 +83,7 @@ export default function ProfileScreen() {
       </View>:null}
     </View>
     <View style={{marginTop:8}}>
-      <Text accessibilityRole="header" className="font-dm-medium text-ink" style={{fontSize:20,lineHeight:25,letterSpacing:-.4,marginBottom:14}}>Keep the good ones close</Text>
+      <Text accessibilityRole="header" className="text-ink" style={{...headingStyle(23),marginBottom:14}}>Keep the good ones close</Text>
       <AuroraList>
         <Setting label="Saved places" note={`${s.savedPlaceKeys.length} good finds`} glyph="heart" onPress={()=>router.push('/saved')} />
         <Setting divider label="Your evening" note="The places you’re keeping in mind" glyph="route" onPress={()=>router.push('/evening')} />
@@ -94,7 +95,7 @@ export default function ProfileScreen() {
     </View>
     <SectionRule spacing={10} />
     <View>
-      <Text accessibilityRole="header" className="font-dm-medium text-ink" style={{fontSize:20,lineHeight:25,letterSpacing:-.4,marginBottom:14}}>Preferences</Text>
+      <Text accessibilityRole="header" className="text-ink" style={{...headingStyle(23),marginBottom:14}}>Preferences</Text>
       <AuroraList>
         <Setting value label="City" note={cityName} glyph="pin" onPress={()=>setPicker('city')} />
         <Setting divider value label="Appearance" note={APPEARANCE_OPTIONS.find(x=>x.value===appearance)?.label||'System'} glyph="sun" onPress={()=>setPicker('appearance')} />

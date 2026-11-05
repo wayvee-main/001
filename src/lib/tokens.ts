@@ -11,8 +11,8 @@
  * aliases are kept pointing at the same hex so existing className strings in src/app
  * and src/components keep working; new code should reach for the semantic name.
  *
- * Palette: Aurora. Warm paper (light) and plum night (dark) grounds lit by the
- * Vee spiral's gold → ember → violet. Solid roles below stay hex so Tailwind's
+ * Palette: Aurora. Mist (light: a cool lavender-white) and plum night (dark)
+ * grounds lit by the Vee spiral's gold → ember → violet. Solid roles below stay hex so Tailwind's
  * opacity modifier keeps working; gradients, glow, frosted surfaces and section
  * rules live in AURORA. Solid pastel metadata pills keep dark ink in both
  * themes. Legacy color aliases follow the ember accent.
@@ -36,7 +36,7 @@ export function withAlpha(hex: string, alpha: number): string {
  * space-separated RGB triples so Tailwind's <alpha-value> opacity modifier
  * (bg-surface/50) keeps working. */
 export const ROLES: Record<string, ThemeValue> = {
-  bg: { light: '#FFFAF6', dark: '#120E13' }, // Daybreak primary ground
+  bg: { light: '#F8F8FD', dark: '#120E13' }, // Mist ground (light), plum night (dark)
   // Local Perks cards use a dedicated matte surface. Search and
   // navigation have separate roles so their lighter treatment stays consistent.
   surface: { light: '#FFFFFF', dark: '#1C171E' },
@@ -44,16 +44,16 @@ export const ROLES: Record<string, ThemeValue> = {
   'surface-soft': { light: '#FFFFFF', dark: '#1C171E' },
   'surface-control': { light: '#FFFFFF', dark: '#251F28' },
   'surface-input': { light: '#FFFFFF', dark: '#251F28' }, // text fields stay lighter than cards
-  'surface-ribbon': { light: '#FFD0A3', dark: '#6A3B1B' }, // Home ribbon and stay anchor
-  'surface-poster': { light: '#FFE7D4', dark: '#503222' },
-  'poster-edge': { light: '#F0DAC8', dark: '#6A4330' },
+  'surface-ribbon': { light: '#E6E0FA', dark: '#6A3B1B' }, // Home ribbon and stay anchor
+  'surface-poster': { light: '#EEEAFB', dark: '#503222' },
+  'poster-edge': { light: '#DCD6F2', dark: '#6A4330' },
   'surface-search': { light: '#FFFFFF', dark: '#251F28' },
   'surface-navigation': { light: '#FFFFFF', dark: '#1C171E' },
-  'surface-sunk': { light: '#F4ECE8', dark: '#2A232D' }, // input wells, sheet track
-  fg: { light: '#1F1720', dark: '#F7EEF3' }, // aubergine editorial ink
-  'fg-muted': { light: '#5F5361', dark: '#CABDC7' },
-  'card-ink': { light: '#1F1720', dark: '#F7EEF3' },
-  'card-muted': { light: '#5F5361', dark: '#CABDC7' },
+  'surface-sunk': { light: '#EEEEF7', dark: '#2A232D' }, // input wells, sheet track
+  fg: { light: '#1B1A26', dark: '#F7EEF3' }, // ink
+  'fg-muted': { light: '#56556F', dark: '#CABDC7' },
+  'card-ink': { light: '#1B1A26', dark: '#F7EEF3' },
+  'card-muted': { light: '#56556F', dark: '#CABDC7' },
   // Solid pastel metadata: color follows meaning, with dark ink in both themes.
   'metadata-category': { light: '#F4D4C0', dark: '#D8B7A0' },
   'metadata-category-ink': { light: '#704125', dark: '#4D2E1C' },
@@ -64,7 +64,7 @@ export const ROLES: Record<string, ThemeValue> = {
   'metadata-offer': { light: '#FFE7AB', dark: '#E7CC9D' },
   'metadata-offer-ink': { light: '#654719', dark: '#50370F' },
   'surface-accent': { light: '#B8400F', dark: '#FFA370' },
-  'control-edge': { light: '#E9DEE3', dark: '#3A3140' },
+  'control-edge': { light: '#E3E1F0', dark: '#3A3140' },
   'selected-surface': { light: '#C2470F', dark: '#FFA370' },
   'on-selected': { light: '#FFFFFF', dark: '#3C1D0E' },
   'selected-glyph': { light: '#FFFFFF', dark: '#3C1D0E' },
@@ -73,12 +73,12 @@ export const ROLES: Record<string, ThemeValue> = {
   'home-tile': { light: '#FFFFFF', dark: '#1C171E' },
   'surface-discovery': { light: '#FFFFFF', dark: '#1C171E' },
   'home-tile-glyph': { light: '#B8400F', dark: '#FFA370' },
-  'home-tile-well': { light: '#FCEDE6', dark: '#3A2630' },
+  'home-tile-well': { light: '#EEEBFA', dark: '#3A2630' },
   'tile-eat': { light: '#FFFFFF', dark: '#1C171E' },
   'tile-bars': { light: '#FFFFFF', dark: '#1C171E' },
   'tile-routes': { light: '#FFFFFF', dark: '#1C171E' },
   'tile-events': { light: '#FFFFFF', dark: '#1C171E' },
-  'fg-accent': { light: '#B8400F', dark: '#FFA370' }, // deeper accent keeps small text readable on tints
+  'fg-accent': { light: '#B03C0E', dark: '#FFA370' }, // deeper accent keeps small text readable on tints (Mist included)
   // One theme-specific orange for action fills, icons, rails and active tabs.
   accent: { light: '#B8400F', dark: '#FFA370' }, // brand accent — icons, borders, rails
   'accent-fill': { light: '#C2470F', dark: '#FFA370' }, // approved editorial control fill
@@ -90,11 +90,13 @@ export const ROLES: Record<string, ThemeValue> = {
   'warm-ink': { light: '#B8400F', dark: '#FFA370' }, // text on warm-tint
   vee: { light: '#B8400F', dark: '#FFA370' }, // legacy Vee accents, now the shared orange
   'vee-strong': { light: '#B8400F', dark: '#FFA370' }, // legacy Vee text, now the shared readable orange
-  'accent-tint': { light: '#FCEDE6', dark: '#3A2630' },
-  'warm-tint': { light: '#FCEDE6', dark: '#3A2630' },
-  'vee-tint': { light: '#FCEDE6', dark: '#3A2630' },
-  'page-secondary': { light: '#F8F1EE', dark: '#17121A' },
-  'page-tertiary': { light: '#FFFCFA', dark: '#1F1922' },
+  'accent-tint': { light: '#EEEBFA', dark: '#3A2630' },
+  // Metadata pill text: violet on Mist's lilac pill (light), the readable orange in dark.
+  'pill-ink': { light: '#5B3DB0', dark: '#FFA370' },
+  'warm-tint': { light: '#EEEBFA', dark: '#3A2630' },
+  'vee-tint': { light: '#EEEBFA', dark: '#3A2630' },
+  'page-secondary': { light: '#F3F2FA', dark: '#17121A' },
+  'page-tertiary': { light: '#FBFBFE', dark: '#1F1922' },
   'ribbon-ink': { light: '#74300D', dark: '#FFDCAC' },
   danger: { light: '#A02F38', dark: '#FF6B6D' }, // closed / sold out / error — the one functional red
 };
@@ -114,10 +116,11 @@ export const AURORA: Record<'light' | 'dark', {
   light: {
     fill: ['#C2470F', '#96486C', '#6A4AC9'], onFill: '#FFFFFF',
     text: ['#D9581C', '#A23E8C', '#6A4AC9'],
-    glow: [{ color: '#FFBA54', opacity: 0.55 }, { color: '#F0642F', opacity: 0.26 }, { color: '#7B5AD6', opacity: 0.3 }],
-    soft: ['rgba(255, 181, 71, 0.22)', 'rgba(240, 100, 47, 0.15)', 'rgba(123, 90, 214, 0.18)'],
-    glass: 'rgba(255, 255, 255, 0.74)', glassEdge: 'rgba(70, 30, 60, 0.09)', rule: 'rgba(70, 30, 60, 0.10)',
-    navigation: 'rgba(255, 255, 255, 0.94)', shadow: '0 14px 30px -16px rgba(60, 20, 50, 0.30)',
+    // Mist: a fainter, cooler light — gold top-left, periwinkle mid, violet top-right.
+    glow: [{ color: '#FFC882', opacity: 0.16 }, { color: '#96AAFF', opacity: 0.16 }, { color: '#7B64EB', opacity: 0.24 }],
+    soft: ['rgba(150, 140, 255, 0.14)', 'rgba(255, 150, 120, 0.07)', 'rgba(123, 90, 214, 0.16)'],
+    glass: 'rgba(255, 255, 255, 0.80)', glassEdge: 'rgba(40, 35, 100, 0.08)', rule: 'rgba(40, 35, 100, 0.09)',
+    navigation: 'rgba(255, 255, 255, 0.94)', shadow: '0 14px 30px -16px rgba(30, 30, 80, 0.26)',
   },
   dark: {
     fill: ['#FFC56B', '#FF9468', '#B9A4FF'], onFill: '#1C1018',
@@ -148,8 +151,8 @@ export const EDGE_ROLES: Record<string, { base: 'fg'; alpha: number; lightBase?:
   edge: { base: 'fg', alpha: 0.12 }, // borders / dividers
   'edge-soft': { base: 'fg', alpha: 0.08 }, // placeholder stripe C
   'edge-faint': { base: 'fg', alpha: 0.04 }, // quiet dividers and decorative rules
-  'edge-card': { base: 'fg', alpha: 0.12, lightBase: '#855A40', lightAlpha: 0.10 },
-  'edge-card-bottom': { base: 'fg', alpha: 0.12, lightBase: '#855A40', lightAlpha: 0.10 },
+  'edge-card': { base: 'fg', alpha: 0.12, lightBase: '#2E2A5E', lightAlpha: 0.10 },
+  'edge-card-bottom': { base: 'fg', alpha: 0.12, lightBase: '#2E2A5E', lightAlpha: 0.10 },
 };
 
 /** Same value in both themes — either brand hue or a translucent tint over
@@ -167,9 +170,9 @@ export const FIXED: Record<string, string> = {
 
 /** Non-CSS-var palette entries theme.ts also needs (Stripes placeholder). */
 export const STRIPES: ThemeValue & { stripeB: ThemeValue } = {
-  light: '#F4ECE8',
+  light: '#EEEEF7',
   dark: '#251F28',
-  stripeB: { light: '#EADFDD', dark: '#332A37' },
+  stripeB: { light: '#E4E3F0', dark: '#332A37' },
 };
 
 /** Old hue-named tokens, kept as aliases of the semantic roles above so

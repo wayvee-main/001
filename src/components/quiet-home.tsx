@@ -5,12 +5,13 @@ import { Glyph } from '@/components/glyph';
 import { NativePressable as Pressable } from '@/components/native-pressable';
 import { VeeMark } from '@/components/vee-mark';
 import { useThemeColors } from '@/lib/theme';
+import { headingStyle } from '@/lib/typography';
 
 /** Home's quiet pieces: section headings and the thin perks and Vee ribbons. */
 export function QuietHomeHeading({ title, onMore }: { title: string; onMore?: () => void }) {
   const colors = useThemeColors(), { width } = useWindowDimensions();
   return <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 10 }}>
-    <Text accessibilityRole="header" className="font-dm-medium text-ink" style={{ flexShrink: 1, fontSize: width <= 360 ? 18 : 19, lineHeight: 25, letterSpacing: -.45 }}>{title}</Text>
+    <Text accessibilityRole="header" className="text-ink" style={{ flexShrink: 1, ...headingStyle(width <= 360 ? 21 : 23) }}>{title}</Text>
     {onMore ? <Pressable accessibilityRole="button" accessibilityLabel={`More ${title.toLowerCase()}`} onPress={onMore} hitSlop={7}
       style={({ pressed }) => ({ minHeight: 30, flexDirection: 'row', alignItems: 'center', gap: 2, opacity: pressed ? .7 : 1 })}>
       <Text className="font-dm" style={{ fontSize: 12, lineHeight: 18, color: colors['fg-accent'] }}>More</Text><Glyph name="chevron" size={13} color={colors['fg-accent']} />

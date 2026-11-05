@@ -51,6 +51,7 @@ module.exports = {
   vee: 'rgb(var(--color-vee) / <alpha-value>)',
   "vee-strong": 'rgb(var(--color-vee-strong) / <alpha-value>)',
   "accent-tint": 'rgb(var(--color-accent-tint) / <alpha-value>)',
+  "pill-ink": 'rgb(var(--color-pill-ink) / <alpha-value>)',
   "warm-tint": 'rgb(var(--color-warm-tint) / <alpha-value>)',
   "vee-tint": 'rgb(var(--color-vee-tint) / <alpha-value>)',
   "page-secondary": 'rgb(var(--color-page-secondary) / <alpha-value>)',

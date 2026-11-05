@@ -15,6 +15,7 @@ import { homeIndexPhotos } from '@/lib/home-index-photos';
 import { useLocalPerks } from '@/lib/local-perks-store';
 import { useScoper } from '@/lib/store';
 import { useThemeColors } from '@/lib/theme';
+import { headingStyle } from '@/lib/typography';
 
 /* Discover's Category posters: shortcuts, a slim deals row, then one chapter per
  * family in the same rhythm (poster, three rows, more in the family). */
@@ -33,7 +34,7 @@ export function DiscoverSectionHeading({ title, meta, action, onPress }: { title
   const colors = useThemeColors();
   return <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 10, marginBottom: 12 }}>
     <View style={{ flex: 1, minWidth: 0 }}>
-      <Text accessibilityRole="header" className="font-dm-bold text-ink" style={{ fontSize: 20, lineHeight: 25, letterSpacing: -.5 }}>{title}</Text>
+      <Text accessibilityRole="header" className="text-ink" style={headingStyle(23)}>{title}</Text>
       {meta ? <Text className="font-dm" style={{ fontSize: 12.5, lineHeight: 17, color: colors['fg-muted'] }}>{meta}</Text> : null}
     </View>
     {action && onPress ? <Pressable accessibilityRole="button" accessibilityLabel={`${action}. ${title}`} onPress={onPress} hitSlop={8} style={{ flexDirection: 'row', alignItems: 'center', gap: 1, minHeight: 28 }}>
@@ -199,7 +200,7 @@ export function DiscoverChapter({ family, label, children }: { family: DiscoverF
   const colors = useThemeColors(), aurora = useAurora();
   return <View testID={`discover-chapter-${family.id}`} style={{ paddingTop: 26, borderTopWidth: 1, borderTopColor: aurora.rule }}>
     <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14, marginHorizontal: 2 }}>
-      <Text accessibilityRole="header" className="font-dm-bold text-ink" style={{ fontSize: 26, lineHeight: 31, letterSpacing: -.8 }}>{family.title}</Text>
+      <Text accessibilityRole="header" className="text-ink" style={headingStyle(29, true)}>{family.title}</Text>
       <Text className="font-dm" style={{ fontSize: 13, lineHeight: 18, color: colors['fg-muted'] }}>{label || countLabel(family.count, family.unit)}</Text>
     </View>
     {children}

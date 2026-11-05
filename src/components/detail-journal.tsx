@@ -18,6 +18,7 @@ import { streetAddress, ticketLink } from '@/lib/links';
 import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
 import { useScoper } from '@/lib/store';
 import { useThemeColors } from '@/lib/theme';
+import { headingStyle } from '@/lib/typography';
 
 function useJournalLink() {
   const toast=useScoper(state=>state.showToast);
@@ -27,7 +28,7 @@ function useJournalLink() {
 export function JournalHeading({title,action,onAction}: {title:string;action?:string;onAction?:()=>void}) {
   const colors=useThemeColors();
   return <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:10}}>
-    <Text accessibilityRole="header" className="font-fraunces text-ink" style={{flex:1,fontSize:20,lineHeight:25,letterSpacing:-.3}}>{title}</Text>
+    <Text accessibilityRole="header" className="text-ink" style={{flex:1,...headingStyle(22)}}>{title}</Text>
     {action&&onAction?<TouchableOpacity accessibilityRole="button" accessibilityLabel={action} onPress={onAction} activeOpacity={.72} style={{minHeight:36,flexDirection:'row',alignItems:'center',gap:5}}>
       <Text className="font-dm text-fine text-peach">{action}</Text><Glyph name="arrow" size={12} color={colors['surface-accent']} />
     </TouchableOpacity>:null}

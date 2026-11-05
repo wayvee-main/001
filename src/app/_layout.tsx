@@ -42,6 +42,9 @@ function AppShell() {
     Outfit_400Regular: require('../../assets/fonts/Outfit-Regular.ttf'),
     Outfit_500Medium: require('../../assets/fonts/Outfit-Medium.ttf'),
     Outfit_700Bold: require('../../assets/fonts/Outfit-Bold.ttf'),
+    // Section headings (src/lib/typography.ts).
+    Fraunces_500MediumItalic: require('../../assets/fonts/Fraunces-MediumItalic.ttf'),
+    Fraunces_600SemiBoldItalic: require('../../assets/fonts/Fraunces-SemiBoldItalic.ttf'),
   });
   // Plays once per cold start, after bootstrap resolves so it knows where it is
   // handing off to, and again between the last onboarding step and Home.

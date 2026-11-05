@@ -26,6 +26,7 @@ import { useRaisedSurface } from '@/lib/shadows';
 import { useScoper } from '@/lib/store';
 import { todayIso } from '@/lib/stay';
 import { useThemeColors } from '@/lib/theme';
+import { headingStyle } from '@/lib/typography';
 import { useEntryActions } from '@/lib/use-entry-actions';
 import { isRegionalPoint } from '@/lib/regional-nearby';
 
@@ -147,7 +148,7 @@ export function HomeTimelyRecommendations({ catalog, now }: { catalog: HomeGuide
 export function PerksHeading({ title, action, onPress }: { title: string; action?: string; onPress?: () => void }) {
   const colors = useThemeColors();
   return <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
-    <Text accessibilityRole="header" className="font-dm-medium text-ink" style={{ fontSize: 20, lineHeight: 25, letterSpacing: -.4, flex: 1 }}>{title}</Text>
+    <Text accessibilityRole="header" className="text-ink" style={{ ...headingStyle(22), flex: 1 }}>{title}</Text>
     {action && onPress ? <Pressable accessibilityRole="button" accessibilityLabel={`${action} ${title.toLowerCase()}`} onPress={onPress} hitSlop={8} style={{ flexDirection: 'row', alignItems: 'center', gap: 1, minHeight: 28 }}>
       <Text className="font-dm-medium" style={{ fontSize: 14, lineHeight: 19, color: colors['fg-accent'] }}>{action}</Text><Glyph name="chevron" size={15} color={colors['fg-accent']} />
     </Pressable> : null}

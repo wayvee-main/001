@@ -14,6 +14,7 @@ import { HOME_LEDGERS } from '@/lib/home-ledger';
 import { HOME_RESULT, homeEntryCategory, homeEntryMetadata, homeMenuItems, shortHomeTitle, type HomeChapter } from '@/lib/home-secondary';
 import { useControlSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
+import { headingStyle } from '@/lib/typography';
 
 export function HomeChapterTitle({title,subtitle}:{title:string;subtitle:string}) {
   return <View style={{gap:9}}><Text testID="home-chapter-title" accessibilityRole="header" className="font-fraunces text-ink" style={{fontSize:34,lineHeight:38,letterSpacing:-.7}}>{shortCardTitle(title)}</Text>
@@ -101,7 +102,7 @@ export function HomeChapters({chapters,variant}:{chapters:readonly HomeChapter[]
       </View>
       <View style={{flex:1,minWidth:0,gap:10}}>
         <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:8}}>
-          <Text accessibilityRole="header" className="font-fraunces text-ink" style={{fontSize:21,lineHeight:25,letterSpacing:-.3,flex:1}}>{chapter.title}</Text>
+          <Text accessibilityRole="header" className="text-ink" style={{...headingStyle(22),flex:1}}>{chapter.title}</Text>
           <TouchableOpacity accessibilityRole="button" accessibilityLabel={`${open?'Show fewer':'See all'} in ${chapter.title}`} onPress={seeAll} hitSlop={6} style={{minHeight:28,flexDirection:'row',alignItems:'center',gap:6}}>
             <Text className={`font-dm text-fine ${isCollection?'text-taupe':'text-peach'}`}>{isCollection?`${chapter.entries.length} ${chapter.entries.length===1?'place':'places'}`:open?'Less':'See all'}</Text><Glyph name="chevron" size={12} color={colors['surface-accent']} />
           </TouchableOpacity>

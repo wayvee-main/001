@@ -10,22 +10,22 @@
    go through Tailwind's <alpha-value> opacity modifier; full rgba() strings
    for tokens with fixed baked-in opacity. */
 :root {
-  --color-bg: 255 250 246;
+  --color-bg: 248 248 253;
   --color-surface: 255 255 255;
   --color-surface-raised: 255 255 255;
   --color-surface-soft: 255 255 255;
   --color-surface-control: 255 255 255;
   --color-surface-input: 255 255 255;
-  --color-surface-ribbon: 255 208 163;
-  --color-surface-poster: 255 231 212;
-  --color-poster-edge: 240 218 200;
+  --color-surface-ribbon: 230 224 250;
+  --color-surface-poster: 238 234 251;
+  --color-poster-edge: 220 214 242;
   --color-surface-search: 255 255 255;
   --color-surface-navigation: 255 255 255;
-  --color-surface-sunk: 244 236 232;
-  --color-fg: 31 23 32;
-  --color-fg-muted: 95 83 97;
-  --color-card-ink: 31 23 32;
-  --color-card-muted: 95 83 97;
+  --color-surface-sunk: 238 238 247;
+  --color-fg: 27 26 38;
+  --color-fg-muted: 86 85 111;
+  --color-card-ink: 27 26 38;
+  --color-card-muted: 86 85 111;
   --color-metadata-category: 244 212 192;
   --color-metadata-category-ink: 112 65 37;
   --color-metadata-distance: 220 232 250;
@@ -35,7 +35,7 @@
   --color-metadata-offer: 255 231 171;
   --color-metadata-offer-ink: 101 71 25;
   --color-surface-accent: 184 64 15;
-  --color-control-edge: 233 222 227;
+  --color-control-edge: 227 225 240;
   --color-selected-surface: 194 71 15;
   --color-on-selected: 255 255 255;
   --color-selected-glyph: 255 255 255;
@@ -43,12 +43,12 @@
   --color-home-tile: 255 255 255;
   --color-surface-discovery: 255 255 255;
   --color-home-tile-glyph: 184 64 15;
-  --color-home-tile-well: 252 237 230;
+  --color-home-tile-well: 238 235 250;
   --color-tile-eat: 255 255 255;
   --color-tile-bars: 255 255 255;
   --color-tile-routes: 255 255 255;
   --color-tile-events: 255 255 255;
-  --color-fg-accent: 184 64 15;
+  --color-fg-accent: 176 60 14;
   --color-accent: 184 64 15;
   --color-accent-fill: 194 71 15;
   --color-on-accent: 255 255 255;
@@ -58,18 +58,19 @@
   --color-warm-ink: 184 64 15;
   --color-vee: 184 64 15;
   --color-vee-strong: 184 64 15;
-  --color-accent-tint: 252 237 230;
-  --color-warm-tint: 252 237 230;
-  --color-vee-tint: 252 237 230;
-  --color-page-secondary: 248 241 238;
-  --color-page-tertiary: 255 252 250;
+  --color-accent-tint: 238 235 250;
+  --color-pill-ink: 91 61 176;
+  --color-warm-tint: 238 235 250;
+  --color-vee-tint: 238 235 250;
+  --color-page-secondary: 243 242 250;
+  --color-page-tertiary: 251 251 254;
   --color-ribbon-ink: 116 48 13;
   --color-danger: 160 47 56;
-  --color-edge: rgba(31, 23, 32, 0.12);
-  --color-edge-soft: rgba(31, 23, 32, 0.08);
-  --color-edge-faint: rgba(31, 23, 32, 0.04);
-  --color-edge-card: rgba(133, 90, 64, 0.1);
-  --color-edge-card-bottom: rgba(133, 90, 64, 0.1);
+  --color-edge: rgba(27, 26, 38, 0.12);
+  --color-edge-soft: rgba(27, 26, 38, 0.08);
+  --color-edge-faint: rgba(27, 26, 38, 0.04);
+  --color-edge-card: rgba(46, 42, 94, 0.1);
+  --color-edge-card-bottom: rgba(46, 42, 94, 0.1);
 }
 
 .dark:root {
@@ -122,6 +123,7 @@
   --color-vee: 255 163 112;
   --color-vee-strong: 255 163 112;
   --color-accent-tint: 58 38 48;
+  --color-pill-ink: 255 163 112;
   --color-warm-tint: 58 38 48;
   --color-vee-tint: 58 38 48;
   --color-page-secondary: 23 18 26;
