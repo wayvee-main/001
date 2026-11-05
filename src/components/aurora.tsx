@@ -10,7 +10,7 @@ import { NativePressable as Pressable } from '@/components/native-pressable';
 import { Photo } from '@/components/photo';
 import type { PhotoCandidate } from '@/components/reliable-image';
 import { gradientColors, useAurora } from '@/lib/aurora';
-import { compactCardText, shortCardTitle } from '@/lib/card-presentation';
+import { compactCardText, metadataParts, numericDistanceLabel, shortCardTitle } from '@/lib/card-presentation';
 import { homeCardMetadata } from '@/lib/card-metadata';
 import { homeGuideHref, type HomeGuideCatalog, type HomeGuideEntry } from '@/lib/home-guide';
 import { homeIndexPhotos } from '@/lib/home-index-photos';
@@ -208,15 +208,29 @@ export function AuroraRow({ leading, title, subtitle, metadata, trailing, chevro
   </Pressable>;
 }
 
-/** A listing as a grouped-list row: photo, name, what it is, and its nearest fact. */
+/** Calm-list row: a 56px photo, the name, one muted line of facts and a chevron. */
+export function AuroraLinkRow({ title, meta, image, photos, glyph = 'compass', divider, onPress, testID, accessibilityLabel }: {
+  title: string; meta?: string; image?: string; photos?: readonly PhotoCandidate[]; glyph?: string; divider?: boolean; onPress: () => void; testID?: string; accessibilityLabel?: string;
+}) {
+  return <AuroraRow testID={testID} divider={divider} title={title} subtitle={meta} onPress={onPress} accessibilityLabel={accessibilityLabel || [title, meta].filter(Boolean).join('. ')}
+    leading={<Photo uri={image} candidates={photos} radius={16} stripedPlaceholder={false} retryable={false} fallbackGlyph={glyph as never}
+      fallbackLabel={`Photo unavailable for ${title}`} style={{ width: 56, height: 56 }} />} />;
+}
+
+/** Up to two facts as one quiet line: what it is, then its distance when measured. */
+export function calmMeta(caption: string, distance?: string): string {
+  const parts = metadataParts(caption), place = distance ? numericDistanceLabel(distance) : '';
+  // A route's stop count can arrive as both its first caption part and its location fact.
+  const fresh = place && !parts.some(part => part.toLowerCase() === place.toLowerCase());
+  return (fresh ? [parts[0], place] : parts.slice(0, 2)).filter(Boolean).join(' · ');
+}
+
+/** A listing as a calm-list row. */
 export function AuroraEntryRow({ entry, catalog, now, divider, trailing, testID = 'aurora-entry-row' }: {
   entry: HomeGuideEntry; catalog: HomeGuideCatalog; now: Date; divider?: boolean; trailing?: string; testID?: string;
 }) {
-  const router = useRouter(), fact = homeCardMetadata(entry, now).find(item => item.tone === 'distance');
-  const meta = trailing ?? fact?.text;
-  return <AuroraRow testID={testID} divider={divider} title={entry.name} metadata={[entry.caption,meta].filter(Boolean).join(' · ')}
-    accessibilityLabel={`Explore ${entry.name}. ${[entry.caption, meta].filter(Boolean).join('. ')}`}
-    onPress={() => router.push(homeGuideHref(entry) as never)}
-    leading={<Photo candidates={homeIndexPhotos(entry, catalog)} radius={16} stripedPlaceholder={false} retryable={false} fallbackGlyph={entry.glyph as never}
-      fallbackLabel={`${entry.name} photo unavailable`} style={{ width: 56, height: 56 }} />} />;
+  const router = useRouter(), distance = trailing ?? homeCardMetadata(entry, now).find(item => item.tone === 'distance')?.text;
+  const meta = calmMeta(entry.caption, distance);
+  return <AuroraLinkRow testID={testID} divider={divider} title={entry.name} meta={meta} photos={homeIndexPhotos(entry, catalog)} glyph={entry.glyph}
+    accessibilityLabel={`Explore ${entry.name}. ${meta}`} onPress={() => router.push(homeGuideHref(entry) as never)} />;
 }

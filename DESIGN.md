@@ -6,35 +6,35 @@ historical; this section takes precedence wherever they differ. Screens not yet
 restyled (detail pages, sheets, Offers, Evening, Search) inherit Aurora's palette
 from the tokens and keep their Daybreak layouts until they are revisited.
 
-## Home refinement — Quiet Feed
+## Home and Discover — Calm lists
 
-Quiet Feed is the approved Home layout below the four-category divider; it
-supersedes the Home-specific Aurora poster, list and overlay-card rules below.
-Keep the current Aurora palette, top chrome and four category tiles.
+Calm lists is the approved structure for Home and Discover. It supersedes the
+earlier Quiet Feed item cards and Discover's photo carousels. Keep the Aurora
+palette and top chrome.
 
-- Use text By day / After hours tabs with a quiet active underline, then a
-  single “Start here” feature: 20px corners, 13px padding (11px narrow), 22px
-  title (21px narrow), one-line snapshot and a 92×100px photo (80×94px narrow).
-  Facts remain source-backed and every metadata value uses the shared pill.
-- “Local perks · offers near you” is one 44px-minimum soft-gradient ribbon
-  opening Offers. Actual promotions, terms and stay actions remain on Offers.
-- For Later, For You and Collections use one **individual card per item**,
-  never a section-wide container. All three share `QuietHomeItem`: 20px corners,
-  12px horizontal padding, a 74px minimum inner row (76px with the card border),
-  a 52px thumbnail with 11px corners, 16px single-line title, and compact metadata
-  pills. Keep 10px gaps between cards. Normal text-scale sizes match exactly;
-  accessibility scaling may grow the cards. More opens each existing guide.
-- Vee is a thin “Let Vee connect the dots.” ribbon below the group, opening
-  the real planner. Match Local Perks: 44px minimum height, 13px corners, soft
-  gradient, 12px text and 12px horizontal padding, with a 20px gradient Vee mark.
-- For You uses the current three time-sensitive ideas; Collections shows two
-  current entries with More opening the full collection page. Use their actual
-  thumbnail candidates, source metadata and complete accessible labels.
-- Use 22px section gaps, 19px headings (18px narrow) and no extra section rules.
-  Layouts grow with accessibility font scaling; never add fixture place facts
-  or replace missing source photos with another venue’s image.
-- The implementation is scoped to `quiet-home.tsx` and Home. Other screens
-  continue using their existing shared Aurora components.
+- **Home order:** headline → picks row → search → rule → category row → rule →
+  By day / After hours → Start here → extras → For later → For you → Collections.
+- **Picks row** sits between the headline and search: 11px italic text, venue in
+  medium weight, each pick led by a 12px pulsing bolt.
+- **Only three containers:** the split-card poster (featured picks: Home's Start
+  here, Discover's local-list lead and On stage), the grouped calm list, and the
+  thin ribbon. Nothing else gets a card.
+- **Calm list** (`AuroraList` + `AuroraLinkRow` / `AuroraEntryRow`): one 22px card
+  per section, hairline separators, a 56px photo, a 16px title, **one muted text
+  line of up to two facts** (what it is · measured distance, via `calmMeta`) and a
+  chevron. No pills in list rows; the poster is the only place facts are pills.
+  Home's For later, For you and Collections, and every Discover section below its
+  posters (More on stage, More good tables, After dinner, A little wandering, Rooms
+  worth knowing), use it, three rows each with See all opening the full guide.
+  Save and add-to-evening live on posters and detail pages, not on list rows.
+- **Extras are thin ribbons:** 44px minimum, 13px corners, soft Aurora gradient,
+  12px text. Home groups “Local perks · offers near you” and “Let Vee connect the
+  dots.” under *Tonight’s extras* (*Today’s extras* by day). Discover and Offers use
+  the same ribbon for the swipeable promotions, with the offer and its terms on
+  one line.
+- Use 22px section gaps and 19px headings (18px narrow) on Home; layouts grow with
+  accessibility font scaling; never add fixture facts or substitute another
+  venue’s photo.
 
 ## Universal card copy and metadata
 
@@ -43,7 +43,8 @@ Keep the current Aurora palette, top chrome and four category tiles.
   Titles use `shortCardTitle`: **five words / 40 characters**. Keep full source
   records, accessibility labels, detail routes and expanded About text intact.
 - Every card metadata value is enclosed by the shared `MetadataPill`; use
-  `MetadataLine` for inline sets. Compact capsules are 27px minimum, regular
+  `MetadataLine` for inline sets. Exception: calm-list rows on Home and Discover
+  show one muted text line instead (see Calm lists). Compact capsules are 27px minimum, regular
   capsules 30px, with one shared subtle accent tint/ink, 11px text, outline glyphs and 28-character labels with
   ellipses. Prefer two useful facts on narrow cards. Full terms stay available
   in the detail/source view. Never add facts to fill a slot.
@@ -81,11 +82,11 @@ Keep the current Aurora palette, top chrome and four category tiles.
   variant="aurora"`): a 64px white pill with "Search {city}" over "Anywhere in {city}
   · Tonight" (Today before evening) and an outlined filter circle. The circle belongs
   to the same control and opens Search, where the scope filters live.
-- **Picks row** (Home, under search): live `homeRecommendations` as plain text, venue
-  in medium weight, each led by a filled bolt. One native-driven loop pulses every
-  bolt at its own phase; it stops for reduced motion, in the background and off
-  Home. The 14-day freshness rule is unchanged; the empty state stays
-  "Fresh local picks are on the way."
+- **Picks row** (Home, between the headline and search): live `homeRecommendations`
+  as 11px italic text, venue in medium weight, each led by a filled bolt. One
+  native-driven loop pulses every bolt at its own phase; it stops for reduced
+  motion, in the background and off Home. The 14-day freshness rule is unchanged;
+  the empty state stays "Fresh local picks are on the way."
 - **Categories:** a quiet row of four: 26px outline glyph over a 14px label in the
   muted ink, no container, each a 64px touch target. A selected Discover filter takes
   the accent with a short gradient underline.
@@ -106,9 +107,8 @@ Keep the current Aurora palette, top chrome and four category tiles.
   routes, local-list rows, Vee's shapes and every You setting. Rows show what a place
   is and its nearest fact; a short value sits at the right, a longer note underneath.
 - **Section rules:** a 1px `AURORA.rule` hairline (`SectionRule`) between top-level
-  sections on all four tabs, about 30px each side. Home has none between the picks
-  row and the category tiles: search, picks and categories read as one block. A rule
-  sits 10px above By day / After hours instead, opening the block those pills switch.
+  sections on Discover, Vee and You. Home has two near the top, one above the
+  category row and one above By day / After hours, and none below them.
 - **Offers:** 62px cards with a gradient badge; the position dot of the visible slide
   takes the gradient. Swipe behaviour is unchanged.
 - **Navigation:** one floating capsule; the active tab takes the fill gradient and the

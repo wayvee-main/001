@@ -1,21 +1,13 @@
 import { useRouter } from 'expo-router';
-import type { ReactNode } from 'react';
 import { Text, View, useWindowDimensions } from 'react-native';
-import { GradientFill, useAuroraCard } from '@/components/aurora';
+import { GradientFill } from '@/components/aurora';
 import type { DaybreakPeriod } from '@/components/daybreak';
 import { Glyph } from '@/components/glyph';
-import { MetadataLine } from '@/components/metadata-pill';
-import { Photo } from '@/components/photo';
-import type { PhotoCandidate } from '@/components/reliable-image';
-import { PerksPhoto } from '@/components/local-perks';
 import { NativePressable as Pressable } from '@/components/native-pressable';
 import { VeeMark } from '@/components/vee-mark';
-import { compactCardText, shortCardTitle } from '@/lib/card-presentation';
-import { homeCardMetadata, type CardMetadataItem } from '@/lib/card-metadata';
-import { homeGuideHref, type HomeGuideCatalog, type HomeGuideEntry } from '@/lib/home-guide';
 import { useThemeColors } from '@/lib/theme';
 
-/** The approved Quiet Feed is local to Home, below its category divider. */
+/** Home's quiet pieces: the time tabs, section headings and the thin extras ribbons. */
 export function QuietHomePeriods({ value, onChange }: { value: DaybreakPeriod; onChange: (period: DaybreakPeriod) => void }) {
   const colors = useThemeColors();
   return <View testID="daybreak-periods" accessibilityRole="tablist" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 18 }}>
@@ -43,62 +35,6 @@ export function QuietHomeHeading({ title, onMore }: { title: string; onMore?: ()
   </View>;
 }
 
-function QuietFacts({ items, menuPill = false }: { items: readonly CardMetadataItem[]; menuPill?: boolean }) {
-  if (!items.length) return null;
-  return <View testID="quiet-home-facts" style={{ marginTop: menuPill ? 9 : 3 }}><MetadataLine items={items} /></View>;
-}
-
-export function QuietHomeFeature({ entry, catalog, now }: { entry: HomeGuideEntry; catalog: HomeGuideCatalog; now: Date }) {
-  const colors = useThemeColors(), card = useAuroraCard(), router = useRouter(), { width } = useWindowDimensions(), narrow = width <= 360;
-  const description = entry.detailContent?.description || entry.description || entry.caption;
-  return <Pressable testID="daybreak-poster" accessibilityRole="button" accessibilityLabel={`Explore ${entry.name}. ${description}`} onPress={() => router.push(homeGuideHref(entry) as never)}
-    style={({ pressed }) => [card, { padding: narrow ? 11 : 13, gap: narrow ? 10 : 14, borderRadius: 20, flexDirection: 'row', alignItems: 'center', opacity: pressed ? .8 : 1 }]}>
-    <View style={{ flex: 1, minWidth: 0 }}>
-      <Text numberOfLines={1} ellipsizeMode="tail" className="font-dm-medium text-ink" style={{ fontSize: narrow ? 21 : 22, lineHeight: 27, letterSpacing: -.65 }}>{shortCardTitle(entry.name)}</Text>
-      {description ? <Text testID="quiet-home-description" numberOfLines={1} ellipsizeMode="tail" className="font-dm" style={{ marginTop: 4, fontSize: narrow ? 11 : 12, lineHeight: narrow ? 17 : 18, color: colors['fg-muted'] }}>{compactCardText(description)}</Text> : null}
-      <QuietFacts items={homeCardMetadata(entry, now)} menuPill />
-    </View>
-    <View testID="quiet-home-feature-photo"><PerksPhoto entry={entry} catalog={catalog} width={narrow ? 80 : 92} height={narrow ? 94 : 100} radius={13} retryable={false} /></View>
-  </Pressable>;
-}
-
-/** All three Home families use this exact card, photo footprint and row size. */
-function QuietHomeItem({ title, leading, items, onPress, testID, accessibilityLabel }: {
-  title: string; leading: ReactNode; items: readonly CardMetadataItem[]; onPress: () => void; testID: string; accessibilityLabel: string;
-}) {
-  const colors = useThemeColors(), card = useAuroraCard();
-  return <View testID={`${testID}-card`} style={[card, { paddingHorizontal: 12, borderRadius: 20 }]}>
-    <Pressable testID={testID} accessibilityRole="button" accessibilityLabel={accessibilityLabel} onPress={onPress}
-      style={({ pressed }) => ({ minHeight: 74, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', gap: 12, opacity: pressed ? .75 : 1 })}>
-      {leading}
-      <View style={{ flex: 1, minWidth: 0 }}>
-        <Text numberOfLines={1} ellipsizeMode="tail" className="font-dm-medium text-ink" style={{ fontSize: 16, lineHeight: 21, letterSpacing: -.2 }}>{shortCardTitle(title)}</Text>
-        <QuietFacts items={items} />
-      </View>
-      <Glyph name="chevron" size={14} color={colors['fg-muted']} />
-    </Pressable>
-  </View>;
-}
-
-export function QuietHomeVenueRow({ entry, catalog, now }: { entry: HomeGuideEntry; catalog: HomeGuideCatalog; now: Date }) {
-  const router = useRouter(), category = entry.caption.split(' · ')[0].trim();
-  const distance = homeCardMetadata(entry, now).find(item => item.tone === 'distance');
-  const facts: CardMetadataItem[] = [
-    ...(category ? [{ key: 'category', text: category, glyph: entry.glyph, tone: 'category' as const, label: category }] : []),
-    ...(distance ? [distance] : []),
-  ];
-  return <QuietHomeItem title={entry.name} testID="daybreak-home-row" accessibilityLabel={`Explore ${entry.name}. ${facts.map(item => item.label).join('. ')}`}
-    items={facts} onPress={() => router.push(homeGuideHref(entry) as never)}
-    leading={<PerksPhoto entry={entry} catalog={catalog} width={52} height={52} radius={11} retryable={false} />} />;
-}
-
-export function QuietHomeLink({ title, glyph, onPress, testID, accessibilityLabel, metadata = [], image, photos }: {
-  title: string; glyph: string; onPress: () => void; testID: string; accessibilityLabel?: string; metadata?: readonly CardMetadataItem[]; image?: string; photos?: readonly PhotoCandidate[];
-}) {
-  return <QuietHomeItem title={title} testID={testID} accessibilityLabel={accessibilityLabel || title} items={metadata} onPress={onPress}
-    leading={<Photo uri={image} candidates={photos} radius={11} fallbackGlyph={glyph} retryable={false} stripedPlaceholder={false} fallbackLabel={`Photo unavailable for ${title}`} style={{ width: 52, height: 52 }} />} />;
-}
-
 export function QuietHomeOffers() {
   const colors = useThemeColors(), router = useRouter();
   return <Pressable testID="quiet-home-offers" accessibilityRole="button" accessibilityLabel="Local perks. View offers near you" onPress={() => router.push('/offers')}
@@ -113,7 +49,7 @@ export function QuietHomeOffers() {
 export function QuietHomeVee() {
   const colors = useThemeColors(), router = useRouter();
   return <Pressable testID="home-evening-ribbon" accessibilityRole="button" accessibilityLabel="Let Vee connect the dots. Plan your evening" onPress={() => router.push('/create')}
-    style={({ pressed }) => ({ minHeight: 44, paddingHorizontal: 12, paddingVertical: 11, marginTop: 12, borderRadius: 13, overflow: 'hidden', flexDirection: 'row', alignItems: 'center', gap: 9, opacity: pressed ? .8 : 1 })}>
+    style={({ pressed }) => ({ minHeight: 44, paddingHorizontal: 12, paddingVertical: 11, borderRadius: 13, overflow: 'hidden', flexDirection: 'row', alignItems: 'center', gap: 9, opacity: pressed ? .8 : 1 })}>
     <GradientFill radius={13} soft />
     <VeeMark size={20} />
     <Text className="font-dm text-ink" style={{ flex: 1, fontSize: 12, lineHeight: 18 }}>Let Vee connect the dots.</Text>

@@ -133,14 +133,14 @@ export function HomeTimelyRecommendations({ catalog, now }: { catalog: HomeGuide
           style={({ pressed }) => ({ minHeight: 44, maxWidth: 280, flexDirection: 'row', alignItems: 'center', gap: 7, opacity: pressed ? .6 : 1 })}>
           <Animated.View testID="home-recommendation-pulse" accessible={false} style={animating ? {
             opacity: pulse.interpolate(pulseRanges(phase, .35)), transform: [{ scale: pulse.interpolate(pulseRanges(phase, .8)) }] } : undefined}>
-            <Glyph name="boltFilled" size={13} color={colors['fg-accent']} />
+            <Glyph name="boltFilled" size={12} color={colors['fg-accent']} />
           </Animated.View>
-          <Text numberOfLines={1} className="font-dm" style={{ flexShrink: 1, fontSize: 13, lineHeight: 18, color: colors['fg-muted'] }}>
+          <Text numberOfLines={1} className="font-dm" style={{ flexShrink: 1, paddingRight: 3, fontSize: 11, lineHeight: 16, fontStyle: 'italic', color: colors['fg-muted'] }}>
             {venuePrefix ? <Text className="font-dm-medium" style={{ color: colors.fg }}>{venuePrefix}</Text> : null}{rest}
           </Text>
         </Pressable>;
       })}
-    </ScrollView> : <Text testID="home-recommendations-empty" className="font-dm" style={{ paddingVertical: 13, paddingHorizontal: 2, fontSize: 13, lineHeight: 18, color: colors['fg-muted'] }}>Fresh local picks are on the way.</Text>}
+    </ScrollView> : <Text testID="home-recommendations-empty" className="font-dm" style={{ paddingVertical: 14, paddingHorizontal: 2, fontSize: 11, lineHeight: 16, fontStyle: 'italic', color: colors['fg-muted'] }}>Fresh local picks are on the way.</Text>}
   </View>;
 }
 
@@ -154,10 +154,10 @@ export function PerksHeading({ title, action, onPress }: { title: string; action
   </View>;
 }
 
-/** A 62px Aurora offer card keeps the actual offer and its conditions together.
+/** A thin offer ribbon (44px, the same as Home's extras) keeps the actual offer and its conditions together.
  * Preserve the visible slide across source refreshes, including during a swipe. */
 export function LocalPerksBanners({ catalog }: { catalog: HomeGuideCatalog; compact?: boolean }) {
-  const aurora = useAurora(), card = useAuroraCard(), colors = useThemeColors(), openStay = useScoper(s => s.openStaySheet), openOffer = useLocalPerks(s => s.openOffer);
+  const colors = useThemeColors(), openStay = useScoper(s => s.openStaySheet), openOffer = useLocalPerks(s => s.openOffer);
   const now = useNow(), reduced = useReducedMotionPreference();
   const { fontScale } = useWindowDimensions();
   const offers = localOffers(catalog, now), slides = [...offers.slice(0, 3).map(offer => ({ id: offer.id, offer })), { id: 'stay', offer: undefined }];
@@ -165,7 +165,7 @@ export function LocalPerksBanners({ catalog }: { catalog: HomeGuideCatalog; comp
   const stride = width + 12;
   const selected = useRef(selectedId), dragging = useRef(false), idleTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const pendingAlignment = useRef(false), lastSwipe = useRef(0);
-  const idsKey = JSON.stringify(slides.map(slide => slide.id)), current = bannerPageForId(slides.map(slide => slide.id), selectedId), height = Math.max(62, Math.ceil(36 * fontScale + 24));
+  const idsKey = JSON.stringify(slides.map(slide => slide.id)), current = bannerPageForId(slides.map(slide => slide.id), selectedId), height = Math.max(44, Math.ceil(18 * fontScale + 26));
   const latest = useRef({ ids: slides.map(slide => slide.id), width: stride });
   const gesture = useRef<typeof latest.current | null>(null);
   // selectedId is deliberately absent: aligning after each selection fights
@@ -212,13 +212,13 @@ export function LocalPerksBanners({ catalog }: { catalog: HomeGuideCatalog; comp
         return <Pressable key={slide.id} testID={`perks-banner-${offer ? 'offer' : slide.id}`} accessibilityRole="button"
           accessibilityLabel={offer ? `${offer.venue}. ${offer.title}. ${copy.detail}. View offer` : copy.title}
           onPress={() => { if (dragging.current || Date.now() - lastSwipe.current < 250) return; if (offer) openOffer(offer); else openStay(); }}
-          style={({ pressed }) => ({ width, height, flexDirection: 'row', alignItems: 'center', gap: 12, paddingLeft: 12, paddingRight: 14, paddingVertical: 8, borderRadius: 20, overflow: 'hidden', opacity: pressed ? .78 : 1, ...card })}>
-          <View style={{ width: 38, height: 38, borderRadius: 19, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' }}><GradientFill radius={19} /><View><Glyph name={offer ? 'tag' : 'briefcase'} size={18} color={aurora.onFill} strokeWidth={1.8} /></View></View>
-          <View style={{ flex: 1, minWidth: 0 }}>
-            <Text numberOfLines={1} className="font-dm-medium" style={{ fontSize: 14, lineHeight: 19, color: colors.fg }}>{offer ? `${copy.title} at ${offer.venue}` : copy.title}</Text>
-            <Text numberOfLines={1} className="font-dm" style={{ fontSize: 12, lineHeight: 17, color: colors['fg-muted'] }}>{copy.detail}</Text>
-          </View>
-          <Glyph name="chevron" size={16} color={colors['fg-muted']} />
+          style={({ pressed }) => ({ width, height, flexDirection: 'row', alignItems: 'center', gap: 9, paddingHorizontal: 12, borderRadius: 13, overflow: 'hidden', opacity: pressed ? .8 : 1 })}>
+          <GradientFill radius={13} soft />
+          <View><Glyph name={offer ? 'tag' : 'briefcase'} size={16} color={colors['fg-accent']} /></View>
+          <Text numberOfLines={1} className="font-dm" style={{ flex: 1, minWidth: 0, fontSize: 12, lineHeight: 18, color: colors['fg-muted'] }}>
+            <Text className="font-dm-medium" style={{ color: colors.fg }}>{offer ? `${copy.title} at ${offer.venue}` : copy.title}</Text>{` · ${copy.detail}`}
+          </Text>
+          <View><Glyph name="chevron" size={13} color={colors['fg-muted']} /></View>
         </Pressable>;
       })}
     </ScrollView>

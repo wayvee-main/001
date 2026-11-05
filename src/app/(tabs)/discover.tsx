@@ -2,13 +2,12 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, type ReactNode } from 'react';
 import { Text, View } from 'react-native';
 import { NativePressable as Pressable } from '@/components/native-pressable';
-import { AuroraEntryCard, AuroraEntryRow, AuroraList, AuroraPoster, GradientText, SectionRule, useGlass } from '@/components/aurora';
+import { AuroraEntryRow, AuroraList, AuroraPoster, GradientText, SectionRule, useGlass } from '@/components/aurora';
 import { CitySearchBar } from '@/components/city-controls';
 import { Glyph } from '@/components/glyph';
-import { HRow, Screen, ScreenScroll } from '@/components/layout';
+import { Screen, ScreenScroll } from '@/components/layout';
 import { LocalCategoryShelf, LocalPerksBanners, LocalPerksHeader, PerksHeading } from '@/components/local-perks';
 import { EmptyState } from '@/components/ui';
-import { homeCardMetadata } from '@/lib/card-metadata';
 import { useNow } from '@/lib/clock';
 import { hydrateEventsFromBackend } from '@/lib/events-remote';
 import { homeGuideKey, searchHomeGuide, type HomeGuideCategory, type HomeGuideEntry } from '@/lib/home-guide';
@@ -36,16 +35,15 @@ export default function DiscoverScreen() {
   const allCount = new Set([...tables, ...bars, ...events, ...routes, ...rooms].map(entry => homeGuideKey(entry.kind, entry.id))).size;
   const count = search ? search.length : mode === 'all' ? allCount : list.length;
   const headings: Record<Mode, string> = { all: 'The local list', eat: 'A good table', bars: 'After dinner', events: 'On stage', routes: 'A little wandering', venues: 'Rooms worth knowing' };
-  const meta = (entry: HomeGuideEntry) => [entry.caption, homeCardMetadata(entry, now).find(fact => fact.tone === 'distance')?.text].filter(Boolean).join(' · ');
-  const renderCards = (entries: HomeGuideEntry[], feature = false) => {
+    const renderCards = (entries: HomeGuideEntry[], feature = false) => {
     const [first, ...rest] = entries, lead = feature && first ? first : undefined, rows = lead ? rest : entries;
     return <View style={{ gap: 12 }}>
       {lead ? <AuroraPoster testID="discover-feature" entry={lead} catalog={catalog} now={now} chip={{ label: 'A good table', glyph: 'food' }} /> : null}
       {rows.length ? <AuroraList>{rows.map((entry, index) => <AuroraEntryRow key={homeGuideKey(entry.kind, entry.id)} testID="discover-row" divider={index > 0} entry={entry} catalog={catalog} now={now} />)}</AuroraList> : null}
     </View>;
   };
-  const rail = (entries: HomeGuideEntry[], wide = false) => <HRow gap={12}>{entries.map(entry => <AuroraEntryCard key={homeGuideKey(entry.kind, entry.id)} entry={entry} catalog={catalog}
-    width={wide ? 300 : 200} height={wide ? 170 : 250} titleSize={wide ? 18 : 16} meta={meta(entry)} />)}</HRow>;
+  const calmList = (entries: HomeGuideEntry[], testID: string) => <AuroraList testID={`${testID}-list`}>{entries.map((entry, index) =>
+    <AuroraEntryRow key={homeGuideKey(entry.kind, entry.id)} testID={testID} divider={index > 0} entry={entry} catalog={catalog} now={now} />)}</AuroraList>;
   const onRefresh = async () => { setRefreshing(true); try { await Promise.all([hydrateEventsFromBackend(true), hydratePlacesFromBackend(true), hydrateViatorPicksFromBackend(true), refreshRegional()]); } finally { setRefreshing(false); } };
   const seeAll = (category: HomeGuideCategory) => router.push(HOME_LEDGERS[category].href);
   const emptyCity = <EmptyState compact title={`More of ${displayCity} is on the way`} message="Local listings appear as the catalog grows." />;
@@ -58,11 +56,11 @@ export default function DiscoverScreen() {
       <LocalPerksBanners catalog={catalog} compact />
     </View>,
     (mode === 'all' && events.length > 0 || mode === 'events') ? <View key="stage">{mode === 'all' ? <PerksHeading title="On stage" /> : null}{events[0] ? <AuroraPoster testID="discover-stage" entry={events[0]} catalog={catalog} now={now} chip={{ label: 'On stage', glyph: 'ticket' }} /> : <EmptyState compact title="No current shows yet" message="Current listings appear here as the calendar updates." />}</View> : null,
-    (mode === 'all' || mode === 'events') && events.length > 1 ? <View key="more-stage"><PerksHeading title="More on stage" action="See all" onPress={() => seeAll('events')} />{rail(events.slice(1, 7))}</View> : null,
-    (mode === 'all' || mode === 'eat') && tables.length > (mode === 'all' ? 2 : 3) ? <View key="tables"><PerksHeading title="More good tables" action="See all" onPress={() => seeAll('eat')} />{rail(tables.slice(mode === 'all' ? 2 : 3, 9))}</View> : null,
-    mode === 'all' && bars.length > 1 ? <View key="after"><PerksHeading title="After dinner" action="See all" onPress={() => seeAll('bars')} />{rail(bars.slice(1, 7))}</View> : null,
+    (mode === 'all' || mode === 'events') && events.length > 1 ? <View key="more-stage"><PerksHeading title="More on stage" action="See all" onPress={() => seeAll('events')} />{calmList(events.slice(1, 4), 'discover-stage-row')}</View> : null,
+    (mode === 'all' || mode === 'eat') && tables.length > (mode === 'all' ? 2 : 3) ? <View key="tables"><PerksHeading title="More good tables" action="See all" onPress={() => seeAll('eat')} />{calmList(tables.slice(mode === 'all' ? 2 : 3, mode === 'all' ? 5 : 9), 'discover-table-row')}</View> : null,
+    mode === 'all' && bars.length > 1 ? <View key="after"><PerksHeading title="After dinner" action="See all" onPress={() => seeAll('bars')} />{calmList(bars.slice(1, 4), 'discover-bar-row')}</View> : null,
     (mode === 'all' || mode === 'routes') && routes.length ? <View key="routes"><PerksHeading title="A little wandering" action="See all" onPress={() => seeAll('routes')} /><AuroraList>{routes.slice(0, 3).map((entry, index) => <AuroraEntryRow key={entry.kind + ':' + entry.id} testID="discover-route" divider={index > 0} entry={entry} catalog={catalog} now={now} />)}</AuroraList></View> : null,
-    mode === 'all' && rooms.length ? <View key="rooms"><PerksHeading title="Rooms worth knowing" />{rail(rooms.slice(0, 6), true)}</View> : null,
+    mode === 'all' && rooms.length ? <View key="rooms"><PerksHeading title="Rooms worth knowing" />{calmList(rooms.slice(0, 3), 'discover-room-row')}</View> : null,
     mode === 'all' && !localList.length && !events.length && !routes.length && !rooms.length ? <View key="empty-all">{emptyCity}</View> : null,
     mode !== 'all' && !({ eat: tables, bars, routes, events, venues: rooms }[mode]?.length) ? <View key="empty-mode">{emptyCity}</View> : null,
   ].filter(Boolean);

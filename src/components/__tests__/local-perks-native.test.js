@@ -4,10 +4,10 @@ import renderer, { act } from 'react-test-renderer';
 import { Animated, AppState, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { cssInterop } from 'react-native-css-interop';
 import { EditorialNav } from '@/components/editorial-nav';
-import { AuroraEntryRow } from '@/components/aurora';
+import { AuroraEntryRow, AuroraLinkRow, AuroraList } from '@/components/aurora';
 import { DaybreakFeature } from '@/components/daybreak';
 import { compactCardText, shortCardTitle } from '@/lib/card-presentation';
-import { QuietHomeFeature, QuietHomeLink, QuietHomeOffers, QuietHomePeriods, QuietHomeVee, QuietHomeVenueRow } from '@/components/quiet-home';
+import { QuietHomeOffers, QuietHomePeriods, QuietHomeVee } from '@/components/quiet-home';
 import { HomeTimelyRecommendations, LocalCategoryShelf, LocalPerksBanners, LocalPerksCard, PerksRoundButton } from '@/components/local-perks';
 import { useReducedMotionPreference } from '@/lib/motion';
 import { useThemeColors } from '@/lib/theme';
@@ -69,40 +69,43 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     useThemeColors.mockReturnValue({ ...Object.fromEntries(Object.entries(ROLES).map(([key, value]) => [key, value[theme]])), 'edge-card': 'rgba(90,60,40,.1)', 'edge-soft': 'rgba(90,60,40,.08)' });
   });
 
-  it('keeps Quiet Feed native surfaces and real venue routes', () => {
+  it('opens the real venue from the Home poster and calm rows without nesting a retry', () => {
     const source = { ...freshEntry, description: 'A short source snapshot.', facts: [{ glyph: 'pin', value: '0.4 mi' }] };
-    for (const [Component, id] of [[QuietHomeFeature, 'daybreak-poster'], [QuietHomeVenueRow, 'daybreak-home-row']]) {
-      const tree = mount(<Component entry={source} catalog={empty} now={new Date(2026, 10, 3, 12)} />);
-      expect(style(tree, id)).toMatchObject({ flexDirection: 'row', alignItems: 'center' });
-      expect(tree.root.findAllByProps({ testID: 'quiet-home-facts' }).length).toBeGreaterThan(0);
+    for (const [tree, id] of [[mount(<DaybreakFeature entry={source} catalog={empty} now={new Date(2026, 10, 3, 12)} />), 'daybreak-poster'],
+      [mount(<AuroraEntryRow testID="daybreak-home-row" entry={source} catalog={empty} now={new Date(2026, 10, 3, 12)} />), 'daybreak-home-row']]) {
       expect(tree.root.findAllByProps({ testID: 'photo-retry' })).toHaveLength(0);
       act(() => pressable(tree, id).props.onPress());
       expect(mockPush).toHaveBeenLastCalledWith('/home/detail?kind=place&id=source-cafe');
     }
   });
-  it('keeps Quiet Feed offers, planner and collection links functional', () => {
+  it('keeps the extras ribbons thin and the planner and collection links functional', () => {
+    for (const id of ['quiet-home-offers', 'home-evening-ribbon']) {
+      const tree = mount(id === 'quiet-home-offers' ? <QuietHomeOffers /> : <QuietHomeVee />);
+      expect(style(tree, id)).toMatchObject({ minHeight: 44, borderRadius: 13, flexDirection: 'row' });
+      expect(style(tree, id).marginTop).toBeUndefined();
+    }
     for (const [component, id, destination] of [
       [<QuietHomeOffers key="offers" />, 'quiet-home-offers', '/offers'],
       [<QuietHomeVee key="vee" />, 'home-evening-ribbon', '/create'],
-      [<QuietHomeLink key="collection" title="Source collection" glyph="bookmark" testID="quiet-link" onPress={() => mockPush('/home/collection?id=source')} />, 'quiet-link', '/home/collection?id=source'],
+      [<AuroraLinkRow key="collection" title="Source collection" glyph="bookmark" testID="quiet-link" onPress={() => mockPush('/home/collection?id=source')} />, 'quiet-link', '/home/collection?id=source'],
     ]) {
       const tree = mount(component);
       act(() => pressable(tree, id).props.onPress());
       expect(mockPush).toHaveBeenLastCalledWith(destination);
     }
   });
-  it('gives every Home item its own matching card and encloses every fact', () => {
-    const facts = [{ key: 'count', text: '4 picks', label: '4 picks', tone: 'category' }, { key: 'time', text: 'Tonight', label: 'Tonight', tone: 'category' }];
-    const venue = mount(<QuietHomeVenueRow entry={{ ...entry, facts: [{ glyph: 'pin', value: '<0.1 mi' }] }} catalog={empty} now={new Date(2026, 10, 3, 12)} />);
-    const idea = mount(<QuietHomeLink title="A timely idea" glyph="coffee" metadata={facts} testID="idea" onPress={() => {}} />);
-    const collection = mount(<QuietHomeLink title="A current collection" glyph="bookmark" metadata={facts} testID="collection" onPress={() => {}} />);
-    for (const [tree, id] of [[venue, 'daybreak-home-row'], [idea, 'idea'], [collection, 'collection']]) {
-      expect(style(tree, id + '-card')).toMatchObject({ borderRadius: 20, paddingHorizontal: 12, borderWidth: 1, backgroundColor: ROLES['surface-raised'][theme] });
-      expect(style(tree, id)).toMatchObject({ minHeight: 74, paddingVertical: 10 });
-      const capsules = nodes(tree).filter(node => node.props.accessible && StyleSheet.flatten(node.props.style)?.borderRadius === 999);
-      expect(capsules).toHaveLength(2);
-      for (const capsule of capsules) expect(StyleSheet.flatten(capsule.props.style).minHeight).toBe(27);
-    }
+  it('groups Home items in calm lists with one quiet fact line and no pills', () => {
+    const tree = mount(<AuroraList testID="calm"><AuroraEntryRow testID="venue" entry={{ ...entry, facts: [{ glyph: 'pin', value: '<0.1 mi' }] }} catalog={empty} now={new Date(2026, 10, 3, 12)} />
+      <AuroraLinkRow divider testID="idea" title="A timely idea" glyph="coffee" meta="4 picks · Tonight" onPress={() => {}} /></AuroraList>);
+    expect(style(tree, 'calm')).toMatchObject({ borderRadius: 22, overflow: 'hidden', backgroundColor: ROLES['surface-raised'][theme] });
+    expect(style(tree, 'venue')).toMatchObject({ minHeight: 64, flexDirection: 'row' });
+    expect(style(tree, 'venue').borderTopWidth).toBe(0);
+    expect(style(tree, 'idea').borderTopWidth).toBe(1);
+    const lines = nodes(tree).filter(node => node.type === 'Text').map(node => (node.children || []).join(''));
+    expect(lines).toEqual(expect.arrayContaining(['Café · 0.1 mi', '4 picks · Tonight']));
+    expect(nodes(tree).filter(node => node.props.accessible && StyleSheet.flatten(node.props.style)?.borderRadius === 999)).toHaveLength(0);
+    const route = mount(<AuroraEntryRow testID="route" entry={{ ...entry, kind: 'crawl', caption: '4 stops · cross-town · rides recommended', facts: [{ glyph: 'route', value: '4 stops' }] }} catalog={empty} now={new Date(2026, 10, 3, 12)} />);
+    expect(nodes(route).some(node => node.type === 'Text' && (node.children || []).join('') === '4 stops · cross-town')).toBe(true);
   });
   it('caps the Golden Bears poster copy without changing its accessible venue record', () => {
     const name = 'California Golden Bears Football vs Stanford Cardinal Football';
@@ -130,12 +133,12 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     const tree = mount(<PerksRoundButton testID="round" label="Offers" glyph="tag" onPress={() => {}} />);
     expect(style(tree, 'round')).toMatchObject({ width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' });
   });
-  it('keeps Home and Discover offers as compact Aurora cards with a gradient badge', () => {
+  it('keeps Discover and Offers promotions as thin soft-gradient ribbons', () => {
     for (const compact of [false, true]) {
       const tree = mount(<LocalPerksBanners catalog={empty} compact={compact} />);
       expect(tree.root.findAllByProps({ testID: 'perks-banner-vee' })).toHaveLength(0);
-      expect(style(tree, 'perks-banner-stay')).toMatchObject({ height: 62, flexDirection: 'row', borderRadius: 20, backgroundColor: ROLES['surface-raised'][theme] });
-      expect(nodes(tree).filter(node => node.props.testID === 'aurora-fill').length).toBeGreaterThan(0);
+      expect(style(tree, 'perks-banner-stay')).toMatchObject({ height: 44, flexDirection: 'row', borderRadius: 13 });
+      expect(nodes(tree).filter(node => node.props.testID === 'aurora-soft-fill').length).toBeGreaterThan(0);
     }
   });
   it('keeps compact rows focused on the venue and opens its real detail route', () => {
@@ -159,7 +162,7 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     expect(mockPush).toHaveBeenLastCalledWith('/home/detail?kind=place&id=source-cafe');
     const row = mount(<AuroraEntryRow testID="daybreak-home-row" entry={source} catalog={empty} now={new Date(2026, 10, 3, 12)} />);
     expect(style(row, 'daybreak-home-row')).toMatchObject({ flexDirection: 'row', minHeight: 64 });
-    expect(nodes(row).some(node => node.type === 'Text' && node.children?.includes('0.4 mi'))).toBe(true);
+    expect(nodes(row).some(node => node.type === 'Text' && (node.children || []).join('').endsWith('· 0.4 mi'))).toBe(true);
     act(() => pressable(row, 'daybreak-home-row').props.onPress());
     expect(mockPush).toHaveBeenLastCalledWith('/home/detail?kind=place&id=source-cafe');
   });
