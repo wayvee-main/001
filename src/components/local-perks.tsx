@@ -71,12 +71,12 @@ export function LocalPerksHeader({ title, assistant = false, location = true }: 
   </View>;
 }
 
-export function PerksPhoto({ entry, catalog, photos: provided, radius = 12, height, width, onUnavailable }: {
-  entry?: HomeGuideEntry; catalog: HomeGuideCatalog; photos?: readonly HomeIndexPhoto[]; radius?: number; height: number; width?: number; onUnavailable?: () => void;
+export function PerksPhoto({ entry, catalog, photos: provided, radius = 12, height, width, onUnavailable, retryable = true }: {
+  entry?: HomeGuideEntry; catalog: HomeGuideCatalog; photos?: readonly HomeIndexPhoto[]; radius?: number; height: number; width?: number; onUnavailable?: () => void; retryable?: boolean;
 }) {
   const photos = provided || (entry ? homeIndexPhotos(entry, catalog) : []);
   return <Photo candidates={photos} fallbackGlyph={entry?.glyph || 'compass'} fallbackLabel={`${entry?.name || 'Local category'} photo unavailable`}
-    radius={radius} stripedPlaceholder={false} onUnavailable={onUnavailable} style={{ width: width || '100%', height }} />;
+    radius={radius} stripedPlaceholder={false} retryable={retryable} onUnavailable={onUnavailable} style={{ width: width || '100%', height }} />;
 }
 
 export function LocalCategoryShelf({ catalog, active, onSelect, tone = 'home' }: { catalog: HomeGuideCatalog; active?: HomeGuideCategory; onSelect?: (category: HomeGuideCategory) => void; tone?: 'home' | 'browse' }) {

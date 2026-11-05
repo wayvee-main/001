@@ -2,14 +2,13 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { CitySearchBar } from '@/components/city-controls';
-import { AuroraEntryRow, AuroraList, SectionRule } from '@/components/aurora';
-import { DaybreakFeature, DaybreakIntro, DaybreakPeriodPicker, type DaybreakPeriod } from '@/components/daybreak';
-import { HomeDoorCard } from '@/components/home-field-guide';
-import { HRow, Screen, ScreenScroll } from '@/components/layout';
-import { HomeTimelyRecommendations, LocalCategoryShelf, LocalPerksBanners, LocalPerksHeader, PerksHeading, PerksVeeRibbon } from '@/components/local-perks';
+import { SectionRule } from '@/components/aurora';
+import { DaybreakIntro, type DaybreakPeriod } from '@/components/daybreak';
+import { QuietHomeFeature, QuietHomeGroup, QuietHomeHeading, QuietHomeLink, QuietHomeOffers, QuietHomePeriods, QuietHomeVee, QuietHomeVenueRow } from '@/components/quiet-home';
+import { Screen, ScreenScroll } from '@/components/layout';
+import { HomeTimelyRecommendations, LocalCategoryShelf, LocalPerksHeader } from '@/components/local-perks';
 import { homeCollectionGlyph, homeDiscoveryIdeas } from '@/lib/home-discovery';
-import { homeIdeaPhoto } from '@/lib/home-guide';
-import { homeCollectionPhotos, homeIdeaPhotos, homeIndexPhotos } from '@/lib/home-index-photos';
+import { homeIndexPhotos } from '@/lib/home-index-photos';
 import { HOME_LEDGERS } from '@/lib/home-ledger';
 import { eventsLeadNow } from '@/lib/daypart';
 import { perksEntries, perksFeaturedEntries } from '@/lib/local-perks';
@@ -32,7 +31,6 @@ export default function HomeScreen() {
     try { await Promise.all([hydrateEventsFromBackend(true), hydratePlacesFromBackend(true), hydrateWeatherFromBackend(true), refreshLocation(), refreshRegional()]); }
     finally { setRefreshing(false); }
   };
-  const vee = <PerksVeeRibbon />;
   return <Screen aurora><ScreenScroll gap={18} clearsTabBar refreshing={refreshing} onRefresh={onRefresh}>
     <LocalPerksHeader location={false} />
     <DaybreakIntro city={displayCity} />
@@ -41,31 +39,29 @@ export default function HomeScreen() {
       <HomeTimelyRecommendations catalog={catalog} now={now} />
     </View>
     <LocalCategoryShelf catalog={catalog} />
-    {/* The rule sits just above the pills: they switch the feature below, so they
-      * open its block rather than closing the categories'. */}
-    <View style={{ gap: 10 }}>
-      <SectionRule spacing={0} testID="home-period-rule" />
-      <DaybreakPeriodPicker value={period} onChange={setPeriodOverride} />
-    </View>
-    <View style={{ gap: 12 }}>
-      {feature ? <View><PerksHeading title={period === 'evening' ? 'A good way into the evening' : 'A very good place to start'} />
-        <DaybreakFeature entry={feature} catalog={catalog} now={now} />
+    <View testID="quiet-home-feed" style={{ gap: 22 }}>
+      <View style={{ gap: 16 }}>
+        <SectionRule spacing={0} testID="home-period-rule" />
+        <QuietHomePeriods value={period} onChange={setPeriodOverride} />
+      </View>
+      {feature ? <View><QuietHomeHeading title="Start here" />
+        <QuietHomeFeature entry={feature} catalog={catalog} now={now} />
       </View> : null}
-      <LocalPerksBanners catalog={catalog} />
+      <QuietHomeOffers />
+      <View>
+        {bars.length ? <><QuietHomeHeading title="For later" onMore={() => router.push(HOME_LEDGERS.bars.href)} />
+          <QuietHomeGroup>{bars.slice(0, 2).map((entry, index) => <QuietHomeVenueRow key={entry.kind + ':' + entry.id} divider={index > 0} entry={entry} catalog={catalog} now={now} />)}</QuietHomeGroup>
+        </> : null}
+        <QuietHomeVee />
+      </View>
+      <View><QuietHomeHeading title="For you" onMore={() => router.push('/home/ideas')} />
+        {ideas.map(idea => <QuietHomeLink key={idea.id} testID={`home-idea-${idea.id}`} title={idea.title} glyph={idea.glyph} accessibilityLabel={`${idea.title}. ${idea.detail}`} onPress={() => router.push(idea.href as never)} />)}
+      </View>
+      {catalog.collections.length ? <View><QuietHomeHeading title="Collections" onMore={() => router.push('/home/collections')} />
+        {catalog.collections.slice(0, 2).map(collection => <QuietHomeLink key={collection.id} testID={`home-collection-${collection.id}`} title={collection.title} glyph={homeCollectionGlyph(collection.id)}
+          accessibilityLabel={`${collection.title}. ${collection.items.length} picks. ${collection.subtitle}`}
+          onPress={() => router.push(`/home/collection?id=${encodeURIComponent(collection.id)}` as never)} />)}
+      </View> : null}
     </View>
-    <SectionRule />
-    {bars.length ? <View style={{ gap: 12 }}><View><PerksHeading title="Leave a little room for later" action="More" onPress={() => router.push(HOME_LEDGERS.bars.href)} />
-      <AuroraList testID="home-later-list">{bars.slice(0, 2).map((entry, index) => <AuroraEntryRow key={entry.kind + ':' + entry.id} testID="daybreak-home-row" divider={index > 0} entry={entry} catalog={catalog} now={now} />)}</AuroraList>
-    </View>{vee}</View> : vee}
-    <SectionRule />
-    <View><PerksHeading title="For you" action="See all" onPress={() => router.push('/home/ideas')} />
-      <HRow gap={12}>{ideas.map(idea => <HomeDoorCard key={idea.id} variant="tile" testID={`home-idea-${idea.id}`} title={idea.title} meta={idea.detail}
-        image={homeIdeaPhoto(idea, catalog)} photos={homeIdeaPhotos(idea, catalog)} glyph={idea.glyph} onPress={() => router.push(idea.href as never)} />)}</HRow>
-    </View>
-    {catalog.collections.length ? <><SectionRule /><View><PerksHeading title="Collections" action="See all" onPress={() => router.push('/home/collections')} />
-      <HRow gap={12}>{catalog.collections.map(collection => <HomeDoorCard key={collection.id} variant="banner" testID={`home-collection-${collection.id}`}
-        title={collection.title} meta={`${collection.items.length} picks · ${collection.subtitle.split(' · ').slice(-1)[0]}`} image={collection.coverImage} photos={homeCollectionPhotos(collection.id, catalog)} glyph={homeCollectionGlyph(collection.id)}
-        onPress={() => router.push(`/home/collection?id=${encodeURIComponent(collection.id)}` as never)} />)}</HRow>
-    </View></> : null}
   </ScreenScroll></Screen>;
 }

@@ -6,6 +6,7 @@ import { cssInterop } from 'react-native-css-interop';
 import { EditorialNav } from '@/components/editorial-nav';
 import { AuroraEntryRow } from '@/components/aurora';
 import { DaybreakFeature } from '@/components/daybreak';
+import { QuietHomeFeature, QuietHomeLink, QuietHomeOffers, QuietHomePeriods, QuietHomeVee, QuietHomeVenueRow } from '@/components/quiet-home';
 import { HomeTimelyRecommendations, LocalCategoryShelf, LocalPerksBanners, LocalPerksCard, PerksRoundButton } from '@/components/local-perks';
 import { useReducedMotionPreference } from '@/lib/motion';
 import { useThemeColors } from '@/lib/theme';
@@ -67,6 +68,38 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     useThemeColors.mockReturnValue({ ...Object.fromEntries(Object.entries(ROLES).map(([key, value]) => [key, value[theme]])), 'edge-card': 'rgba(90,60,40,.1)', 'edge-soft': 'rgba(90,60,40,.08)' });
   });
 
+  it('keeps Quiet Feed native surfaces and real venue routes', () => {
+    const source = { ...freshEntry, description: 'A short source snapshot.', facts: [{ glyph: 'pin', value: '0.4 mi' }] };
+    for (const [Component, id] of [[QuietHomeFeature, 'daybreak-poster'], [QuietHomeVenueRow, 'daybreak-home-row']]) {
+      const tree = mount(<Component entry={source} catalog={empty} now={new Date(2026, 10, 3, 12)} />);
+      expect(style(tree, id)).toMatchObject({ flexDirection: 'row', alignItems: 'center' });
+      expect(tree.root.findAllByProps({ testID: 'quiet-home-facts' }).length).toBeGreaterThan(0);
+      expect(tree.root.findAllByProps({ testID: 'photo-retry' })).toHaveLength(0);
+      act(() => pressable(tree, id).props.onPress());
+      expect(mockPush).toHaveBeenLastCalledWith('/home/detail?kind=place&id=source-cafe');
+    }
+  });
+  it('keeps Quiet Feed offers, planner and collection links functional', () => {
+    for (const [component, id, destination] of [
+      [<QuietHomeOffers key="offers" />, 'quiet-home-offers', '/offers'],
+      [<QuietHomeVee key="vee" />, 'home-evening-ribbon', '/create'],
+      [<QuietHomeLink key="collection" title="Source collection" glyph="bookmark" testID="quiet-link" onPress={() => mockPush('/home/collection?id=source')} />, 'quiet-link', '/home/collection?id=source'],
+    ]) {
+      const tree = mount(component);
+      act(() => pressable(tree, id).props.onPress());
+      expect(mockPush).toHaveBeenLastCalledWith(destination);
+    }
+  });
+  it('keeps the Quiet Feed time selector connected to its featured pool', () => {
+    const changed = jest.fn(), tree = mount(<QuietHomePeriods value="day" onChange={changed} />);
+    expect(pressable(tree, 'daybreak-period-day').props.accessibilityState.selected).toBe(true);
+    act(() => pressable(tree, 'daybreak-period-evening').props.onPress());
+    expect(changed).toHaveBeenLastCalledWith('evening');
+    act(() => tree.update(<QuietHomePeriods value="evening" onChange={changed} />));
+    expect(pressable(tree, 'daybreak-period-evening').props.accessibilityState.selected).toBe(true);
+    expect(pressable(tree, 'daybreak-period-evening').props['aria-selected']).toBe(true);
+    expect(pressable(tree, 'daybreak-period-day').props.accessibilityState.selected).toBe(false);
+  });
   it('retains round action sizing', () => {
     const tree = mount(<PerksRoundButton testID="round" label="Offers" glyph="tag" onPress={() => {}} />);
     expect(style(tree, 'round')).toMatchObject({ width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' });

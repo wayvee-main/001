@@ -6,6 +6,32 @@ historical; this section takes precedence wherever they differ. Screens not yet
 restyled (detail pages, sheets, Offers, Evening, Search) inherit Aurora's palette
 from the tokens and keep their Daybreak layouts until they are revisited.
 
+## Home refinement — Quiet Feed
+
+Quiet Feed is the approved Home layout below the four-category divider; it
+supersedes the Home-specific Aurora poster, list and overlay-card rules below.
+Keep the current Aurora palette, top chrome and four category tiles.
+
+- Use text By day / After hours tabs with a quiet active underline, then a
+  single “Start here” feature: 20px corners, 13px padding (11px narrow), 22px
+  title (21px narrow), one-line snapshot and a 92×100px photo (80×94px narrow).
+  Facts remain source-backed; only the published Menu gets a soft accent pill.
+- “Local perks · offers near you” is one 44px-minimum soft-gradient ribbon
+  opening Offers. Actual promotions, terms and stay actions remain on Offers.
+- “For later” groups two real nearby bar rows inside one 20px card: 52px
+  photos with 11px corners, 16px single-line names, quiet inline facts, 74px
+  minimum rows and interior hairlines. More opens the existing Bars guide.
+- Vee is an uncontained 24px mark and “Let Vee connect the dots.” link below
+  the group, separated by one fine rule, opening the real planner.
+- For You uses the current three time-sensitive ideas as 44px-minimum glyph
+  links. Collections shows two current collection links; More opens the full
+  collection page. Preserve their existing routes and complete accessible labels.
+- Use 22px section gaps, 19px headings (18px narrow) and no extra section rules.
+  Layouts grow with accessibility font scaling; never add fixture place facts
+  or replace missing source photos with another venue’s image.
+- The implementation is scoped to `quiet-home.tsx` and Home. Other screens
+  continue using their existing shared Aurora components.
+
 ## Current approval — Aurora
 
 - The Vee spiral's gold → ember → violet is the light source. Light theme is warm
