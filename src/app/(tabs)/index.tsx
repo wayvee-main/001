@@ -55,12 +55,12 @@ export default function HomeScreen() {
         <QuietHomeVee />
       </View>
       <View><QuietHomeHeading title="For you" onMore={() => router.push('/home/ideas')} />
-        {ideas.map(idea => <QuietHomeLink key={idea.id} testID={`home-idea-${idea.id}`} title={idea.title} glyph={idea.glyph} accessibilityLabel={`${idea.title}. ${idea.detail}`} onPress={() => router.push(idea.href as never)} />)}
+        <QuietHomeGroup testID="quiet-home-ideas">{ideas.map((idea, index) => <QuietHomeLink key={idea.id} divider={index > 0} testID={`home-idea-${idea.id}`} title={idea.title} glyph={idea.glyph} accessibilityLabel={`${idea.title}. ${idea.detail}`} onPress={() => router.push(idea.href as never)} />)}</QuietHomeGroup>
       </View>
       {catalog.collections.length ? <View><QuietHomeHeading title="Collections" onMore={() => router.push('/home/collections')} />
-        {catalog.collections.slice(0, 2).map(collection => <QuietHomeLink key={collection.id} testID={`home-collection-${collection.id}`} title={collection.title} glyph={homeCollectionGlyph(collection.id)}
+        <QuietHomeGroup testID="quiet-home-collections">{catalog.collections.slice(0, 2).map((collection, index) => <QuietHomeLink key={collection.id} divider={index > 0} testID={`home-collection-${collection.id}`} title={collection.title} glyph={homeCollectionGlyph(collection.id)}
           accessibilityLabel={`${collection.title}. ${collection.items.length} picks. ${collection.subtitle}`}
-          onPress={() => router.push(`/home/collection?id=${encodeURIComponent(collection.id)}` as never)} />)}
+          onPress={() => router.push(`/home/collection?id=${encodeURIComponent(collection.id)}` as never)} />)}</QuietHomeGroup>
       </View> : null}
     </View>
   </ScreenScroll></Screen>;

@@ -21,11 +21,14 @@ Keep the current Aurora palette, top chrome and four category tiles.
 - “For later” groups two real nearby bar rows inside one 20px card: 52px
   photos with 11px corners, 16px single-line names, quiet inline facts, 74px
   minimum rows and interior hairlines. More opens the existing Bars guide.
-- Vee is an uncontained 24px mark and “Let Vee connect the dots.” link below
-  the group, separated by one fine rule, opening the real planner.
+- Vee is a thin “Let Vee connect the dots.” ribbon below the group, opening
+  the real planner. Match Local Perks: 44px minimum height, 13px corners, soft
+  gradient, 12px text and 12px horizontal padding, with a 20px gradient Vee mark.
 - For You uses the current three time-sensitive ideas as 44px-minimum glyph
   links. Collections shows two current collection links; More opens the full
-  collection page. Preserve their existing routes and complete accessible labels.
+  collection page. Enclose each section’s links in the same 20px grouped card
+  as For Later, with matching inset and interior hairlines. Preserve their
+  existing routes and complete accessible labels.
 - Use 22px section gaps, 19px headings (18px narrow) and no extra section rules.
   Layouts grow with accessibility font scaling; never add fixture place facts
   or replace missing source photos with another venue’s image.

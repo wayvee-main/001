@@ -74,9 +74,9 @@ export function QuietHomeFeature({ entry, catalog, now }: { entry: HomeGuideEntr
   </Pressable>;
 }
 
-export function QuietHomeGroup({ children }: { children: ReactNode }) {
+export function QuietHomeGroup({ children, testID = 'home-later-list' }: { children: ReactNode; testID?: string }) {
   const card = useAuroraCard();
-  return <View testID="home-later-list" style={[card, { paddingHorizontal: 12, borderRadius: 20 }]}>{children}</View>;
+  return <View testID={testID} style={[card, { paddingHorizontal: 12, borderRadius: 20 }]}>{children}</View>;
 }
 
 export function QuietHomeVenueRow({ entry, catalog, now, divider = false }: { entry: HomeGuideEntry; catalog: HomeGuideCatalog; now: Date; divider?: boolean }) {
@@ -98,10 +98,10 @@ export function QuietHomeVenueRow({ entry, catalog, now, divider = false }: { en
   </Pressable>;
 }
 
-export function QuietHomeLink({ title, glyph, onPress, testID, accessibilityLabel }: { title: string; glyph: string; onPress: () => void; testID: string; accessibilityLabel?: string }) {
-  const colors = useThemeColors();
+export function QuietHomeLink({ title, glyph, onPress, testID, accessibilityLabel, divider = false }: { title: string; glyph: string; onPress: () => void; testID: string; accessibilityLabel?: string; divider?: boolean }) {
+  const colors = useThemeColors(), aurora = useAurora();
   return <Pressable testID={testID} accessibilityRole="button" accessibilityLabel={accessibilityLabel || title} onPress={onPress}
-    style={({ pressed }) => ({ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 10, opacity: pressed ? .7 : 1 })}>
+    style={({ pressed }) => ({ minHeight: 44, borderTopWidth: divider ? 1 : 0, borderTopColor: aurora.glassEdge, flexDirection: 'row', alignItems: 'center', gap: 10, opacity: pressed ? .7 : 1 })}>
     <Glyph name={glyph} size={16} color={colors['fg-accent']} />
     <Text numberOfLines={1} ellipsizeMode="tail" className="font-dm text-ink" style={{ flex: 1, minWidth: 0, fontSize: 14, lineHeight: 19 }}>{title}</Text>
     <Glyph name="chevron" size={13} color={colors['fg-muted']} />
@@ -120,11 +120,12 @@ export function QuietHomeOffers() {
 }
 
 export function QuietHomeVee() {
-  const colors = useThemeColors(), aurora = useAurora(), router = useRouter();
+  const colors = useThemeColors(), router = useRouter();
   return <Pressable testID="home-evening-ribbon" accessibilityRole="button" accessibilityLabel="Let Vee connect the dots. Plan your evening" onPress={() => router.push('/create')}
-    style={({ pressed }) => ({ minHeight: 46, borderTopWidth: 1, borderTopColor: aurora.rule, paddingTop: 12, marginTop: 9, flexDirection: 'row', alignItems: 'center', gap: 10, opacity: pressed ? .7 : 1 })}>
-    <VeeMark size={24} />
-    <Text className="font-dm-medium text-ink" style={{ flex: 1, fontSize: 13, lineHeight: 19 }}>Let Vee connect the dots.</Text>
-    <View style={{ transform: [{ rotate: '-45deg' }] }}><Glyph name="arrow" size={14} color={colors['fg-muted']} /></View>
+    style={({ pressed }) => ({ minHeight: 44, paddingHorizontal: 12, paddingVertical: 11, marginTop: 12, borderRadius: 13, overflow: 'hidden', flexDirection: 'row', alignItems: 'center', gap: 9, opacity: pressed ? .8 : 1 })}>
+    <GradientFill radius={13} soft />
+    <VeeMark size={20} />
+    <Text className="font-dm text-ink" style={{ flex: 1, fontSize: 12, lineHeight: 18 }}>Let Vee connect the dots.</Text>
+    <Glyph name="chevron" size={13} color={colors['fg-muted']} />
   </Pressable>;
 }
