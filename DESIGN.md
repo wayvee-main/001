@@ -6,11 +6,46 @@ historical; this section takes precedence wherever they differ. Screens not yet
 restyled (detail pages, sheets, Offers, Evening, Search) inherit Aurora's palette
 from the tokens and keep their Daybreak layouts until they are revisited.
 
-## Home and Discover — Calm lists
+## Discover — Category posters
 
-Calm lists is the approved structure for Home and Discover. It supersedes the
-earlier Quiet Feed item cards and Discover's photo carousels. Keep the Aurora
-palette and top chrome.
+Discover is a guide to the whole catalog in four families: **Eat → Go out → Drink →
+Wander**. It supersedes Discover's earlier local list, filter row and carousels.
+
+- **Order:** header, headline, the shared search launcher, *Browse* (up to six
+  shortcut tiles, then "All N categories"), the slim *Deals & happy hours* row, then
+  one chapter per family.
+- **Categories** come from `buildDiscoverGuide` (`src/lib/discover-categories.ts`),
+  sorted only by what each record says about itself (cuisine, bar kind, venue
+  description). Places listed twice (curated and map) count once. Empty categories
+  never show. Cross-cuts: *Open late* (the restaurant's open-late flag; verified
+  late hours shown first, "confirm" hours never shown), *Happy hours* (published
+  happy-hour facts or offers), *Budget-friendly* (price "$"), *Live music & DJs*.
+- **Chapters** share one rhythm: a ruled header with the family and its count, a
+  150px category poster (photo, plum-dark scrim, family kicker, name, count, gradient
+  arrow), three calm-list rows, then *More in {family}* chips for its other
+  categories. Rows show what a place is plus its distance, otherwise its price or
+  verified late hours.
+- **Go out** is fuller: an *On stage* poster counting dated shows plus each venue's
+  published weekly series ("Blue Mondays", shown as EVERY MON without guessing a
+  date), date-tile rows, then *Rooms worth knowing* as up to four venue photo cards
+  with their own facts and a calendar cue when the venue publishes one.
+- **Deals** (`discoverDeals`) are slim 60px soft-gradient cards in a swipeable row:
+  a gradient badge ($2, HH, %, $0 or a glyph), who it is from and one line of
+  offer and terms. Only real sources: venue offers, published happy hours (a venue
+  with an offer is not repeated) and the partner placements the screen passes in
+  (home-food, ordering-savings, discover-rides). *Today* only when the wording says
+  daily, weekdays on a weekday, or today's full weekday name; abbreviated ranges
+  stay untagged. *Partner* marks partner promotions. Never invent a deal.
+- Every poster, tile, chip and *See all* opens `/category?id=…` (a category, a whole
+  family, or `deals`); *All N categories* opens `/categories`. Old
+  `/discover?mode=…` links are redirected to the matching category.
+- Photos inside these controls are not retryable (no nested buttons on web), and
+  a venue never borrows another venue's photo: it shows its icon instead.
+
+## Home — Calm lists
+
+Calm lists is the approved structure for Home. It supersedes the earlier Quiet
+Feed item cards. Keep the Aurora palette and top chrome.
 
 - **Home order:** headline → picks row → search → rule → category row → rule →
   By day / After hours pill toggle → Start here → perks ribbon → For later → Vee
@@ -24,16 +59,15 @@ palette and top chrome.
   per section, hairline separators, a 56px photo, a 16px title, **one muted text
   line of up to two facts** (what it is · measured distance, via `calmMeta`) and a
   chevron. No pills in list rows; the poster is the only place facts are pills.
-  Home's For later, For you and Collections, and every Discover section below its
-  posters (More on stage, More good tables, After dinner, A little wandering, Rooms
-  worth knowing), use it, three rows each with See all opening the full guide.
+  Home's For later, For you and Collections use it, and Discover's chapters use the
+  same rows under their category posters.
   Save and add-to-evening live on posters and detail pages, not on list rows.
 - **Extras are thin ribbons:** 44px minimum, 13px corners, soft Aurora gradient,
   12px text. They are never grouped: each sits beside what it serves. Home puts
   “Local perks · offers near you” under the Start here poster and “Let Vee connect
   the dots.” after For later, where planning the rest of the evening starts.
-  Discover and Offers use the same ribbon for the swipeable promotions, with the
-  offer and its terms on one line.
+  The Offers screen uses the same ribbon for its swipeable promotions; Discover's
+  deals use the two-line deal card (see Discover — Category posters).
 - Use 22px section gaps and 19px headings (18px narrow) on Home; layouts grow with
   accessibility font scaling; never add fixture facts or substitute another
   venue’s photo.

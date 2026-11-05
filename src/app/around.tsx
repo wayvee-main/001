@@ -95,7 +95,7 @@ export default function AroundScreen() {
       id: 'shows',
       title: 'Shows tonight',
       count: showsTonight.length,
-      action: () => router.push('/discover?mode=Events'),
+      action: () => router.push('/category?id=shows'),
       empty: 'No dated listings for tonight.',
       rows: showsTonight.slice(0, PER_SECTION).map((event, index, shown) => (
         <FoodHubRow
@@ -113,7 +113,7 @@ export default function AroundScreen() {
       id: 'bars',
       title: 'Bars',
       count: NIGHTLIFE_SPOTS.length,
-      action: () => router.push('/discover?mode=Nightlife'),
+      action: () => router.push('/category?id=drink'),
       empty: 'No bars in the catalog yet.',
       rows: NIGHTLIFE_SPOTS.slice(0, PER_SECTION).map((spot, index, shown) => (
         <FoodHubRow

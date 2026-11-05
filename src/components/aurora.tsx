@@ -229,7 +229,8 @@ export function calmMeta(caption: string, distance?: string): string {
 export function AuroraEntryRow({ entry, catalog, now, divider, trailing, testID = 'aurora-entry-row' }: {
   entry: HomeGuideEntry; catalog: HomeGuideCatalog; now: Date; divider?: boolean; trailing?: string; testID?: string;
 }) {
-  const router = useRouter(), distance = trailing ?? homeCardMetadata(entry, now).find(item => item.tone === 'distance')?.text;
+  const router = useRouter(), price = entry.facts.find(fact => fact.glyph === 'wallet')?.value;
+  const distance = trailing ?? homeCardMetadata(entry, now).find(item => item.tone === 'distance')?.text ?? price;
   const meta = calmMeta(entry.caption, distance);
   return <AuroraLinkRow testID={testID} divider={divider} title={entry.name} meta={meta} photos={homeIndexPhotos(entry, catalog)} glyph={entry.glyph}
     accessibilityLabel={`Explore ${entry.name}. ${meta}`} onPress={() => router.push(homeGuideHref(entry) as never)} />;

@@ -14,6 +14,8 @@ export interface WayveePromotion {
   placement: PromotionPlacement;
   priority: number;
   eyebrow: string;
+  /** The partner's name as it is written, for display beside the offer. */
+  brand: string;
   title: string;
   detail: string;
   finePrint?: string;
@@ -30,6 +32,7 @@ export const PROMOTIONS: readonly WayveePromotion[] = [
     placement: 'home-food',
     priority: 20,
     eyebrow: 'DOORDASH',
+    brand: 'DoorDash',
     title: 'Oakland deals nearby',
     detail: 'Rotating % off and BOGO offers',
     finePrint: 'Terms apply per offer',
@@ -44,6 +47,7 @@ export const PROMOTIONS: readonly WayveePromotion[] = [
     placement: 'discover-rides',
     priority: 10,
     eyebrow: 'LYFT',
+    brand: 'Lyft',
     title: '50% off your first ride',
     detail: 'Up to $10 · code 50OFF1WB',
     finePrint: 'New riders only',
@@ -59,6 +63,7 @@ export const PROMOTIONS: readonly WayveePromotion[] = [
     placement: 'discover-rides',
     priority: 20,
     eyebrow: 'UBER',
+    brand: 'Uber',
     title: 'Get there by ride',
     detail: 'Live ETAs and upfront pricing',
     tone: 'mist',
@@ -72,6 +77,7 @@ export const PROMOTIONS: readonly WayveePromotion[] = [
     placement: 'ordering-savings',
     priority: 10,
     eyebrow: 'UBER ONE',
+    brand: 'Uber One',
     title: '$0 delivery fee',
     detail: 'On eligible Uber Eats orders for members',
     finePrint: 'Membership terms apply',

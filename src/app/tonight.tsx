@@ -81,7 +81,7 @@ export default function TonightScreen() {
         accessibilityRole="button"
         accessibilityLabel="Browse all of Tonight, with search and filters"
         activeOpacity={0.72}
-        onPress={() => router.push('/discover?mode=Events')}
+        onPress={() => router.push('/category?id=shows')}
         className="flex-row items-center justify-between rounded-card px-3.5 py-3">
         <View className="min-w-0 flex-1 flex-row items-center gap-x-3">
           <Glyph name="compass" size={17} color={colors.rust} strokeWidth={1.7} />
