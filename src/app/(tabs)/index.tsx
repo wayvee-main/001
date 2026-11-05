@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { CitySearchBar } from '@/components/city-controls';
 import { AuroraEntryRow, AuroraLinkRow, AuroraList, SectionRule } from '@/components/aurora';
-import { DaybreakFeature, DaybreakIntro, type DaybreakPeriod } from '@/components/daybreak';
-import { QuietHomeHeading, QuietHomeOffers, QuietHomePeriods, QuietHomeVee } from '@/components/quiet-home';
+import { DaybreakFeature, DaybreakIntro, DaybreakPeriodPicker, type DaybreakPeriod } from '@/components/daybreak';
+import { QuietHomeHeading, QuietHomeOffers, QuietHomeVee } from '@/components/quiet-home';
 import { Screen, ScreenScroll } from '@/components/layout';
 import { HomeTimelyRecommendations, LocalCategoryShelf, LocalPerksHeader } from '@/components/local-perks';
 import { homeCollectionGlyph, homeDiscoveryIdeas } from '@/lib/home-discovery';
@@ -47,17 +47,22 @@ export default function HomeScreen() {
     <View testID="quiet-home-feed" style={{ gap: 22 }}>
       <View style={{ gap: 16 }}>
         <SectionRule spacing={0} testID="home-period-rule" />
-        <QuietHomePeriods value={period} onChange={setPeriodOverride} />
+        <DaybreakPeriodPicker value={period} onChange={setPeriodOverride} />
       </View>
-      {feature ? <View><QuietHomeHeading title="Start here" />
-        <DaybreakFeature entry={feature} catalog={catalog} now={now} />
-      </View> : null}
-      <View testID="home-extras"><QuietHomeHeading title={period === 'evening' ? 'Tonight’s extras' : 'Today’s extras'} />
-        <View style={{ gap: 8 }}><QuietHomeOffers /><QuietHomeVee /></View>
+      {/* Each extra sits beside what it serves: perks under the pick it could
+        * sweeten, Vee after the evening's later stops, where planning starts. */}
+      <View style={{ gap: 10 }}>
+        {feature ? <View><QuietHomeHeading title="Start here" />
+          <DaybreakFeature entry={feature} catalog={catalog} now={now} />
+        </View> : null}
+        <QuietHomeOffers />
       </View>
-      {bars.length ? <View><QuietHomeHeading title="For later" onMore={() => router.push(HOME_LEDGERS.bars.href)} />
-        <AuroraList testID="home-later-list">{bars.slice(0, 2).map((entry, index) => <AuroraEntryRow key={entry.kind + ':' + entry.id} testID="daybreak-home-row" divider={index > 0} entry={entry} catalog={catalog} now={now} />)}</AuroraList>
-      </View> : null}
+      <View style={{ gap: 10 }}>
+        {bars.length ? <View><QuietHomeHeading title="For later" onMore={() => router.push(HOME_LEDGERS.bars.href)} />
+          <AuroraList testID="home-later-list">{bars.slice(0, 2).map((entry, index) => <AuroraEntryRow key={entry.kind + ':' + entry.id} testID="daybreak-home-row" divider={index > 0} entry={entry} catalog={catalog} now={now} />)}</AuroraList>
+        </View> : null}
+        <QuietHomeVee />
+      </View>
       <View><QuietHomeHeading title="For you" onMore={() => router.push('/home/ideas')} />
         <AuroraList testID="quiet-home-ideas">{ideas.map((idea, index) => <AuroraLinkRow key={idea.id} testID={`home-idea-${idea.id}`} divider={index > 0} title={idea.title} glyph={idea.glyph}
           image={homeIdeaPhoto(idea, catalog)} photos={homeIdeaPhotos(idea, catalog)} meta={metadataParts(idea.detail).slice(0, 2).join(' · ')}

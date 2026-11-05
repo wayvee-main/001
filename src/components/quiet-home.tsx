@@ -1,29 +1,12 @@
 import { useRouter } from 'expo-router';
 import { Text, View, useWindowDimensions } from 'react-native';
 import { GradientFill } from '@/components/aurora';
-import type { DaybreakPeriod } from '@/components/daybreak';
 import { Glyph } from '@/components/glyph';
 import { NativePressable as Pressable } from '@/components/native-pressable';
 import { VeeMark } from '@/components/vee-mark';
 import { useThemeColors } from '@/lib/theme';
 
-/** Home's quiet pieces: the time tabs, section headings and the thin extras ribbons. */
-export function QuietHomePeriods({ value, onChange }: { value: DaybreakPeriod; onChange: (period: DaybreakPeriod) => void }) {
-  const colors = useThemeColors();
-  return <View testID="daybreak-periods" accessibilityRole="tablist" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 18 }}>
-    {([{ key: 'day', label: 'By day', glyph: 'sun' }, { key: 'evening', label: 'After hours', glyph: 'moon' }] as const).map(item => {
-      const selected = value === item.key;
-      return <Pressable key={item.key} testID={`daybreak-period-${item.key}`} accessibilityRole="tab" accessibilityState={{ selected }} aria-selected={selected} onPress={() => onChange(item.key)} hitSlop={4}
-        style={({ pressed }) => ({ minHeight: 36, flexDirection: 'row', alignItems: 'center', gap: 5, opacity: pressed ? .7 : 1 })}>
-        <Glyph name={item.glyph} size={14} color={selected ? colors.fg : colors['fg-muted']} />
-        <View style={{ paddingVertical: 7, borderBottomWidth: 2, borderBottomColor: selected ? colors['fg-accent'] : 'transparent' }}>
-          <Text className={selected ? 'font-dm-medium' : 'font-dm'} style={{ fontSize: 13, lineHeight: 18, color: selected ? colors.fg : colors['fg-muted'] }}>{item.label}</Text>
-        </View>
-      </Pressable>;
-    })}
-  </View>;
-}
-
+/** Home's quiet pieces: section headings and the thin perks and Vee ribbons. */
 export function QuietHomeHeading({ title, onMore }: { title: string; onMore?: () => void }) {
   const colors = useThemeColors(), { width } = useWindowDimensions();
   return <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 10 }}>

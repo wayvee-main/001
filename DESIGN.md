@@ -13,8 +13,9 @@ earlier Quiet Feed item cards and Discover's photo carousels. Keep the Aurora
 palette and top chrome.
 
 - **Home order:** headline → picks row → search → rule → category row → rule →
-  By day / After hours → Start here → extras → For later → For you → Collections.
-- **Picks row** sits between the headline and search: 11px italic text, venue in
+  By day / After hours pill toggle → Start here → perks ribbon → For later → Vee
+  ribbon → For you → Collections.
+- **Picks row** sits between the headline and search: 10px italic text, venue in
   medium weight, each pick led by a 12px pulsing bolt.
 - **Only three containers:** the split-card poster (featured picks: Home's Start
   here, Discover's local-list lead and On stage), the grouped calm list, and the
@@ -28,10 +29,11 @@ palette and top chrome.
   worth knowing), use it, three rows each with See all opening the full guide.
   Save and add-to-evening live on posters and detail pages, not on list rows.
 - **Extras are thin ribbons:** 44px minimum, 13px corners, soft Aurora gradient,
-  12px text. Home groups “Local perks · offers near you” and “Let Vee connect the
-  dots.” under *Tonight’s extras* (*Today’s extras* by day). Discover and Offers use
-  the same ribbon for the swipeable promotions, with the offer and its terms on
-  one line.
+  12px text. They are never grouped: each sits beside what it serves. Home puts
+  “Local perks · offers near you” under the Start here poster and “Let Vee connect
+  the dots.” after For later, where planning the rest of the evening starts.
+  Discover and Offers use the same ribbon for the swipeable promotions, with the
+  offer and its terms on one line.
 - Use 22px section gaps and 19px headings (18px narrow) on Home; layouts grow with
   accessibility font scaling; never add fixture facts or substitute another
   venue’s photo.
@@ -83,7 +85,7 @@ palette and top chrome.
   · Tonight" (Today before evening) and an outlined filter circle. The circle belongs
   to the same control and opens Search, where the scope filters live.
 - **Picks row** (Home, between the headline and search): live `homeRecommendations`
-  as 11px italic text, venue in medium weight, each led by a filled bolt. One
+  as 10px italic text, venue in medium weight, each led by a filled bolt. One
   native-driven loop pulses every bolt at its own phase; it stops for reduced
   motion, in the background and off Home. The 14-day freshness rule is unchanged;
   the empty state stays "Fresh local picks are on the way."

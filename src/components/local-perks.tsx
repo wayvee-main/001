@@ -135,12 +135,12 @@ export function HomeTimelyRecommendations({ catalog, now }: { catalog: HomeGuide
             opacity: pulse.interpolate(pulseRanges(phase, .35)), transform: [{ scale: pulse.interpolate(pulseRanges(phase, .8)) }] } : undefined}>
             <Glyph name="boltFilled" size={12} color={colors['fg-accent']} />
           </Animated.View>
-          <Text numberOfLines={1} className="font-dm" style={{ flexShrink: 1, paddingRight: 3, fontSize: 11, lineHeight: 16, fontStyle: 'italic', color: colors['fg-muted'] }}>
+          <Text numberOfLines={1} className="font-dm" style={{ flexShrink: 1, paddingRight: 3, fontSize: 10, lineHeight: 15, fontStyle: 'italic', color: colors['fg-muted'] }}>
             {venuePrefix ? <Text className="font-dm-medium" style={{ color: colors.fg }}>{venuePrefix}</Text> : null}{rest}
           </Text>
         </Pressable>;
       })}
-    </ScrollView> : <Text testID="home-recommendations-empty" className="font-dm" style={{ paddingVertical: 14, paddingHorizontal: 2, fontSize: 11, lineHeight: 16, fontStyle: 'italic', color: colors['fg-muted'] }}>Fresh local picks are on the way.</Text>}
+    </ScrollView> : <Text testID="home-recommendations-empty" className="font-dm" style={{ paddingVertical: 14, paddingHorizontal: 2, fontSize: 10, lineHeight: 15, fontStyle: 'italic', color: colors['fg-muted'] }}>Fresh local picks are on the way.</Text>}
   </View>;
 }
 

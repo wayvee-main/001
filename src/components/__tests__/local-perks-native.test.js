@@ -5,9 +5,9 @@ import { Animated, AppState, Pressable, ScrollView, StyleSheet, Text, View } fro
 import { cssInterop } from 'react-native-css-interop';
 import { EditorialNav } from '@/components/editorial-nav';
 import { AuroraEntryRow, AuroraLinkRow, AuroraList } from '@/components/aurora';
-import { DaybreakFeature } from '@/components/daybreak';
+import { DaybreakPeriodPicker, DaybreakFeature } from '@/components/daybreak';
 import { compactCardText, shortCardTitle } from '@/lib/card-presentation';
-import { QuietHomeOffers, QuietHomePeriods, QuietHomeVee } from '@/components/quiet-home';
+import { QuietHomeOffers, QuietHomeVee } from '@/components/quiet-home';
 import { HomeTimelyRecommendations, LocalCategoryShelf, LocalPerksBanners, LocalPerksCard, PerksRoundButton } from '@/components/local-perks';
 import { useReducedMotionPreference } from '@/lib/motion';
 import { useThemeColors } from '@/lib/theme';
@@ -119,12 +119,12 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     expect(nodes(tree).some(node => node.type === 'Text' && node.children?.includes(shortCardTitle(name)))).toBe(true);
     expect(pressable(tree, 'daybreak-poster').props.accessibilityLabel).toContain(name);
   });
-  it('keeps the Quiet Feed time selector connected to its featured pool', () => {
-    const changed = jest.fn(), tree = mount(<QuietHomePeriods value="day" onChange={changed} />);
+  it('keeps the By day / After hours pill toggle connected to its featured pool', () => {
+    const changed = jest.fn(), tree = mount(<DaybreakPeriodPicker value="day" onChange={changed} />);
     expect(pressable(tree, 'daybreak-period-day').props.accessibilityState.selected).toBe(true);
     act(() => pressable(tree, 'daybreak-period-evening').props.onPress());
     expect(changed).toHaveBeenLastCalledWith('evening');
-    act(() => tree.update(<QuietHomePeriods value="evening" onChange={changed} />));
+    act(() => tree.update(<DaybreakPeriodPicker value="evening" onChange={changed} />));
     expect(pressable(tree, 'daybreak-period-evening').props.accessibilityState.selected).toBe(true);
     expect(pressable(tree, 'daybreak-period-evening').props['aria-selected']).toBe(true);
     expect(pressable(tree, 'daybreak-period-day').props.accessibilityState.selected).toBe(false);

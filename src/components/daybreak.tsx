@@ -26,13 +26,13 @@ export function DaybreakIntro({ city }: { city: string }) {
   </View>;
 }
 
-/** By day / After hours as two pills: the selected one filled with ink. */
+/** By day / After hours as a two-pill toggle: the selected one filled with ink. */
 export function DaybreakPeriodPicker({ value, onChange }: { value: DaybreakPeriod; onChange: (period: DaybreakPeriod) => void }) {
   const colors = useThemeColors(), aurora = useAurora();
   return <View testID="daybreak-periods" accessibilityRole="tablist" style={{ flexDirection: 'row', gap: 8 }}>
     {([{ key: 'day', label: 'By day', glyph: 'sun' }, { key: 'evening', label: 'After hours', glyph: 'moon' }] as const).map(item => {
       const selected = item.key === value;
-      return <Pressable key={item.key} testID={`daybreak-period-${item.key}`} accessibilityRole="tab" accessibilityState={{ selected }} onPress={() => onChange(item.key)} hitSlop={{ top: 4, bottom: 4 }}
+      return <Pressable key={item.key} testID={`daybreak-period-${item.key}`} accessibilityRole="tab" accessibilityState={{ selected }} aria-selected={selected} onPress={() => onChange(item.key)} hitSlop={{ top: 4, bottom: 4 }}
         style={({ pressed }) => ({ minHeight: 40, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 15, borderRadius: 999,
           borderWidth: 1, borderColor: selected ? colors.fg : aurora.glassEdge, backgroundColor: selected ? colors.fg : 'transparent', opacity: pressed ? .7 : 1 })}>
         <Glyph name={item.glyph} size={16} color={selected ? colors.bg : colors['fg-muted']} strokeWidth={1.7} />
