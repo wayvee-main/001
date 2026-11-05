@@ -36,13 +36,18 @@ export default function HomeScreen() {
   return <Screen aurora><ScreenScroll gap={18} clearsTabBar refreshing={refreshing} onRefresh={onRefresh}>
     <LocalPerksHeader location={false} />
     <DaybreakIntro city={displayCity} />
-    <View style={{ gap: 6, marginBottom: -6 }}>
+    <View style={{ gap: 6, marginBottom: -11 }}>
       <CitySearchBar variant="aurora" testID="home-search" labelTestID="home-search-label" city={displayCity} onPress={() => router.push('/search')} />
       <HomeTimelyRecommendations catalog={catalog} now={now} />
     </View>
     <LocalCategoryShelf catalog={catalog} />
-    <DaybreakPeriodPicker value={period} onChange={setPeriodOverride} />
-    <View style={{ marginTop: 10, gap: 12 }}>
+    {/* The rule sits just above the pills: they switch the feature below, so they
+      * open its block rather than closing the categories'. */}
+    <View style={{ gap: 10 }}>
+      <SectionRule spacing={0} testID="home-period-rule" />
+      <DaybreakPeriodPicker value={period} onChange={setPeriodOverride} />
+    </View>
+    <View style={{ gap: 12 }}>
       {feature ? <View><PerksHeading title={period === 'evening' ? 'A good way into the evening' : 'A very good place to start'} />
         <DaybreakFeature entry={feature} catalog={catalog} now={now} />
       </View> : null}

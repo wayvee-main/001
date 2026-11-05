@@ -39,7 +39,8 @@ from the tokens and keep their Daybreak layouts until they are revisited.
 - **Categories:** four equal tiles (88px) with gradient-tinted icon badges; a
   selected Discover filter takes the fill gradient.
 - **By day / After hours:** two pills, the selected one filled with ink. They switch
-  Home's featured section, so no rule separates them from it.
+  Home's featured section, so the rule goes above them and none separates them from
+  the section heading below.
 - **Posters** (Home feature, Discover feature and On stage) are split cards: a
   168px photo on top with a light top shade, the gradient category chip and the
   frosted save action; below it, on the solid card, the name (21px), a one-line
@@ -55,7 +56,8 @@ from the tokens and keep their Daybreak layouts until they are revisited.
   is and its nearest fact; a short value sits at the right, a longer note underneath.
 - **Section rules:** a 1px `AURORA.rule` hairline (`SectionRule`) between top-level
   sections on all four tabs, about 30px each side. Home has none between the picks
-  row and the category tiles: search, picks and categories read as one block.
+  row and the category tiles: search, picks and categories read as one block. A rule
+  sits 10px above By day / After hours instead, opening the block those pills switch.
 - **Offers:** 62px cards with a gradient badge; the position dot of the visible slide
   takes the gradient. Swipe behaviour is unchanged.
 - **Navigation:** one floating capsule; the active tab takes the fill gradient and the
