@@ -7,6 +7,7 @@ import { Glyph } from '@/components/glyph';
 import { NativePressable as Pressable } from '@/components/native-pressable';
 import { Photo } from '@/components/photo';
 import { useAppGutter } from '@/components/layout';
+import { StubPoster, StubRail, StubStack, StubTicket } from '@/components/stub-cards';
 import { useAurora } from '@/lib/aurora';
 import { countLabel, type DiscoverCategory, type DiscoverFamily, type DiscoverGuide, type DiscoverSeries } from '@/lib/discover-categories';
 import type { DiscoverDeal } from '@/lib/discover-deals';
@@ -14,6 +15,7 @@ import { homeGuideHref, type HomeGuideCatalog, type HomeGuideEntry } from '@/lib
 import { homeIndexPhotos } from '@/lib/home-index-photos';
 import { useLocalPerks } from '@/lib/local-perks-store';
 import { useScoper } from '@/lib/store';
+import { dateLead, dealLead, weeklyLead } from '@/lib/stub-cards';
 import { useThemeColors } from '@/lib/theme';
 import { headingStyle } from '@/lib/typography';
 
@@ -48,7 +50,7 @@ export function DiscoverBrowseGrid({ categories, catalog }: { categories: Discov
   const router = useRouter(), aurora = useAurora();
   return <View testID="discover-browse" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
     {categories.map(category => <Pressable key={category.id} testID={`discover-browse-${category.id}`} accessibilityRole="button" accessibilityLabel={`${category.title}. ${countLabel(category.entries.length, category.unit)}`}
-      onPress={() => router.push(categoryHref(category.id) as never)} style={({ pressed }) => ({ width: '48.4%', height: 92, borderRadius: 18, overflow: 'hidden', backgroundColor: aurora.photoFallback, opacity: pressed ? .85 : 1 })}>
+      onPress={() => router.push(categoryHref(category.id) as never)} style={({ pressed }) => ({ width: '48.4%', height: 84, borderRadius: 18, overflow: 'hidden', backgroundColor: aurora.photoFallback, opacity: pressed ? .85 : 1 })}>
       <Photo candidates={categoryPhotos(category, catalog)} radius={0} stripedPlaceholder={false} retryable={false} fallbackGlyph={category.glyph as never}
         fallbackLabel={`${category.title} photo unavailable`} inkColor="rgba(255, 255, 255, 0.7)" style={[StyleSheet.absoluteFill, { backgroundColor: aurora.photoFallback }]} />
       <LinearGradient pointerEvents="none" colors={[...SCRIM]} style={StyleSheet.absoluteFill} />
@@ -60,37 +62,25 @@ export function DiscoverBrowseGrid({ categories, catalog }: { categories: Discov
   </View>;
 }
 
-/** A slim, swipeable deal: gradient badge, who it's from, the offer in one line. */
-export function DiscoverDealCard({ deal, width = 286 }: { deal: DiscoverDeal; width?: number | `${number}%` }) {
-  const router = useRouter(), colors = useThemeColors(), aurora = useAurora(), openOffer = useLocalPerks(s => s.openOffer), showToast = useScoper(s => s.showToast);
+/** A deal as a value ticket: price or happy-hour window in the stub, the venue's own photo when it has one. */
+export function DealTicket({ deal, catalog, now, width = 292 }: { deal: DiscoverDeal; catalog: HomeGuideCatalog; now: Date; width?: number | 'full' }) {
+  const router = useRouter(), openOffer = useLocalPerks(s => s.openOffer), showToast = useScoper(s => s.showToast);
   const open = () => {
     if (deal.action.type === 'offer') openOffer(deal.action.offer);
     else if (deal.action.type === 'entry') router.push(deal.action.href as never);
     else Linking.openURL(deal.action.url).catch(() => showToast(`Could not open ${deal.who}`));
   };
-  return <Pressable testID={`discover-deal-${deal.id}`} accessibilityRole="button" accessibilityLabel={`${deal.who}. ${deal.what}${deal.tag ? `. ${deal.tag}` : ''}`} onPress={open}
-    style={({ pressed }) => ({ width, minHeight: 60, borderRadius: 16, borderWidth: 1, borderColor: aurora.glassEdge, overflow: 'hidden', flexDirection: 'row', alignItems: 'center', gap: 11, paddingLeft: 9, paddingRight: 12, paddingVertical: 8, opacity: pressed ? .8 : 1 })}>
-    <GradientFill radius={16} soft />
-    <View style={{ width: 42, height: 42, borderRadius: 21, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' }}>
-      <GradientFill radius={21} />
-      {deal.badge ? <Text className="font-dm-bold" style={{ fontSize: 14, lineHeight: 18, letterSpacing: -.3, color: aurora.onFill }}>{deal.badge}</Text> : <View><Glyph name={deal.glyph || 'tag'} size={18} color={aurora.onFill} strokeWidth={2} /></View>}
-    </View>
-    <View style={{ flex: 1, minWidth: 0 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-        <Text numberOfLines={1} className="font-dm-bold text-ink" style={{ flexShrink: 1, fontSize: 14, lineHeight: 19, letterSpacing: -.2 }}>{deal.who}</Text>
-        {deal.tag ? <View style={{ borderRadius: 6, overflow: 'hidden', paddingHorizontal: 6, paddingVertical: 1, backgroundColor: deal.tag === 'Partner' ? colors['surface-raised'] : undefined }}>
-          {deal.tag === 'Today' ? <GradientFill radius={6} /> : null}
-          <Text className="font-dm-bold" style={{ fontSize: 9.5, lineHeight: 13, letterSpacing: .8, color: deal.tag === 'Today' ? aurora.onFill : colors['fg-muted'] }}>{deal.tag.toUpperCase()}</Text>
-        </View> : null}
-      </View>
-      <Text numberOfLines={1} className="font-dm" style={{ fontSize: 12, lineHeight: 17, color: colors['fg-muted'] }}>{deal.what}</Text>
-    </View>
-    <View><Glyph name="chevron" size={14} color={colors['fg-muted']} /></View>
-  </Pressable>;
+  const happyHour = deal.badge === 'HH', parts = deal.what.split(' · ');
+  const caption = happyHour ? 'Happy hour' : parts[0];
+  const accent = happyHour ? deal.what.replace(/happy[ -]?hour/i, '').replace(/\s+/g, ' ').trim() : parts.slice(1).join(' · ');
+  const entry = deal.entryKey ? catalog.entries[deal.entryKey] : undefined;
+  return <StubTicket testID={`discover-deal-${deal.id}`} lead={dealLead(deal, now)} title={deal.who} tags={deal.tag ? [deal.tag] : undefined} caption={caption} accent={accent || undefined}
+    photo={entry ? { candidates: homeIndexPhotos(entry, catalog), glyph: entry.glyph, label: `${entry.name} photo unavailable` } : undefined}
+    width={width} onPress={open} accessibilityLabel={`${deal.who}. ${deal.what}${deal.tag ? `. ${deal.tag}` : ''}`} />;
 }
 
-export function DiscoverDealsRow({ deals }: { deals: DiscoverDeal[] }) {
-  return <Bleed gap={10}>{deals.map(deal => <DiscoverDealCard key={deal.id} deal={deal} />)}</Bleed>;
+export function DiscoverDealsRow({ deals, catalog, now }: { deals: DiscoverDeal[]; catalog: HomeGuideCatalog; now: Date }) {
+  return <StubRail testID="discover-deals">{deals.map(deal => <DealTicket key={deal.id} deal={deal} catalog={catalog} now={now} />)}</StubRail>;
 }
 
 /** A full-width category poster: photo, scrim, family kicker, name, count and an arrow. */
@@ -98,7 +88,7 @@ export function DiscoverCategoryPoster({ category, catalog, count, unit, kicker 
   const router = useRouter(), aurora = useAurora(), { width } = useWindowDimensions();
   const total = count ?? category.entries.length, label = unit ? `${total} ${unit}` : countLabel(total, category.unit);
   return <Pressable testID={`discover-poster-${category.id}`} accessibilityRole="button" accessibilityLabel={`${category.title}. ${label}`} onPress={() => router.push(categoryHref(category.id) as never)}
-    style={({ pressed }) => ({ height: width <= 360 ? 136 : 150, borderRadius: 22, overflow: 'hidden', backgroundColor: aurora.photoFallback, opacity: pressed ? .88 : 1, boxShadow: aurora.shadow } as ViewStyle)}>
+    style={({ pressed }) => ({ height: width <= 360 ? 110 : 120, borderRadius: 20, overflow: 'hidden', backgroundColor: aurora.photoFallback, opacity: pressed ? .88 : 1, boxShadow: aurora.shadow } as ViewStyle)}>
     <Photo candidates={categoryPhotos(category, catalog)} radius={0} stripedPlaceholder={false} retryable={false} fallbackGlyph={category.glyph as never}
       fallbackLabel={`${category.title} photo unavailable`} inkColor="rgba(255, 255, 255, 0.7)" style={[StyleSheet.absoluteFill, { backgroundColor: aurora.photoFallback }]} />
     <LinearGradient pointerEvents="none" colors={[...SCRIM]} style={StyleSheet.absoluteFill} />
@@ -107,11 +97,11 @@ export function DiscoverCategoryPoster({ category, catalog, count, unit, kicker 
         <Glyph name={category.glyph} size={13} color="rgba(255, 255, 255, 0.9)" strokeWidth={2} />
         <Text className="font-dm-bold" style={{ fontSize: 11, lineHeight: 15, letterSpacing: 1.2, color: 'rgba(255, 255, 255, 0.9)' }}>{kicker.toUpperCase()}</Text>
       </View>
-      <Text numberOfLines={1} className="font-dm-bold" style={{ fontSize: 22, lineHeight: 27, letterSpacing: -.6, color: '#FFFFFF' }}>{category.title}</Text>
+      <Text numberOfLines={1} className="font-dm-bold" style={{ fontSize: 20, lineHeight: 25, letterSpacing: -.6, color: '#FFFFFF' }}>{category.title}</Text>
       <Text className="font-dm" style={{ fontSize: 12.5, lineHeight: 17, color: 'rgba(255, 255, 255, 0.85)' }}>{label}</Text>
     </View>
-    <View pointerEvents="none" style={{ position: 'absolute', right: 14, bottom: 14, width: 38, height: 38, borderRadius: 19, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' }}>
-      <GradientFill radius={19} /><View><Glyph name="arrow" size={16} color={aurora.onFill} strokeWidth={2} /></View>
+    <View pointerEvents="none" style={{ position: 'absolute', right: 14, bottom: 13, width: 36, height: 36, borderRadius: 18, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' }}>
+      <GradientFill radius={18} /><View><Glyph name="arrow" size={16} color={aurora.onFill} strokeWidth={2} /></View>
     </View>
   </Pressable>;
 }
@@ -131,68 +121,33 @@ export function DiscoverMore({ family, categories }: { family: string; categorie
   </View>;
 }
 
-const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-const DAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-function DateTile({ top, middle, bottom }: { top: string; middle: string; bottom: string }) {
-  const colors = useThemeColors(), aurora = useAurora();
-  return <View style={{ width: 50, height: 54, borderRadius: 13, overflow: 'hidden', alignItems: 'center', backgroundColor: colors['surface-sunk'] }}>
-    <View style={{ alignSelf: 'stretch', alignItems: 'center', paddingVertical: 2, overflow: 'hidden' }}><GradientFill radius={0} />
-      <Text className="font-dm-bold" style={{ fontSize: 10, lineHeight: 13, letterSpacing: 1, color: aurora.onFill }}>{top}</Text></View>
-    <Text className="font-dm-bold text-ink" style={{ fontSize: middle.length > 3 ? 15 : 19, lineHeight: 22, marginTop: 2 }}>{middle}</Text>
-    <Text className="font-dm-bold" style={{ fontSize: 9, lineHeight: 12, letterSpacing: 1, color: colors['fg-muted'] }}>{bottom}</Text>
-  </View>;
-}
-
-function ShowRow({ title, meta, tile, href, divider, testID }: { title: string; meta: string; tile: [string, string, string]; href: string; divider: boolean; testID: string }) {
-  const router = useRouter(), colors = useThemeColors(), aurora = useAurora();
-  return <Pressable testID={testID} accessibilityRole="button" accessibilityLabel={`${title}. ${meta}`} onPress={() => router.push(href as never)}
-    style={({ pressed }) => ({ minHeight: 72, flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 9, paddingLeft: 12, paddingRight: 16, borderTopWidth: divider ? 1 : 0, borderTopColor: aurora.glassEdge, opacity: pressed ? .72 : 1 })}>
-    <DateTile top={tile[0]} middle={tile[1]} bottom={tile[2]} />
-    <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
-      <Text numberOfLines={1} className="font-dm-medium text-ink" style={{ fontSize: 16, lineHeight: 21, letterSpacing: -.2 }}>{title}</Text>
-      <Text numberOfLines={1} className="font-dm" style={{ fontSize: 13, lineHeight: 18, color: colors['fg-muted'] }}>{meta}</Text>
-    </View>
-    <Glyph name="chevron" size={16} color={colors['fg-muted']} strokeWidth={1.8} />
-  </Pressable>;
-}
-
-/** Dated shows first, then each venue's published weekly series. */
-export function DiscoverShows({ events, series }: { events: HomeGuideEntry[]; series: DiscoverSeries[] }) {
-  const showtime = (event: HomeGuideEntry) => event.details.find(detail => detail.label === 'Showtime')?.value;
-  const rows = [
-    ...events.slice(0, 3).map(event => { const at = new Date(event.startsAt || ''); const valid = !Number.isNaN(at.getTime());
-      return { id: 'event:' + event.id, title: event.name, meta: [event.caption, showtime(event)].filter(Boolean).join(' · '), href: homeGuideHref(event),
-        tile: (valid ? [MONTHS[at.getMonth()], String(at.getDate()), DAYS[at.getDay()]] : ['SOON', '·', '']) as [string, string, string] }; }),
-    ...series.map(item => ({ id: 'series:' + item.id, title: item.title, meta: [item.venue.name, item.time, /21\+/.test(item.venue.caption) ? '21+' : ''].filter(Boolean).join(' · '),
-      href: item.href, tile: ['EVERY', item.weekday.slice(0, 3).toUpperCase(), 'WEEKLY'] as [string, string, string] })),
+/** Dated shows first, then each venue's published weekly series — as date tickets. */
+export function DiscoverShows({ events, series, catalog, layout = 'rail' }: { events: HomeGuideEntry[]; series: DiscoverSeries[]; catalog: HomeGuideCatalog; layout?: 'rail' | 'stack' }) {
+  const router = useRouter();
+  const showtime = (event: HomeGuideEntry) => event.details.find(detail => detail.label === 'Showtime')?.value || event.facts.find(fact => fact.glyph === 'clock')?.value;
+  const items = [
+    ...events.slice(0, 6).map(event => ({ id: 'event:' + event.id, lead: dateLead(event.startsAt) || { kind: 'thumb' as const }, title: event.name, caption: event.caption, accent: showtime(event), href: homeGuideHref(event),
+      photo: { candidates: homeIndexPhotos(event, catalog), glyph: event.glyph, label: `${event.name} photo unavailable` } })),
+    ...series.map(item => ({ id: 'series:' + item.id, lead: weeklyLead(item.weekday), title: item.title, caption: [item.venue.name, /21\+/.test(item.venue.caption) ? '21+' : ''].filter(Boolean).join(' · '), accent: item.time, href: item.href, photo: undefined })),
   ];
-  if (!rows.length) return null;
-  return <AuroraList testID="discover-shows">{rows.map((row, index) => <ShowRow key={row.id} testID={`discover-show-${row.id}`} divider={index > 0} title={row.title} meta={row.meta} tile={row.tile} href={row.href} />)}</AuroraList>;
+  if (!items.length) return null;
+  const tickets = items.map(item => <StubTicket key={item.id} testID={`discover-show-${item.id}`} lead={item.lead} title={item.title} caption={item.caption} accent={item.accent} photo={item.photo}
+    width={layout === 'rail' ? 300 : 'full'} onPress={() => router.push(item.href as never)} accessibilityLabel={[item.title, item.caption, item.accent].filter(Boolean).join('. ')} />);
+  return layout === 'rail' ? <StubRail testID="discover-shows">{tickets}</StubRail> : <StubStack testID="discover-shows">{tickets}</StubStack>;
 }
 
-/** Up to four venues as photo cards with their own facts and calendar. */
+/** Venues as square-ish posters on a rail: photo, name, what kind of room, then pills. */
 export function DiscoverRooms({ venues, catalog }: { venues: HomeGuideEntry[]; catalog: HomeGuideCatalog }) {
-  const router = useRouter(), colors = useThemeColors(), card = useAuroraCard(), aurora = useAurora();
+  const router = useRouter();
   if (!venues.length) return null;
-  return <View testID="discover-rooms" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-    {venues.slice(0, 4).map(venue => {
-      const calendar = venue.links.some(link => /calendar|events/i.test(link.url));
-      const place = venue.facts.find(fact => fact.glyph === 'pin')?.value;
-      return <Pressable key={venue.id} testID={`discover-room-${venue.id}`} accessibilityRole="button" accessibilityLabel={`${venue.name}. ${venue.caption}`} onPress={() => router.push(homeGuideHref(venue) as never)}
-        style={({ pressed }) => ({ ...card, width: '48.4%', borderRadius: 18, overflow: 'hidden', opacity: pressed ? .85 : 1 })}>
-        <Photo candidates={homeIndexPhotos(venue, catalog)} radius={0} stripedPlaceholder={false} retryable={false} fallbackGlyph={venue.glyph as never}
-          fallbackLabel={`${venue.name} photo unavailable`} style={{ width: '100%', height: 96, backgroundColor: aurora.photoFallback }} />
-        <View style={{ paddingHorizontal: 11, paddingTop: 9, paddingBottom: 11, gap: 1 }}>
-          <Text numberOfLines={1} className="font-dm-medium text-ink" style={{ fontSize: 14, lineHeight: 19 }}>{venue.name}</Text>
-          <Text numberOfLines={1} className="font-dm" style={{ fontSize: 12, lineHeight: 16, color: colors['fg-muted'] }}>{venue.caption.split(' · ')[0]}</Text>
-          {calendar || place ? <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 5 }}>
-            <Glyph name={calendar ? 'calendar' : 'pin'} size={12} color={colors['fg-accent']} strokeWidth={2} />
-            <Text numberOfLines={1} className="font-dm-medium" style={{ flexShrink: 1, fontSize: 11.5, lineHeight: 15, color: colors['fg-accent'] }}>{[calendar ? 'Calendar' : '', place].filter(Boolean).join(' · ')}</Text>
-          </View> : null}
-        </View>
-      </Pressable>;
-    })}
-  </View>;
+  return <StubRail testID="discover-rooms">{venues.slice(0, 8).map(venue => {
+    const [kind, detail] = venue.caption.split(' · ');
+    const calendar = venue.links.some(link => /calendar|events/i.test(link.url)), place = venue.facts.find(fact => fact.glyph === 'pin')?.value;
+    const pills = [calendar ? { text: 'Calendar', glyph: 'ticket' } : place ? { text: place, glyph: 'pin' } : null, detail ? { text: detail.charAt(0).toUpperCase() + detail.slice(1) } : null].filter((pill): pill is { text: string; glyph?: string } => Boolean(pill));
+    return <StubPoster key={venue.id} testID={`discover-room-${venue.id}`} title={venue.name} caption={kind} pills={pills}
+      photo={{ candidates: homeIndexPhotos(venue, catalog), glyph: venue.glyph, label: `${venue.name} photo unavailable` }}
+      onPress={() => router.push(homeGuideHref(venue) as never)} accessibilityLabel={`${venue.name}. ${venue.caption}`} />;
+  })}</StubRail>;
 }
 
 /** Family chapter frame: a ruled header with the family name and count. */

@@ -70,8 +70,9 @@ function PhotoOrIcon({ photo, width, height, radius }: { photo: StubPhoto; width
   if (!photo.uri && !photo.candidates?.length) return <View style={{ width, height, borderRadius: radius, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' }}>
     <GradientFill radius={radius} soft /><View><Glyph name={photo.glyph as GlyphName} size={Math.min(34, Math.round(height * .36))} color={colors['fg-accent']} strokeWidth={1.5} /></View>
   </View>;
+  const light = aurora.scheme === 'light';
   return <Photo uri={photo.uri} candidates={photo.candidates} radius={radius} stripedPlaceholder={false} retryable={false} fallbackGlyph={photo.glyph as GlyphName} fallbackLabel={photo.label}
-    style={{ width, height, backgroundColor: aurora.photoFallback }} />;
+    inkColor={light ? colors['fg-accent'] : undefined} style={{ width, height, backgroundColor: light ? colors['surface-sunk'] : aurora.photoFallback }} />;
 }
 
 function Lead({ lead, photo }: { lead: StubLead; photo?: StubPhoto }) {

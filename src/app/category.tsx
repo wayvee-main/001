@@ -1,14 +1,22 @@
 import { useLocalSearchParams } from 'expo-router';
 import { Text, View } from 'react-native';
 import { IconBadge } from '@/components/aurora';
-import { DiscoverDealCard, DiscoverRows, DiscoverSectionHeading, DiscoverShows } from '@/components/discover';
+import { DealTicket, DiscoverRooms, DiscoverRows, DiscoverSectionHeading, DiscoverShows } from '@/components/discover';
+import { StubStack } from '@/components/stub-cards';
 import { HomeGuideScreen } from '@/components/home-field-guide';
 import { EmptyState } from '@/components/ui';
 import { buildDiscoverGuide, countLabel } from '@/lib/discover-categories';
-import { discoverDeals } from '@/lib/discover-deals';
+import { discoverDeals, type DiscoverDeal } from '@/lib/discover-deals';
 import { promotionForPlacement } from '@/lib/promotions';
 import { useThemeColors } from '@/lib/theme';
 import { useHomeGuide } from '@/lib/use-home-guide';
+
+/** Deals split by when they count: on today, the rest, then partner offers. */
+const DEAL_GROUPS: { key: string; title: string; meta: (count: number) => string; test: (deal: DiscoverDeal) => boolean }[] = [
+  { key: 'today', title: 'Today', meta: count => `${count} on now`, test: deal => deal.tag === 'Today' },
+  { key: 'local', title: 'Happy hours & offers', meta: count => `${count} ${count === 1 ? 'place' : 'places'}`, test: deal => !deal.tag },
+  { key: 'partner', title: 'Partner offers', meta: () => 'Terms apply per offer', test: deal => deal.tag === 'Partner' },
+];
 
 /** One Discover category (or a whole family, or every deal) as a full list. */
 export default function DiscoverCategoryScreen() {
@@ -26,13 +34,18 @@ export default function DiscoverCategoryScreen() {
         <Text className="font-dm" style={{ fontSize: 13, lineHeight: 18, color: colors['fg-muted'] }}>{[count, familyName && !family ? familyName : '', displayCity].filter(Boolean).join(' · ')}</Text>
       </View>
     </View>
-    {id === 'deals' ? (deals.length ? <View style={{ gap: 10 }}>{deals.map(deal => <DiscoverDealCard key={deal.id} deal={deal} width="100%" />)}</View>
+    {id === 'deals' ? (deals.length ? DEAL_GROUPS.map(group => { const items = deals.filter(group.test); return items.length ? <View key={group.title}>
+        <DiscoverSectionHeading title={group.title} meta={group.meta(items.length)} />
+        <StubStack testID={`deals-${group.key}`}>{items.map(deal => <DealTicket key={deal.id} deal={deal} catalog={catalog} now={now} width="full" />)}</StubStack>
+      </View> : null; })
       : <EmptyState compact title="No current deals" message="Offers appear here when a venue publishes one." />)
     : family ? family.categories.map(item => <View key={item.id}>
         <DiscoverSectionHeading title={item.title} meta={countLabel(item.entries.length, item.unit)} />
-        {item.id === 'shows' ? <DiscoverShows events={item.entries} series={guide.series} /> : <DiscoverRows entries={item.entries} catalog={catalog} now={now} meta={item.meta} />}
+        {item.id === 'shows' ? <DiscoverShows events={item.entries} series={guide.series} catalog={catalog} layout="stack" />
+          : item.family === 'go-out' ? <DiscoverRooms venues={item.entries} catalog={catalog} />
+          : <DiscoverRows entries={item.entries} catalog={catalog} now={now} meta={item.meta} />}
       </View>)
-    : category ? (id === 'shows' ? <DiscoverShows events={category.entries} series={guide.series} /> : <DiscoverRows entries={category.entries} catalog={catalog} now={now} meta={category.meta} testID="discover-category-row" />)
+    : category ? (id === 'shows' ? <DiscoverShows events={category.entries} series={guide.series} catalog={catalog} layout="stack" /> : <DiscoverRows entries={category.entries} catalog={catalog} now={now} meta={category.meta} testID="discover-category-row" />)
     : <EmptyState compact title="Nothing here just yet" message="This category is empty in the current catalog." />}
   </HomeGuideScreen>;
 }

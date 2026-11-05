@@ -42,10 +42,9 @@ export default function DiscoverScreen() {
       const shows = guide.byId.shows?.entries || [], upcoming = shows.length + guide.series.length;
       const chips = [guide.byId['live-music'], ...others.filter(category => category.id !== 'shows')].filter(Boolean);
       return <DiscoverChapter key={family.id} family={family} label="Shows & rooms">
-        {upcoming && guide.byId.shows ? <DiscoverCategoryPoster category={guide.byId.shows} catalog={catalog} kicker="Go out" count={upcoming} unit="upcoming" /> : null}
-        {upcoming ? <View style={{ height: 10 }} /> : null}
-        <DiscoverShows events={shows} series={guide.series} />
-        {venues.length ? <View style={{ marginTop: upcoming ? 22 : 0 }}><DiscoverSectionHeading title="Rooms worth knowing" meta={`${venues.length} venues`} /><DiscoverRooms venues={venues} catalog={catalog} /></View> : null}
+        {upcoming ? <DiscoverSectionHeading title="On stage" meta={`${upcoming} upcoming`} action="See all" onPress={() => router.push(categoryHref('shows') as never)} /> : null}
+        <DiscoverShows events={shows} series={guide.series} catalog={catalog} />
+        {venues.length ? <View style={{ marginTop: upcoming ? 24 : 0 }}><DiscoverSectionHeading title="Rooms worth knowing" meta={`${venues.length} venues`} action="See all" onPress={() => router.push(categoryHref('go-out') as never)} /><DiscoverRooms venues={venues} catalog={catalog} /></View> : null}
         <DiscoverMore family={family.title} categories={chips} />
       </DiscoverChapter>;
     }
@@ -76,7 +75,7 @@ export default function DiscoverScreen() {
       </View> : null}
       {deals.length ? <View style={{ marginTop: 10 }}>
         <DiscoverSectionHeading title="Deals & happy hours" meta={`${deals.length} near you`} action="See all" onPress={() => router.push(categoryHref('deals') as never)} />
-        <DiscoverDealsRow deals={deals} />
+        <DiscoverDealsRow deals={deals} catalog={catalog} now={now} />
       </View> : null}
       {guide.families.some(family => family.count) ? guide.families.map(chapter)
         : <EmptyState compact title={`More of ${displayCity} is on the way`} message="Local listings appear as the catalog grows." />}

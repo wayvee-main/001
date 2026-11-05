@@ -1,5 +1,5 @@
 import { hasHappyHour } from '@/lib/discover-categories';
-import { homeGuideHref, type HomeGuideCatalog, type HomeGuideEntry } from '@/lib/home-guide';
+import { homeGuideHref, homeGuideKey, type HomeGuideCatalog, type HomeGuideEntry } from '@/lib/home-guide';
 import { compactOffer, localOffers, type LocalOffer } from '@/lib/local-perks';
 import type { WayveePromotion } from '@/lib/promotions';
 
@@ -12,6 +12,8 @@ export type DiscoverDeal = {
   badge: string; glyph?: string;
   who: string; what: string;
   tag?: 'Today' | 'Partner';
+  /** The venue the deal belongs to, for its photo. Partners have none. */
+  entryKey?: string;
   action: { type: 'offer'; offer: LocalOffer } | { type: 'entry'; href: string } | { type: 'url'; url: string };
 };
 
@@ -47,7 +49,7 @@ function partner(promotion: WayveePromotion | undefined): DiscoverDeal[] {
 export function discoverDeals(catalog: HomeGuideCatalog, now = new Date(), promotions: readonly (WayveePromotion | undefined)[] = []): DiscoverDeal[] {
   const offers: DiscoverDeal[] = localOffers(catalog, now).map(offer => {
     const copy = compactOffer(offer);
-    return { id: 'offer:' + offer.id, badge: copy.title.match(/\$[\d.]+/)?.[0] || '%', who: offer.venue, what: `${copy.title} · ${copy.detail}`,
+    return { id: 'offer:' + offer.id, badge: copy.title.match(/\$[\d.]+/)?.[0] || '%', who: offer.venue, what: `${copy.title} · ${copy.detail}`, entryKey: offer.venueKey,
       tag: coversToday(offer.label || '', now) ? 'Today' : undefined, action: { type: 'offer', offer } };
   });
   const offered = new Set(offers.map(deal => deal.who));
@@ -56,7 +58,7 @@ export function discoverDeals(catalog: HomeGuideCatalog, now = new Date(), promo
     const wording = happyHourWording(entry);
     if (!wording || seen.has(entry.name)) return [];
     seen.add(entry.name);
-    return [{ id: 'happy:' + entry.kind + ':' + entry.id, badge: 'HH', who: entry.name, what: wording, tag: coversToday(wording, now) ? 'Today' as const : undefined,
+    return [{ id: 'happy:' + entry.kind + ':' + entry.id, badge: 'HH', who: entry.name, what: wording, entryKey: homeGuideKey(entry.kind, entry.id), tag: coversToday(wording, now) ? 'Today' as const : undefined,
       action: { type: 'entry' as const, href: homeGuideHref(entry) } }];
   });
   const partners = promotions.flatMap(partner);
