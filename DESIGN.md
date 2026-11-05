@@ -15,25 +15,45 @@ Keep the current Aurora palette, top chrome and four category tiles.
 - Use text By day / After hours tabs with a quiet active underline, then a
   single “Start here” feature: 20px corners, 13px padding (11px narrow), 22px
   title (21px narrow), one-line snapshot and a 92×100px photo (80×94px narrow).
-  Facts remain source-backed; only the published Menu gets a soft accent pill.
+  Facts remain source-backed and every metadata value uses the shared pill.
 - “Local perks · offers near you” is one 44px-minimum soft-gradient ribbon
   opening Offers. Actual promotions, terms and stay actions remain on Offers.
-- “For later” groups two real nearby bar rows inside one 20px card: 52px
-  photos with 11px corners, 16px single-line names, quiet inline facts, 74px
-  minimum rows and interior hairlines. More opens the existing Bars guide.
+- For Later, For You and Collections use one **individual card per item**,
+  never a section-wide container. All three share `QuietHomeItem`: 20px corners,
+  12px horizontal padding, a 74px minimum inner row (76px with the card border),
+  a 52px thumbnail with 11px corners, 16px single-line title, and compact metadata
+  pills. Keep 10px gaps between cards. Normal text-scale sizes match exactly;
+  accessibility scaling may grow the cards. More opens each existing guide.
 - Vee is a thin “Let Vee connect the dots.” ribbon below the group, opening
   the real planner. Match Local Perks: 44px minimum height, 13px corners, soft
   gradient, 12px text and 12px horizontal padding, with a 20px gradient Vee mark.
-- For You uses the current three time-sensitive ideas as 44px-minimum glyph
-  links. Collections shows two current collection links; More opens the full
-  collection page. Enclose each section’s links in the same 20px grouped card
-  as For Later, with matching inset and interior hairlines. Preserve their
-  existing routes and complete accessible labels.
+- For You uses the current three time-sensitive ideas; Collections shows two
+  current entries with More opening the full collection page. Use their actual
+  thumbnail candidates, source metadata and complete accessible labels.
 - Use 22px section gaps, 19px headings (18px narrow) and no extra section rules.
   Layouts grow with accessibility font scaling; never add fixture place facts
   or replace missing source photos with another venue’s image.
 - The implementation is scoped to `quiet-home.tsx` and Home. Other screens
   continue using their existing shared Aurora components.
+
+## Universal card copy and metadata
+
+- All card/poster descriptions and snapshots use `compactCardText`: at most
+  **80 characters**, whitespace normalized, one display line, tail ellipsis.
+  Titles use `shortCardTitle`: **five words / 40 characters**. Keep full source
+  records, accessibility labels, detail routes and expanded About text intact.
+- Every card metadata value is enclosed by the shared `MetadataPill`; use
+  `MetadataLine` for inline sets. Compact capsules are 27px minimum, regular
+  capsules 30px, with one shared subtle accent tint/ink, 11px text, outline glyphs and 28-character labels with
+  ellipses. Prefer two useful facts on narrow cards. Full terms stay available
+  in the detail/source view. Never add facts to fill a slot.
+- Distances are numeric with units: `0.0 mi`, `0.05 mi`, `0.7 mi`, `12 mi`.
+  `formatMiles` never emits “Here”, comparison signs or less/more-than phrases.
+  Normalize cached labels through `numericDistanceLabel` as well; preserve
+  measured/estimated provenance and do not alter price comparisons.
+- Apply these shared rules across Home, Discover, secondary/search cards,
+  photo posters, journal previews and detail-header facts. Long-form menu,
+  policy and About content remains available when opened.
 
 ## Current approval — Aurora
 

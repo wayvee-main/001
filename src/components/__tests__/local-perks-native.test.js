@@ -6,6 +6,7 @@ import { cssInterop } from 'react-native-css-interop';
 import { EditorialNav } from '@/components/editorial-nav';
 import { AuroraEntryRow } from '@/components/aurora';
 import { DaybreakFeature } from '@/components/daybreak';
+import { compactCardText, shortCardTitle } from '@/lib/card-presentation';
 import { QuietHomeFeature, QuietHomeLink, QuietHomeOffers, QuietHomePeriods, QuietHomeVee, QuietHomeVenueRow } from '@/components/quiet-home';
 import { HomeTimelyRecommendations, LocalCategoryShelf, LocalPerksBanners, LocalPerksCard, PerksRoundButton } from '@/components/local-perks';
 import { useReducedMotionPreference } from '@/lib/motion';
@@ -90,6 +91,31 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
       expect(mockPush).toHaveBeenLastCalledWith(destination);
     }
   });
+  it('gives every Home item its own matching card and encloses every fact', () => {
+    const facts = [{ key: 'count', text: '4 picks', label: '4 picks', tone: 'category' }, { key: 'time', text: 'Tonight', label: 'Tonight', tone: 'category' }];
+    const venue = mount(<QuietHomeVenueRow entry={{ ...entry, facts: [{ glyph: 'pin', value: '<0.1 mi' }] }} catalog={empty} now={new Date(2026, 10, 3, 12)} />);
+    const idea = mount(<QuietHomeLink title="A timely idea" glyph="coffee" metadata={facts} testID="idea" onPress={() => {}} />);
+    const collection = mount(<QuietHomeLink title="A current collection" glyph="bookmark" metadata={facts} testID="collection" onPress={() => {}} />);
+    for (const [tree, id] of [[venue, 'daybreak-home-row'], [idea, 'idea'], [collection, 'collection']]) {
+      expect(style(tree, id + '-card')).toMatchObject({ borderRadius: 20, paddingHorizontal: 12, borderWidth: 1, backgroundColor: ROLES['surface-raised'][theme] });
+      expect(style(tree, id)).toMatchObject({ minHeight: 74, paddingVertical: 10 });
+      const capsules = nodes(tree).filter(node => node.props.accessible && StyleSheet.flatten(node.props.style)?.borderRadius === 999);
+      expect(capsules).toHaveLength(2);
+      for (const capsule of capsules) expect(StyleSheet.flatten(capsule.props.style).minHeight).toBe(27);
+    }
+  });
+  it('caps the Golden Bears poster copy without changing its accessible venue record', () => {
+    const name = 'California Golden Bears Football vs Stanford Cardinal Football';
+    const description = 'An extended college football preview with schedules, team information, stadium details and additional venue information that belongs on the detail page.';
+    const source = { ...entry, kind: 'event', name, description, facts: [{ glyph: 'calendar', value: 'Tomorrow' }] };
+    const tree = mount(<DaybreakFeature entry={source} catalog={empty} now={new Date(2026, 10, 3, 12)} />);
+    const snapshot = nodes(tree).find(node => node.props.testID === 'daybreak-poster-description');
+    expect(snapshot.props.numberOfLines).toBe(1);
+    expect(snapshot.children.join('')).toBe(compactCardText(description));
+    expect(snapshot.children.join('').length).toBeLessThanOrEqual(80);
+    expect(nodes(tree).some(node => node.type === 'Text' && node.children?.includes(shortCardTitle(name)))).toBe(true);
+    expect(pressable(tree, 'daybreak-poster').props.accessibilityLabel).toContain(name);
+  });
   it('keeps the Quiet Feed time selector connected to its featured pool', () => {
     const changed = jest.fn(), tree = mount(<QuietHomePeriods value="day" onChange={changed} />);
     expect(pressable(tree, 'daybreak-period-day').props.accessibilityState.selected).toBe(true);
@@ -144,9 +170,9 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     const pills = nodes(tree).filter(node => /^card-metadata-(pin:0|menu|offer)$/.test(node.props.testID || ''));
     expect(pills).toHaveLength(3);
     for (const pill of pills) expect(StyleSheet.flatten(pill.props.style)).toMatchObject({ minHeight: 30, flexDirection: 'row', borderRadius: 999, borderWidth: 0 });
-    expect(style(tree, 'card-metadata-pin:0').backgroundColor).toBe(ROLES['metadata-distance'][theme]);
-    expect(style(tree, 'card-metadata-menu').backgroundColor).toBe(ROLES['metadata-menu'][theme]);
-    expect(style(tree, 'card-metadata-offer').backgroundColor).toBe(ROLES['metadata-offer'][theme]);
+    expect(style(tree, 'card-metadata-pin:0').backgroundColor).toBe(ROLES['accent-tint'][theme]);
+    expect(style(tree, 'card-metadata-menu').backgroundColor).toBe(ROLES['accent-tint'][theme]);
+    expect(style(tree, 'card-metadata-offer').backgroundColor).toBe(ROLES['accent-tint'][theme]);
     expect(style(tree, 'perks-add-stop')).toMatchObject({ top: 92, right: 18 });
     expect(style(tree, 'perks-add-stop').bottom).toBeUndefined();
   });

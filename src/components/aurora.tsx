@@ -4,11 +4,13 @@ import { useId, type ReactNode } from 'react';
 import { StyleSheet, Text, View, useWindowDimensions, type StyleProp, type ViewStyle } from 'react-native';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 
+import { MetadataLine, MetadataPill } from '@/components/metadata-pill';
 import { Glyph } from '@/components/glyph';
 import { NativePressable as Pressable } from '@/components/native-pressable';
 import { Photo } from '@/components/photo';
 import type { PhotoCandidate } from '@/components/reliable-image';
 import { gradientColors, useAurora } from '@/lib/aurora';
+import { compactCardText, shortCardTitle } from '@/lib/card-presentation';
 import { homeCardMetadata } from '@/lib/card-metadata';
 import { homeGuideHref, type HomeGuideCatalog, type HomeGuideEntry } from '@/lib/home-guide';
 import { homeIndexPhotos } from '@/lib/home-index-photos';
@@ -113,9 +115,9 @@ function OverlayPhoto({ uri, photos, glyph, label }: { uri?: string; photos?: re
 }
 
 /** The one overlay-card recipe: photo, scrim, then type at the foot. */
-export function AuroraPhotoCard({ title, meta, image, photos, glyph = 'compass', width, height, radius = 22, titleSize = 16, onPress, testID, accessibilityLabel, children, footer, style }: {
+export function AuroraPhotoCard({ title, meta, image, photos, glyph = 'compass', width, height, radius = 22, titleSize = 16, onPress, testID, accessibilityLabel, children, footer, style, metadataInset = 0 }: {
   title: string; meta?: string; image?: string; photos?: readonly PhotoCandidate[]; glyph?: string; width?: number; height: number; radius?: number;
-  titleSize?: number; onPress: () => void; testID?: string; accessibilityLabel?: string; children?: ReactNode; footer?: ReactNode; style?: StyleProp<ViewStyle>;
+  titleSize?: number; metadataInset?: number; onPress: () => void; testID?: string; accessibilityLabel?: string; children?: ReactNode; footer?: ReactNode; style?: StyleProp<ViewStyle>;
 }) {
   const aurora = useAurora();
   return <View testID={testID ? `${testID}-frame` : undefined} style={[{ width, height, borderRadius: radius, overflow: 'hidden', flexShrink: 0, backgroundColor: aurora.photoFallback, boxShadow: aurora.shadow } as ViewStyle, style]}>
@@ -123,8 +125,8 @@ export function AuroraPhotoCard({ title, meta, image, photos, glyph = 'compass',
       style={({ pressed }) => ({ flex: 1, opacity: pressed ? 0.88 : 1 })}>
       <OverlayPhoto uri={image} photos={photos} glyph={glyph} label={`${title} photo unavailable`} />
       <View pointerEvents="none" style={{ position: 'absolute', left: 14, right: footer ? 64 : 14, bottom: 13, gap: 3 }}>
-        <Text numberOfLines={2} className="font-dm-medium" style={{ fontSize: titleSize, lineHeight: Math.round(titleSize * 1.25), letterSpacing: -0.2, color: aurora.onPhoto }}>{title}</Text>
-        {meta ? <Text numberOfLines={1} className="font-dm" style={{ fontSize: 12, lineHeight: 16, color: 'rgba(255, 255, 255, 0.8)' }}>{meta}</Text> : null}
+        <Text numberOfLines={2} className="font-dm-medium" style={{ fontSize: titleSize, lineHeight: Math.round(titleSize * 1.25), letterSpacing: -0.2, color: aurora.onPhoto }}>{shortCardTitle(title)}</Text>
+        {meta ? <View style={{ paddingRight: metadataInset }}><MetadataLine text={meta} /></View> : null}
         {footer}
       </View>
     </Pressable>
@@ -138,7 +140,7 @@ export function AuroraEntryCard({ entry, catalog, width, height, meta, titleSize
 }) {
   const router = useRouter(), { saved, canSave, save, added, add } = useEntryActions(entry);
   return <AuroraPhotoCard testID={testID} title={entry.name} meta={meta ?? entry.caption} photos={homeIndexPhotos(entry, catalog)} glyph={entry.glyph}
-    width={width} height={height} titleSize={titleSize} onPress={() => router.push(homeGuideHref(entry) as never)} accessibilityLabel={`Explore ${entry.name}. ${entry.caption}`}>
+    width={width} height={height} titleSize={titleSize} metadataInset={40} onPress={() => router.push(homeGuideHref(entry) as never)} accessibilityLabel={`Explore ${entry.name}. ${entry.caption}`}>
     {canSave ? <PhotoAction testID="perks-save-place" glyph={saved ? 'check' : 'heart'} label={`${saved ? 'Unsave' : 'Save'} ${entry.name}`} selected={saved} onPress={save} style={{ top: 10, right: 10 }} /> : null}
     <PhotoAction testID="perks-add-stop" glyph={added ? 'check' : 'plus'} label={`${added ? 'Remove' : 'Add'} ${entry.name} ${added ? 'from' : 'to'} your evening`} selected={added} onPress={add} style={{ bottom: 12, right: 10 }} />
   </AuroraPhotoCard>;
@@ -166,14 +168,10 @@ export function AuroraPoster({ entry, catalog, now, photoHeight = 168, chip, sub
         {chip ? <View pointerEvents="none" style={{ position: 'absolute', top: 12, left: 12 }}><AuroraChip label={chip.label} glyph={chip.glyph} /></View> : null}
       </View>
       <View style={{ paddingTop: 13, paddingBottom: 14, paddingLeft: 16, paddingRight: 68, gap: 1 }}>
-        <Text numberOfLines={2} className="font-dm-bold text-ink" style={{ fontSize: narrow ? 20 : 21, lineHeight: 26, letterSpacing: -0.6 }}>{entry.name}</Text>
-        {description ? <Text numberOfLines={1} className="font-dm" style={{ fontSize: 13, lineHeight: 18, color: colors['fg-muted'] }}>{description}</Text> : null}
+        <Text numberOfLines={2} className="font-dm-bold text-ink" style={{ fontSize: narrow ? 20 : 21, lineHeight: 26, letterSpacing: -0.6 }}>{shortCardTitle(entry.name)}</Text>
+        {description ? <Text testID={`${testID}-description`} numberOfLines={1} ellipsizeMode="tail" className="font-dm" style={{ fontSize: 13, lineHeight: 18, color: colors['fg-muted'] }}>{compactCardText(description)}</Text> : null}
         {facts.length ? <View testID="aurora-poster-facts" style={{ flexDirection: 'row', gap: 6, marginTop: 9 }}>
-          {facts.map(fact => <View key={fact.key} accessible accessibilityLabel={fact.label} style={{ height: 28, borderRadius: 14, paddingHorizontal: 10, flexDirection: 'row', alignItems: 'center', gap: 5, overflow: 'hidden', flexShrink: 1, minWidth: 0 }}>
-            <GradientFill radius={14} soft />
-            {fact.glyph ? <View><Glyph name={fact.glyph} size={13} color={colors['fg-accent']} strokeWidth={1.8} /></View> : null}
-            <Text numberOfLines={1} className="font-dm-medium" style={{ flexShrink: 1, fontSize: 12, lineHeight: 16, color: colors.fg }}>{fact.text}</Text>
-          </View>)}
+          {facts.map(fact => <MetadataPill key={fact.key} text={fact.text} label={fact.label} glyph={fact.glyph} tone={fact.tone} />)}
         </View> : null}
       </View>
     </Pressable>
@@ -193,8 +191,8 @@ export function AuroraList({ children, testID }: { children: ReactNode; testID?:
 }
 
 /** One row of a grouped list. `divider` draws the hairline above every row but the first. */
-export function AuroraRow({ leading, title, subtitle, trailing, chevron = true, divider = false, onPress, testID, accessibilityLabel }: {
-  leading?: ReactNode; title: string; subtitle?: string; trailing?: string; chevron?: boolean; divider?: boolean; onPress: () => void; testID?: string; accessibilityLabel?: string;
+export function AuroraRow({ leading, title, subtitle, metadata, trailing, chevron = true, divider = false, onPress, testID, accessibilityLabel }: {
+  leading?: ReactNode; title: string; subtitle?: string; metadata?: string; trailing?: string; chevron?: boolean; divider?: boolean; onPress: () => void; testID?: string; accessibilityLabel?: string;
 }) {
   const colors = useThemeColors(), aurora = useAurora();
   return <Pressable testID={testID} accessibilityRole="button" accessibilityLabel={accessibilityLabel || [title, subtitle, trailing].filter(Boolean).join('. ')} onPress={onPress}
@@ -202,10 +200,10 @@ export function AuroraRow({ leading, title, subtitle, trailing, chevron = true, 
       borderTopWidth: divider ? 1 : 0, borderTopColor: aurora.glassEdge, opacity: pressed ? 0.72 : 1 })}>
     {leading}
     <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
-      <Text numberOfLines={2} className="font-dm-medium text-ink" style={{ fontSize: 16, lineHeight: 21, letterSpacing: -0.2 }}>{title}</Text>
-      {subtitle ? <Text numberOfLines={1} className="font-dm" style={{ fontSize: 13, lineHeight: 18, color: colors['fg-muted'] }}>{subtitle}</Text> : null}
+      <Text numberOfLines={2} className="font-dm-medium text-ink" style={{ fontSize: 16, lineHeight: 21, letterSpacing: -0.2 }}>{shortCardTitle(title)}</Text>
+      {metadata ? <MetadataLine text={metadata} /> : subtitle ? <Text numberOfLines={1} className="font-dm" style={{ fontSize: 13, lineHeight: 18, color: colors['fg-muted'] }}>{compactCardText(subtitle)}</Text> : null}
     </View>
-    {trailing ? <Text numberOfLines={1} className="font-dm" style={{ maxWidth: '40%', fontSize: 13, lineHeight: 18, color: colors['fg-muted'] }}>{trailing}</Text> : null}
+    {trailing ? <View style={{ maxWidth: '40%' }}><MetadataPill text={trailing} tone="distance" /></View> : null}
     {chevron ? <Glyph name="chevron" size={16} color={colors['fg-muted']} strokeWidth={1.8} /> : null}
   </Pressable>;
 }
@@ -216,7 +214,7 @@ export function AuroraEntryRow({ entry, catalog, now, divider, trailing, testID 
 }) {
   const router = useRouter(), fact = homeCardMetadata(entry, now).find(item => item.tone === 'distance');
   const meta = trailing ?? fact?.text;
-  return <AuroraRow testID={testID} divider={divider} title={entry.name} subtitle={entry.caption} trailing={meta} chevron={!meta}
+  return <AuroraRow testID={testID} divider={divider} title={entry.name} metadata={[entry.caption,meta].filter(Boolean).join(' · ')}
     accessibilityLabel={`Explore ${entry.name}. ${[entry.caption, meta].filter(Boolean).join('. ')}`}
     onPress={() => router.push(homeGuideHref(entry) as never)}
     leading={<Photo candidates={homeIndexPhotos(entry, catalog)} radius={16} stripedPlaceholder={false} retryable={false} fallbackGlyph={entry.glyph as never}

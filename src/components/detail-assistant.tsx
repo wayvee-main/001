@@ -1,3 +1,4 @@
+import { MetadataLine } from '@/components/metadata-pill';
 import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState, type ComponentRef } from 'react';
@@ -55,7 +56,7 @@ export function DetailAssistantDock({context,chevron=false}: {context:DetailCont
             <View style={[surface,{padding:11,borderRadius:12,flexDirection:'row',alignItems:'center',gap:8}]}>
               <Glyph name="pin" size={14} color={colors['surface-accent']} /><View style={{flex:1,minWidth:0}}>
                 <Text numberOfLines={2} className="font-dm text-label text-ink">{context.name}</Text>
-                {context.caption?<Text numberOfLines={1} className="mt-0.5 font-dm text-fine text-taupe">{context.caption}</Text>:null}
+                {context.caption?<View className="mt-0.5"><MetadataLine text={context.caption} /></View>:null}
               </View>
             </View>
             <ScrollView ref={scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} onContentSizeChange={()=>scroll.current?.scrollToEnd({animated:false})} contentContainerStyle={{gap:16,paddingBottom:3}}>

@@ -1,3 +1,5 @@
+import { MetadataLine, MetadataPill } from '@/components/metadata-pill';
+import { compactCardText, shortCardTitle } from '@/lib/card-presentation';
 import { useState } from 'react';
 import { Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { Glyph } from '@/components/glyph';
@@ -6,21 +8,12 @@ import { eventDayGroupLabel, type NightlifeSpot, type Restaurant, type ScoperEve
 import { useThemeColors } from '@/lib/theme';
 
 export function SmallFact({glyph,value,label}:{glyph:string;value:string;label?:string}) {
-  const colors=useThemeColors();
-  return <View accessibilityLabel={label||value} className="flex-row items-center gap-x-1">
-    <Glyph name={glyph} size={12} color={colors['card-muted']} />
-    <Text className="font-dm text-fine text-card-muted">{value}</Text>
-  </View>;
+  return <MetadataPill text={value} glyph={['wallet','dollar'].includes(glyph)?undefined:glyph} label={label} tone={['pin','walk','car'].includes(glyph)?'distance':['wallet','dollar'].includes(glyph)?'offer':'category'} />;
 }
 
 function TableFacts({restaurant:x}:{restaurant:Restaurant}) {
   const distance=x.distanceLabel.replace(/\s+(walk|ride)$/i,'');
-  const glyph=/ride/i.test(x.distanceLabel)?'car':/walk/i.test(x.distanceLabel)?'walk':'pin';
-  return <View className="mt-1 flex-row flex-wrap items-center" style={{columnGap:8,rowGap:2}}>
-    <Text accessibilityLabel={x.cuisine} className="font-dm text-fine text-card-muted">{x.cuisine==='American supper club'?'Supper club':x.cuisine}</Text>
-    <SmallFact glyph="wallet" value={x.price} label={`Price level ${x.price}`} />
-    <SmallFact glyph={glyph} value={distance} label={x.distanceLabel} />
-  </View>;
+  return <View className="mt-1"><MetadataLine text={[x.cuisine==='American supper club'?'Supper club':x.cuisine,x.price,distance].filter(Boolean).join(' · ')} limit={3} /></View>;
 }
 
 function twoLineName(x:Restaurant,narrow:boolean):string {
@@ -51,7 +44,7 @@ export function MoreTable({restaurant:x,onPress}:{restaurant:Restaurant;onPress:
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Explore ${x.name}`} onPress={onPress} activeOpacity={.78}
     className="flex-row items-center bg-surface" style={{padding:10,gap:narrow?9:11,borderRadius:13}}>
     <Photo uri={x.image} radius={9} style={{width:narrow?46:54,height:narrow?46:54}} />
-    <View className="min-w-0 flex-1"><Text className="font-dm-medium text-card-name text-card-ink">{x.name}</Text><TableFacts restaurant={x} /></View>
+    <View className="min-w-0 flex-1"><Text className="font-dm-medium text-card-name text-card-ink">{shortCardTitle(x.name)}</Text><TableFacts restaurant={x} /></View>
   </TouchableOpacity>;
 }
 
@@ -73,8 +66,8 @@ export function EssentialNight({spot:x,onPress}:{spot:NightlifeSpot;onPress:()=>
     className="overflow-hidden rounded-card bg-surface border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark" style={{width:width<=400?149:157,alignSelf:'flex-start'}}>
     <Photo uri={x.image} radius={12} style={{width:'100%',height:111}} />
     <View style={{paddingHorizontal:11,paddingTop:10,paddingBottom:12}}>
-      <Text numberOfLines={2} className="font-dm-medium text-card-name text-card-ink">{x.name}</Text>
-      <Text numberOfLines={1} className="mt-[5px] font-dm text-fine text-card-muted">{note[0]}</Text>
+      <Text numberOfLines={2} className="font-dm-medium text-card-name text-card-ink">{shortCardTitle(x.name)}</Text>
+      <Text numberOfLines={1} className="mt-[5px] font-dm text-fine text-card-muted">{compactCardText(note[0])}</Text>
       <View className="mt-[9px] flex-row flex-wrap items-center justify-between" style={{gap:4}}>
         <SmallFact glyph="pin" value={street} label={x.address} /><SmallFact glyph={note[1]} value={note[2]} label={x.hours} />
       </View>
@@ -98,8 +91,8 @@ export function EssentialEvent({event:x,onPress}:{event:ScoperEvent;onPress:()=>
     className="overflow-hidden rounded-card bg-surface border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark" style={{width:width<=400?149:157,alignSelf:'flex-start'}}>
     <Photo uri={x.image} radius={12} style={{width:'100%',height:artHeight}} />
     <View onLayout={e=>setBodyHeight(e.nativeEvent.layout.height)} style={{paddingHorizontal:11,paddingTop:10,paddingBottom:12}}>
-      <Text numberOfLines={2} className="font-dm-medium text-card-name text-card-ink">{x.name}</Text>
-      <Text numberOfLines={1} className="mt-[5px] font-dm text-fine text-card-muted">{eventCaption(x)}</Text>
+      <Text numberOfLines={2} className="font-dm-medium text-card-name text-card-ink">{shortCardTitle(x.name)}</Text>
+      <Text numberOfLines={1} className="mt-[5px] font-dm text-fine text-card-muted">{compactCardText(eventCaption(x))}</Text>
       <View className="mt-[9px] flex-row flex-wrap items-center justify-between" style={{gap:4}}>
         <SmallFact glyph="pin" value={shortVenue} label={x.venue} /><SmallFact glyph="clock" value={x.time} />
       </View>
@@ -123,7 +116,7 @@ export function StageHero({event:x,onPress}:{event:ScoperEvent;onPress:()=>void}
       </View>:null}</View>
     <View onLayout={e=>setBodyHeight(e.nativeEvent.layout.height)} style={{padding:14,gap:7}}>
       <Text numberOfLines={1} className="font-dm text-fine text-card-muted">{[eventCaption(x),x.ticketed?'Official tickets':x.priceLabel].filter(Boolean).join(' · ')}</Text>
-      <Text numberOfLines={2} className="font-fraunces text-card-ink" style={{fontSize:25,lineHeight:28}}>{x.name}</Text>
+      <Text numberOfLines={2} className="font-fraunces text-card-ink" style={{fontSize:25,lineHeight:28}}>{shortCardTitle(x.name)}</Text>
       <View className="flex-row flex-wrap items-center justify-between" style={{gap:6}}><SmallFact glyph="pin" value={x.venue} /><SmallFact glyph={/ride/i.test(x.travel)?'car':'walk'} value={x.travel} /></View>
       <View className="flex-row items-center justify-between border-t border-edge-faint pt-2">
         <View className="flex-row flex-wrap" style={{gap:10}}>{doors?<SmallFact glyph="clock" value={`Doors ${doors}`} />:null}<SmallFact glyph="music" value={`Show ${x.time}`} /></View>

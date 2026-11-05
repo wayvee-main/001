@@ -1,3 +1,4 @@
+import { MetadataLine } from '@/components/metadata-pill';
 import { useRouter } from 'expo-router';
 import { Text, View } from 'react-native';
 
@@ -19,8 +20,7 @@ export function HomeResultCard({entry,borderless=false}:{entry:HomeGuideEntry;bo
     </View>
     <View style={{flex:1,minWidth:0,gap:3}}>
       <Text numberOfLines={1} ellipsizeMode="tail" className="font-fraunces text-ink" style={{fontSize:17,lineHeight:20,letterSpacing:-.25}}>{shortHomeTitle(entry.name)}</Text>
-      <Text numberOfLines={1} ellipsizeMode="tail" className="font-dm text-taupe" style={{fontSize:11,lineHeight:13}}>{meta.primary}</Text>
-      {meta.secondary?<Text numberOfLines={1} ellipsizeMode="tail" className="font-dm text-taupe" style={{fontSize:11,lineHeight:13}}>{meta.secondary}</Text>:null}
+      <MetadataLine text={[meta.primary,meta.secondary].filter(Boolean).join(' · ')} />
     </View>
     <Glyph name="chevron" size={15} color={colors['surface-accent']} />
   </RaisedTouchable>;

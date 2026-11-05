@@ -1,3 +1,5 @@
+import { shortCardTitle } from '@/lib/card-presentation';
+import { MetadataLine } from '@/components/metadata-pill';
 // One stop in a night, as a row.
 //
 // It was a rail: a 28 pt kind-coloured node, a hairline connector carrying the
@@ -84,8 +86,8 @@ export function StopRow({
         {...(onPress ? { accessibilityRole: 'button' as const, accessibilityLabel: `${title}, ${time}`, activeOpacity: 0.75, onPress } : {})}
         className="min-w-0 flex-1">
         <Text numberOfLines={1} className="font-dm-bold text-micro uppercase tracking-[0.5px] text-peach">{time}</Text>
-        <Text numberOfLines={1} className="font-dm-bold text-body text-ink">{title}</Text>
-        {meta ? <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">{meta}</Text> : null}
+        <Text numberOfLines={1} className="font-dm-bold text-body text-ink">{shortCardTitle(title)}</Text>
+        {meta ? <View className="mt-0.5"><MetadataLine text={meta} /></View> : null}
         {reasonLabel ? (
           <View className="mt-0.5 flex-row items-center gap-x-1">
             <Icon d={ICON_PATHS.sparkles} size={10} color={colors.pine} strokeWidth={2} />

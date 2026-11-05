@@ -31,13 +31,13 @@ describe('the shared Home / Nearest pool', () => {
     const common={restaurants:Object.values(RESTAURANTS),places:[],center:CITY_CENTER,coordsFor:()=>null,allowCuratedEstimates:true};
     expect(buildNearestPool({...common,device:{latitude:40.7,longitude:-74}})).toEqual(buildNearestPool(common));
   });
-  it('uses the bounded nearby label for measured and estimated places', () => {
+  it('uses numeric nearby labels and retains measured/estimated provenance', () => {
     const measured=buildNearestPool({restaurants:[],places:NEARBY_OAKLAND,center:CITY_CENTER,
       device:{latitude:NEARBY_OAKLAND[0].lat,longitude:NEARBY_OAKLAND[0].lon},coordsFor:()=>null});
-    expect(measured[0].distanceLabel).toBe('<0.1 mi');
+    expect(measured[0].distanceLabel).toBe('0.0 mi');
     const estimated=buildNearestPool({restaurants:[{...RESTAURANTS.farmhouse,distanceLabel:'0.05 mi'}],places:[],
       center:CITY_CENTER,coordsFor:()=>null,allowCuratedEstimates:true});
-    expect(estimated[0].distanceLabel).toBe('<0.1 mi');
+    expect(estimated[0].distanceLabel).toBe('0.05 mi');
     expect(estimated[0].estimated).toBe(true);
   });
 });

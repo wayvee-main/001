@@ -1,3 +1,4 @@
+import { shortCardTitle } from '@/lib/card-presentation';
 import { EVENTS, RESTAURANTS } from '@/lib/data';
 import { restaurantJournalMenu, type JournalMenuItem } from '@/lib/detail-journal';
 import type { HomeIdea } from '@/lib/home-discovery';
@@ -5,7 +6,7 @@ import { entriesForHomeIdea, type HomeGuideCatalog, type HomeGuideCategory, type
 
 /** One native geometry shared by all four categories. Never content-dependent. */
 export const HOME_RESULT = { height:72, thumbnailWidth:72, thumbnailHeight:56, inset:8, gap:10, textGap:12, radius:13 } as const;
-export const shortHomeTitle=(name:string)=>{const words=name.trim().split(/\s+/);return words.length>5?words.slice(0,5).join(' ')+'…':name;};
+export const shortHomeTitle = shortCardTitle;
 
 export function homeEntryCategory(entry:HomeGuideEntry):HomeGuideCategory {
   if(entry.kind==='event'||entry.kind==='venue'||['theatre','cinema','arts_centre','events_venue','music_venue','museum','gallery'].includes(entry.category||''))return 'events';

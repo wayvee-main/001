@@ -1,7 +1,8 @@
+import { MetadataLine, MetadataPill } from '@/components/metadata-pill';
+import { shortCardTitle } from '@/lib/card-presentation';
 import type { ReactNode } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
-import { Glyph } from '@/components/glyph';
 import { Photo } from '@/components/photo';
 import { ChevronRight } from '@/components/ui';
 import { useElevation } from '@/lib/shadows';
@@ -54,7 +55,7 @@ export function ListRow({
       <Photo uri={image} fallbackGlyph={fallbackGlyph} fallbackLabel={`Photo unavailable for ${title}`} radius={14} style={{ width: 60, height: 60, ...elevation }} />
       <View className="min-w-0 flex-1">
         <Text numberOfLines={1} ellipsizeMode="tail" className="font-dm-bold text-[14px] text-ink">
-          {title}
+          {shortCardTitle(title)}
         </Text>
         {badge ? (
           <View className={`mt-1 self-start rounded-full px-2 py-[2px] ${badgeTone === 'accent' ? 'bg-blush' : 'bg-sage'} border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark`}>
@@ -63,19 +64,8 @@ export function ListRow({
             </Text>
           </View>
         ) : null}
-        {meta ? (
-          <Text numberOfLines={1} ellipsizeMode="tail" className="mt-1 font-dm text-meta text-taupe">
-            {meta}
-          </Text>
-        ) : null}
-        {tasteTag ? (
-          <View className="mt-1 flex-row items-center gap-x-1">
-            <Glyph name="spark" size={9} color={colors.rust} strokeWidth={2} />
-            <Text numberOfLines={1} className="font-dm-medium text-[10.5px] text-rust">
-              {tasteTag} match
-            </Text>
-          </View>
-        ) : null}
+        {meta ? <View className="mt-1"><MetadataLine text={meta} /></View> : null}
+        {tasteTag ? <View className="mt-1"><MetadataPill text={`${tasteTag} match`} glyph="spark" /></View> : null}
       </View>
       {trailing ? (
         <View className="shrink-0">{trailing}</View>

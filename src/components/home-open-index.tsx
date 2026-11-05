@@ -1,3 +1,6 @@
+import { CardMetadata } from '@/components/card-metadata';
+import { metadataFact } from '@/lib/card-metadata';
+import { MetadataLine } from '@/components/metadata-pill';
 import { useRouter } from 'expo-router';
 import { Text, TouchableOpacity, View } from 'react-native';
 
@@ -24,12 +27,9 @@ export function HomeIndexRow({entry,category,index,photos,onPhotoUnavailable}:{e
     style={{minHeight:index===0?HOME_INDEX.firstHeight:HOME_INDEX.height,flexDirection:'row',alignItems:'center',gap:15,paddingTop:index===0?0:15,paddingBottom:15,borderBottomWidth:1,borderBottomColor:colors['edge-soft']}}>
     <View style={{flex:1,minWidth:0}}>
       <Text numberOfLines={2} ellipsizeMode="tail" className="font-fraunces text-ink" style={{fontSize:22,lineHeight:25,letterSpacing:-.3,marginBottom:6}}>{shortHomeTitle(entry.name)}</Text>
-      {caption?<Text numberOfLines={1} className="font-dm text-fine text-taupe" style={{lineHeight:15,marginBottom:8}}>{caption}</Text>:null}
+      {caption?<View style={{marginBottom:8}}><MetadataLine text={caption} /></View>:null}
       <View testID="home-ledger-row-facts" style={{flexDirection:'row',alignItems:'center',gap:6,minHeight:16}}>
-        <View style={{flex:1,minWidth:0,flexDirection:'row',alignItems:'center',gap:8}}>{facts.map((fact,factIndex)=><View key={factIndex} accessibilityLabel={fact.label||fact.value} style={{flexDirection:'row',alignItems:'center',gap:4,minWidth:0,flexShrink:1}}>
-          {!['wallet','dollar'].includes(fact.glyph)?<Glyph name={fact.glyph} size={12} color={colors['surface-accent']} />:null}
-          <Text numberOfLines={1} className="font-dm text-fine text-taupe" style={{lineHeight:16,flexShrink:1}}>{fact.value}</Text>
-        </View>)}</View>
+        <View style={{flex:1,minWidth:0}}><CardMetadata items={facts.map(metadataFact)} compact /></View>
         <Glyph name="chevron" size={15} color={colors['surface-accent']} />
       </View>
     </View>

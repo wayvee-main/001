@@ -4,11 +4,13 @@ import { View } from 'react-native';
 import { CitySearchBar } from '@/components/city-controls';
 import { SectionRule } from '@/components/aurora';
 import { DaybreakIntro, type DaybreakPeriod } from '@/components/daybreak';
-import { QuietHomeFeature, QuietHomeGroup, QuietHomeHeading, QuietHomeLink, QuietHomeOffers, QuietHomePeriods, QuietHomeVee, QuietHomeVenueRow } from '@/components/quiet-home';
+import { QuietHomeFeature, QuietHomeHeading, QuietHomeLink, QuietHomeOffers, QuietHomePeriods, QuietHomeVee, QuietHomeVenueRow } from '@/components/quiet-home';
 import { Screen, ScreenScroll } from '@/components/layout';
 import { HomeTimelyRecommendations, LocalCategoryShelf, LocalPerksHeader } from '@/components/local-perks';
 import { homeCollectionGlyph, homeDiscoveryIdeas } from '@/lib/home-discovery';
-import { homeIndexPhotos } from '@/lib/home-index-photos';
+import { metadataParts } from '@/lib/card-presentation';
+import { homeIdeaPhoto } from '@/lib/home-guide';
+import { homeCollectionPhotos, homeIdeaPhotos, homeIndexPhotos } from '@/lib/home-index-photos';
 import { HOME_LEDGERS } from '@/lib/home-ledger';
 import { eventsLeadNow } from '@/lib/daypart';
 import { perksEntries, perksFeaturedEntries } from '@/lib/local-perks';
@@ -50,17 +52,19 @@ export default function HomeScreen() {
       <QuietHomeOffers />
       <View>
         {bars.length ? <><QuietHomeHeading title="For later" onMore={() => router.push(HOME_LEDGERS.bars.href)} />
-          <QuietHomeGroup>{bars.slice(0, 2).map((entry, index) => <QuietHomeVenueRow key={entry.kind + ':' + entry.id} divider={index > 0} entry={entry} catalog={catalog} now={now} />)}</QuietHomeGroup>
+          <View style={{ gap: 10 }}>{bars.slice(0, 2).map(entry => <QuietHomeVenueRow key={entry.kind + ':' + entry.id} entry={entry} catalog={catalog} now={now} />)}</View>
         </> : null}
         <QuietHomeVee />
       </View>
       <View><QuietHomeHeading title="For you" onMore={() => router.push('/home/ideas')} />
-        <QuietHomeGroup testID="quiet-home-ideas">{ideas.map((idea, index) => <QuietHomeLink key={idea.id} divider={index > 0} testID={`home-idea-${idea.id}`} title={idea.title} glyph={idea.glyph} accessibilityLabel={`${idea.title}. ${idea.detail}`} onPress={() => router.push(idea.href as never)} />)}</QuietHomeGroup>
+        <View testID="quiet-home-ideas" style={{ gap: 10 }}>{ideas.map(idea => <QuietHomeLink key={idea.id} testID={`home-idea-${idea.id}`} title={idea.title} glyph={idea.glyph} image={homeIdeaPhoto(idea, catalog)} photos={homeIdeaPhotos(idea, catalog)}
+          metadata={metadataParts(idea.detail).slice(0, 2).map((text, index) => ({ key: String(index), text, label: text, tone: 'category' as const }))} accessibilityLabel={`${idea.title}. ${idea.detail}`} onPress={() => router.push(idea.href as never)} />)}</View>
       </View>
       {catalog.collections.length ? <View><QuietHomeHeading title="Collections" onMore={() => router.push('/home/collections')} />
-        <QuietHomeGroup testID="quiet-home-collections">{catalog.collections.slice(0, 2).map((collection, index) => <QuietHomeLink key={collection.id} divider={index > 0} testID={`home-collection-${collection.id}`} title={collection.title} glyph={homeCollectionGlyph(collection.id)}
+        <View testID="quiet-home-collections" style={{ gap: 10 }}>{catalog.collections.slice(0, 2).map(collection => <QuietHomeLink key={collection.id} testID={`home-collection-${collection.id}`} title={collection.title} glyph={homeCollectionGlyph(collection.id)} image={collection.coverImage} photos={homeCollectionPhotos(collection.id, catalog)}
+          metadata={[{ key: 'count', text: `${collection.items.length} picks`, label: `${collection.items.length} picks`, tone: 'category' }, ...metadataParts(collection.subtitle).slice(-1).map(text => ({ key: 'context', text, label: text, tone: 'category' as const }))]}
           accessibilityLabel={`${collection.title}. ${collection.items.length} picks. ${collection.subtitle}`}
-          onPress={() => router.push(`/home/collection?id=${encodeURIComponent(collection.id)}` as never)} />)}</QuietHomeGroup>
+          onPress={() => router.push(`/home/collection?id=${encodeURIComponent(collection.id)}` as never)} />)}</View>
       </View> : null}
     </View>
   </ScreenScroll></Screen>;

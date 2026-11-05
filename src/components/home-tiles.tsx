@@ -1,3 +1,5 @@
+import { MetadataLine } from '@/components/metadata-pill';
+import { shortCardTitle } from '@/lib/card-presentation';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Glyph, type GlyphName } from '@/components/glyph';
@@ -79,7 +81,7 @@ export function Umbrella({ title }: { title: string }) {
     <View
       style={{ borderTopColor: colors.edge, borderTopWidth: StyleSheet.hairlineWidth }}
       className="pt-3.5">
-      <Text className="font-fraunces text-section text-ink">{title}</Text>
+      <Text className="font-fraunces text-section text-ink">{shortCardTitle(title)}</Text>
     </View>
   );
 }
@@ -101,7 +103,7 @@ export function SubLabel({
 }) {
   return (
     <View className="min-h-[20px] flex-row items-center justify-between gap-x-2">
-      <Text className="font-dm-bold text-micro uppercase text-taupe">{title}</Text>
+      <Text className="font-dm-bold text-micro uppercase text-taupe">{shortCardTitle(title)}</Text>
       {onPress ? (
         <TouchableOpacity
           accessibilityRole="button"
@@ -148,8 +150,8 @@ export function RailCard({
       className="w-[252px] flex-row items-center gap-x-3 rounded-panel p-2.5">
       <Photo uri={image} radius={11} style={{ width: 52, height: 52 }} />
       <View className="min-w-0 flex-1 pr-1">
-        <Text numberOfLines={1} className="font-dm-medium text-body text-ink">{title}</Text>
-        {meta ? <Text numberOfLines={1} className="mt-0.5 font-dm text-meta text-taupe">{meta}</Text> : null}
+        <Text numberOfLines={1} className="font-dm-medium text-body text-ink">{shortCardTitle(title)}</Text>
+        {meta ? <View className="mt-0.5"><MetadataLine text={meta} /></View> : null}
       </View>
     </TouchableOpacity>
   );

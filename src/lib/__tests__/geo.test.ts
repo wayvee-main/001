@@ -46,9 +46,9 @@ describe('usableAnchor', () => {
 });
 
 describe('formatMiles', () => {
-  it('shows a small measured distance instead of Here or zero', () => {
-    expect(formatMiles(0)).toBe('<0.1 mi');
-    expect(formatMiles(0.09)).toBe('<0.1 mi');
+  it('shows numeric distances without bounds or proximity phrases', () => {
+    expect(formatMiles(0)).toBe('0.0 mi');
+    expect(formatMiles(0.09)).toBe('0.09 mi');
     expect(formatMiles(0.1)).toBe('0.1 mi');
     expect(formatMiles(0.72)).toBe('0.7 mi');
   });

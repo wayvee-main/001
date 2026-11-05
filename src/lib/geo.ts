@@ -52,10 +52,11 @@ export function milesBetween(a: GeoPoint, b: GeoPoint): number {
   return 2 * EARTH_RADIUS_MILES * Math.asin(Math.min(1, Math.sqrt(h)));
 }
 
-/** Show a bounded distance for nearby points instead of rounding to zero or
- * saying "Here". Only call with a measured or explicitly marked estimate. */
+/** Numeric distances only. Use hundredths for nearby measured points;
+ * never add comparator symbols or replace a distance with "Here". */
 export function formatMiles(miles: number): string {
-  if (miles < 0.1) return '<0.1 mi';
+  if (miles === 0) return '0.0 mi';
+  if (miles < 0.1) return `${miles.toFixed(2)} mi`;
   if (miles < 10) return `${miles.toFixed(1)} mi`;
   return `${Math.round(miles)} mi`;
 }

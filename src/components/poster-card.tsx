@@ -1,3 +1,5 @@
+import { MetadataLine, MetadataPill } from '@/components/metadata-pill';
+import { shortCardTitle } from '@/lib/card-presentation';
 import * as Linking from 'expo-linking';
 import { Text, TouchableOpacity, View } from 'react-native';
 
@@ -44,14 +46,8 @@ export function ViatorPickCard({ pick, onPress }: { pick: ViatorPick; onPress: (
       </View>
       <View className="px-3 py-2.5">
         {highlight ? <Badge label={highlight} /> : null}
-        <Text numberOfLines={2} className={`font-dm-bold text-[13px] leading-[16px] text-ink ${highlight ? 'mt-1' : ''}`}>{pick.title}</Text>
-        {price || restLine ? (
-          <Text numberOfLines={1} className="mt-1 font-dm text-[10.5px] text-taupe">
-            {price ? <Text className="font-dm-bold text-pine">{price}</Text> : null}
-            {price && restLine ? ' · ' : ''}
-            {restLine}
-          </Text>
-        ) : null}
+        <Text numberOfLines={2} className={`font-dm-bold text-[13px] leading-[16px] text-ink ${highlight ? 'mt-1' : ''}`}>{shortCardTitle(pick.title)}</Text>
+        {price || restLine ? <View className="mt-1"><MetadataLine text={[price,restLine].filter(Boolean).join(' · ')} /></View> : null}
       </View>
     </TouchableOpacity>
   );
@@ -86,9 +82,9 @@ export function PosterCard({
       className="overflow-hidden rounded-card">
       <Photo uri={image} radius={12} style={{ width: POSTER_WIDTH, height: 85 }} />
       <View className="px-3 py-2.5">
-        <Text numberOfLines={1} className="font-dm-bold text-[8.5px] tracking-[0.6px] text-peach">{eyebrow}</Text>
-        <Text numberOfLines={2} className="mt-1 font-dm-bold text-[13px] leading-[16px] text-ink">{title}</Text>
-        {meta ? <Text numberOfLines={1} className="mt-1 font-dm text-[10.5px] text-taupe">{meta}</Text> : null}
+        <MetadataPill text={eyebrow} />
+        <Text numberOfLines={2} className="mt-1 font-dm-bold text-[13px] leading-[16px] text-ink">{shortCardTitle(title)}</Text>
+        {meta ? <View className="mt-1"><MetadataLine text={meta} /></View> : null}
         {onPlan ? (
           <View className="mt-2 items-start">
             <PlanChip onPress={onPlan} />

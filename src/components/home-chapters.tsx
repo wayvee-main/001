@@ -1,3 +1,5 @@
+import { MetadataLine, MetadataPill } from '@/components/metadata-pill';
+import { compactCardText, shortCardTitle } from '@/lib/card-presentation';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
@@ -14,7 +16,7 @@ import { useControlSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
 
 export function HomeChapterTitle({title,subtitle}:{title:string;subtitle:string}) {
-  return <View style={{gap:9}}><Text testID="home-chapter-title" accessibilityRole="header" className="font-fraunces text-ink" style={{fontSize:34,lineHeight:38,letterSpacing:-.7}}>{title}</Text>
+  return <View style={{gap:9}}><Text testID="home-chapter-title" accessibilityRole="header" className="font-fraunces text-ink" style={{fontSize:34,lineHeight:38,letterSpacing:-.7}}>{shortCardTitle(title)}</Text>
     <Text className="font-dm text-label text-taupe">{subtitle}</Text></View>;
 }
 
@@ -37,8 +39,8 @@ export function HomeChapterDoor({title,summary,image,photos,glyph,onPress,testID
   const colors=useThemeColors();
   return <RaisedTouchable testID={testID} accessibilityRole="button" accessibilityLabel={title+'. '+summary} onPress={onPress} activeOpacity={.78} style={{padding:7,borderRadius:13,flexDirection:'row',alignItems:'center',gap:11,minHeight:104}}>
     <Photo uri={image} candidates={photos} radius={8} fallbackGlyph={glyph} style={{width:'40%',height:90,flexShrink:0}} />
-    <View style={{flex:1,minWidth:0,gap:7}}><Text numberOfLines={2} className="font-fraunces text-ink" style={{fontSize:19,lineHeight:23,letterSpacing:-.3}}>{title}</Text>
-      <Text numberOfLines={2} className="font-dm text-fine text-taupe" style={{lineHeight:17}}>{summary}</Text></View>
+    <View style={{flex:1,minWidth:0,gap:7}}><Text numberOfLines={2} className="font-fraunces text-ink" style={{fontSize:19,lineHeight:23,letterSpacing:-.3}}>{shortCardTitle(title)}</Text>
+      <Text numberOfLines={1} ellipsizeMode="tail" className="font-dm text-fine text-taupe" style={{lineHeight:17}}>{compactCardText(summary)}</Text></View>
     <Glyph name="chevron" size={14} color={colors['surface-accent']} />
   </RaisedTouchable>;
 }
@@ -56,17 +58,13 @@ function IdeaFeature({entry,featureDish=false}:{entry:HomeGuideEntry;featureDish
       <Photo uri={image} radius={8} fallbackGlyph={entry.glyph} style={{width:'43%',height:100,flexShrink:0}} />
       <View style={{flex:1,minWidth:0,gap:6}}>
         <Text numberOfLines={2} className="font-fraunces text-ink" style={{fontSize:18,lineHeight:22,letterSpacing:-.25}}>{shortHomeTitle(entry.name)}</Text>
-        <Text numberOfLines={2} className="font-dm text-fine text-taupe" style={{lineHeight:16}}>{summary}</Text>
-        {entry.kind==='event'?<Text numberOfLines={1} className="font-dm text-fine text-taupe">{entry.caption}</Text>:null}
-        <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>{dish?.price?<Text className="font-dm text-fine text-ink">{dish.price}</Text>:<View />}<Glyph name="chevron" size={14} color={colors['surface-accent']} /></View>
+        <Text numberOfLines={1} ellipsizeMode="tail" className="font-dm text-fine text-taupe" style={{lineHeight:16}}>{compactCardText(summary)}</Text>
+        {entry.kind==='event'?<MetadataLine text={entry.caption} />:null}
+        <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>{dish?.price?<MetadataPill text={dish.price} tone="offer" />:<View />}<Glyph name="chevron" size={14} color={colors['surface-accent']} /></View>
       </View>
     </RaisedTouchable>
-    <View testID="home-idea-feature-facts" style={{flexDirection:'row',alignItems:'center',gap:13,paddingHorizontal:4}}>
-      <View style={{flex:1,minWidth:0,flexDirection:'row',alignItems:'center',gap:5}}><Glyph name={category==='events'?'ticket':'pin'} size={12} color={colors['surface-accent']} />
-        <Text numberOfLines={1} className="font-dm text-fine text-taupe" style={{flexShrink:1}}>{category==='events'?(entry.kind==='event'?'Tickets via official listing':'Explore the venue'):address||meta.secondary||meta.primary}</Text></View>
-      {support&&category!=='events'?<View style={{flexShrink:0,flexDirection:'row',alignItems:'center',gap:5}}><Glyph name="food" size={12} color={colors['surface-accent']} /><Text className="font-dm text-fine text-taupe">{support}</Text></View>:null}
-    </View>
-    {dish?.note?<Text numberOfLines={2} className="font-dm text-fine text-taupe">{dish.note}</Text>:null}
+    <View testID="home-idea-feature-facts" style={{paddingHorizontal:4}}><MetadataLine text={[category==='events'?(entry.kind==='event'?'Tickets via official listing':'Explore the venue'):address||meta.secondary||meta.primary,support&&category!=='events'?support:undefined].filter(Boolean).join(' · ')} glyph={category==='events'?'ticket':'pin'} /></View>
+    {dish?.note?<Text numberOfLines={1} ellipsizeMode="tail" className="font-dm text-fine text-taupe">{compactCardText(dish.note)}</Text>:null}
   </View>;
 }
 
@@ -80,12 +78,12 @@ function CollectionFeature({entry}:{entry:HomeGuideEntry}) {
       <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:8}}>
         <Text testID="home-chapter-feature-title" numberOfLines={2} className="font-fraunces text-ink" style={{fontSize:18,lineHeight:22,letterSpacing:-.2,flex:1}}>{shortHomeTitle(entry.name)}</Text><Glyph name="chevron" size={14} color={colors['surface-accent']} />
       </View>
-      <Text numberOfLines={2} className="font-dm text-fine text-taupe" style={{lineHeight:17}}>{category==='events'?[...new Set([entry.caption,meta.primary].filter(Boolean))].join(' · '):entry.description||entry.caption}</Text>
+      <Text numberOfLines={1} ellipsizeMode="tail" className="font-dm text-fine text-taupe" style={{lineHeight:17}}>{compactCardText(category==='events'?[...new Set([entry.caption,meta.primary].filter(Boolean))].join(' · '):entry.description||entry.caption)}</Text>
     </View>
     {preview.length?<View testID="home-chapter-menu-preview" style={{flexDirection:'row',gap:7}}>{preview.map(item=><View key={item.name} style={{flex:1,minWidth:0,minHeight:58,padding:5,borderWidth:1,borderColor:colors['edge-faint'],borderRadius:9,flexDirection:'row',alignItems:'center',gap:6}}>
-      <Photo uri={item.image} radius={6} style={{width:45,height:45,flexShrink:0}} /><View style={{flex:1,minWidth:0,gap:3}}><Text numberOfLines={2} className="font-dm text-ink" style={{fontSize:10,lineHeight:13}}>{item.name.replace(/^\d+\.\s*/,'')}</Text>{item.price?<Text numberOfLines={1} className="font-dm text-fine text-taupe">{item.price}</Text>:null}</View>
+      <Photo uri={item.image} radius={6} style={{width:45,height:45,flexShrink:0}} /><View style={{flex:1,minWidth:0,gap:3}}><Text numberOfLines={2} className="font-dm text-ink" style={{fontSize:10,lineHeight:13}}>{item.name.replace(/^\d+\.\s*/,'')}</Text>{item.price?<MetadataPill text={item.price} tone="offer" />:null}</View>
     </View>)}</View>:null}
-    {preview[0]?.note?<Text numberOfLines={2} className="font-dm text-fine text-taupe">{preview[0].note}</Text>:null}
+    {preview[0]?.note?<Text numberOfLines={1} ellipsizeMode="tail" className="font-dm text-fine text-taupe">{compactCardText(preview[0].note)}</Text>:null}
   </RaisedTouchable>;
 }
 

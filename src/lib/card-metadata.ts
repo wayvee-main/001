@@ -1,3 +1,4 @@
+import { numericDistanceLabel } from '@/lib/card-presentation';
 import { publicDetailUrl } from '@/lib/detail-content';
 import { homeGuideHref, homeGuideKey, type HomeGuideEntry, type HomeGuideFact } from '@/lib/home-guide';
 import { compactOffer } from '@/lib/local-perks';
@@ -7,9 +8,9 @@ export type CardMetadataItem = { key: string; text: string; glyph?: string; tone
 
 export function metadataFact(fact: HomeGuideFact, index: number): CardMetadataItem {
   const price = ['wallet', 'dollar'].includes(fact.glyph);
-  return { key: fact.glyph + ':' + index, text: fact.value, glyph: price ? undefined : fact.glyph,
+  return { key: fact.glyph + ':' + index, text: numericDistanceLabel(fact.value), glyph: price ? undefined : fact.glyph,
     tone: price ? 'offer' : ['pin', 'walk', 'route', 'car'].includes(fact.glyph) ? 'distance' : 'category',
-    label: fact.label ? fact.label + '. ' + fact.value : fact.value };
+    label: numericDistanceLabel(fact.label ? fact.label + '. ' + fact.value : fact.value) };
 }
 
 /** Keep source facts intact. A short pool stays short; never invent ratings,

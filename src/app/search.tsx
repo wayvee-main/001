@@ -1,3 +1,5 @@
+import { MetadataLine } from '@/components/metadata-pill';
+import { shortCardTitle } from '@/lib/card-presentation';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 import { Keyboard, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -51,8 +53,8 @@ function IndexRow({title,subtitle,glyph,onPress,testID}:{title:string;subtitle?:
       flexDirection:'row',alignItems:'center',gap:11,paddingVertical:11}}>
     <Glyph name={glyph} size={15} color={colors['fg-muted']} />
     <View className="min-w-0 flex-1">
-      <Text numberOfLines={1} className="font-dm-medium text-body-strong text-ink">{title}</Text>
-      {subtitle?<Text numberOfLines={1} className="mt-0.5 font-dm text-fine text-taupe">{subtitle}</Text>:null}
+      <Text numberOfLines={1} className="font-dm-medium text-body-strong text-ink">{shortCardTitle(title)}</Text>
+      {subtitle?<View className="mt-0.5"><MetadataLine text={subtitle} /></View>:null}
     </View>
     <Glyph name="chevron" size={12} color={colors['fg-muted']} />
   </TouchableOpacity>;

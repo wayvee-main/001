@@ -1,3 +1,5 @@
+import { MetadataLine } from '@/components/metadata-pill';
+import { shortCardTitle } from '@/lib/card-presentation';
 import * as Linking from 'expo-linking';
 import { Text, TouchableOpacity, View } from 'react-native';
 
@@ -66,7 +68,7 @@ function VenueListings({id}: {id:string}) {
     {events.slice(0,6).map(event=><TouchableOpacity key={event.id} accessibilityRole="button" accessibilityLabel={`${event.name}. ${event.date}. ${event.priceLabel}`} onPress={()=>router.push(`/home/detail?kind=event&id=${encodeURIComponent(event.id)}`)}
       style={{paddingVertical:11,borderTopWidth:1,borderTopColor:colors['edge-faint'],flexDirection:'row',alignItems:'center',gap:11}}>
       <Photo uri={event.image} radius={9} fallbackGlyph="ticket" style={{width:52,height:48}} />
-      <View style={{flex:1,minWidth:0,gap:4}}><Text numberOfLines={1} className="font-fraunces text-label text-ink">{event.name.split(/\s+/).slice(0,5).join(' ')}{event.name.split(/\s+/).length>5?'…':''}</Text><Text numberOfLines={1} className="font-dm text-fine text-taupe">{event.date.split('·')[0].trim()} · {event.time} · {event.priceLabel}</Text></View><Glyph name="arrow" size={13} color={colors['surface-accent']} />
+      <View style={{flex:1,minWidth:0,gap:4}}><Text numberOfLines={1} className="font-fraunces text-label text-ink">{shortCardTitle(event.name)}</Text><MetadataLine text={[event.date.split('·')[0].trim(),event.time,event.priceLabel].filter(Boolean).join(' · ')} /></View><Glyph name="arrow" size={13} color={colors['surface-accent']} />
     </TouchableOpacity>)}
   </View>;
 }

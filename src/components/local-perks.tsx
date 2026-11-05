@@ -1,3 +1,4 @@
+import { MetadataLine } from '@/components/metadata-pill';
 import { NativePressable as Pressable } from '@/components/native-pressable';
 import { useColorScheme } from 'nativewind';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -5,6 +6,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Animated, AppState, Easing, Platform, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { AuroraGlow, GradientFill, IconBadge, useAuroraCard, useGlass } from '@/components/aurora';
 import { Glyph } from '@/components/glyph';
+import { shortCardTitle } from '@/lib/card-presentation';
 import { CardMetadata } from '@/components/card-metadata';
 import { Photo } from '@/components/photo';
 import { VeeMark } from '@/components/vee-mark';
@@ -27,7 +29,7 @@ import { useThemeColors } from '@/lib/theme';
 import { useEntryActions } from '@/lib/use-entry-actions';
 import { isRegionalPoint } from '@/lib/regional-nearby';
 
-const brief = (text: string) => text.trim().split(/\s+/).length > 5 ? text.trim().split(/\s+/).slice(0, 5).join(' ') + '…' : text;
+const brief = shortCardTitle;
 
 export function PerksRoundButton({ glyph, label, onPress, children, selected = false, glass = false, testID }: {
   glyph?: string; label: string; onPress: () => void; children?: ReactNode; selected?: boolean; glass?: boolean; testID?: string;
@@ -244,7 +246,7 @@ export function LocalPerksCard({ entry, catalog, format = 'row', width, photos, 
       </View>
       <View style={{ flex: rail ? undefined : 1, minWidth: 0, paddingTop: rail ? 10 : 0, paddingBottom: rail ? 2 : 0, gap: rail ? 6 : 3 }}>
         <Text numberOfLines={1} ellipsizeMode="tail" className="font-fraunces text-ink" style={{ fontSize: rail && format === 'wide' ? 24 : 20, lineHeight: rail && format === 'wide' ? 29 : 25, letterSpacing: -.5 }}>{brief(entry.name)}</Text>
-        {entry.caption ? <Text numberOfLines={1} className="font-dm text-taupe" style={{ fontSize: 11, lineHeight: 17 }}>{entry.caption}</Text> : null}
+        {entry.caption ? <MetadataLine text={entry.caption} /> : null}
         <View style={{ paddingTop: rail ? 3 : 1 }}><CardMetadata items={metadata.items} note={metadata.note} /></View>
       </View>
       {!rail ? <Glyph name="chevron" size={14} color={colors['fg-accent']} /> : null}

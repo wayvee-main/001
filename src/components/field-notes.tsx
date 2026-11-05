@@ -1,10 +1,10 @@
+import { MetadataPill } from '@/components/metadata-pill';
+import { compactCardText, shortCardTitle } from '@/lib/card-presentation';
 import type { ReactNode } from 'react';
 import { Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
-import { Glyph } from '@/components/glyph';
 import { Photo } from '@/components/photo';
 import { eventDayGroupLabel, type Crawl, type NightlifeSpot, type Restaurant, type ScoperEvent, type Venue } from '@/lib/data';
 import { useRaisedSurface } from '@/lib/shadows';
-import { useThemeColors } from '@/lib/theme';
 
 function briefWords(value:string,max:number):string {
   const words=value.trim().split(/\s+/);
@@ -20,11 +20,7 @@ function heroDescription(x:ScoperEvent):string {
 }
 
 export function NoteFact({glyph,value,label,compact=false,flexible=false}:{glyph:string;value:string;label?:string;compact?:boolean;flexible?:boolean}) {
-  const colors=useThemeColors();
-  return <View accessibilityLabel={label||value} className="flex-row items-center gap-x-1" style={compact?{minWidth:0,flexShrink:flexible?1:0,flexGrow:flexible?1:0}:undefined}>
-    <Glyph name={glyph} size={12} color={colors['fg-muted']} />
-    <Text numberOfLines={compact?1:undefined} className="font-dm text-fine text-taupe" style={compact?{minWidth:0,flexShrink:1}:undefined}>{value}</Text>
-  </View>;
+  return <View style={{minWidth:0,flexShrink:flexible?1:0,flexGrow:flexible?1:0}}><MetadataPill text={value} glyph={['wallet','dollar'].includes(glyph)?undefined:glyph} label={label} compact={compact} tone={['pin','walk','car'].includes(glyph)?'distance':['wallet','dollar'].includes(glyph)?'offer':'category'} /></View>;
 }
 
 /** Shared photo-note geometry for Discover strips and Home's category grid. */
@@ -52,7 +48,7 @@ export function NoteCard({
   const {width}=useWindowDimensions(),narrow=width<=360;
   const surface=useRaisedSurface(1,tone);
   const title=<Text testID={titleTestID} numberOfLines={compact?1:strip?3:undefined} className="font-fraunces text-ink"
-    style={{fontSize:strip?17:18,lineHeight:strip?19.55:20.7,letterSpacing:-.2,...(titleAccessory?{flex:1,minWidth:0}:null)}}>{briefWords(name,5)}</Text>;
+    style={{fontSize:strip?17:18,lineHeight:strip?19.55:20.7,letterSpacing:-.2,...(titleAccessory?{flex:1,minWidth:0}:null)}}>{shortCardTitle(name)}</Text>;
   return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Explore ${accessibilityName||name}`} onPress={onPress} activeOpacity={.78} testID={testID}
     className={`items-start ${elevated?'':'py-3.5'} ${strip?'':`flex-row ${divider&&!elevated?'border-t border-edge-faint':''}`}`}
     style={[strip?{width:cardWidth,flexShrink:0}:{gap:12},elevated?{...surface,borderWidth:0,borderRadius:PHOTO_NOTE.radius,paddingTop:PHOTO_NOTE.padding,paddingRight:PHOTO_NOTE.padding,paddingBottom:PHOTO_NOTE.padding,paddingLeft:PHOTO_NOTE.padding}:null]}>
@@ -62,7 +58,7 @@ export function NoteCard({
       style={{width:31,flexShrink:0,fontSize:23,lineHeight:25.3}}>{String(index+1).padStart(2,'0')}</Text>:null}
     <View className={`min-w-0 ${strip?'w-full':'flex-1'}`}>
       {titleAccessory?<View testID={`note-heading-${testID}`} className="w-full flex-row items-baseline gap-x-2">{title}{titleAccessory}</View>:title}
-      {caption?<Text numberOfLines={compact?1:undefined} className="font-dm text-fine text-taupe" style={{marginTop:strip?5:7}}>{caption}</Text>:null}
+      {caption?<Text numberOfLines={1} ellipsizeMode="tail" className="font-dm text-fine text-taupe" style={{marginTop:strip?5:7}}>{compactCardText(caption)}</Text>:null}
       {facts?<View testID={`note-facts-${testID}`} className="flex-row" style={{marginTop:strip?8:11,flexWrap:compact?'nowrap':'wrap',columnGap:compact?8:11,rowGap:4}}>{facts}</View>:null}
     </View>
     {!strip&&image?<Photo uri={image} radius={9} style={{width:narrow?47:59,height:narrow?73:82}} />:null}
@@ -94,7 +90,7 @@ export function TrailLead({event:x,onPress}:{event:ScoperEvent;onPress:()=>void}
       <Text className="font-dm text-fine text-peach">{date}</Text>
       <Text testID="discover-listing-title" className="mt-[7px] font-fraunces text-ink" style={{fontSize:25,lineHeight:27,letterSpacing:-.7}}>{briefWords(eventName(x),5)}</Text>
       <Text className="mt-[7px] font-dm text-fine text-taupe">{eventCaption(x)}</Text>
-      <Text testID="trail-lead-description" numberOfLines={1} className="mt-[7px] font-dm text-fine text-taupe">{heroDescription(x)}</Text>
+      <Text testID="trail-lead-description" numberOfLines={1} className="mt-[7px] font-dm text-fine text-taupe">{compactCardText(heroDescription(x))}</Text>
       <View className="mt-[11px] flex-row flex-wrap" style={{columnGap:11,rowGap:4}}>
         <NoteFact glyph="pin" value={shortVenue(x)} label={x.venue} /><NoteFact glyph="clock" value={x.time} label={`${date}, ${x.time}`} />
       </View>

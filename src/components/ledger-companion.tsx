@@ -1,3 +1,5 @@
+import { MetadataLine, MetadataPill } from '@/components/metadata-pill';
+import { compactCardText, numericDistanceLabel } from '@/lib/card-presentation';
 import { useState, type ReactNode } from 'react';
 import { useRouter } from 'expo-router';
 import { Text, TouchableOpacity, View } from 'react-native';
@@ -26,7 +28,7 @@ export function JournalQuietAction({chip}: {chip:LedgerChip}) {
   return <TouchableOpacity testID={chip.testID} accessibilityRole="button" accessibilityLabel={chip.accessibilityLabel||chip.label} onPress={chip.onPress} activeOpacity={.76}
     style={{flex:1,minHeight:40,borderRadius:12,backgroundColor:colors['surface-navigation'],borderWidth:1,borderColor:colors['edge-card'],borderBottomColor:colors['edge-card-bottom'],flexDirection:'row',alignItems:'center',justifyContent:'center',gap:6,paddingHorizontal:10}}>
     {chip.glyph?<Glyph name={chip.glyph} size={13} color={colors['surface-accent']} />:null}
-    <Text numberOfLines={1} className="font-dm-medium text-fine text-ink">{chip.label}</Text>
+    <Text numberOfLines={1} className="font-dm-medium text-fine text-ink">{numericDistanceLabel(chip.label)}</Text>
   </TouchableOpacity>;
 }
 
@@ -54,7 +56,7 @@ export function LedgerCompanionScreen({context,image,photos,glyph='landmark',eye
   const metadata=chips.filter(chip=>!['save','directions','book'].includes(chip.key)&&!context.caption?.includes(chip.label));
   const inline=compactFacts||compactJournalFacts(essentials);
   const caption=context.caption;
-  const about=essentials.length>0||folds.length>0;
+  const about=essentials.length>0||folds.length>0||Boolean(context.snapshot);
   return <HomeGuideScreen now={now} search={false} context={false} header={false} activeTab={navActive} layer="tertiary"
     beforeNav={<DetailAssistantDock key={context.kind+':'+context.id} context={context} />}>
     <View testID="ledger-companion" style={{gap:22,paddingBottom:4}}>
@@ -73,23 +75,21 @@ export function LedgerCompanionScreen({context,image,photos,glyph='landmark',eye
         <View style={{gap:7}}>
           {headingEyebrow?<Text className="font-dm-medium text-fine uppercase text-peach" style={{letterSpacing:1}}>{headingEyebrow}</Text>:null}
           <Text testID="ledger-title" accessibilityRole="header" accessibilityLabel={context.name} numberOfLines={2} className="font-fraunces text-ink" style={{fontSize:32,lineHeight:35,letterSpacing:-.75}}>{shortTitle(context.name)}</Text>
-          {caption?<Text testID="ledger-chip-row" numberOfLines={2} className="font-dm text-fine text-taupe" style={{lineHeight:17}}>{caption}</Text>:null}
+          {caption?<View testID="ledger-chip-row"><MetadataLine text={caption} /></View>:null}
         </View>
         <View testID="ledger-photo" style={{height:context.kind==='event'?170:160,borderRadius:13,overflow:'hidden'}}>
           <Photo uri={image} source={HOME_TILE_PREVIEW_PHOTOS[`/${context.kind}/${context.id}`]?.source} candidates={photos} fit="cover" radius={13} stripedPlaceholder={false} fallbackGlyph={glyph} fallbackLabel={`Photo unavailable for ${context.name}`} style={{height:'100%',width:'100%'}} />
         </View>
         <View style={{gap:12}}>
-          {context.snapshot?<Text testID="ledger-snapshot" numberOfLines={3} ellipsizeMode="tail" className="font-dm text-label text-taupe" style={{width:'100%',lineHeight:19}}>{context.snapshot}</Text>:null}
+          {context.snapshot?<Text testID="ledger-snapshot" accessibilityLabel={context.snapshot} numberOfLines={1} ellipsizeMode="tail" className="font-dm text-label text-taupe" style={{width:'100%',lineHeight:19}}>{compactCardText(context.snapshot)}</Text>:null}
           <View testID="perks-detail-actions" style={{flexDirection:'row',flexWrap:'wrap',gap:8}}>{[...metadata,...(save?[save]:[]),...(directions?[directions]:[])].map(chip=>{
-            const content=<>{chip.glyph?<Glyph name={chip.glyph} size={12} color={colors['fg-muted']} />:null}<Text className="font-dm text-fine text-ink">{chip.label}</Text></>;
+            const content=<>{chip.glyph?<Glyph name={chip.glyph} size={12} color={colors['fg-muted']} />:null}<Text className="font-dm text-fine text-ink">{numericDistanceLabel(chip.label)}</Text></>;
             const style={minHeight:32,borderRadius:18,paddingHorizontal:10,backgroundColor:colors['surface-control'],borderWidth:1,borderColor:colors['edge-card'],flexDirection:'row' as const,alignItems:'center' as const,gap:5};
             return chip.onPress?<TouchableOpacity key={chip.key} accessibilityRole="button" accessibilityLabel={chip.accessibilityLabel||chip.label} accessibilityState={{selected:chip.selected}} onPress={chip.onPress} style={style}>{content}</TouchableOpacity>:<View key={chip.key} style={style}>{content}</View>;
           })}</View>
           {inline.length?<View testID="ledger-facts" style={{flexDirection:'row',flexWrap:'wrap',alignItems:'center',columnGap:12,rowGap:2}}>{inline.map((fact,index)=>{
             const onPress=/address|location|venue|destination/i.test(fact.label)?directions?.onPress:undefined;
-            const content=<><Glyph name={fact.glyph||ledgerFactGlyph(fact.label)} size={12} color={colors['surface-accent']} />
-              <Text numberOfLines={1} ellipsizeMode="tail" className="font-dm text-fine text-taupe" style={{flexShrink:1,lineHeight:18}}>{fact.value}</Text>
-              {onPress?<Glyph name="navigation" size={12} color={colors['surface-accent']} />:null}</>;
+            const content=<MetadataPill text={fact.value} label={fact.label+': '+(fact.fullValue||fact.value)} glyph={fact.glyph||ledgerFactGlyph(fact.label)} />;
             return onPress?<TouchableOpacity key={index} accessibilityRole="button" accessibilityLabel={`Directions. ${essentials.find(item=>/address/i.test(item.label))?.value||fact.value}`} onPress={onPress} style={{maxWidth:'100%',minHeight:28,flexDirection:'row',alignItems:'center',gap:6}}>{content}</TouchableOpacity>
               :<View key={index} accessible accessibilityLabel={fact.label+': '+(fact.fullValue||fact.value)} style={{maxWidth:'100%',minHeight:22,flexDirection:'row',alignItems:'center',gap:6}}>{content}</View>;
           })}</View>:null}
@@ -102,6 +102,7 @@ export function LedgerCompanionScreen({context,image,photos,glyph='landmark',eye
         {mainAction?<JournalQuietAction chip={mainAction} />:null}
       </View>:null}
       {about?<JournalFold label={context.kind==='event'?'Before you go':'About & visit'} testID="journal-about">
+        {context.snapshot?<Text className="font-dm text-label text-taupe" style={{lineHeight:20}}>{context.snapshot}</Text>:null}
         {essentials.map((fact,index)=><View key={index} style={{gap:3}}><Text className="font-dm-medium text-fine text-ink">{fact.label}</Text><Text className="font-dm text-label text-taupe" style={{lineHeight:19}}>{fact.value}</Text></View>)}
         {folds.map(fold=><View key={fold.key} testID={'journal-fold-'+fold.key} style={{gap:9,paddingTop:10,borderTopWidth:1,borderTopColor:colors['edge-faint']}}>
           <Text className="font-dm-medium text-label text-ink">{fold.label}</Text>{fold.children}

@@ -9,7 +9,7 @@ const entry: HomeGuideEntry = { kind: 'place', id: 'raw-bar', name: 'Raw bar', c
 
 it('builds the approved dock from actual distance, menu and offer records', () => {
   const result = cardMetadata(entry, now);
-  expect(result.items.map(item => [item.text, item.tone])).toEqual([['<0.1 mi', 'distance'], ['Menu', 'menu'], ['$2 oysters', 'offer']]);
+  expect(result.items.map(item => [item.text, item.tone])).toEqual([['0.1 mi', 'distance'], ['Menu', 'menu'], ['$2 oysters', 'offer']]);
   expect(result.note).toContain('3–6 PM');
   expect(result.note).toContain('Minimum 6');
   expect(result.items[2].label).toContain('minimum 6');
@@ -18,7 +18,7 @@ it('builds the approved dock from actual distance, menu and offer records', () =
 it('never pads missing facts or advertises an empty menu', () => {
   const sparse = { ...entry, facts: [], detailContent: undefined };
   expect(cardMetadata(sparse, now)).toEqual({ items: [] });
-  expect(cardMetadata({ ...entry, detailContent: { ...entry.detailContent!, menu: { url: 'https://venue.example/menu', items: [] }, offers: [] } }, now).items.map(item => item.text)).toEqual(['<0.1 mi']);
+  expect(cardMetadata({ ...entry, detailContent: { ...entry.detailContent!, menu: { url: 'https://venue.example/menu', items: [] }, offers: [] } }, now).items.map(item => item.text)).toEqual(['0.1 mi']);
   const document = { ...entry.detailContent!, menu: undefined, menuDocuments: [{ url: 'https://venue.example/menu.pdf', title: 'Menu', format: 'pdf' as const }], offers: [] };
   expect(cardMetadata({ ...entry, detailContent: document }, now).items.some(item => item.key === 'menu')).toBe(true);
 });
@@ -38,12 +38,12 @@ it('keeps event times and prices factual, and removes wallet glyphs', () => {
 
 it('keeps the two-fact row layout compact without orphaning an offer note', () => {
   const result = cardMetadata(entry, now, 2);
-  expect(result.items.map(item => item.text)).toEqual(['<0.1 mi', 'Menu']);
+  expect(result.items.map(item => item.text)).toEqual(['0.1 mi', 'Menu']);
   expect(result.note).toBeUndefined();
 });
 
 it('prioritizes a published menu and location for Home without repeating the promo', () => {
-  expect(homeCardMetadata(entry, now).map(item => [item.text, item.tone])).toEqual([['Menu', 'menu'], ['<0.1 mi', 'distance']]);
+  expect(homeCardMetadata(entry, now).map(item => [item.text, item.tone])).toEqual([['Menu', 'menu'], ['0.1 mi', 'distance']]);
   const laterLocation = { ...entry, facts: [{ glyph: 'dollar', value: '$$' }, { glyph: 'clock', value: '6 PM' }, { glyph: 'pin', value: '0.4 mi' }] };
   expect(homeCardMetadata(laterLocation, now).map(item => item.text)).toEqual(['Menu', '0.4 mi']);
 });
@@ -51,7 +51,7 @@ it('prioritizes a published menu and location for Home without repeating the pro
 it('does not duplicate or invent Home metadata when source facts are sparse', () => {
   expect(homeCardMetadata({ ...entry, facts: [] }, now).map(item => item.key)).toEqual(['menu', 'offer']);
   expect(homeCardMetadata({ ...entry, facts: [], detailContent: undefined }, now)).toEqual([]);
-  expect(homeCardMetadata({ ...entry, detailContent: undefined }, now).map(item => item.text)).toEqual(['<0.1 mi']);
+  expect(homeCardMetadata({ ...entry, detailContent: undefined }, now).map(item => item.text)).toEqual(['0.1 mi']);
   const event = { ...entry, detailContent: undefined, facts: [{ glyph: 'calendar', value: 'Tomorrow' }, { glyph: 'wallet', value: 'From $35' }] };
   expect(homeCardMetadata(event, now).map(item => item.text)).toEqual(['Tomorrow', 'From $35']);
   const narrative = { ...entry, detailContent: undefined, facts: [{ glyph: 'pin', value: '1724 Broadway' }, { glyph: 'calendar', value: 'Nights posted on the official page' }] };

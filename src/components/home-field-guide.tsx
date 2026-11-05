@@ -1,3 +1,5 @@
+import { MetadataLine } from '@/components/metadata-pill';
+import { shortCardTitle } from '@/lib/card-presentation';
 import { useRouter } from 'expo-router';
 import type { ReactNode } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
@@ -19,7 +21,7 @@ import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
 
 export const HOME_DOOR_HEIGHT = 83;
-const briefTitle = (name: string) => {const words=name.trim().split(/\s+/);return words.length>5?words.slice(0,5).join(' ')+'…':name;};
+const briefTitle = shortCardTitle;
 
 /** Same exact height, inset, typography and chevron for For you and Collections. */
 export function HomeDoorCard({title,meta,image,photos,glyph='compass',width,onPress,testID,variant='row'}: {
@@ -35,8 +37,8 @@ export function HomeDoorCard({title,meta,image,photos,glyph='compass',width,onPr
     style={[surface,{height:HOME_DOOR_HEIGHT,width,flexShrink:0,padding:11,borderRadius:15,flexDirection:'row',alignItems:'center',gap:12}]}>
     <Photo uri={image} candidates={photos} radius={11} fallbackGlyph={glyph} fallbackLabel={`Photo unavailable for ${title}`} style={{width:58,height:58,backgroundColor:colors['surface-sunk']}} />
     <View className="min-w-0 flex-1">
-      <Text numberOfLines={2} className="font-dm-medium text-card-name text-ink">{title}</Text>
-      <Text numberOfLines={1} className="mt-1 font-dm text-fine text-taupe">{meta}</Text>
+      <Text numberOfLines={2} className="font-dm-medium text-card-name text-ink">{shortCardTitle(title)}</Text>
+      <View className="mt-1"><MetadataLine text={meta} /></View>
     </View>
     <Glyph name="chevron" size={14} color={colors['surface-accent']} />
   </TouchableOpacity>;
@@ -98,7 +100,7 @@ export function HomeGuideRow({entry}: {entry:HomeGuideEntry}) {
     onPress={()=>router.push(homeGuideHref(entry) as never)} activeOpacity={.78} className="flex-row items-center gap-x-3 border-t border-edge-faint py-3">
     <Photo uri={entry.image} radius={10} fallbackGlyph={entry.glyph} fallbackLabel={entry.kind==='collection'?`${entry.name} collection`:`Photo unavailable for ${entry.name}`} style={{width:70,height:70}} />
     <View className="min-w-0 flex-1 gap-y-1.5"><Text numberOfLines={1} className="font-fraunces text-ink" style={{fontSize:17,lineHeight:20.7,letterSpacing:-.15}}>{briefTitle(entry.name)}</Text>
-      <Text numberOfLines={1} className="font-dm text-fine text-taupe">{entry.caption}</Text>
+      <MetadataLine text={entry.caption} />
       <HomeGuideFacts facts={entry.facts} />
     </View>
     <Glyph name="chevron" size={14} color={colors['surface-accent']} />
@@ -112,7 +114,7 @@ export function HomeGuideLead({entry}: {entry:HomeGuideEntry}) {
     <View className="flex-row items-center gap-x-3">
       <Photo uri={entry.image} radius={10} fallbackGlyph={entry.glyph} fallbackLabel={entry.kind==='collection'?`${entry.name} collection`:`Photo unavailable for ${entry.name}`} style={{width:65,height:65}} />
       <View className="min-w-0 flex-1 gap-y-1.5"><Text numberOfLines={2} className="font-fraunces text-ink" style={{fontSize:17,lineHeight:20.7}}>{briefTitle(entry.name)}</Text>
-        <Text numberOfLines={1} className="font-dm text-fine text-taupe">{entry.caption}</Text><HomeGuideFacts facts={entry.facts} />
+        <MetadataLine text={entry.caption} /><HomeGuideFacts facts={entry.facts} />
       </View>
     </View>
     <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Take a closer look at ${entry.name}`} onPress={()=>router.push(homeGuideHref(entry) as never)} activeOpacity={.78}
