@@ -55,6 +55,18 @@ it('keeps a featured product snapshot partial while retaining the real PDF link'
  const html='<script type="application/ld+json">'+JSON.stringify({'@type':'Product',name:'Soup',offers:{price:'12',priceCurrency:'USD'}})+'</script><a href="/dinner.pdf">Full dinner menu</a>';
  const result=extractMenuPhotos(html,base,identity,true);
  expect(result.menuPage).toBe(false);expect(result.content?.menuDocuments?.[0]).toMatchObject({url:base+'dinner.pdf',format:'pdf'});
+ expect(result.menuComplete).toBe(false);
+});
+it('distinguishes a full declared structured menu from a few semantic highlights',()=>{
+ const items=Array.from({length:220},(_,i)=>({'@type':'MenuItem',name:'Published dish '+i,offers:{price:12,priceCurrency:'USD'}}));
+ const html='<script type="application/ld+json">'+JSON.stringify({'@type':'Menu',hasMenuSection:{'@type':'MenuSection',name:'All dishes',hasMenuItem:items}})+'</script>';
+ const result=extractMenuPhotos(html,base+'menu',identity,true);
+ expect(result.menuComplete).toBe(true);expect(result.content?.menu?.items).toHaveLength(220);
+ expect(extractMenuPhotos('<div class="food-item"><h3>Soup</h3><span class="price">$12</span></div>',base+'menu',identity,true).menuComplete).toBe(false);
+});
+it('follows merchant-linked ordering pages without guessing unrelated platform stores',()=>{
+ const links=discoverSources('<a href="https://order.toasttab.com/online/real-kitchen">Order pickup</a><a href="https://real-kitchen.square.site/">Menu</a><a href="https://toasttab.com/">Company</a>',base);
+ expect(links.map(link=>link.url)).toEqual(['https://order.toasttab.com/online/real-kitchen','https://real-kitchen.square.site/']);
 });
 it('does not mistake a normal Wix captcha-library reference for an access challenge',()=>{
  const html='<script>window.recaptchaSupport="captcha challenge-platform";</script><div data-hook="item.root"><h3 data-hook="item.name">Soup</h3><p data-hook="item.price">$12</p></div>';

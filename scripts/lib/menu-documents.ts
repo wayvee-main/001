@@ -11,7 +11,7 @@ export async function readMenuDocument(body:Buffer,format:'pdf'|'image',url:stri
  try{
   const input=join(dir,format==='pdf'?'menu.pdf':'menu.image');await writeFile(input,body);
   if(format==='pdf'){
-   try{const result=await run('pdftotext',['-layout','-f','1','-l','12',input,'-'],{timeout:20000,maxBuffer:1_000_000});const parsed=menuFromText(result.stdout,url,identity);if(parsed?.menu?.items.length)return parsed;}catch{/* OCR fallback below is separately bounded. */}
+   try{const result=await run('pdftotext',['-layout','-f','1','-l','40',input,'-'],{timeout:20000,maxBuffer:2_000_000});const parsed=menuFromText(result.stdout,url,identity);if(parsed?.menu?.items.length)return parsed;}catch{/* OCR fallback below is separately bounded. */}
    await run('pdftoppm',['-f','1','-l','3','-scale-to','1800','-png',input,join(dir,'page')],{timeout:30000,maxBuffer:100_000});
   }
   const images=format==='pdf'?(await readdir(dir)).filter(name=>/^page.*\.png$/.test(name)).map(name=>join(dir,name)):[input];
