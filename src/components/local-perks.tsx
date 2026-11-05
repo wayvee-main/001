@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Animated, AppState, Easing, Platform, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { AuroraGlow, GradientFill, useAuroraCard, useGlass } from '@/components/aurora';
 import { Glyph } from '@/components/glyph';
+import { useAppGutter } from '@/lib/gutter';
 import { shortCardTitle } from '@/lib/card-presentation';
 import { CardMetadata } from '@/components/card-metadata';
 import { Photo } from '@/components/photo';
@@ -85,15 +86,18 @@ export function PerksPhoto({ entry, catalog, photos: provided, radius = 12, heig
 /** The four categories as a quiet row: outline glyph over label, no container. A
  * selected Discover filter takes the accent with a short gradient underline. */
 export function LocalCategoryShelf({ catalog, active, onSelect, tone = 'home' }: { catalog: HomeGuideCatalog; active?: HomeGuideCategory; onSelect?: (category: HomeGuideCategory) => void; tone?: 'home' | 'browse' }) {
-  const router = useRouter(), colors = useThemeColors();
-  return <View testID="home-category-shelf" style={{ flexDirection: 'row' }}>
+  const router = useRouter(), colors = useThemeColors(), aurora = useAurora();
+  return <View testID="home-category-shelf" style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
     {(['eat', 'bars', 'routes', 'events'] as const).map(category => {
       const pool = catalog.categories[category], selected = active === category;
       return <Pressable key={category} testID={`${tone === 'browse' ? 'discover-chip' : 'home-category'}-${category}`} accessibilityRole="button" accessibilityLabel={`${HOME_LEDGERS[category].title}. ${pool.length} local options`}
         accessibilityState={{ selected }} onPress={() => onSelect ? onSelect(category) : router.push(HOME_LEDGERS[category].href)}
-        style={({ pressed }) => ({ flex: 1, minWidth: 0, minHeight: 64, alignItems: 'center', justifyContent: 'center', gap: 7, paddingTop: 6, paddingBottom: 8, opacity: pressed ? .6 : 1 })}>
-        <View><Glyph name={{ eat: 'food', bars: 'drink', routes: 'route', events: 'ticket' }[category]} size={26} color={selected ? colors['fg-accent'] : colors['fg-muted']} strokeWidth={1.5} /></View>
-        <Text numberOfLines={1} className={selected ? 'font-dm-medium' : 'font-dm'} style={{ fontSize: 14, lineHeight: 18, color: selected ? colors.fg : colors['fg-muted'] }}>{HOME_LEDGERS[category].title}</Text>
+        style={({ pressed }) => ({ flex: 1, minWidth: 0, minHeight: 64, alignItems: 'center', gap: 8, paddingVertical: 4, opacity: pressed ? .6 : 1 })}>
+        <View style={{ width: 65, height: 65, borderRadius: 22, overflow: 'hidden', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: selected ? colors['fg-accent'] : aurora.glassEdge }}>
+          <GradientFill radius={22} soft />
+          <View><Glyph name={{ eat: 'food', bars: 'drink', routes: 'route', events: 'ticket' }[category]} size={26} color={colors['fg-accent']} strokeWidth={1.6} /></View>
+        </View>
+        <Text numberOfLines={1} className="font-dm-medium" style={{ fontSize: 13, lineHeight: 17, color: selected ? colors.fg : colors['fg-muted'] }}>{HOME_LEDGERS[category].title}</Text>
         {selected ? <View testID={`category-selected-${category}`} style={{ position: 'absolute', bottom: 0, width: 22, height: 3, borderRadius: 2, overflow: 'hidden' }}><GradientFill radius={2} /></View> : null}
       </Pressable>;
     })}
@@ -102,7 +106,7 @@ export function LocalCategoryShelf({ catalog, active, onSelect, tone = 'home' }:
 
 /** Named, source-backed picks as plain text, each led by a pulsing bolt. Only the bolts move. */
 export function HomeTimelyRecommendations({ catalog, now }: { catalog: HomeGuideCatalog; now: Date }) {
-  const router = useRouter(), colors = useThemeColors(), reduced = useReducedMotionPreference();
+  const router = useRouter(), colors = useThemeColors(), aurora = useAurora(), gutter = useAppGutter(), reduced = useReducedMotionPreference();
   const openOffer = useLocalPerks(s => s.openOffer), recommendations = homeRecommendations(catalog, now);
   const hasPicks = recommendations.length > 0;
   const [pulse] = useState(() => new Animated.Value(0));
@@ -122,9 +126,10 @@ export function HomeTimelyRecommendations({ catalog, now }: { catalog: HomeGuide
     animation.start();
     return () => { animation.stop(); pulse.setValue(0); };
   }, [animating, pulse]));
-  return <View testID="home-timely-recommendations" style={{ minHeight: 44, marginHorizontal: -2 }}>
-    {hasPicks ? <ScrollView horizontal showsHorizontalScrollIndicator={false} nestedScrollEnabled directionalLockEnabled
-      contentContainerStyle={{ alignItems: 'center', gap: 22, paddingHorizontal: 2 }}>
+  return <View testID="home-timely-recommendations" style={{ minHeight: 44, marginHorizontal: -gutter, flexDirection: 'row', alignItems: 'center', borderTopWidth: 1, borderBottomWidth: 1, borderColor: aurora.rule }}>
+    <Text accessible={false} className="font-dm-bold" style={{ paddingLeft: gutter, paddingRight: 14, fontSize: 10, lineHeight: 14, letterSpacing: 1.6, color: colors['fg-accent'] }}>FRESH</Text>
+    {hasPicks ? <ScrollView horizontal showsHorizontalScrollIndicator={false} nestedScrollEnabled directionalLockEnabled style={{ flex: 1 }}
+      contentContainerStyle={{ alignItems: 'center', gap: 18, paddingRight: gutter }}>
       {recommendations.map((suggestion, index) => {
         const phase = (index * 0.125) % 1, venuePrefix = suggestion.label.startsWith(suggestion.venue + ' · ') ? suggestion.venue : suggestion.label === suggestion.venue ? suggestion.venue : '';
         const rest = venuePrefix ? suggestion.label.slice(venuePrefix.length) : suggestion.label;
@@ -136,12 +141,12 @@ export function HomeTimelyRecommendations({ catalog, now }: { catalog: HomeGuide
             opacity: pulse.interpolate(pulseRanges(phase, .35)), transform: [{ scale: pulse.interpolate(pulseRanges(phase, .8)) }] } : undefined}>
             <Glyph name="boltFilled" size={12} color={colors['fg-accent']} />
           </Animated.View>
-          <Text numberOfLines={1} className="font-dm" style={{ flexShrink: 1, paddingRight: 3, fontSize: 10, lineHeight: 15, fontStyle: 'italic', color: colors['fg-muted'] }}>
+          <Text numberOfLines={1} className="font-dm" style={{ flexShrink: 1, fontSize: 12, lineHeight: 17, color: colors['fg-muted'] }}>
             {venuePrefix ? <Text className="font-dm-medium" style={{ color: colors.fg }}>{venuePrefix}</Text> : null}{rest}
           </Text>
         </Pressable>;
       })}
-    </ScrollView> : <Text testID="home-recommendations-empty" className="font-dm" style={{ paddingVertical: 14, paddingHorizontal: 2, fontSize: 10, lineHeight: 15, fontStyle: 'italic', color: colors['fg-muted'] }}>Fresh local picks are on the way.</Text>}
+    </ScrollView> : <Text testID="home-recommendations-empty" className="font-dm" style={{ flex: 1, paddingVertical: 13, paddingRight: gutter, fontSize: 12, lineHeight: 17, color: colors['fg-muted'] }}>Local picks are on the way.</Text>}
   </View>;
 }
 

@@ -9,7 +9,6 @@ import {
   ScrollView,
   Text,
   View,
-  useWindowDimensions,
   type ScrollViewProps,
   type StyleProp,
   type ViewStyle,
@@ -25,6 +24,9 @@ import { useActiveCity } from '@/lib/city';
 import { todayIso } from '@/lib/stay';
 import { perksAreaKey } from '@/lib/local-perks';
 import { useScoper } from '@/lib/store';
+import { useAppGutter } from '@/lib/gutter';
+
+export { useAppGutter };
 
 const EDGE_FADE_WIDTH = 28;
 
@@ -36,10 +38,6 @@ export function AppBackdrop({ children, style, layer = 'primary' }: { children: 
 }
 
 /** Daybreak content gutters match the approved phone layouts. */
-export function useAppGutter(): number {
-  const { width } = useWindowDimensions();
-  return width <= 360 ? 13 : width <= 430 ? 17 : 24;
-}
 
 /** Full-height app background with safe-area top padding. Tab screens pass
  * `aurora` for the screen-top glow ('tall' on Vee, where it frames the mark). */

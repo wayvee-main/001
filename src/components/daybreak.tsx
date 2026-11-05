@@ -1,6 +1,6 @@
 import { Text, View, useWindowDimensions } from 'react-native';
 import { NativePressable as Pressable } from '@/components/native-pressable';
-import { AuroraPoster, GradientText, useGlass } from '@/components/aurora';
+import { AuroraPoster, GradientFill, GradientText, useGlass } from '@/components/aurora';
 import { Glyph } from '@/components/glyph';
 import { useAurora } from '@/lib/aurora';
 import type { HomeGuideCatalog, HomeGuideEntry } from '@/lib/home-guide';
@@ -26,7 +26,7 @@ export function DaybreakIntro({ city }: { city: string }) {
   </View>;
 }
 
-/** By day / After hours as a two-pill toggle: the selected one filled with ink. */
+/** By day / After hours as a two-pill toggle: the selected one filled with the Aurora gradient. */
 export function DaybreakPeriodPicker({ value, onChange }: { value: DaybreakPeriod; onChange: (period: DaybreakPeriod) => void }) {
   const colors = useThemeColors(), aurora = useAurora();
   return <View testID="daybreak-periods" accessibilityRole="tablist" style={{ flexDirection: 'row', gap: 8 }}>
@@ -34,9 +34,10 @@ export function DaybreakPeriodPicker({ value, onChange }: { value: DaybreakPerio
       const selected = item.key === value;
       return <Pressable key={item.key} testID={`daybreak-period-${item.key}`} accessibilityRole="tab" accessibilityState={{ selected }} aria-selected={selected} onPress={() => onChange(item.key)} hitSlop={{ top: 4, bottom: 4 }}
         style={({ pressed }) => ({ minHeight: 40, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 15, borderRadius: 999,
-          borderWidth: 1, borderColor: selected ? colors.fg : aurora.glassEdge, backgroundColor: selected ? colors.fg : 'transparent', opacity: pressed ? .7 : 1 })}>
-        <Glyph name={item.glyph} size={16} color={selected ? colors.bg : colors['fg-muted']} strokeWidth={1.7} />
-        <Text className="font-dm-medium" style={{ fontSize: 14, lineHeight: 19, color: selected ? colors.bg : colors['fg-muted'] }}>{item.label}</Text>
+          overflow: 'hidden', borderWidth: selected ? 0 : 1, borderColor: aurora.glassEdge, backgroundColor: selected ? undefined : colors['surface-raised'], opacity: pressed ? .7 : 1 })}>
+        {selected ? <GradientFill /> : null}
+        <View><Glyph name={item.glyph} size={16} color={selected ? aurora.onFill : colors['fg-muted']} strokeWidth={1.7} /></View>
+        <Text className="font-dm-medium" style={{ fontSize: 14, lineHeight: 19, color: selected ? aurora.onFill : colors['fg-muted'] }}>{item.label}</Text>
       </Pressable>;
     })}
   </View>;
@@ -52,5 +53,5 @@ const FEATURE_CHIPS: Partial<Record<HomeGuideEntry['kind'], { label: string; gly
 
 /** Home's featured pick as the split-card poster, labelled by what kind of pick it is. */
 export function DaybreakFeature({ entry, catalog, now }: { entry: HomeGuideEntry; catalog: HomeGuideCatalog; now: Date }) {
-  return <AuroraPoster testID="daybreak-poster" entry={entry} catalog={catalog} now={now} chip={FEATURE_CHIPS[entry.kind]} />;
+  return <AuroraPoster testID="daybreak-poster" entry={entry} catalog={catalog} now={now} chip={FEATURE_CHIPS[entry.kind]} photoHeight={136} />;
 }

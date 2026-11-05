@@ -153,7 +153,7 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     const source = { ...freshEntry, description: 'A source-backed snapshot.', facts: [{ glyph: 'pin', value: '0.4 mi' }] };
     const poster = mount(<DaybreakFeature entry={source} catalog={empty} now={new Date(2026, 10, 3, 12)} />);
     expect(style(poster, 'daybreak-poster-frame')).toMatchObject({ borderRadius: 24, overflow: 'hidden' });
-    expect(style(poster, 'daybreak-poster-photo')).toMatchObject({ height: 168, overflow: 'hidden' });
+    expect(style(poster, 'daybreak-poster-photo')).toMatchObject({ height: 136, overflow: 'hidden' });
     expect(nodes(poster).filter(node => node.props.testID === 'aurora-poster-add')).toHaveLength(1);
     const facts = poster.root.findByProps({ testID: 'aurora-poster-facts' });
     expect(nodes(poster).filter(node => node.props.accessible && ['0.4 mi', 'Menu'].some(label => (node.props.accessibilityLabel || '').includes(label)))).not.toHaveLength(0);

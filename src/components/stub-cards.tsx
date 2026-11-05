@@ -4,7 +4,7 @@ import Svg, { Line } from 'react-native-svg';
 
 import { GradientFill, GradientText, useAuroraCard } from '@/components/aurora';
 import { Glyph, type GlyphName } from '@/components/glyph';
-import { useAppGutter } from '@/components/layout';
+import { useAppGutter } from '@/lib/gutter';
 import { MetadataPill } from '@/components/metadata-pill';
 import { NativePressable as Pressable } from '@/components/native-pressable';
 import { Photo } from '@/components/photo';
@@ -92,7 +92,8 @@ function Tags({ tags }: { tags?: readonly StubTag[] }) {
 }
 
 function Pills({ pills }: { pills?: readonly StubPill[] }) {
-  return pills?.length ? <View style={{ flexDirection: 'row', gap: 5, overflow: 'hidden' }}>{pills.slice(0, 2).map(pill => <MetadataPill key={pill.text} text={pill.text} glyph={pill.glyph} />)}</View> : null;
+  // The first pill carries the fact (a count, a price, a kind) and keeps its size; only the second may shorten.
+  return pills?.length ? <View style={{ flexDirection: 'row', gap: 5, overflow: 'hidden' }}>{pills.slice(0, 2).map((pill, index) => <View key={pill.text} style={{ flexShrink: index === 0 ? 0 : 1, minWidth: 0 }}><MetadataPill text={pill.text} glyph={pill.glyph} /></View>)}</View> : null;
 }
 
 /** Short and wide: stub, perforation, words — and the photo on the right when the stub is a date or a value. */
