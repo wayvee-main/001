@@ -2,30 +2,40 @@ import { useColorScheme } from 'nativewind';
 import type { ReactNode, Ref } from 'react';
 import { Keyboard, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-import { IconBadge, useGlass } from '@/components/aurora';
+import { useAuroraCard } from '@/components/aurora';
 import { Glyph } from '@/components/glyph';
+import { useNow } from '@/lib/clock';
+import { currentDaypart } from '@/lib/daypart';
 import { useControlSurface } from '@/lib/shadows';
 import { useThemeColors } from '@/lib/theme';
 
 // Daybreak uses the same 49px search geometry on every layer.
 export const SEARCH_BAR_HEIGHT = 49;
-/** Home and Discover share the frosted Aurora launcher. */
-export const AURORA_SEARCH_HEIGHT = 52;
+/** Home and Discover share the two-line launcher. */
+export const AURORA_SEARCH_HEIGHT = 64;
 export function CitySearchBar({city,testID,labelTestID,inputTestID,inputLabel,placeholder,value='',onChangeText,onPress,onSubmit,autoFocus=false,inputRef,variant='default'}: {
   city:string;testID:string;labelTestID?:string;inputLabel?:string;value?:string;variant?:'default'|'aurora';
   inputTestID?:string;placeholder?:string;autoFocus?:boolean;inputRef?:Ref<TextInput>;
   onChangeText?:(text:string)=>void;onPress?:()=>void;onSubmit?:(query:string)=>void;
 }) {
-  const colors=useThemeColors(),control=useControlSurface(),glass=useGlass();
+  const colors=useThemeColors(),control=useControlSurface(),card=useAuroraCard(),now=useNow();
   const label=placeholder || `Search ${/^san francisco$/i.test(city)?'SF':city}`;
-  // Aurora launcher (Home and Discover): a frosted pill that opens Search, where
-  // the scope filters live, so the filter circle belongs to the same control.
-  if(variant==='aurora'&&onPress)return <TouchableOpacity testID={testID} accessibilityRole="button" accessibilityLabel={`${inputLabel || label}. Filters on the next screen`} onPress={onPress} activeOpacity={.78}
-    style={[glass,{height:AURORA_SEARCH_HEIGHT,width:'100%',borderRadius:999,flexDirection:'row',alignItems:'center',gap:12,paddingLeft:18,paddingRight:8}]}>
-    <Glyph name="search" size={20} color={colors['fg-muted']} />
-    <Text testID={labelTestID} numberOfLines={1} className="min-w-0 flex-1 font-dm text-taupe" style={{fontSize:16,lineHeight:22}}>{value || label}</Text>
-    <IconBadge testID={`${testID}-filters`} glyph="filter" size={36} iconSize={17} />
-  </TouchableOpacity>;
+  // Home and Discover launcher: a two-line white pill that opens Search, where the
+  // scope filters live, so the filter circle belongs to the same control.
+  if(variant==='aurora'&&onPress){
+    const daypart=currentDaypart(now),area=`Anywhere in ${city} · ${daypart==='evening'||daypart==='lateNight'?'Tonight':'Today'}`;
+    return <TouchableOpacity testID={testID} accessibilityRole="button" accessibilityLabel={`${inputLabel || label}. ${area}. Filters on the next screen`} onPress={onPress} activeOpacity={.78}
+      style={[card,{height:AURORA_SEARCH_HEIGHT,width:'100%',borderRadius:999,flexDirection:'row',alignItems:'center',gap:14,paddingLeft:22,paddingRight:10}]}>
+      <Glyph name="search" size={21} color={colors.fg} strokeWidth={2} />
+      <View style={{flex:1,minWidth:0}}>
+        <Text testID={labelTestID} numberOfLines={1} className="font-dm-medium text-ink" style={{fontSize:16,lineHeight:21}}>{value || label}</Text>
+        <Text testID={`${testID}-area`} numberOfLines={1} className="font-dm" style={{fontSize:13,lineHeight:18,color:colors['fg-muted']}}>{area}</Text>
+      </View>
+      <View testID={`${testID}-filters`} style={{width:44,height:44,borderRadius:22,borderWidth:1,borderColor:colors['control-edge'],alignItems:'center',justifyContent:'center'}}>
+        <Glyph name="filter" size={19} color={colors.fg} strokeWidth={1.8} />
+      </View>
+    </TouchableOpacity>;
+  }
   const submit=()=>{Keyboard.dismiss();onSubmit?.(value.trim());};
   const content=<>
     <Glyph name="search" size={17} color={colors['fg-muted']} />

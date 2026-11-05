@@ -4,7 +4,7 @@ import { useColorScheme } from 'nativewind';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Animated, AppState, Easing, Platform, ScrollView, Text, View, useWindowDimensions } from 'react-native';
-import { AuroraGlow, GradientFill, IconBadge, useAuroraCard, useGlass } from '@/components/aurora';
+import { AuroraGlow, GradientFill, useAuroraCard, useGlass } from '@/components/aurora';
 import { Glyph } from '@/components/glyph';
 import { shortCardTitle } from '@/lib/card-presentation';
 import { CardMetadata } from '@/components/card-metadata';
@@ -81,19 +81,19 @@ export function PerksPhoto({ entry, catalog, photos: provided, radius = 12, heig
     radius={radius} stripedPlaceholder={false} retryable={retryable} onUnavailable={onUnavailable} style={{ width: width || '100%', height }} />;
 }
 
+/** The four categories as a quiet row: outline glyph over label, no container. A
+ * selected Discover filter takes the accent with a short gradient underline. */
 export function LocalCategoryShelf({ catalog, active, onSelect, tone = 'home' }: { catalog: HomeGuideCatalog; active?: HomeGuideCategory; onSelect?: (category: HomeGuideCategory) => void; tone?: 'home' | 'browse' }) {
-  const router = useRouter(), colors = useThemeColors(), aurora = useAurora(), card = useAuroraCard();
-  const { width } = useWindowDimensions();
-  return <View testID="home-category-shelf" style={{ flexDirection: 'row', gap: width <= 350 ? 8 : 10 }}>
+  const router = useRouter(), colors = useThemeColors();
+  return <View testID="home-category-shelf" style={{ flexDirection: 'row' }}>
     {(['eat', 'bars', 'routes', 'events'] as const).map(category => {
       const pool = catalog.categories[category], selected = active === category;
       return <Pressable key={category} testID={`${tone === 'browse' ? 'discover-chip' : 'home-category'}-${category}`} accessibilityRole="button" accessibilityLabel={`${HOME_LEDGERS[category].title}. ${pool.length} local options`}
         accessibilityState={{ selected }} onPress={() => onSelect ? onSelect(category) : router.push(HOME_LEDGERS[category].href)}
-        style={({ pressed }) => ({ flex: 1, minWidth: 0, minHeight: 88, borderRadius: 20, overflow: 'hidden', alignItems: 'center', justifyContent: 'center', gap: 8, paddingHorizontal: 4, paddingVertical: 10, opacity: pressed ? .72 : 1, ...card })}>
-        {selected ? <GradientFill radius={20} /> : null}
-        {selected ? <View><Glyph name={{ eat: 'food', bars: 'drink', routes: 'route', events: 'ticket' }[category]} size={22} color={aurora.onFill} strokeWidth={1.7} /></View>
-          : <IconBadge glyph={{ eat: 'food', bars: 'drink', routes: 'route', events: 'ticket' }[category]} size={40} iconSize={19} />}
-        <Text numberOfLines={1} className="font-dm-medium" style={{ fontSize: 13, lineHeight: 17, color: selected ? aurora.onFill : colors.fg }}>{HOME_LEDGERS[category].title}</Text>
+        style={({ pressed }) => ({ flex: 1, minWidth: 0, minHeight: 64, alignItems: 'center', justifyContent: 'center', gap: 7, paddingTop: 6, paddingBottom: 8, opacity: pressed ? .6 : 1 })}>
+        <View><Glyph name={{ eat: 'food', bars: 'drink', routes: 'route', events: 'ticket' }[category]} size={26} color={selected ? colors['fg-accent'] : colors['fg-muted']} strokeWidth={1.5} /></View>
+        <Text numberOfLines={1} className={selected ? 'font-dm-medium' : 'font-dm'} style={{ fontSize: 14, lineHeight: 18, color: selected ? colors.fg : colors['fg-muted'] }}>{HOME_LEDGERS[category].title}</Text>
+        {selected ? <View testID={`category-selected-${category}`} style={{ position: 'absolute', bottom: 0, width: 22, height: 3, borderRadius: 2, overflow: 'hidden' }}><GradientFill radius={2} /></View> : null}
       </Pressable>;
     })}
   </View>;

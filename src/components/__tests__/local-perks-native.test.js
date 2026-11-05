@@ -183,13 +183,15 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     tabs.forEach(tab => expect(StyleSheet.flatten(tab.props.style)).toMatchObject({ flex: 1, minHeight: 50, alignItems: 'center', borderRadius: 999 }));
     expect(nodes(tree).filter(node => node.props.testID === 'nav-active-fill')).toHaveLength(1);
   });
-  it('preserves category tile touch targets and each separate category destination', () => {
+  it('keeps the category row touch targets and each separate category destination', () => {
     const tree = mount(<LocalCategoryShelf catalog={empty} />);
     for (const category of ['eat', 'bars', 'routes', 'events']) {
-      expect(style(tree, `home-category-${category}`)).toMatchObject({ flex: 1, minWidth: 0, minHeight: 88, borderRadius: 20 });
+      expect(style(tree, `home-category-${category}`)).toMatchObject({ flex: 1, minWidth: 0, minHeight: 64, alignItems: 'center' });
       act(() => tree.root.findByProps({ testID: `home-category-${category}` }).props.onPress());
       expect(mockPush).toHaveBeenLastCalledWith('/home/' + category);
     }
+    const browse = mount(<LocalCategoryShelf catalog={empty} tone="browse" active="bars" onSelect={() => {}} />);
+    expect(nodes(browse).filter(node => /^category-selected-/.test(node.props.testID || '')).map(node => node.props.testID)).toEqual(['category-selected-bars']);
   });
   it('updates named menu picks by daypart and opens the actual dish', () => {
     const tree = mount(<HomeTimelyRecommendations catalog={freshCatalog} now={new Date(2026, 10, 3, 8)} />);

@@ -77,16 +77,18 @@ Keep the current Aurora palette, top chrome and four category tiles.
 - **Headlines:** the second phrase of each tab headline is gradient type
   ("Make a day of it.", "out there.", "evening?", "city."), coloured glyph by glyph
   with `GradientText` so it wraps, scales and reads as one sentence.
-- **Search:** Home and Discover share one frosted launcher (`CitySearchBar
-  variant="aurora"`, 52px). The filter circle belongs to the same control and opens
-  Search, where the scope filters live.
+- **Search:** Home and Discover share one launcher (`CitySearchBar
+  variant="aurora"`): a 64px white pill with "Search {city}" over "Anywhere in {city}
+  · Tonight" (Today before evening) and an outlined filter circle. The circle belongs
+  to the same control and opens Search, where the scope filters live.
 - **Picks row** (Home, under search): live `homeRecommendations` as plain text, venue
   in medium weight, each led by a filled bolt. One native-driven loop pulses every
   bolt at its own phase; it stops for reduced motion, in the background and off
   Home. The 14-day freshness rule is unchanged; the empty state stays
   "Fresh local picks are on the way."
-- **Categories:** four equal tiles (88px) with gradient-tinted icon badges; a
-  selected Discover filter takes the fill gradient.
+- **Categories:** a quiet row of four: 26px outline glyph over a 14px label in the
+  muted ink, no container, each a 64px touch target. A selected Discover filter takes
+  the accent with a short gradient underline.
 - **By day / After hours:** two pills, the selected one filled with ink. They switch
   Home's featured section, so the rule goes above them and none separates them from
   the section heading below.
