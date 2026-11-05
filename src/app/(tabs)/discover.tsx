@@ -40,7 +40,7 @@ export default function DiscoverScreen() {
   const renderCards = (entries: HomeGuideEntry[], feature = false) => {
     const [first, ...rest] = entries, lead = feature && first ? first : undefined, rows = lead ? rest : entries;
     return <View style={{ gap: 12 }}>
-      {lead ? <AuroraPoster testID="discover-feature" entry={lead} catalog={catalog} now={now} height={320} chip={{ label: 'A good table', glyph: 'food' }} /> : null}
+      {lead ? <AuroraPoster testID="discover-feature" entry={lead} catalog={catalog} now={now} chip={{ label: 'A good table', glyph: 'food' }} /> : null}
       {rows.length ? <AuroraList>{rows.map((entry, index) => <AuroraEntryRow key={homeGuideKey(entry.kind, entry.id)} testID="discover-row" divider={index > 0} entry={entry} catalog={catalog} now={now} />)}</AuroraList> : null}
     </View>;
   };
@@ -57,7 +57,7 @@ export default function DiscoverScreen() {
       {(mode === 'all' || mode === 'eat' || mode === 'bars' || mode === 'venues') && list.length ? renderCards(list.slice(0, mode === 'all' ? 3 : mode === 'eat' ? 3 : 10), mode === 'all' || mode === 'eat') : null}
       <LocalPerksBanners catalog={catalog} compact />
     </View>,
-    (mode === 'all' && events.length > 0 || mode === 'events') ? <View key="stage">{mode === 'all' ? <PerksHeading title="On stage" /> : null}{events[0] ? <AuroraPoster testID="discover-stage" entry={events[0]} catalog={catalog} now={now} height={260} chip={{ label: 'On stage', glyph: 'ticket' }} /> : <EmptyState compact title="No current shows yet" message="Current listings appear here as the calendar updates." />}</View> : null,
+    (mode === 'all' && events.length > 0 || mode === 'events') ? <View key="stage">{mode === 'all' ? <PerksHeading title="On stage" /> : null}{events[0] ? <AuroraPoster testID="discover-stage" entry={events[0]} catalog={catalog} now={now} chip={{ label: 'On stage', glyph: 'ticket' }} /> : <EmptyState compact title="No current shows yet" message="Current listings appear here as the calendar updates." />}</View> : null,
     (mode === 'all' || mode === 'events') && events.length > 1 ? <View key="more-stage"><PerksHeading title="More on stage" action="See all" onPress={() => seeAll('events')} />{rail(events.slice(1, 7))}</View> : null,
     (mode === 'all' || mode === 'eat') && tables.length > (mode === 'all' ? 2 : 3) ? <View key="tables"><PerksHeading title="More good tables" action="See all" onPress={() => seeAll('eat')} />{rail(tables.slice(mode === 'all' ? 2 : 3, 9))}</View> : null,
     mode === 'all' && bars.length > 1 ? <View key="after"><PerksHeading title="After dinner" action="See all" onPress={() => seeAll('bars')} />{rail(bars.slice(1, 7))}</View> : null,

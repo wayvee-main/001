@@ -50,7 +50,7 @@ const FEATURE_CHIPS: Partial<Record<HomeGuideEntry['kind'], { label: string; gly
   venue: { label: 'Rooms worth knowing', glyph: 'landmark' },
 };
 
-/** Home's featured pick as an Aurora poster, labelled by what kind of pick it is. */
+/** Home's featured pick as the split-card poster, labelled by what kind of pick it is. */
 export function DaybreakFeature({ entry, catalog, now }: { entry: HomeGuideEntry; catalog: HomeGuideCatalog; now: Date }) {
-  return <AuroraPoster testID="daybreak-poster" entry={entry} catalog={catalog} now={now} height={360} chip={FEATURE_CHIPS[entry.kind]} />;
+  return <AuroraPoster testID="daybreak-poster" entry={entry} catalog={catalog} now={now} chip={FEATURE_CHIPS[entry.kind]} />;
 }

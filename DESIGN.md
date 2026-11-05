@@ -40,10 +40,12 @@ from the tokens and keep their Daybreak layouts until they are revisited.
   selected Discover filter takes the fill gradient.
 - **By day / After hours:** two pills, the selected one filled with ink. They switch
   Home's featured section, so no rule separates them from it.
-- **Posters** (Home feature, Discover feature and On stage): full photo, one scrim
-  recipe, overlay type (gradient chip, name, one-line snapshot, up to two
-  source-backed facts), frosted save and add-to-evening actions. A missing photo
-  falls back to a dark plum ground so the type stays legible.
+- **Posters** (Home feature, Discover feature and On stage) are split cards: a
+  168px photo on top with a light top shade, the gradient category chip and the
+  frosted save action; below it, on the solid card, the name (21px), a one-line
+  snapshot and up to two source-backed facts as soft-gradient pills (28px), with a
+  42px gradient add-to-evening button at the right. Type never sits on the photo, so
+  it reads whether or not the photo loads.
 - **Overlay cards:** portrait tiles (For you, carousels) and wide banners
   (Collections, Rooms) share `AuroraPhotoCard`. Listing cards keep their real save
   and add-to-evening actions. Photos inside a control are not retryable, which keeps
@@ -52,7 +54,8 @@ from the tokens and keep their Daybreak layouts until they are revisited.
   routes, local-list rows, Vee's shapes and every You setting. Rows show what a place
   is and its nearest fact; a short value sits at the right, a longer note underneath.
 - **Section rules:** a 1px `AURORA.rule` hairline (`SectionRule`) between top-level
-  sections on all four tabs, about 30px each side.
+  sections on all four tabs, about 30px each side. Home has none between the picks
+  row and the category tiles: search, picks and categories read as one block.
 - **Offers:** 62px cards with a gradient badge; the position dot of the visible slide
   takes the gradient. Swipe behaviour is unchanged.
 - **Navigation:** one floating capsule; the active tab takes the fill gradient and the

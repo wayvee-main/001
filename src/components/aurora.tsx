@@ -144,32 +144,45 @@ export function AuroraEntryCard({ entry, catalog, width, height, meta, titleSize
   </AuroraPhotoCard>;
 }
 
-/** Full-width poster: the featured pick with its source-backed facts in the overlay. */
-export function AuroraPoster({ entry, catalog, now, height = 360, chip, subtitle, testID = 'aurora-poster' }: {
-  entry: HomeGuideEntry; catalog: HomeGuideCatalog; now: Date; height?: number; chip?: { label: string; glyph?: string }; subtitle?: string; testID?: string;
+/** Featured pick as a split card: the photo on top (label and save over it), then the
+ * name, a one-line snapshot and up to two source-backed facts as pills on a solid panel,
+ * with add-to-evening at the right. Type never sits on the photo, so it reads with or
+ * without one. */
+export function AuroraPoster({ entry, catalog, now, photoHeight = 168, chip, subtitle, testID = 'aurora-poster' }: {
+  entry: HomeGuideEntry; catalog: HomeGuideCatalog; now: Date; photoHeight?: number; chip?: { label: string; glyph?: string }; subtitle?: string; testID?: string;
 }) {
-  const router = useRouter(), aurora = useAurora(), { width } = useWindowDimensions(), { saved, canSave, save, added, add } = useEntryActions(entry);
+  const router = useRouter(), colors = useThemeColors(), aurora = useAurora(), card = useAuroraCard(), { width } = useWindowDimensions();
+  const { saved, canSave, save, added, add } = useEntryActions(entry);
   const description = subtitle ?? (entry.detailContent?.description || entry.description || entry.caption);
   const facts = homeCardMetadata(entry, now);
-  const narrow = width <= 360, posterHeight = narrow ? Math.round(height * 0.88) : height;
-  return <View testID={`${testID}-frame`} style={{ height: posterHeight, borderRadius: 26, overflow: 'hidden', backgroundColor: aurora.photoFallback, boxShadow: aurora.shadow } as ViewStyle}>
+  const narrow = width <= 360, imageHeight = narrow ? Math.round(photoHeight * 0.9) : photoHeight;
+  return <View testID={`${testID}-frame`} style={[card, { borderRadius: 24, overflow: 'hidden' }]}>
     <Pressable testID={testID} accessibilityRole="button" accessibilityLabel={`Explore ${entry.name}. ${description}`} onPress={() => router.push(homeGuideHref(entry) as never)}
-      style={({ pressed }) => ({ flex: 1, opacity: pressed ? 0.9 : 1 })}>
-      <OverlayPhoto photos={homeIndexPhotos(entry, catalog)} glyph={entry.glyph} label={`${entry.name} photo unavailable`} />
-      <View pointerEvents="none" style={{ position: 'absolute', left: 18, right: 70, bottom: 18, gap: 4 }}>
-        {chip ? <AuroraChip label={chip.label} glyph={chip.glyph} /> : null}
-        <Text numberOfLines={2} className="font-dm-bold" style={{ marginTop: chip ? 6 : 0, fontSize: narrow ? 25 : 28, lineHeight: narrow ? 29 : 32, letterSpacing: -0.8, color: aurora.onPhoto }}>{entry.name}</Text>
-        {description ? <Text numberOfLines={1} className="font-dm" style={{ fontSize: 14, lineHeight: 19, color: 'rgba(255, 255, 255, 0.8)' }}>{description}</Text> : null}
-        {facts.length ? <View testID="aurora-poster-facts" style={{ flexDirection: 'row', gap: 14, marginTop: 6 }}>
-          {facts.map(fact => <View key={fact.key} accessible accessibilityLabel={fact.label} style={{ flexDirection: 'row', alignItems: 'center', gap: 5, flexShrink: 1, minWidth: 0 }}>
-            {fact.glyph ? <Glyph name={fact.glyph} size={14} color="rgba(255, 255, 255, 0.86)" strokeWidth={1.7} /> : null}
-            <Text numberOfLines={1} className="font-dm" style={{ flexShrink: 1, fontSize: 13, lineHeight: 17, color: 'rgba(255, 255, 255, 0.86)' }}>{fact.text}</Text>
+      style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}>
+      <View testID={`${testID}-photo`} style={{ height: imageHeight, overflow: 'hidden', backgroundColor: aurora.photoFallback }}>
+        <Photo candidates={homeIndexPhotos(entry, catalog)} radius={0} stripedPlaceholder={false} retryable={false} fallbackGlyph={entry.glyph as never}
+          fallbackLabel={`${entry.name} photo unavailable`} inkColor="rgba(255, 255, 255, 0.72)" style={[StyleSheet.absoluteFill, { backgroundColor: aurora.photoFallback }]} />
+        <LinearGradient pointerEvents="none" colors={['rgba(14, 8, 16, 0.32)', 'rgba(14, 8, 16, 0)']} locations={[0, 0.5]} style={StyleSheet.absoluteFill} />
+        {chip ? <View pointerEvents="none" style={{ position: 'absolute', top: 12, left: 12 }}><AuroraChip label={chip.label} glyph={chip.glyph} /></View> : null}
+      </View>
+      <View style={{ paddingTop: 13, paddingBottom: 14, paddingLeft: 16, paddingRight: 68, gap: 1 }}>
+        <Text numberOfLines={2} className="font-dm-bold text-ink" style={{ fontSize: narrow ? 20 : 21, lineHeight: 26, letterSpacing: -0.6 }}>{entry.name}</Text>
+        {description ? <Text numberOfLines={1} className="font-dm" style={{ fontSize: 13, lineHeight: 18, color: colors['fg-muted'] }}>{description}</Text> : null}
+        {facts.length ? <View testID="aurora-poster-facts" style={{ flexDirection: 'row', gap: 6, marginTop: 9 }}>
+          {facts.map(fact => <View key={fact.key} accessible accessibilityLabel={fact.label} style={{ height: 28, borderRadius: 14, paddingHorizontal: 10, flexDirection: 'row', alignItems: 'center', gap: 5, overflow: 'hidden', flexShrink: 1, minWidth: 0 }}>
+            <GradientFill radius={14} soft />
+            {fact.glyph ? <View><Glyph name={fact.glyph} size={13} color={colors['fg-accent']} strokeWidth={1.8} /></View> : null}
+            <Text numberOfLines={1} className="font-dm-medium" style={{ flexShrink: 1, fontSize: 12, lineHeight: 16, color: colors.fg }}>{fact.text}</Text>
           </View>)}
         </View> : null}
       </View>
     </Pressable>
-    {canSave ? <PhotoAction testID="aurora-poster-save" glyph={saved ? 'check' : 'heart'} label={`${saved ? 'Unsave' : 'Save'} ${entry.name}`} selected={saved} onPress={save} style={{ top: 14, right: 14 }} /> : null}
-    <PhotoAction testID="aurora-poster-add" glyph={added ? 'check' : 'plus'} label={`${added ? 'Remove' : 'Add'} ${entry.name} ${added ? 'from' : 'to'} your evening`} selected={added} onPress={add} style={{ bottom: 16, right: 16 }} />
+    {canSave ? <PhotoAction testID="aurora-poster-save" glyph={saved ? 'check' : 'heart'} label={`${saved ? 'Unsave' : 'Save'} ${entry.name}`} selected={saved} onPress={save} style={{ top: 10, right: 10 }} /> : null}
+    <Pressable testID="aurora-poster-add" accessibilityRole="button" accessibilityLabel={`${added ? 'Remove' : 'Add'} ${entry.name} ${added ? 'from' : 'to'} your evening`} accessibilityState={{ selected: added }} onPress={add} hitSlop={4}
+      style={({ pressed }) => ({ position: 'absolute', right: 14, bottom: 14, width: 42, height: 42, borderRadius: 21, overflow: 'hidden', alignItems: 'center', justifyContent: 'center', opacity: pressed ? 0.75 : 1 })}>
+      <GradientFill radius={21} />
+      <View><Glyph name={added ? 'check' : 'plus'} size={19} color={aurora.onFill} strokeWidth={2.2} /></View>
+    </Pressable>
   </View>;
 }
 

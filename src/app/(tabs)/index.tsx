@@ -36,11 +36,10 @@ export default function HomeScreen() {
   return <Screen aurora><ScreenScroll gap={18} clearsTabBar refreshing={refreshing} onRefresh={onRefresh}>
     <LocalPerksHeader location={false} />
     <DaybreakIntro city={displayCity} />
-    <View style={{ gap: 6 }}>
+    <View style={{ gap: 6, marginBottom: -6 }}>
       <CitySearchBar variant="aurora" testID="home-search" labelTestID="home-search-label" city={displayCity} onPress={() => router.push('/search')} />
       <HomeTimelyRecommendations catalog={catalog} now={now} />
     </View>
-    <SectionRule />
     <LocalCategoryShelf catalog={catalog} />
     <DaybreakPeriodPicker value={period} onChange={setPeriodOverride} />
     <View style={{ marginTop: 10, gap: 12 }}>
