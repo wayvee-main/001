@@ -11,11 +11,11 @@
  * aliases are kept pointing at the same hex so existing className strings in src/app
  * and src/components keep working; new code should reach for the semantic name.
  *
- * Palette: Daybreak cream and warm brown, matte cards and compact apricot ribbons.
- * Solid pastel metadata pills use dark, high-contrast ink in both themes.
- * Filled controls use the smoke/light and peach/dark pairing with
- * theme-specific on-accent ink. Legacy color aliases follow the same orange
- * family; the original gradient mark keeps its brand colors.
+ * Palette: Aurora. Warm paper (light) and plum night (dark) grounds lit by the
+ * Vee spiral's gold → ember → violet. Solid roles below stay hex so Tailwind's
+ * opacity modifier keeps working; gradients, glow, frosted surfaces and section
+ * rules live in AURORA. Solid pastel metadata pills keep dark ink in both
+ * themes. Legacy color aliases follow the ember accent.
  */
 
 export type ThemeValue = { light: string; dark: string };
@@ -36,24 +36,24 @@ export function withAlpha(hex: string, alpha: number): string {
  * space-separated RGB triples so Tailwind's <alpha-value> opacity modifier
  * (bg-surface/50) keeps working. */
 export const ROLES: Record<string, ThemeValue> = {
-  bg: { light: '#FFF8EF', dark: '#241912' }, // Daybreak primary ground
+  bg: { light: '#FFFAF6', dark: '#120E13' }, // Daybreak primary ground
   // Local Perks cards use a dedicated matte surface. Search and
   // navigation have separate roles so their lighter treatment stays consistent.
-  surface: { light: '#FFFFFF', dark: '#3B2A20' },
-  'surface-raised': { light: '#FFFFFF', dark: '#3B2A20' },
-  'surface-soft': { light: '#FFFFFF', dark: '#3B2A20' },
-  'surface-control': { light: '#FFFFFF', dark: '#3B2E25' },
-  'surface-input': { light: '#FFFFFF', dark: '#3B2E25' }, // text fields stay lighter than cards
+  surface: { light: '#FFFFFF', dark: '#1C171E' },
+  'surface-raised': { light: '#FFFFFF', dark: '#1C171E' },
+  'surface-soft': { light: '#FFFFFF', dark: '#1C171E' },
+  'surface-control': { light: '#FFFFFF', dark: '#251F28' },
+  'surface-input': { light: '#FFFFFF', dark: '#251F28' }, // text fields stay lighter than cards
   'surface-ribbon': { light: '#FFD0A3', dark: '#6A3B1B' }, // Home ribbon and stay anchor
   'surface-poster': { light: '#FFE7D4', dark: '#503222' },
   'poster-edge': { light: '#F0DAC8', dark: '#6A4330' },
-  'surface-search': { light: '#FFFFFF', dark: '#3B2E25' },
-  'surface-navigation': { light: '#FFFFFF', dark: '#3B2A20' },
-  'surface-sunk': { light: '#F1EBE4', dark: '#2C2018' }, // input wells, sheet track
-  fg: { light: '#3F261D', dark: '#FFF1DE' }, // aubergine editorial ink
-  'fg-muted': { light: '#70584A', dark: '#CEB19B' },
-  'card-ink': { light: '#3F261D', dark: '#FFF1DE' },
-  'card-muted': { light: '#70584A', dark: '#CEB19B' },
+  'surface-search': { light: '#FFFFFF', dark: '#251F28' },
+  'surface-navigation': { light: '#FFFFFF', dark: '#1C171E' },
+  'surface-sunk': { light: '#F4ECE8', dark: '#2A232D' }, // input wells, sheet track
+  fg: { light: '#1F1720', dark: '#F7EEF3' }, // aubergine editorial ink
+  'fg-muted': { light: '#5F5361', dark: '#CABDC7' },
+  'card-ink': { light: '#1F1720', dark: '#F7EEF3' },
+  'card-muted': { light: '#5F5361', dark: '#CABDC7' },
   // Solid pastel metadata: color follows meaning, with dark ink in both themes.
   'metadata-category': { light: '#F4D4C0', dark: '#D8B7A0' },
   'metadata-category-ink': { light: '#704125', dark: '#4D2E1C' },
@@ -63,40 +63,77 @@ export const ROLES: Record<string, ThemeValue> = {
   'metadata-menu-ink': { light: '#354B2B', dark: '#293F21' },
   'metadata-offer': { light: '#FFE7AB', dark: '#E7CC9D' },
   'metadata-offer-ink': { light: '#654719', dark: '#50370F' },
-  'surface-accent': { light: '#A83713', dark: '#FFA370' },
-  'control-edge': { light: '#EDDDD0', dark: '#5B4030' },
-  'selected-surface': { light: '#A83713', dark: '#FFA370' },
+  'surface-accent': { light: '#B8400F', dark: '#FFA370' },
+  'control-edge': { light: '#E9DEE3', dark: '#3A3140' },
+  'selected-surface': { light: '#C2470F', dark: '#FFA370' },
   'on-selected': { light: '#FFFFFF', dark: '#3C1D0E' },
   'selected-glyph': { light: '#FFFFFF', dark: '#3C1D0E' },
   'navigation-muted': { light: '#FFFFFF', dark: '#3C1D0E' },
   // Home's reference glyph cards use off-white; other card materials stay separate.
-  'home-tile': { light: '#FFFFFF', dark: '#3B2A20' },
-  'surface-discovery': { light: '#FFFFFF', dark: '#3B2A20' },
-  'home-tile-glyph': { light: '#A83713', dark: '#FFA370' },
-  'home-tile-well': { light: '#FFE5D0', dark: '#5B3420' },
-  'tile-eat': { light: '#FFFFFF', dark: '#3B2A20' },
-  'tile-bars': { light: '#FFFFFF', dark: '#3B2A20' },
-  'tile-routes': { light: '#FFFFFF', dark: '#3B2A20' },
-  'tile-events': { light: '#FFFFFF', dark: '#3B2A20' },
-  'fg-accent': { light: '#A83713', dark: '#FFA370' }, // deeper accent keeps small text readable on tints
+  'home-tile': { light: '#FFFFFF', dark: '#1C171E' },
+  'surface-discovery': { light: '#FFFFFF', dark: '#1C171E' },
+  'home-tile-glyph': { light: '#B8400F', dark: '#FFA370' },
+  'home-tile-well': { light: '#FCEDE6', dark: '#3A2630' },
+  'tile-eat': { light: '#FFFFFF', dark: '#1C171E' },
+  'tile-bars': { light: '#FFFFFF', dark: '#1C171E' },
+  'tile-routes': { light: '#FFFFFF', dark: '#1C171E' },
+  'tile-events': { light: '#FFFFFF', dark: '#1C171E' },
+  'fg-accent': { light: '#B8400F', dark: '#FFA370' }, // deeper accent keeps small text readable on tints
   // One theme-specific orange for action fills, icons, rails and active tabs.
-  accent: { light: '#A83713', dark: '#FFA370' }, // brand accent — icons, borders, rails
-  'accent-fill': { light: '#A83713', dark: '#FFA370' }, // approved editorial control fill
+  accent: { light: '#B8400F', dark: '#FFA370' }, // brand accent — icons, borders, rails
+  'accent-fill': { light: '#C2470F', dark: '#FFA370' }, // approved editorial control fill
   'on-accent': { light: '#FFFFFF', dark: '#3C1D0E' }, // theme-paired CTA ink
-  open: { light: '#A83713', dark: '#FFA370' }, // open-now / confirmed / live; status stays explicit in its label
-  warm: { light: '#A83713', dark: '#FFA370' }, // legacy category fill, now the shared orange
+  open: { light: '#AE3C0E', dark: '#FFA370' }, // open-now / confirmed / live; status stays explicit in its label
+  warm: { light: '#B8400F', dark: '#FFA370' }, // legacy category fill, now the shared orange
   'warm-strong': { light: '#FFFFFF', dark: '#3C1D0E' }, // ink on the legacy category fill
   // Readable ink for legacy category tints.
-  'warm-ink': { light: '#A83713', dark: '#FFA370' }, // text on warm-tint
-  vee: { light: '#A83713', dark: '#FFA370' }, // legacy Vee accents, now the shared orange
-  'vee-strong': { light: '#A83713', dark: '#FFA370' }, // legacy Vee text, now the shared readable orange
-  'accent-tint': { light: '#FFE5D0', dark: '#5B3420' },
-  'warm-tint': { light: '#FFE5D0', dark: '#5B3420' },
-  'vee-tint': { light: '#FFE5D0', dark: '#5B3420' },
-  'page-secondary': { light: '#F7EDE1', dark: '#2C2018' },
-  'page-tertiary': { light: '#FFFCF8', dark: '#32241C' },
+  'warm-ink': { light: '#B8400F', dark: '#FFA370' }, // text on warm-tint
+  vee: { light: '#B8400F', dark: '#FFA370' }, // legacy Vee accents, now the shared orange
+  'vee-strong': { light: '#B8400F', dark: '#FFA370' }, // legacy Vee text, now the shared readable orange
+  'accent-tint': { light: '#FCEDE6', dark: '#3A2630' },
+  'warm-tint': { light: '#FCEDE6', dark: '#3A2630' },
+  'vee-tint': { light: '#FCEDE6', dark: '#3A2630' },
+  'page-secondary': { light: '#F8F1EE', dark: '#17121A' },
+  'page-tertiary': { light: '#FFFCFA', dark: '#1F1922' },
   'ribbon-ink': { light: '#74300D', dark: '#FFDCAC' },
   danger: { light: '#A02F38', dark: '#FF6B6D' }, // closed / sold out / error — the one functional red
+};
+
+/** Aurora's non-solid values, resolved per theme by useAurora() (src/lib/aurora.ts).
+ * Every stop that carries text is audited by scripts/check-contrast.ts:
+ * - fill: gradient behind filled controls; onFill is their label ink (≥ 4.5:1 at every stop).
+ * - text: gradient headline phrases, large type only (≥ 3:1 on bg at every stop).
+ * - glow: the screen-top light, decorative (hex + opacity so SVG stops render everywhere).
+ * - soft: low-alpha tint behind icon badges; glass: translucent frosted surface over the glow. */
+export type AuroraStop = { color: string; opacity: number };
+export const AURORA: Record<'light' | 'dark', {
+  fill: readonly [string, string, string]; onFill: string; text: readonly [string, string, string];
+  glow: readonly [AuroraStop, AuroraStop, AuroraStop]; soft: readonly [string, string, string];
+  glass: string; glassEdge: string; rule: string; navigation: string; shadow: string;
+}> = {
+  light: {
+    fill: ['#C2470F', '#96486C', '#6A4AC9'], onFill: '#FFFFFF',
+    text: ['#D9581C', '#A23E8C', '#6A4AC9'],
+    glow: [{ color: '#FFBA54', opacity: 0.55 }, { color: '#F0642F', opacity: 0.26 }, { color: '#7B5AD6', opacity: 0.3 }],
+    soft: ['rgba(255, 181, 71, 0.22)', 'rgba(240, 100, 47, 0.15)', 'rgba(123, 90, 214, 0.18)'],
+    glass: 'rgba(255, 255, 255, 0.74)', glassEdge: 'rgba(70, 30, 60, 0.09)', rule: 'rgba(70, 30, 60, 0.10)',
+    navigation: 'rgba(255, 255, 255, 0.94)', shadow: '0 14px 30px -16px rgba(60, 20, 50, 0.30)',
+  },
+  dark: {
+    fill: ['#FFC56B', '#FF9468', '#B9A4FF'], onFill: '#1C1018',
+    text: ['#FFC56B', '#FF8A5B', '#B9A4FF'],
+    glow: [{ color: '#FFBA54', opacity: 0.2 }, { color: '#F0642F', opacity: 0.3 }, { color: '#7B5AD6', opacity: 0.44 }],
+    soft: ['rgba(255, 181, 71, 0.16)', 'rgba(240, 100, 47, 0.14)', 'rgba(123, 90, 214, 0.22)'],
+    glass: 'rgba(38, 31, 42, 0.66)', glassEdge: 'rgba(255, 240, 250, 0.09)', rule: 'rgba(255, 240, 250, 0.10)',
+    navigation: 'rgba(32, 26, 35, 0.95)', shadow: '0 18px 36px -20px rgba(0, 0, 0, 0.92)',
+  },
+};
+/** Photo scrim under overlay text and the avatar ring, identical in both themes. */
+export const AURORA_FIXED = {
+  scrim: ['rgba(14, 8, 16, 0.10)', 'rgba(14, 8, 16, 0)', 'rgba(14, 8, 16, 0.88)'] as const,
+  ring: ['#FFC757', '#E85D2C', '#6F5BD1'] as const,
+  photoFallback: '#2A2030',
+  onPhoto: '#FFFFFF',
 };
 
 /** Local Perks uses opaque, matte page grounds. Retain this typed export for
@@ -130,9 +167,9 @@ export const FIXED: Record<string, string> = {
 
 /** Non-CSS-var palette entries theme.ts also needs (Stripes placeholder). */
 export const STRIPES: ThemeValue & { stripeB: ThemeValue } = {
-  light: '#F1EBE4',
-  dark: '#3B2A20',
-  stripeB: { light: '#E8D9CA', dark: '#49392D' },
+  light: '#F4ECE8',
+  dark: '#251F28',
+  stripeB: { light: '#EADFDD', dark: '#332A37' },
 };
 
 /** Old hue-named tokens, kept as aliases of the semantic roles above so

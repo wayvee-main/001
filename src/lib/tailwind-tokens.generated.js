@@ -106,6 +106,6 @@ module.exports = {
   },
   boxShadow: {
     'soft-light': '0 3px 9px rgba(96, 48, 23, .032)',
-    'soft-dark': '0 3px 9px rgba(44, 32, 24, 0.1)',
+    'soft-dark': '0 3px 9px rgba(42, 35, 45, 0.1)',
   },
 };

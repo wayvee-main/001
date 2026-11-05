@@ -8,7 +8,7 @@
  *
  * Run: npx -y tsx scripts/check-contrast.ts
  */
-import { BACKDROP_GRADIENTS, EDGE_ROLES, FIXED, hexToRgb, ROLES, withAlpha } from '../src/lib/tokens';
+import { AURORA, BACKDROP_GRADIENTS, EDGE_ROLES, FIXED, hexToRgb, ROLES, withAlpha } from '../src/lib/tokens';
 
 type Theme = 'light' | 'dark';
 
@@ -177,6 +177,39 @@ for (const theme of ['light', 'dark'] as Theme[]) {
       if(!ok)failures+=1;
       console.log(`${ok?'PASS':'FAIL'}  ${minimum.toFixed(2)}:1  ${theme} ${ink} on translucent ${surface} (${alpha})`);
     }
+  }
+}
+
+
+/** Aurora: gradients are checked along their whole ramp (stops and the colours
+ * between them), and frosted surfaces over the strongest point of the glow. */
+function ramp(stops: readonly string[], steps = 8): string[] {
+  const out: string[] = [];
+  for (let i = 0; i < stops.length - 1; i++) {
+    const a = hexToRgb(stops[i]), b = hexToRgb(stops[i + 1]);
+    for (let s = 0; s <= steps; s++) {
+      const t = s / steps;
+      out.push(`#${a.map((c, k) => Math.round(c * (1 - t) + b[k] * t).toString(16).padStart(2, '0')).join('')}`);
+    }
+  }
+  return out;
+}
+for (const theme of ['light', 'dark'] as Theme[]) {
+  const aurora = AURORA[theme], bg = ROLES.bg[theme];
+  const checks: [string, string[], string[], number][] = [
+    ['filled-control label on fill gradient', [aurora.onFill], ramp(aurora.fill), AA_TEXT],
+    ['gradient headline on bg (large text)', ramp(aurora.text), [bg], AA_LARGE],
+  ];
+  const glowGrounds = aurora.glow.map(stop => flatten(withAlpha(stop.color, stop.opacity), bg));
+  const glassGrounds = [bg, ...glowGrounds].map(ground => flatten(aurora.glass, ground));
+  for (const ink of ['fg', 'fg-muted', 'fg-accent']) checks.push([`${ink} on frosted glass over the glow`, [ROLES[ink][theme]], glassGrounds, AA_TEXT]);
+  for (const ink of ['fg', 'fg-muted']) checks.push([`${ink} directly on the glow`, [ROLES[ink][theme]], glowGrounds, AA_TEXT]);
+  checks.push(['fg-muted on navigation capsule', [ROLES['fg-muted'][theme]], [bg, ...glowGrounds].map(ground => flatten(aurora.navigation, ground)), AA_TEXT]);
+  for (const [name, inks, grounds, min] of checks) {
+    const minimum = Math.min(...inks.flatMap(ink => grounds.map(ground => contrast(ink, ground))));
+    const ok = minimum >= min;
+    if (!ok) failures += 1;
+    console.log(`${ok ? 'PASS' : 'FAIL'}  ${minimum.toFixed(2)}:1  (min ${min})  ${theme} Aurora ${name}`);
   }
 }
 
