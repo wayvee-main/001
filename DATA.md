@@ -289,3 +289,59 @@ Oakland curation does not fill an SF device feed. Source-tagged parks and venues
 can appear as place guides; they never imply an invented trail length or show.
 Saved regional place IDs can hydrate directly outside the nearby window.
 Official site enrichment is bounded and independent of the app's read path.
+
+## Background menu/photo collection and storage
+
+`Collect menus and photos` runs in GitHub Actions, every 15 minutes when the
+scheduler is available and on collector changes. It uses deterministic HTML
+and structured-data parsers, local PDF/OCR tools, and native image decoding.
+It makes **no LLM calls**. Source pages are not passed into chat or retained as
+raw HTML. Extracted source fields and HTTP validators are cached between runs.
+
+Supabase Postgres is the durable store:
+
+| Data | Table / field |
+|---|---|
+| Regional place identities and source-backed goods | `regional_places`, including `detail_content` |
+| Menu/photo jobs, retries, leases and menu source coverage | `regional_enrichment_jobs` |
+| Shared request budgets, run summaries and burst expiry | `regional_enrichment_budgets`, `regional_enrichment_runs`, `regional_enrichment_settings` |
+| Successfully decoded full image files, SHA-256, dimensions, size and external URL | `regional_photo_assets` |
+| Image-to-venue associations and source provenance | `regional_place_photos` |
+
+**Image bytes are not copied into Supabase Storage.** They are downloaded by
+the worker for bounded validation and hashing, then discarded. The app uses
+the source image URLs. Matching file hashes count once in the image inventory,
+even when the same file is linked from multiple URLs or venues. Re-encoded or
+resized source files can have different hashes; this is a file count, not a
+claim of perceptual uniqueness. Existing catalog photo URLs are reported
+separately until their files have passed the new full-file checks.
+
+The approved November 5 acceleration expires at midnight Pacific
+(`2026-11-06T08:00:00Z`). During this window, shared ceilings are 3,000 HTTP
+requests per run, 12,000 per UTC hour, 96,000 per UTC day and 250 MB per run.
+Separate menu and photo lanes can each work on 12 venues at once. Every source
+still shares the robots, DNS, redirect and one-request-per-second host guard.
+Image decoding has its own two-worker limit. After expiry, limits return to
+800 requests per hour, 19,200 per UTC day and 60 MB per run with four workers
+per lane. Runner failure retains reservations and source goods; stale lease
+tokens cannot update image inventory or menu coverage.
+
+Menu collection follows up to 16 discovered source pages/documents per venue
+instead of stopping at the first extracted dish. An explicit structured Menu
+whose declared items are all captured can supply complete source evidence;
+all discovered menu sources must be accounted for without errors or crawl
+limits before a job is `ready` / `source_complete`. Semantic snapshots, PDF/OCR
+extraction and missing sections remain partial. Complete source coverage is
+scoped to discovered published menus, not unpublished or authenticated menus.
+Original documents remain linked. The shared payload can retain up to 1,000
+menu items and 48 source photos; a source beyond the item bound cannot be
+reported complete. Partial refreshes preserve previously verified goods and
+official prices retain precedence over delivery prices.
+
+Every completed run emits compact image/menu totals in its log, its GitHub
+job summary, the `menu-photo-coverage` JSON artifact, and the Supabase run
+record. `regional_enrichment_summary()` reports exact content-hashed file
+counts toward 10,000, distinct catalog photo URLs, menu item counts, complete
+published source sets, partial work and remaining queue states. These private
+collector tables and RPCs are service-role only; normal app reads continue
+through the existing place records.

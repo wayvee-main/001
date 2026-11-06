@@ -21,7 +21,7 @@ it('can use the larger reservation while rejecting over-budget concurrent reques
  expect(results.filter(result=>result.status==='fulfilled')).toHaveLength(800);
  expect(results.filter(result=>result.status==='rejected').every(result=>result.status==='rejected'&&result.reason instanceof SourceBudgetExhausted)).toBe(true);
  expect(loader.requests).toBe(800);expect(request).toHaveBeenCalledTimes(800);
- expect(new CollectionLoader(10000).limit).toBe(800);
+ expect(new CollectionLoader(10000).limit).toBe(6000);
  expect(new CollectionLoader(Number.NaN).remaining).toBe(0);
 });
 it('memoizes identical source GETs so separate field jobs do not redownload the homepage',async()=>{

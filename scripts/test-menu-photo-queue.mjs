@@ -18,6 +18,8 @@ try {
     'supabase/migrations/20261027010000_menu_photo_collection.sql',
     'supabase/migrations/20261103010000_menu_photo_throughput.sql',
     'scripts/lib/__tests__/menu-photo-queue.sql',
+    'supabase/migrations/20261105010000_menu_photo_bulk.sql',
+    'scripts/lib/__tests__/menu-photo-bulk.sql',
   ]) await db.exec(await readFile(new URL('../'+path,import.meta.url),'utf8'));
-  console.log('Menu/photo SQL passed: shared budgets, fair claims, sibling leases and stale-token protection');
+  console.log('Menu/photo SQL passed: shared budgets, burst expiry, fair lanes, sibling leases, image deduplication and coverage counts');
 } finally { await db.close(); }

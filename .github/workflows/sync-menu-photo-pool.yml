@@ -8,9 +8,9 @@ on:
       requests:
         description: 'External HTTP ceiling (robots, redirects, PDFs, photos and browser requests all count)'
         required: true
-        default: '800'
+        default: '3000'
         type: choice
-        options: ['0', '20', '100', '200', '800']
+        options: ['0', '100', '800', '3000']
   push:
     branches: [main]
     paths:
@@ -20,13 +20,18 @@ on:
       - 'scripts/lib/menu-browser.ts'
       - 'scripts/lib/menu-documents.ts'
       - 'scripts/lib/menu-source-reader.ts'
+      - 'scripts/lib/menu-photo-policy.ts'
+      - 'scripts/lib/photo-validation.ts'
       - 'scripts/test-menu-photo-queue.mjs'
+      - 'scripts/test-photo-decoder.ts'
       - 'scripts/lib/__tests__/menu-photo-queue.sql'
+      - 'scripts/lib/__tests__/menu-photo-bulk.sql'
       - 'scripts/lib/menu-schema.ts'
       - 'scripts/lib/regional-details.ts'
       - 'src/lib/detail-content.ts'
       - 'supabase/migrations/20261027010000_menu_photo_collection.sql'
       - 'supabase/migrations/20261103010000_menu_photo_throughput.sql'
+      - 'supabase/migrations/20261105010000_menu_photo_bulk.sql'
       - '.github/workflows/sync-menu-photo-pool.yml'
 
 permissions:
@@ -49,13 +54,17 @@ jobs:
       - name: Check collection code
         run: |
           npx tsc --noEmit
-          npx jest scripts/lib/__tests__/menu-photo-extract.test.ts scripts/lib/__tests__/collection-loader.test.ts scripts/lib/__tests__/menu-source-reader.test.ts scripts/lib/__tests__/regional-details.test.ts src/lib/__tests__/detail-content.test.ts --runInBand --forceExit
-      - name: Check queue budgets and leases in isolated PostgreSQL
+          npx jest scripts/lib/__tests__/menu-photo-extract.test.ts scripts/lib/__tests__/collection-loader.test.ts scripts/lib/__tests__/menu-source-reader.test.ts scripts/lib/__tests__/regional-details.test.ts scripts/lib/__tests__/menu-photo-policy.test.ts scripts/lib/__tests__/photo-validation.test.ts src/lib/__tests__/detail-content.test.ts --runInBand --forceExit
+      - name: Prepare isolated collection tools
         run: |
-          npm install --prefix "$RUNNER_TEMP/wayvee-queue-tests" --no-package-lock --ignore-scripts @electric-sql/pglite@0.5.12
+          npm install --prefix "$RUNNER_TEMP/wayvee-collection-tools" --no-package-lock --ignore-scripts @electric-sql/pglite@0.5.12 sharp@0.34.5
+      - name: Check queue budgets, inventory and leases in isolated PostgreSQL
+        run: |
           node scripts/test-menu-photo-queue.mjs
+          npx --yes tsx scripts/test-photo-decoder.ts
         env:
-          MENU_PHOTO_SQL_TEST_ROOT: ${{ runner.temp }}/wayvee-queue-tests
+          MENU_PHOTO_SQL_TEST_ROOT: ${{ runner.temp }}/wayvee-collection-tools
+          MENU_PHOTO_TOOLS_ROOT: ${{ runner.temp }}/wayvee-collection-tools
       - uses: supabase/setup-cli@v1
         with:
           version: v3.0.0
@@ -100,20 +109,30 @@ jobs:
           fi
       - uses: actions/cache/restore@v4
         with:
-          path: ${{ runner.temp }}/wayvee-menu-photo-sources-v2.json
-          key: menu-photo-v2-${{ hashFiles('scripts/lib/menu-photo-extract.ts', 'scripts/lib/menu-schema.ts', 'src/lib/detail-content.ts') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/wayvee-menu-photo-sources-v3.json
+          key: menu-photo-v3-${{ hashFiles('scripts/lib/menu-photo-extract.ts', 'scripts/lib/menu-schema.ts', 'src/lib/detail-content.ts') }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
-            menu-photo-v2-${{ hashFiles('scripts/lib/menu-photo-extract.ts', 'scripts/lib/menu-schema.ts', 'src/lib/detail-content.ts') }}-
+            menu-photo-v3-${{ hashFiles('scripts/lib/menu-photo-extract.ts', 'scripts/lib/menu-schema.ts', 'src/lib/detail-content.ts') }}-
       - name: Collect bounded menu/photo batches
         run: npx --yes tsx scripts/sync-menu-photo-pool.ts
         env:
           SUPABASE_URL: ${{ vars.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          MENU_PHOTO_REQUEST_LIMIT: ${{ inputs.requests || '800' }}
+          MENU_PHOTO_REQUEST_LIMIT: ${{ inputs.requests || '3000' }}
           MENU_PHOTO_BROWSER_ROOT: ${{ runner.temp }}/wayvee-enrichment-browser
-          MENU_PHOTO_CACHE_PATH: ${{ runner.temp }}/wayvee-menu-photo-sources-v2.json
+          MENU_PHOTO_CACHE_PATH: ${{ runner.temp }}/wayvee-menu-photo-sources-v3.json
+          MENU_PHOTO_TOOLS_ROOT: ${{ runner.temp }}/wayvee-collection-tools
+          MENU_PHOTO_SUMMARY_PATH: ${{ runner.temp }}/wayvee-menu-photo-summary.json
+      - name: Retain compact coverage summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: menu-photo-coverage
+          path: ${{ runner.temp }}/wayvee-menu-photo-summary.json
+          if-no-files-found: ignore
+          retention-days: 14
       - uses: actions/cache/save@v4
         if: always()
         with:
-          path: ${{ runner.temp }}/wayvee-menu-photo-sources-v2.json
-          key: menu-photo-v2-${{ hashFiles('scripts/lib/menu-photo-extract.ts', 'scripts/lib/menu-schema.ts', 'src/lib/detail-content.ts') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/wayvee-menu-photo-sources-v3.json
+          key: menu-photo-v3-${{ hashFiles('scripts/lib/menu-photo-extract.ts', 'scripts/lib/menu-schema.ts', 'src/lib/detail-content.ts') }}-${{ github.run_id }}-${{ github.run_attempt }}

@@ -1,5 +1,5 @@
 import { streetKey } from '../../src/lib/catalog-identity';
-import { parseDetailContent, type DetailContent, type DetailMenuDocument, type DetailMenuItem, type DetailPhoto, type DetailSourceKind } from '../../src/lib/detail-content';
+import { DETAIL_MENU_ITEM_LIMIT, parseDetailContent, type DetailContent, type DetailMenuDocument, type DetailMenuItem, type DetailPhoto, type DetailSourceKind } from '../../src/lib/detail-content';
 import { extractOfficialMenu, menuTree, menuTextOf, menuDescendants, menuPlain } from './menu-schema';
 
 export type PlaceIdentity={name:string;address?:string|null;category?:string};
@@ -58,13 +58,15 @@ export function discoverSources(html:string,base:string):SourceLink[] {
   const pdf=/\.pdf(?:[?#]|$)/i.test(url),img=/\.(?:png|jpe?g|webp)(?:[?#]|$)/i.test(url);
   const menu=/menu|dinner|lunch|brunch|breakfast|drinks|food|order|pickup/i.test(label+' '+target.pathname);
   const official=target.origin===origin||target.hostname.replace(/^www\./,'')===new URL(base).hostname.replace(/^www\./,'');
-  const ordering=(kind==='ubereats'||kind==='doordash')&&/\/store\//.test(target.pathname);
+  const ordering=((kind==='ubereats'||kind==='doordash')&&/\/store\//.test(target.pathname))||
+   (menu&&/(^|\.)(toasttab\.com|chownow\.com|square\.site|clover\.com|olo\.com|order\.online)$/.test(target.hostname)&&
+    (target.pathname!=='/'||/\.square\.site$/.test(target.hostname)));
   const social=kind==='social'&&/\/(?:p|reel|posts|photos)\//.test(target.pathname);
   if((official&&(menu||/gallery|photos|pictures/i.test(label+' '+target.pathname))&&!/gift|catering|wholesale/i.test(label+' '+url))||ordering||social){
    if(!links.some(link=>link.url===url))links.push({url,kind,document:pdf?'pdf':img&&menu?'image':undefined,title:label.slice(0,100)||(/drinks/i.test(url)?'Drinks menu':'Menu'),trustedLink:true});
   }
  }
- return links.sort((a,b)=>(a.kind==='official'?0:a.kind==='social'?2:1)-(b.kind==='official'?0:b.kind==='social'?2:1)).slice(0,12);
+ return links.sort((a,b)=>(a.kind==='official'?0:a.kind==='social'?2:1)-(b.kind==='official'?0:b.kind==='social'?2:1)).slice(0,32);
 }
 function identityMatches(nodes:ReturnType<typeof jsonNodes>,identity:PlaceIdentity,trusted:boolean):boolean {
  const expected=streetKey(identity.address),norm=(v:string)=>v.toLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
@@ -99,7 +101,7 @@ export function menuFromText(text:string,url:string,identity:PlaceIdentity,now=n
  return items.length?parseDetailContent({version:1,sourceUrl:url,verifiedAt:now.toISOString(),menu:{url,sourceKind:'official',sourceLabel:'Official menu',pricingContext:'venue',verifiedAt:now.toISOString(),items}}):undefined;
 }
 
-export function extractMenuPhotos(html:string,url:string,identity:PlaceIdentity,trustedLink=false,now=new Date()):{content?:DetailContent;links:SourceLink[];blocked:boolean;menuPage?:boolean} {
+export function extractMenuPhotos(html:string,url:string,identity:PlaceIdentity,trustedLink=false,now=new Date()):{content?:DetailContent;links:SourceLink[];blocked:boolean;menuPage?:boolean;menuComplete?:boolean} {
  const kind=sourceKind(url),label=sourceLabel(kind),graphs=jsonNodes(html),{root,nodes}=menuTree(html);
  const visible=menuTextOf(root).slice(0,5000),title=html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]||'';
  const blocked=/just a moment|pardon our interruption|access denied|robot check|captcha challenge/i.test(title)||/verify (?:that )?you are human|checking (?:your )?browser|request blocked|enable javascript and cookies to continue/i.test(visible);
@@ -147,5 +149,10 @@ export function extractMenuPhotos(html:string,url:string,identity:PlaceIdentity,
  const content=(items.length||photos.length||documents.length)?parseDetailContent({version:1,sourceUrl:url,verifiedAt:now.toISOString(),description:official?.description,photos,
   menu:items.length&&kind!=='social'?{...official?.menu,url,items:items.map(item=>({...item,sourceUrl:item.sourceUrl||url,imageSourceUrl:item.imageSourceUrl||(item.image?url:undefined)})),sourceKind:kind,sourceLabel:label,pricingContext:kind==='official'?'venue':'delivery',note:kind==='official'?'Published menu prices; availability may change.':`${label} delivery prices; in-venue prices may differ.`}:undefined,menuDocuments:documents}):undefined;
  const menuPage=!!items.length&&(kind==='ubereats'||kind==='doordash'||/MenuItem|hasMenuItem|data-hook=["']item\.root|class=["'][^"']*menu-item/i.test(html)||/menu|dinner|lunch|drinks/i.test(new URL(url).pathname));
- return{content,links,blocked:false,menuPage};
+ const declaredMenu=graphs.some(({node})=>/^(?:https?:\/\/schema\.org\/)?Menu(?:Section)?$/.test(String(node['@type']||'')));
+ const declaredItems=graphs.filter(({node})=>/^(?:https?:\/\/schema\.org\/)?MenuItem$/.test(String(node['@type']||''))).map(({node})=>cleanName(node.name).toLowerCase()).filter(Boolean);
+ const publishedNames=new Set(content?.menu?.items.map(item=>item.name.toLowerCase()));
+ const menuComplete=kind==='official'&&declaredMenu&&declaredItems.length>0&&declaredItems.length<=DETAIL_MENU_ITEM_LIMIT&&
+  new Set(declaredItems).size===declaredItems.length&&declaredItems.every(name=>publishedNames.has(name))&&html.length<=2_500_000;
+ return{content,links,blocked:false,menuPage,menuComplete};
 }

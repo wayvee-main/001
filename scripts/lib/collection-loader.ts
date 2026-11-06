@@ -1,6 +1,7 @@
 import { lookup } from 'node:dns/promises';
 import { isIP } from 'node:net';
 import { SourceBudgetExhausted } from './detail-source-cache';
+import { COLLECTION_REQUEST_MAX } from './menu-photo-policy';
 
 export class SourceBlocked extends Error {}
 export class SourceUnavailable extends Error {}
@@ -40,7 +41,7 @@ export class CollectionLoader {
  private dns=new Map<string,Promise<string[]>>();private robots=new Map<string,Promise<string>>();
  private hosts=new Map<string,Promise<void>>();private memo=new Map<string,Promise<CollectedResource>>();
  constructor(limit:number,options:LoaderOptions={}){
-  this.limit=Number.isFinite(limit)?Math.max(0,Math.min(800,Math.floor(limit))):0;this.request=options.request||fetch;
+  this.limit=Number.isFinite(limit)?Math.max(0,Math.min(COLLECTION_REQUEST_MAX,Math.floor(limit))):0;this.request=options.request||fetch;
   this.resolve=options.resolve||(async host=>(await lookup(host,{all:true})).map(item=>item.address));
   this.delay=options.delayMs??1000;this.maxBytes=options.maxBytes??60_000_000;
  }

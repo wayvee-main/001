@@ -16,6 +16,8 @@ export type DetailContent = {
   links?:{label:string;url:string}[];
   venue?:{name:string;address?:string;image?:string;url?:string};
 };
+export const DETAIL_PHOTO_LIMIT = 48;
+export const DETAIL_MENU_ITEM_LIMIT = 1000;
 const record=(value:unknown):value is Record<string,unknown>=>Boolean(value&&typeof value==='object'&&!Array.isArray(value));
 const text=(value:unknown,max=3000)=>typeof value==='string'?value.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,max):undefined;
 export const publicDetailUrl=(value:unknown):string|undefined=>{
@@ -36,10 +38,10 @@ export function parseDetailContent(value:unknown,now=new Date()):DetailContent|u
   const sourceUrl=publicDetailUrl(value.sourceUrl),verifiedAt=text(value.verifiedAt,40);
   if(!sourceUrl||!verifiedAt||!Number.isFinite(Date.parse(verifiedAt)))return;
   const content:DetailContent={version:1,sourceUrl,verifiedAt,description:text(value.description),subtitle:text(value.subtitle,180),ageLabel:text(value.ageLabel,80)};
-  content.photos=list(value.photos).flatMap(photo=>{const url=publicDetailUrl(photo.url);return url?[{url,caption:text(photo.caption,180),...provenance(photo)}]:[];}).slice(0,16);
+  content.photos=list(value.photos).flatMap(photo=>{const url=publicDetailUrl(photo.url);return url?[{url,caption:text(photo.caption,180),...provenance(photo)}]:[];}).slice(0,DETAIL_PHOTO_LIMIT);
   if(record(value.menu)){
     const url=publicDetailUrl(value.menu.url);
-    const items=list(value.menu.items).flatMap(item=>{const name=text(item.name,180),sourceUrl=publicDetailUrl(item.sourceUrl),imageSourceUrl=publicDetailUrl(item.imageSourceUrl);return name?[{name,desc:text(item.desc,700),price:text(item.price,100),image:publicDetailUrl(item.image),note:text(item.note,400),categories:Array.isArray(item.categories)?item.categories.map(x=>text(x,60)).filter((x):x is string=>!!x):[],...(sourceUrl?{sourceUrl}:{}),...(imageSourceUrl?{imageSourceUrl}:{})}]:[];}).slice(0,180);
+    const items=list(value.menu.items).flatMap(item=>{const name=text(item.name,180),sourceUrl=publicDetailUrl(item.sourceUrl),imageSourceUrl=publicDetailUrl(item.imageSourceUrl);return name?[{name,desc:text(item.desc,700),price:text(item.price,100),image:publicDetailUrl(item.image),note:text(item.note,400),categories:Array.isArray(item.categories)?item.categories.map(x=>text(x,60)).filter((x):x is string=>!!x):[],...(sourceUrl?{sourceUrl}:{}),...(imageSourceUrl?{imageSourceUrl}:{})}]:[];}).slice(0,DETAIL_MENU_ITEM_LIMIT);
     const menuVerifiedAt=text(value.menu.verifiedAt,40);
     const kind=sourceKind(value.menu.sourceKind),sourceLabel=text(value.menu.sourceLabel,120),pricingContext=['venue','delivery'].includes(String(value.menu.pricingContext))?value.menu.pricingContext as 'venue'|'delivery':undefined;
     if(url&&items.length)content.menu={url,title:text(value.menu.title,100),note:text(value.menu.note,400),verifiedAt:menuVerifiedAt&&Number.isFinite(Date.parse(menuVerifiedAt))?menuVerifiedAt:verifiedAt,items,...(kind&&kind!=='social'?{sourceKind:kind}:{}),...(sourceLabel?{sourceLabel}:{}),...(pricingContext?{pricingContext}:{})};

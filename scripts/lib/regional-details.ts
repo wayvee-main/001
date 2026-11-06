@@ -1,4 +1,4 @@
-import { parseDetailContent, type DetailContent } from '../../src/lib/detail-content';
+import { DETAIL_PHOTO_LIMIT, parseDetailContent, type DetailContent } from '../../src/lib/detail-content';
 
 /** Empty fields from a partial source never erase prior verified goods. */
 export function mergeRegionalDetails(existing: DetailContent | undefined, incoming: DetailContent | undefined): DetailContent | undefined {
@@ -7,7 +7,7 @@ export function mergeRegionalDetails(existing: DetailContent | undefined, incomi
   const preferExistingMenu=!!existing?.menu?.items.length&&!delivery(existing.menu)&&delivery(incoming.menu);
   const samePricing=!existing?.menu||delivery(existing.menu)===delivery(incoming.menu);
   const photos = [...(existing?.photos || []), ...(incoming.photos || [])]
-    .filter((photo, index, all) => all.findIndex(other => other.url === photo.url) === index).slice(0, 16);
+    .filter((photo, index, all) => all.findIndex(other => other.url === photo.url) === index).slice(0, DETAIL_PHOTO_LIMIT);
   return parseDetailContent({
     ...existing, ...incoming, description: incoming.description || existing?.description,
     subtitle: incoming.subtitle || existing?.subtitle, ageLabel: incoming.ageLabel || existing?.ageLabel,

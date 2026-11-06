@@ -10,6 +10,13 @@ const now=new Date('2026-10-25T12:00:00Z');
 const base={version:1,sourceUrl:'https://venue.example/menu',verifiedAt:now.toISOString()};
 
 describe('Actual detail goods',()=>{
+ it('preserves large source menus and a deeper verified gallery within explicit bounds',()=>{
+  const items=Array.from({length:220},(_,i)=>({name:'Dish '+i,price:'$12',categories:['Mains']}));
+  const photos=Array.from({length:55},(_,i)=>({url:'https://venue.example/photo-'+i+'.jpg'}));
+  const content=parseDetailContent({...base,menu:{url:base.sourceUrl,items},photos})!;
+  expect(content.menu?.items).toHaveLength(220);expect(content.photos).toHaveLength(48);
+  expect(content.menu?.items[219].name).toBe('Dish 219');
+ });
  it('connects a map identity to the matching restaurant without moving another branch’s menu',()=>{
   const same={id:'osm:1585385137',name:'Shooting Star Cafe',address:'1022 Webster Street'};
   const menu=menuListingForPlace(same,Object.values(RESTAURANTS),'oakland');
