@@ -13,7 +13,7 @@ const WALK_BUDGET_KEY = 'wayvee.walk-budget.v1';
 
 export type ArrivalStatus = 'unknown' | 'done';
 
-/** What brings the guest to Oakland. Each value changes ranking, which is why
+/** What brings the guest to the Bay. Each value changes ranking, which is why
  * the sequence names the effect on screen instead of asking a personality
  * question — see TRIP_CONTEXT_EFFECTS below. */
 export type TripContext = 'visiting' | 'work' | 'live';
@@ -22,7 +22,10 @@ export const TRIP_CONTEXTS: TripContext[] = ['visiting', 'work', 'live'];
 
 /** How far a guest will walk. `null` means "whatever it takes" — distance still
  * sorts, it just never demotes (CLAUDE.md #2: sorting, never a filter). */
-export type WalkBudget = 10 | 20 | null;
+export type WalkBudget = 5 | 10 | 15 | 20 | 30 | null;
+
+/** The stops on the arrival slider, shortest first; `null` is "Any". */
+export const WALK_BUDGETS: WalkBudget[] = [5, 10, 15, 20, 30, null];
 
 export async function restoreArrivalStatus(): Promise<ArrivalStatus> {
   return (await getStoredItem(ARRIVAL_KEY)) === 'done' ? 'done' : 'unknown';
@@ -48,7 +51,7 @@ export async function saveTripContext(context: TripContext | null): Promise<void
 export async function restoreWalkBudget(): Promise<WalkBudget> {
   const raw = await getStoredItem(WALK_BUDGET_KEY);
   const parsed = raw === null ? NaN : Number(raw);
-  return parsed === 10 || parsed === 20 ? parsed : null;
+  return WALK_BUDGETS.includes(parsed as WalkBudget) ? (parsed as WalkBudget) : null;
 }
 
 export async function saveWalkBudget(minutes: WalkBudget): Promise<void> {
@@ -66,7 +69,7 @@ export async function saveWalkBudget(minutes: WalkBudget): Promise<void> {
 export const TRIP_CONTEXT_EFFECTS: Record<TripContext, { label: string; blurb: string; effect: string }> = {
   visiting: {
     label: 'Visiting',
-    blurb: 'Oakland essentials, room to wander.',
+    blurb: 'Bay essentials, room to wander.',
     effect: 'Landmark venues move up and dinner defaults early enough that a show still fits.',
   },
   work: {

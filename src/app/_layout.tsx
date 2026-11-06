@@ -7,9 +7,9 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
 import { useEffect, useState, type ReactNode } from 'react';
-import { Animated, Easing, Platform } from 'react-native';
+import { Animated, Easing, Platform, View, type ViewStyle } from 'react-native';
 
-import { ArrivalSequence } from '@/components/arrival-sequence';
+import { ArrivalStory, QuickSetupSheet } from '@/components/arrival-sequence';
 import { BrandIntro } from '@/components/brand-intro';
 import { AppErrorBoundary } from '@/components/error-boundary';
 import { AppBackdrop } from '@/components/layout';
@@ -49,6 +49,9 @@ function AppShell() {
   // Plays once per cold start, after bootstrap resolves so it knows where it is
   // handing off to, and again between the last onboarding step and Home.
   const [intro, setIntro] = useState<'splash' | 'handoff' | null>('splash');
+  // Arrival's story is done and quick setup is up over Home (not persisted: a
+  // guest who leaves mid-setup starts the short story again).
+  const [setupOpen, setSetupOpen] = useState(false);
   const { arrivalStatus, bootstrapReady, checkPostVisitPrompt, completeArrival, hydrateApp, userDataReady, plans, showToast } = useScoper();
   const { colorScheme } = useColorScheme();
   const statusBarStyle = colorScheme === 'light' ? 'dark' : 'light';
@@ -144,21 +147,19 @@ function AppShell() {
   // Persisted, not component state: a returning guest has already answered
   // these questions, and re-asking every cold launch is the fastest way to make
   // the app feel like it isn't listening.
-  if (arrivalStatus === 'unknown') {
+  if (arrivalStatus === 'unknown' && !setupOpen) {
     return (
       <>
         <StatusBar style={statusBarStyle} />
-        <ArrivalSequence
-          onDone={() => {
-            setIntro('handoff');
-            void completeArrival();
-          }}
-        />
+        <ArrivalStory onSetup={() => setSetupOpen(true)} />
         <GlobalOverlays />
         {opening}
       </>
     );
   }
+
+  // Quick setup rises over the real Home, blurred and inert behind it.
+  const settingUp = arrivalStatus === 'unknown';
 
   return (
     // Solid, unanimated backdrop — stays opaque across the Positioner→Home cut
@@ -167,21 +168,32 @@ function AppShell() {
     <AppBackdrop>
       <FadeIn>
         <StatusBar style={statusBarStyle} />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: 'transparent' },
-          }}>
-          <Stack.Screen name="plan" options={{ animation: 'fade_from_bottom', gestureEnabled: true }} />
-          <Stack.Screen name="answer" options={{ animation: 'fade_from_bottom', gestureEnabled: true }} />
-        </Stack>
+        <View
+          style={[{ flex: 1 }, settingUp ? SETUP_BLUR : null]}
+          pointerEvents={settingUp ? 'none' : 'auto'}
+          importantForAccessibility={settingUp ? 'no-hide-descendants' : 'auto'}
+          accessibilityElementsHidden={settingUp}>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: 'transparent' },
+            }}>
+            <Stack.Screen name="plan" options={{ animation: 'fade_from_bottom', gestureEnabled: true }} />
+            <Stack.Screen name="answer" options={{ animation: 'fade_from_bottom', gestureEnabled: true }} />
+          </Stack>
+        </View>
         <GlobalOverlays />
         <LocalPerksOverlays />
       </FadeIn>
+      {settingUp ? <QuickSetupSheet onDone={() => void completeArrival()} /> : null}
       {opening}
     </AppBackdrop>
   );
 }
+
+/** Home behind quick setup. Android and the web blur it; iOS has no blur
+ * filter, so there the sheet's veil alone sets Home back. */
+const SETUP_BLUR: ViewStyle | null = Platform.OS === 'ios' ? null : { filter: 'blur(12px)' };
 
 /** The Positioner's other half — Home's own soft entrance once the sequence
  * hands off, replacing what used to be an instant, unanimated mount. */

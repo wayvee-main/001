@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Easing, StyleSheet, Text, View } from 'react-native';
 
+import { AuroraGlow } from '@/components/aurora';
 import { AppBackdrop } from '@/components/layout';
+import { StoryOrbs } from '@/components/onboarding-art';
 import { VeeMark } from '@/components/vee-mark';
 import { useThemeColors } from '@/lib/theme';
 
@@ -103,17 +105,22 @@ export function BrandIntro({ mode, onComplete }: { mode: 'splash' | 'handoff'; o
       pointerEvents="none"
       style={[StyleSheet.absoluteFill, { zIndex: 20, opacity: overlayOpacity }]}>
       <AppBackdrop>
+        {mode === 'splash' ? <><AuroraGlow height={900} /><StoryOrbs lights={[0, 1]} /></> : null}
         <View style={StyleSheet.absoluteFill} className="items-center justify-center">
           <Animated.View
-            className="items-center gap-y-5"
-            style={{ transform: [{ translateY: exitLift }, { scale: exitScale }] }}>
+            style={{ alignItems: 'center', transform: [{ translateY: exitLift }, { scale: exitScale }] }}>
             <Animated.View style={{ opacity: markOpacity, transform: [{ scale: markScale }] }}>
-              <VeeMark size={78} gradient />
+              <VeeMark size={96} gradient />
             </Animated.View>
-            <Animated.View style={{ opacity: wordOpacity, transform: [{ translateY: wordRise }] }}>
-              <Text style={{ color: colors.fg }} className="font-fraunces text-[32px]">
+            <Animated.View style={{ alignItems: 'center', marginTop: 18, opacity: wordOpacity, transform: [{ translateY: wordRise }] }}>
+              <Text style={{ color: colors.fg, fontSize: 42, lineHeight: 48, letterSpacing: -1.5 }} className="font-dm-bold">
                 Wayvee
               </Text>
+              {mode === 'splash' ? (
+                <Text style={{ color: colors['fg-muted'], fontSize: 15, lineHeight: 20, marginTop: 6 }} className="font-dm">
+                  The Bay, minus the guesswork.
+                </Text>
+              ) : null}
             </Animated.View>
           </Animated.View>
         </View>

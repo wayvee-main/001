@@ -539,7 +539,7 @@ export const useScoper = create<ScoperState>((set, get) => {
         await clearSession();
       } finally {
         set({ ...accountReset, authError: null, session: null, userDataReady: true, sheet: null, toast: null, pendingIntent: null });
-        get().showToast('Signed out — see you around Oakland');
+        get().showToast('Signed out — see you around the Bay');
         intentionalSignOut = false;
         for (const key of plans) {
           const [kind, itemId] = splitPlanKey(key);

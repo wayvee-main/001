@@ -111,6 +111,10 @@ export type AuroraStop = { color: string; opacity: number };
 export const AURORA: Record<'light' | 'dark', {
   fill: readonly [string, string, string]; onFill: string; text: readonly [string, string, string];
   glow: readonly [AuroraStop, AuroraStop, AuroraStop]; soft: readonly [string, string, string];
+  /** Onboarding's soft lights behind each illustration: peach, lilac, rose. Decorative. */
+  orbs: readonly [AuroraStop, AuroraStop, AuroraStop];
+  /** The dim laid over a blurred Home while the quick setup sheet is up. */
+  veil: string;
   glass: string; glassEdge: string; rule: string; navigation: string; shadow: string;
 }> = {
   light: {
@@ -119,6 +123,8 @@ export const AURORA: Record<'light' | 'dark', {
     // Mist: a fainter, cooler light — gold top-left, periwinkle mid, violet top-right.
     glow: [{ color: '#FFC882', opacity: 0.16 }, { color: '#96AAFF', opacity: 0.16 }, { color: '#7B64EB', opacity: 0.24 }],
     soft: ['rgba(150, 140, 255, 0.14)', 'rgba(255, 150, 120, 0.07)', 'rgba(123, 90, 214, 0.16)'],
+    orbs: [{ color: '#FFB37A', opacity: 0.385 }, { color: '#9F86FF', opacity: 0.385 }, { color: '#FF8FB1', opacity: 0.315 }],
+    veil: 'rgba(20, 16, 40, 0.38)',
     glass: 'rgba(255, 255, 255, 0.80)', glassEdge: 'rgba(40, 35, 100, 0.08)', rule: 'rgba(40, 35, 100, 0.09)',
     navigation: 'rgba(255, 255, 255, 0.94)', shadow: '0 14px 30px -16px rgba(30, 30, 80, 0.26)',
   },
@@ -127,6 +133,8 @@ export const AURORA: Record<'light' | 'dark', {
     text: ['#FFC56B', '#FF8A5B', '#B9A4FF'],
     glow: [{ color: '#FFBA54', opacity: 0.2 }, { color: '#F0642F', opacity: 0.3 }, { color: '#7B5AD6', opacity: 0.44 }],
     soft: ['rgba(255, 181, 71, 0.16)', 'rgba(240, 100, 47, 0.14)', 'rgba(123, 90, 214, 0.22)'],
+    orbs: [{ color: '#FFB37A', opacity: 0.245 }, { color: '#9F86FF', opacity: 0.315 }, { color: '#FF8FB1', opacity: 0.21 }],
+    veil: 'rgba(0, 0, 0, 0.55)',
     glass: 'rgba(38, 31, 42, 0.66)', glassEdge: 'rgba(255, 240, 250, 0.09)', rule: 'rgba(255, 240, 250, 0.10)',
     navigation: 'rgba(32, 26, 35, 0.95)', shadow: '0 18px 36px -20px rgba(0, 0, 0, 0.92)',
   },

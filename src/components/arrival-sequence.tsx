@@ -1,767 +1,468 @@
-import { useMemo, useState, type ReactNode } from 'react';
-import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import {
+  ActivityIndicator,
+  Animated,
+  BackHandler,
+  Easing,
+  PanResponder,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { VeeMark } from '@/components/vee-mark';
-import { WayveeWordmark } from '@/components/wayvee-wordmark';
+import { AuroraGlow, GradientFill, GradientText } from '@/components/aurora';
 import { Glyph } from '@/components/glyph';
-import { AppBackdrop, useAppGutter } from '@/components/layout';
-import { TRIP_CONTEXTS, TRIP_CONTEXT_EFFECTS, type TripContext, type WalkBudget } from '@/lib/arrival';
-import { useActiveCityName } from '@/lib/city';
-import {
-  NO_RESTRICTIONS,
-  OTHER_RESTRICTION,
-  PLAN_AROUND_NOTE_MAX,
-  planAroundSummary,
-  togglePlanAroundChip,
-} from '@/lib/plan-around';
+import { AppBackdrop } from '@/components/layout';
+import { BayConstellation, HappyHourClock, NearbyRings, NightRoute, StoryOrbs, WeekLine } from '@/components/onboarding-art';
+import { AuthForm } from '@/components/overlays';
+import { GoogleLogo } from '@/components/ui';
+import { WalkSlider } from '@/components/walk-slider';
+import type { TripContext, WalkBudget } from '@/lib/arrival';
+import { useAurora } from '@/lib/aurora';
+import { switchCity } from '@/lib/bootstrap';
+import { useActiveCity, useActiveCityName, useCityOptions } from '@/lib/city';
+import { milesBetween } from '@/lib/geo';
+import { NO_RESTRICTIONS, OTHER_RESTRICTION, togglePlanAroundChip } from '@/lib/plan-around';
 import { useScoper } from '@/lib/store';
 import { useThemeColors } from '@/lib/theme';
-import { useWashInk } from '@/lib/wash';
+import { HEADING_FONT, headingStyle } from '@/lib/typography';
 
-const STEPS = ['welcome', 'context', 'interests', 'confirm'] as const;
-type Step = (typeof STEPS)[number];
-
-/** The six interest tiles. `tags` is what the tile actually writes into the
- * taste profile — the ranker only ever sees vocabulary the catalog carries, so
- * a tile can never promise a category the catalog can't answer.
+/* Arrival, in two parts.
  *
- * Outdoors and Fitness are no longer dimmed. The previous build greyed them out
- * because no catalog backs them yet, but this step's own copy is now explicit
- * that these are priorities rather than filters, which is the honest framing the
- * dimming was working around. Picking one steers the mix; it never promises a
- * listing that doesn't exist. */
-const INTEREST_TILES: { id: string; label: string; tags: string[]; glyph: string; tone: 'warm' | 'vee' | 'accent' }[] = [
-  { id: 'food', label: 'Food', tags: ['Restaurants'], glyph: 'food', tone: 'warm' },
-  { id: 'music', label: 'Live music', tags: ['Live music'], glyph: 'music', tone: 'vee' },
-  { id: 'outdoors', label: 'Outdoors', tags: ['Outdoor'], glyph: 'hike', tone: 'accent' },
-  { id: 'fitness', label: 'Fitness', tags: ['Fitness'], glyph: 'fitness', tone: 'vee' },
-  { id: 'drinks', label: 'Drinks', tags: ['Nightlife'], glyph: 'drink', tone: 'accent' },
-  { id: 'art', label: 'Art & film', tags: ['Movies'], glyph: 'film', tone: 'warm' },
-];
+ * ArrivalStory is full-screen: four short cards about what Wayvee is (the
+ * whole Bay; dates checked against official listings; deals straight from
+ * venues; Vee), the way in (Google, email, or explore first), then a location
+ * ask in context, before the system's own prompt.
+ *
+ * QuickSetupSheet then rises over Home itself, blurred behind it: what brings
+ * you here, what you're into, how far you'll walk, what to plan around. It
+ * replaces the old four-step questionnaire, and every answer it shows is what
+ * gets stored. */
 
-const CONTEXT_GLYPHS: Record<TripContext, string> = {
-  visiting: 'luggage',
-  work: 'briefcase',
-  live: 'home',
+// ── Shared pieces ───────────────────────────────────────────────────────────
+
+/** Bold Outfit with one italic Fraunces word in the Aurora gradient. */
+function StoryHeadline({ main, accent, size = 38 }: { main: string; accent: string; size?: number }) {
+  return (
+    <Text accessibilityRole="header" className="font-dm-bold text-ink" style={{ fontSize: size, lineHeight: size + 4, letterSpacing: size > 32 ? -1.4 : -1 }}>
+      {main}
+      <Text style={{ fontFamily: HEADING_FONT, letterSpacing: -0.6 }}><GradientText text={accent} /></Text>
+    </Text>
+  );
+}
+
+function PrimaryButton({ label, onPress, busy = false, testID, style }: { label: string; onPress: () => void; busy?: boolean; testID?: string; style?: StyleProp<ViewStyle> }) {
+  const aurora = useAurora();
+  return (
+    <TouchableOpacity testID={testID} accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ busy, disabled: busy }} disabled={busy} activeOpacity={0.85} onPress={onPress}
+      style={[{ height: 54, borderRadius: 27, alignItems: 'center', justifyContent: 'center', boxShadow: '0 12px 24px -12px rgba(106, 74, 201, 0.55)' }, style]}>
+      <GradientFill radius={27} />
+      {busy ? <ActivityIndicator color={aurora.onFill} /> : <Text className="font-dm-bold" style={{ fontSize: 16, lineHeight: 20, color: aurora.onFill }}>{label}</Text>}
+    </TouchableOpacity>
+  );
+}
+
+function QuietButton({ label, onPress, icon, busy = false, testID }: { label: string; onPress: () => void; icon?: ReactNode; busy?: boolean; testID?: string }) {
+  const colors = useThemeColors(), aurora = useAurora();
+  return (
+    <TouchableOpacity testID={testID} accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ busy, disabled: busy }} disabled={busy} activeOpacity={0.8} onPress={onPress}
+      style={{ height: 54, borderRadius: 27, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: colors['surface-raised'], borderWidth: 1, borderColor: aurora.glassEdge, boxShadow: aurora.shadow }}>
+      {busy ? <ActivityIndicator color={colors.fg} /> : icon}
+      <Text className="font-dm-medium text-ink" style={{ fontSize: 16, lineHeight: 20 }}>{label}</Text>
+    </TouchableOpacity>
+  );
+}
+
+function TextLink({ label, onPress, testID, height = 40 }: { label: string; onPress: () => void; testID?: string; height?: number }) {
+  return (
+    <TouchableOpacity testID={testID} accessibilityRole="button" activeOpacity={0.7} onPress={onPress} style={{ height, paddingHorizontal: 6, alignItems: 'center', justifyContent: 'center' }}>
+      <Text className="font-dm-medium text-peach" style={{ fontSize: 15, lineHeight: 20 }}>{label}</Text>
+    </TouchableOpacity>
+  );
+}
+
+function Dots({ at, count }: { at: number; count: number }) {
+  const colors = useThemeColors();
+  return (
+    <View accessibilityLabel={`Step ${at + 1} of ${count}`} style={{ flexDirection: 'row', justifyContent: 'center', gap: 6 }}>
+      {Array.from({ length: count }, (_, i) => i === at
+        ? <View key={i} style={{ width: 22, height: 7, borderRadius: 4, overflow: 'hidden' }}><GradientFill radius={4} /></View>
+        : <View key={i} style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: colors['fg-muted'], opacity: 0.35 }} />)}
+    </View>
+  );
+}
+
+function TopBar({ onBack, onSignIn }: { onBack?: () => void; onSignIn?: () => void }) {
+  const colors = useThemeColors();
+  return (
+    <View style={{ height: 48, paddingHorizontal: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+      {onBack ? (
+        <TouchableOpacity accessibilityRole="button" accessibilityLabel="Go back" hitSlop={10} activeOpacity={0.7} onPress={onBack} style={{ width: 36, height: 36, justifyContent: 'center' }}>
+          <Glyph name="chevronLeft" size={22} color={colors.fg} strokeWidth={2} />
+        </TouchableOpacity>
+      ) : <View style={{ width: 36 }} />}
+      {onSignIn ? <TextLink testID="arrival-sign-in" label="Sign in" onPress={onSignIn} /> : null}
+    </View>
+  );
+}
+
+/** A soft entrance for each card: fade up a few points. */
+function StepFade({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
+  const [opacity] = useState(() => new Animated.Value(0));
+  const [rise] = useState(() => new Animated.Value(10));
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(opacity, { toValue: 1, duration: 280, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+      Animated.timing(rise, { toValue: 0, duration: 320, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+    ]).start();
+  }, [opacity, rise]);
+  return <Animated.View style={[style, { opacity, transform: [{ translateY: rise }] }]}>{children}</Animated.View>;
+}
+
+// ── The story ───────────────────────────────────────────────────────────────
+
+const CARDS = ['bay', 'shows', 'deals', 'vee'] as const;
+type Card = (typeof CARDS)[number];
+type StoryStep = Card | 'account' | 'location';
+
+const COPY: Record<Card | 'location', { main: string; accent: string; sub: string; lights: (0 | 1 | 2)[] }> = {
+  bay: { main: 'The whole ', accent: 'Bay.', sub: 'Eight cities, one honest guide.', lights: [0, 1, 2] },
+  shows: { main: 'Every date, ', accent: 'checked.', sub: 'Pulled from official listings, so tonight means tonight.', lights: [1, 2, 0] },
+  deals: { main: 'Deals that are\n', accent: 'actually on.', sub: 'Straight from the venues. Tagged Today only when it’s true.', lights: [2, 0, 1] },
+  vee: { main: 'Then, let ', accent: 'Vee.', sub: 'Say the vibe. Get the whole night.', lights: [0, 1] },
+  location: { main: 'Mind if Vee\n', accent: 'tags along?', sub: 'Location turns “nearby” into minutes. Only while you’re using Wayvee.', lights: [1, 0] },
 };
 
-const WALK_OPTIONS: { value: WalkBudget; label: string }[] = [
-  { value: 10, label: '10 min' },
-  { value: 20, label: '20 min' },
-  { value: null, label: 'Any distance' },
+function StoryArt({ step }: { step: Card | 'location' }) {
+  if (step === 'bay') return <BayConstellation />;
+  if (step === 'shows') return <WeekLine />;
+  if (step === 'deals') return <HappyHourClock />;
+  if (step === 'vee') return <NightRoute />;
+  return <NearbyRings />;
+}
+
+/** Room for the tallest footer (the way in), held on every card so the art
+ * and headline stay put as the guest pages through. */
+const FOOTER_HEIGHT = 184;
+
+export function ArrivalStory({ onSetup }: { onSetup: () => void }) {
+  const session = useScoper(s => s.session);
+  const signInWithGoogle = useScoper(s => s.signInWithGoogle);
+  const requestLocation = useScoper(s => s.requestLocation);
+  const skipLocation = useScoper(s => s.skipLocation);
+  const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
+  const [step, setStep] = useState<StoryStep>('bay');
+  const [history, setHistory] = useState<StoryStep[]>([]);
+  const [accountMode, setAccountMode] = useState<'sign-in' | 'create'>('create');
+  const [busy, setBusy] = useState<'google' | 'location' | null>(null);
+  const [googleError, setGoogleError] = useState<string | null>(null);
+
+  // Signed in by any route (Google here, email in the account step, or a web
+  // redirect that reloaded the app): the next thing to ask is location.
+  const current: StoryStep = session ? 'location' : step;
+  const cardIndex = CARDS.indexOf(current as Card);
+
+  const go = (next: StoryStep) => {
+    setHistory([...history, current]);
+    setStep(next);
+  };
+  const back = () => {
+    const previous = history[history.length - 1];
+    if (!previous || session) return false;
+    setHistory(history.slice(0, -1));
+    setStep(previous);
+    return true;
+  };
+
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener('hardwareBackPress', back);
+    return () => subscription.remove();
+  });
+
+  const swipe = PanResponder.create({
+    onMoveShouldSetPanResponder: (_event, gesture) => cardIndex >= 0 && Math.abs(gesture.dx) > 14 && Math.abs(gesture.dx) > Math.abs(gesture.dy) * 1.4,
+    onPanResponderRelease: (_event, gesture) => {
+      if (gesture.dx < -44 && cardIndex < CARDS.length - 1) go(CARDS[cardIndex + 1]);
+      else if (gesture.dx > 44 && cardIndex > 0) back();
+    },
+  });
+
+  const google = async () => {
+    setGoogleError(null);
+    setBusy('google');
+    try {
+      await signInWithGoogle();
+    } catch (caught) {
+      setGoogleError(caught instanceof Error ? caught.message : 'Google sign-in did not finish.');
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const shareLocation = async () => {
+    setBusy('location');
+    try {
+      await requestLocation();
+    } catch {
+      // A failed fix is the same as no fix: setup asks where in the Bay instead.
+    }
+    onSetup();
+  };
+
+  const notNow = async () => {
+    try {
+      await skipLocation();
+    } catch {
+      // Not being asked again is a convenience; moving on is what matters.
+    }
+    onSetup();
+  };
+
+  const openAccount = (mode: 'sign-in' | 'create') => {
+    setAccountMode(mode);
+    go('account');
+  };
+
+  if (current === 'account') {
+    return (
+      <AppBackdrop>
+        <AuroraGlow height={windowHeight} />
+        <View style={{ paddingTop: insets.top }}><TopBar onBack={back} /></View>
+        <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 8, paddingBottom: insets.bottom + 28 }}>
+          <StepFade key={accountMode}><AuthForm titleVariant="page" initialMode={accountMode} /></StepFade>
+        </ScrollView>
+      </AppBackdrop>
+    );
+  }
+
+  const copy = COPY[current];
+  const canGoBack = history.length > 0 && !session;
+
+  return (
+    <AppBackdrop>
+      <AuroraGlow height={windowHeight} />
+      <View testID={`arrival-${current}`} style={{ flex: 1, paddingTop: insets.top }} {...swipe.panHandlers}>
+        <TopBar onBack={canGoBack ? back : undefined} onSignIn={cardIndex >= 0 && cardIndex < 3 ? () => openAccount('sign-in') : undefined} />
+        <View style={{ flex: 1, minHeight: 180 }}>
+          <StoryOrbs lights={copy.lights} />
+          <StepFade key={current} style={{ flex: 1, paddingVertical: 6 }}><StoryArt step={current} /></StepFade>
+        </View>
+        <StepFade key={current + '-copy'} style={{ paddingHorizontal: 28, minHeight: 148 }}>
+          <StoryHeadline main={copy.main} accent={copy.accent} />
+          <Text className="font-dm text-taupe" style={{ fontSize: 16, lineHeight: 23, marginTop: 10, maxWidth: 310 }}>{copy.sub}</Text>
+        </StepFade>
+        <View style={{ minHeight: FOOTER_HEIGHT + insets.bottom + 18, justifyContent: 'flex-end', paddingHorizontal: 24, paddingBottom: insets.bottom + 18 }}>
+          {current === 'vee' ? (
+            <>
+              <View style={{ gap: 10 }}>
+                <QuietButton testID="arrival-google" label="Continue with Google" icon={<GoogleLogo size={19} />} busy={busy === 'google'} onPress={google} />
+                <PrimaryButton testID="arrival-email" label="Sign up with email" onPress={() => openAccount('create')} />
+                <TextLink testID="arrival-explore" label="Explore first" onPress={() => go('location')} />
+              </View>
+              {googleError ? <Text accessibilityLiveRegion="polite" className="font-dm text-peach" style={{ fontSize: 12.5, lineHeight: 17, textAlign: 'center', marginBottom: 6 }}>{googleError}</Text> : null}
+              <View style={{ marginTop: 6 }}><Dots at={3} count={4} /></View>
+            </>
+          ) : current === 'location' ? (
+            <View style={{ gap: 10 }}>
+              <PrimaryButton testID="arrival-share-location" label="Share location" busy={busy === 'location'} onPress={shareLocation} />
+              <TextLink testID="arrival-not-now" label="Not now" onPress={notNow} />
+            </View>
+          ) : (
+            <>
+              <View style={{ marginBottom: 18 }}><Dots at={cardIndex} count={4} /></View>
+              <PrimaryButton testID="arrival-next" label="Next" onPress={() => go(CARDS[cardIndex + 1])} />
+            </>
+          )}
+        </View>
+      </View>
+    </AppBackdrop>
+  );
+}
+
+// ── Quick setup ─────────────────────────────────────────────────────────────
+
+/** The six interests. `tags` is what each writes into the taste profile — the
+ * ranker only sees vocabulary the catalog carries, so a chip can never
+ * promise a category the catalog can't answer. Picking one steers the mix;
+ * it never promises a listing that doesn't exist. */
+const INTERESTS: { id: string; label: string; tags: string[]; glyph: string }[] = [
+  { id: 'food', label: 'Food', tags: ['Restaurants'], glyph: 'food' },
+  { id: 'music', label: 'Live music', tags: ['Live music'], glyph: 'music' },
+  { id: 'outdoors', label: 'Outdoors', tags: ['Outdoor'], glyph: 'hike' },
+  { id: 'fitness', label: 'Fitness', tags: ['Fitness'], glyph: 'fitness' },
+  { id: 'drinks', label: 'Drinks', tags: ['Nightlife'], glyph: 'drink' },
+  { id: 'art', label: 'Art & film', tags: ['Movies'], glyph: 'film' },
 ];
 
-/** Marigold is the one tone a check mark can't sit on in white — `warm-strong`
- * is the ink that belongs on it. Coral and cobalt both carry white. */
-function checkInkFor(tone: 'warm' | 'vee' | 'accent', colors: ReturnType<typeof useThemeColors>): string {
-  return tone === 'warm' ? colors['warm-strong'] : '#FFFFFF';
+const HERE_FOR: { value: TripContext; label: string; glyph: string }[] = [
+  { value: 'visiting', label: 'A visit', glyph: 'luggage' },
+  { value: 'work', label: 'Work', glyph: 'briefcase' },
+  { value: 'live', label: 'I live here', glyph: 'home' },
+];
+
+/** The plan-around chips shown here; the rest stay a tap away in You. */
+const PLAN_AROUND_SHOWN = [NO_RESTRICTIONS, 'Vegetarian', 'Vegan', 'Gluten-free', 'Halal', 'Wheelchair access', 'Low-noise'];
+
+/** How far a launched city's centre can be and still count as "here". */
+const NEARBY_CITY_MILES = 40;
+
+function SectionLabel({ text, first = false }: { text: string; first?: boolean }) {
+  return <Text accessibilityRole="header" className="text-ink" style={[headingStyle(19), { marginTop: first ? 16 : 20, marginBottom: 10 }]}>{text}</Text>;
 }
 
-function toneHex(tone: 'warm' | 'vee' | 'accent', colors: ReturnType<typeof useThemeColors>): string {
-  return tone === 'warm' ? colors.warm : tone === 'vee' ? colors.vee : colors.accent;
+function SubLabel({ text, style }: { text: string; style?: StyleProp<ViewStyle> }) {
+  return <View style={style}><Text className="font-dm-bold text-taupe" style={{ fontSize: 11, lineHeight: 14, letterSpacing: 1.4 }}>{text.toUpperCase()}</Text></View>;
 }
 
-function toneTint(tone: 'warm' | 'vee' | 'accent', colors: ReturnType<typeof useThemeColors>): string {
-  return tone === 'warm' ? colors['warm-tint'] : tone === 'vee' ? colors['vee-tint'] : colors['accent-tint'];
+function Chip({ label, glyph, selected, onPress, role = 'checkbox' }: { label: string; glyph?: string; selected: boolean; onPress: () => void; role?: 'checkbox' | 'radio' }) {
+  const colors = useThemeColors(), aurora = useAurora(), ink = colors['pill-ink'];
+  return (
+    <TouchableOpacity accessibilityRole={role} accessibilityState={role === 'radio' ? { selected } : { checked: selected }} accessibilityLabel={label} activeOpacity={0.78} onPress={onPress}
+      style={{ height: 38, paddingHorizontal: 13, borderRadius: 19, flexDirection: 'row', alignItems: 'center', gap: 6,
+        backgroundColor: selected ? colors['accent-tint'] : colors['surface-raised'], borderWidth: selected ? 1.5 : 1, borderColor: selected ? `${ink}73` : aurora.glassEdge }}>
+      {glyph ? <Glyph name={glyph} size={15} color={selected ? ink : colors.accent} strokeWidth={1.9} /> : null}
+      <Text className="font-dm-medium" style={{ fontSize: 14, lineHeight: 18, color: selected ? ink : colors['fg-muted'] }}>{label}</Text>
+      {selected ? <Glyph name="check" size={14} color={ink} strokeWidth={2.4} /> : null}
+    </TouchableOpacity>
+  );
 }
 
-export function ArrivalSequence({ onDone }: { onDone: () => void }) {
-  const storedTripContext = useScoper((s) => s.tripContext);
-  const storedWalkBudget = useScoper((s) => s.walkBudgetMinutes);
-  const storedPlanAround = useScoper((s) => s.planAround);
-  const setTasteTags = useScoper((s) => s.setTasteTags);
-  const setTripContextValue = useScoper((s) => s.setTripContext);
-  const setWalkBudgetMinutes = useScoper((s) => s.setWalkBudgetMinutes);
-  const setPlanAround = useScoper((s) => s.setPlanAround);
-  const resolveTastePrompt = useScoper((s) => s.resolveTastePrompt);
+function HereFor({ value, onChange }: { value: TripContext; onChange: (value: TripContext) => void }) {
+  const colors = useThemeColors(), aurora = useAurora();
+  return (
+    <View accessibilityRole="radiogroup" style={{ flexDirection: 'row', padding: 4, borderRadius: 23, backgroundColor: colors['surface-sunk'], borderWidth: 1, borderColor: aurora.glassEdge }}>
+      {HERE_FOR.map(option => {
+        const selected = option.value === value, ink = selected ? aurora.onFill : colors['fg-muted'];
+        return (
+          <TouchableOpacity key={option.value} accessibilityRole="radio" accessibilityState={{ selected }} accessibilityLabel={option.label} activeOpacity={0.8} onPress={() => onChange(option.value)}
+            style={{ flex: 1, height: 38, borderRadius: 19, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+            {selected ? <GradientFill radius={19} /> : null}
+            <Glyph name={option.glyph} size={15} color={ink} strokeWidth={1.9} />
+            <Text numberOfLines={1} className="font-dm-medium" style={{ fontSize: 14, lineHeight: 18, color: ink }}>{option.label}</Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+}
 
-  // Seeded from whatever is already stored, so a guest who quit halfway through
-  // and came back sees their own answers rather than the defaults again.
-  const [step, setStep] = useState<Step>('welcome');
-  const [tripContext, setTripContext] = useState<TripContext>(storedTripContext ?? 'visiting');
+export function QuickSetupSheet({ onDone }: { onDone: () => void }) {
+  const colors = useThemeColors(), aurora = useAurora(), insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
+  const storedTripContext = useScoper(s => s.tripContext);
+  const storedWalkBudget = useScoper(s => s.walkBudgetMinutes);
+  const storedPlanAround = useScoper(s => s.planAround);
+  const locationStatus = useScoper(s => s.locationStatus);
+  const deviceLocation = useScoper(s => s.deviceLocation);
+  const setTasteTags = useScoper(s => s.setTasteTags);
+  const setTripContext = useScoper(s => s.setTripContext);
+  const setWalkBudgetMinutes = useScoper(s => s.setWalkBudgetMinutes);
+  const setPlanAround = useScoper(s => s.setPlanAround);
+  const resolveTastePrompt = useScoper(s => s.resolveTastePrompt);
+  const cities = useCityOptions(), activeSlug = useActiveCity(), cityName = useActiveCityName();
+
+  const [hereFor, setHereFor] = useState<TripContext>(storedTripContext ?? 'visiting');
   const [interests, setInterests] = useState<string[]>(['food', 'music', 'outdoors']);
-  const [chips, setChips] = useState<string[]>(storedPlanAround.chips);
-  const [note, setNote] = useState(storedPlanAround.note);
   const [walkBudget, setWalkBudget] = useState<WalkBudget>(storedWalkBudget ?? 20);
+  const [chips, setChips] = useState<string[]>(storedPlanAround.chips.length ? storedPlanAround.chips : [NO_RESTRICTIONS]);
+  const [veil] = useState(() => new Animated.Value(0));
+  const [rise] = useState(() => new Animated.Value(windowHeight));
+  const closing = useRef(false);
 
-  const page = STEPS.indexOf(step) + 1;
-  const goNext = () => setStep(STEPS[Math.min(page, STEPS.length - 1)]);
-  const goBack = () => setStep(STEPS[Math.max(0, page - 2)]);
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(veil, { toValue: 1, duration: 320, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+      Animated.spring(rise, { toValue: 0, damping: 22, stiffness: 180, mass: 0.9, useNativeDriver: true }),
+    ]).start();
+  }, [veil, rise]);
 
-  // Every answer is written through as it's made, so a guest who closes the app
-  // mid-sequence keeps what they already told us.
-  const chooseTripContext = (context: TripContext) => {
-    setTripContext(context);
-    setTripContextValue(context);
+  // With a fix, settle on the nearest launched city so "Using your location"
+  // names the right one. Without one, the guest picks below.
+  const located = locationStatus === 'granted' && deviceLocation !== null;
+  useEffect(() => {
+    if (locationStatus !== 'granted' || !deviceLocation) return;
+    const nearest = cities
+      .filter(city => city.anchor)
+      .map(city => ({ slug: city.slug, miles: milesBetween(deviceLocation, city.anchor!) }))
+      .sort((a, b) => a.miles - b.miles)[0];
+    if (nearest && nearest.slug !== activeSlug && nearest.miles <= NEARBY_CITY_MILES) void switchCity(nearest.slug).catch(() => undefined);
+  }, [locationStatus, deviceLocation, cities, activeSlug]);
+
+  const close = (save: boolean) => {
+    if (closing.current) return;
+    closing.current = true;
+    if (save) {
+      // Everything on the sheet is stored, touched or not: a guest who accepts
+      // the defaults has still just read them as Wayvee's understanding.
+      setTripContext(hereFor);
+      setWalkBudgetMinutes(walkBudget);
+      setTasteTags(INTERESTS.filter(item => interests.includes(item.id)).flatMap(item => item.tags));
+      setPlanAround({ chips, note: chips.includes(OTHER_RESTRICTION) ? storedPlanAround.note : '' });
+      void resolveTastePrompt(interests.length > 0 ? 'done' : 'skipped');
+    } else {
+      void resolveTastePrompt('skipped');
+    }
+    Animated.parallel([
+      Animated.timing(veil, { toValue: 0, duration: 240, easing: Easing.in(Easing.quad), useNativeDriver: true }),
+      Animated.timing(rise, { toValue: windowHeight, duration: 280, easing: Easing.in(Easing.cubic), useNativeDriver: true }),
+    ]).start(() => onDone());
   };
 
-  const toggleInterest = (id: string) => {
-    const next = interests.includes(id) ? interests.filter((value) => value !== id) : [...interests, id];
-    setInterests(next);
-    setTasteTags(INTEREST_TILES.filter((tile) => next.includes(tile.id)).flatMap((tile) => tile.tags));
-  };
-
-  const leaveInterests = () => {
-    void resolveTastePrompt(interests.length > 0 ? 'done' : 'skipped');
-    goNext();
-  };
-
-  const toggleChip = (chip: string) => {
-    const next = togglePlanAroundChip(chips, chip);
-    setChips(next);
-    // Clearing "Other" drops the note with it — a note nobody can see any more
-    // must not keep steering the ranking.
-    const nextNote = next.includes(OTHER_RESTRICTION) ? note : '';
-    if (!next.includes(OTHER_RESTRICTION) && note) setNote('');
-    setPlanAround({ chips: next, note: nextNote });
-  };
-
-  const changeNote = (value: string) => {
-    setNote(value);
-    setPlanAround({ chips, note: value });
-  };
-
-  const chooseWalkBudget = (minutes: WalkBudget) => {
-    setWalkBudget(minutes);
-    setWalkBudgetMinutes(minutes);
-  };
-
-  const interestSummary = INTEREST_TILES
-    .filter((tile) => interests.includes(tile.id))
-    .map((tile) => tile.label)
-    .join(' · ') || 'Surprise me';
-
-  /** Writes through everything the confirmation card just showed, tapped or not.
-   *
-   * The per-answer writes above only fire when a guest actually touches a
-   * control, so a guest who accepts the pre-selected defaults — Visiting, the
-   * three lead interests, a 20 minute walk — would land on Home with none of it
-   * stored, having just read a card that said Wayvee had it. The last screen's
-   * promise is what has to be true, so completion commits the whole thing. */
-  const commit = () => {
-    setTripContextValue(tripContext);
-    setWalkBudgetMinutes(walkBudget);
-    setTasteTags(INTEREST_TILES.filter((tile) => interests.includes(tile.id)).flatMap((tile) => tile.tags));
-    setPlanAround({ chips, note: chips.includes(OTHER_RESTRICTION) ? note : '' });
-    void resolveTastePrompt(interests.length > 0 ? 'done' : 'skipped');
-    onDone();
-  };
+  const toggleInterest = (id: string) => setInterests(interests.includes(id) ? interests.filter(value => value !== id) : [...interests, id]);
 
   return (
-    <Backdrop>
-      <Chrome page={page} canGoBack={page > 1} onBack={goBack} />
+    <View style={[StyleSheet.absoluteFill, { zIndex: 15 }]}>
+      <Animated.View testID="setup-veil" style={[StyleSheet.absoluteFill, { backgroundColor: aurora.veil, opacity: veil }]} />
+      <Animated.View testID="quick-setup" accessibilityViewIsModal
+        style={{ position: 'absolute', left: 0, right: 0, bottom: 0, maxHeight: windowHeight - insets.top - 20, backgroundColor: colors.bg,
+          borderTopLeftRadius: 30, borderTopRightRadius: 30, boxShadow: '0 -20px 50px -20px rgba(20, 10, 40, 0.45)', transform: [{ translateY: rise }] }}>
+        <View style={{ width: 40, height: 5, borderRadius: 3, backgroundColor: colors['fg-muted'], opacity: 0.35, alignSelf: 'center', marginTop: 10 }} />
+        <ScrollView style={{ flexGrow: 0, flexShrink: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 22, paddingTop: 16, paddingBottom: 6 }}>
+          <StoryHeadline main="Quick " accent="setup." size={30} />
 
-      {step === 'welcome' ? <WelcomeStep /> : null}
-      {step === 'context' ? <ContextStep selected={tripContext} onSelect={chooseTripContext} /> : null}
-      {step === 'interests' ? <InterestsStep selected={interests} onToggle={toggleInterest} /> : null}
-      {step === 'confirm' ? (
-        <ConfirmStep
-          chips={chips}
-          note={note}
-          walkBudget={walkBudget}
-          contextLabel={TRIP_CONTEXT_EFFECTS[tripContext].label}
-          interestSummary={interestSummary}
-          onToggleChip={toggleChip}
-          onChangeNote={changeNote}
-          onWalkBudget={chooseWalkBudget}
-        />
-      ) : null}
+          {located ? (
+            <View testID="setup-located" style={{ alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, height: 30, paddingHorizontal: 12, borderRadius: 15, marginTop: 12, backgroundColor: colors['accent-tint'] }}>
+              <Glyph name="navigation" size={13} color={colors['pill-ink']} strokeWidth={2} />
+              <Text className="font-dm-bold" style={{ fontSize: 12.5, lineHeight: 16, color: colors['pill-ink'] }}>Using your location · {cityName}</Text>
+            </View>
+          ) : (
+            <>
+              <SectionLabel text="Where in the Bay?" first />
+              <View testID="setup-cities" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                {cities.map(city => <Chip key={city.slug} role="radio" label={city.name} glyph="pin" selected={city.slug === activeSlug} onPress={() => void switchCity(city.slug).catch(() => undefined)} />)}
+              </View>
+            </>
+          )}
 
-      {step === 'welcome' ? <SingleFooter label="Get started" onPress={goNext} /> : null}
-      {step === 'context' ? (
-        <SingleFooter label="Continue" onPress={goNext} />
-      ) : null}
-      {step === 'interests' ? (
-        <SplitFooter
-          secondary="Surprise me"
-          primary="Continue"
-          onSecondary={leaveInterests}
-          onPrimary={leaveInterests}
-          note={`${interests.length} selected`}
-        />
-      ) : null}
-      {step === 'confirm' ? (
-        <SplitFooter secondary="Edit" primary="Open Wayvee" onSecondary={() => setStep('context')} onPrimary={commit} vee />
-      ) : null}
-    </Backdrop>
-  );
-}
+          <SectionLabel text="Here for" />
+          <HereFor value={hereFor} onChange={setHereFor} />
 
-// ── Shared chrome ───────────────────────────────────────────────────────────
+          <SectionLabel text="Into" />
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            {INTERESTS.map(item => <Chip key={item.id} label={item.label} glyph={item.glyph} selected={interests.includes(item.id)} onPress={() => toggleInterest(item.id)} />)}
+          </View>
 
-/** The same warm-paper/plum ground as Plans and every other route. Onboarding
- * keeps its warmer ink ramp, but no longer changes background worlds during
- * the handoff into the app. */
-function Backdrop({ children }: { children: ReactNode }) {
-  return <AppBackdrop>{children}</AppBackdrop>;
-}
-
-function Chrome({ page, canGoBack, onBack }: { page: number; canGoBack: boolean; onBack: () => void }) {
-  const insets = useSafeAreaInsets();
-  const gutter = useAppGutter();
-  const ink = useWashInk();
-  return (
-    <View
-      style={{ paddingHorizontal: gutter, paddingTop: insets.top + 8 }}
-      className="flex-row items-center justify-between pb-2">
-      {canGoBack ? (
-        <TouchableOpacity
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          activeOpacity={0.7}
-          hitSlop={10}
-          onPress={onBack}
-          className="h-8 w-8 items-center justify-center">
-          <Glyph name="back" size={18} color={ink.chrome} strokeWidth={1.5} />
-        </TouchableOpacity>
-      ) : (
-        <View className="h-8 w-8" />
-      )}
-
-      <View className="flex-row items-center gap-x-2.5">
-        <View className="flex-row items-center gap-x-1.5">
-          {STEPS.map((item, index) => (
-            <View
-              key={item}
-              style={{
-                width: index + 1 === page ? 26 : 5,
-                height: 5,
-                borderRadius: 3,
-                backgroundColor: index + 1 === page ? '#E85D2C' : ink.rail,
-              }}
-            />
-          ))}
+          <SectionLabel text="Preferences" />
+          <SubLabel text="Walk up to" />
+          <WalkSlider value={walkBudget} onChange={setWalkBudget} />
+          <SubLabel text="Plan around" style={{ marginTop: 26, marginBottom: 10 }} />
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            {PLAN_AROUND_SHOWN.map(chip => <Chip key={chip} label={chip} selected={chips.includes(chip)} onPress={() => setChips(togglePlanAroundChip(chips, chip))} />)}
+          </View>
+        </ScrollView>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 22, paddingTop: 14, paddingBottom: insets.bottom + 16 }}>
+          <TextLink testID="setup-skip" label="Skip" height={54} onPress={() => close(false)} />
+          <PrimaryButton testID="setup-done" label="Show me the Bay" style={{ flex: 1 }} onPress={() => close(true)} />
         </View>
-        <Text style={{ color: ink.step }} className="font-dm-medium text-label tabular-nums">
-          0{page}
-        </Text>
-      </View>
-
-      <View className="h-8 w-8" />
-    </View>
-  );
-}
-
-/** Scrolls rather than sitting in a fixed frame: the reference laid every step
- * out inside an absolutely-positioned 392×843 canvas, which only holds on the
- * one device it was drawn for and breaks the moment the OS text size moves. */
-function Page({
-  helper,
-  title,
-  copy,
-  branded = false,
-  children,
-}: {
-  helper?: string;
-  title: string;
-  copy?: string;
-  branded?: boolean;
-  children?: ReactNode;
-}) {
-  const ink = useWashInk();
-  const colors = useThemeColors();
-  const gutter = useAppGutter();
-  return (
-    <ScrollView
-      className="flex-1"
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
-      contentContainerStyle={{ paddingHorizontal: gutter, paddingTop: 14, paddingBottom: 28 }}>
-      <View className="flex-row items-center gap-x-2.5">
-        {branded ? (
-          <WayveeWordmark size={32} color={colors.fg} />
-        ) : (
-          <VeeMark size={22} gradient />
-        )}
-        {helper ? <Text style={{ color: ink.helper }} className="font-dm text-body">{helper}</Text> : null}
-      </View>
-
-      {/* The one deliberately off-scale size in the app: the sequence's hero is
-          the first thing anyone sees and the reference sets it at 31/36. Every
-          other size on these screens comes from the shared type scale. */}
-      <Text
-        style={{ color: ink.title, fontSize: 31, lineHeight: 36, letterSpacing: -1.05, marginTop: branded ? 28 : 16 }}
-        className="max-w-[330px] font-fraunces-medium">
-        {title}
-      </Text>
-      {copy ? (
-        <Text style={{ color: ink.copy }} className="mt-4 max-w-[330px] font-dm text-body">
-          {copy}
-        </Text>
-      ) : null}
-
-      {children}
-    </ScrollView>
-  );
-}
-
-function SingleFooter({ label, onPress }: { label: string; onPress: () => void }) {
-  const colors = useThemeColors();
-  const insets = useSafeAreaInsets();
-  const gutter = useAppGutter();
-  return (
-    <View style={{ paddingHorizontal: gutter, paddingBottom: insets.bottom + 16 }} className="pt-2">
-      <TouchableOpacity
-        accessibilityRole="button"
-        activeOpacity={0.86}
-        onPress={onPress}
-        className="h-[58px] flex-row items-center justify-between rounded-full bg-ember px-5 border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
-        <VeeMark size={19} variant="compact" color={colors['on-accent']} />
-        <Text className="font-dm-bold text-body-strong text-on-accent">{label}</Text>
-        <Glyph name="arrow" size={17} color={colors['on-accent']} strokeWidth={1.7} />
-      </TouchableOpacity>
-    </View>
-  );
-}
-
-function SplitFooter({
-  secondary,
-  primary,
-  note,
-  onSecondary,
-  onPrimary,
-  vee = false,
-}: {
-  secondary: string;
-  primary: string;
-  note?: string;
-  onSecondary: () => void;
-  onPrimary: () => void;
-  vee?: boolean;
-}) {
-  const insets = useSafeAreaInsets();
-  const gutter = useAppGutter();
-  const ink = useWashInk();
-  const colors = useThemeColors();
-  return (
-    <View style={{ paddingHorizontal: gutter, paddingBottom: insets.bottom + 16 }} className="pt-2">
-      <View className="flex-row gap-x-3">
-        <TouchableOpacity
-          accessibilityRole="button"
-          activeOpacity={0.82}
-          onPress={onSecondary}
-          style={{ backgroundColor: ink.secondaryBg }}
-          className="h-[58px] flex-1 items-center justify-center rounded-full border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
-          <Text style={{ color: ink.secondaryText }} className="font-dm-medium text-body-strong">{secondary}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          accessibilityRole="button"
-          activeOpacity={0.86}
-          onPress={onPrimary}
-          className="h-[58px] flex-1 flex-row items-center justify-center gap-x-2 rounded-full bg-ember px-4 border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
-          {vee ? <VeeMark size={18} variant="compact" color={colors['on-accent']} /> : null}
-          <Text className="font-dm-bold text-body-strong text-on-accent">{primary}</Text>
-          {vee ? null : <Glyph name="arrow" size={16} color={colors['on-accent']} strokeWidth={1.7} />}
-        </TouchableOpacity>
-      </View>
-      {note ? (
-        <Text style={{ color: ink.note }} className="mt-3 text-center font-dm text-meta underline">
-          {note}
-        </Text>
-      ) : null}
-    </View>
-  );
-}
-
-function MiniGlyph({ name, tone, size = 40 }: { name: string; tone: 'warm' | 'vee' | 'accent'; size?: number }) {
-  const colors = useThemeColors();
-  return (
-    <View style={{ width: size, height: size }} className="items-center justify-center">
-      <Glyph name={name} size={size * 0.58} color={toneHex(tone, colors)} strokeWidth={1.7} />
-    </View>
-  );
-}
-
-// ── 01 · Welcome ────────────────────────────────────────────────────────────
-
-function WelcomeStep() {
-  const ink = useWashInk();
-  // The catalog's city, not the device's: this line promises knowledge of a
-  // place, and the place we actually know is the one whose catalog is loaded.
-  const cityName = useActiveCityName();
-  const promises: { glyph: string; tone: 'warm' | 'vee' | 'accent'; text: string }[] = [
-    { glyph: 'pin', tone: 'accent', text: 'Real places, hours, and distances' },
-    { glyph: 'spark', tone: 'warm', text: 'One balanced plan, shaped around you' },
-    { glyph: 'ticket', tone: 'vee', text: 'You control every booking' },
-  ];
-
-  return (
-    <Page
-      branded
-      title={`${cityName}, minus\nthe guesswork.`}
-      copy="Food, events, outdoors, and fitness—planned around you.">
-      <View
-        style={{ backgroundColor: ink.cardBg, borderColor: ink.cardBorder }}
-        className="mt-7 rounded-panel border px-4 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
-        {promises.map((promise, index) => (
-          <View
-            key={promise.glyph}
-            style={index < promises.length - 1 ? { borderBottomWidth: 1, borderBottomColor: ink.cardDivider } : undefined}
-            className="min-h-[65px] flex-row items-center gap-x-3 py-3">
-            <MiniGlyph name={promise.glyph} tone={promise.tone} size={38} />
-            <Text style={{ color: ink.body }} className="flex-1 font-dm text-label">
-              {promise.text}
-            </Text>
-          </View>
-        ))}
-      </View>
-    </Page>
-  );
-}
-
-// ── 02 · Trip context ───────────────────────────────────────────────────────
-
-function ContextStep({ selected, onSelect }: { selected: TripContext; onSelect: (context: TripContext) => void }) {
-  const ink = useWashInk();
-  const colors = useThemeColors();
-
-  return (
-    <Page
-      helper="A little context for Vee."
-      title={'What brings you\nto Oakland?'}
-      copy="Vee adjusts timing, distance, and recommendations.">
-      <View className="mt-6 gap-y-2.5">
-        {TRIP_CONTEXTS.map((context) => {
-          const option = TRIP_CONTEXT_EFFECTS[context];
-          const active = selected === context;
-          return (
-            <TouchableOpacity
-              key={context}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: active }}
-              accessibilityLabel={`${option.label}. ${option.blurb}`}
-              activeOpacity={0.82}
-              onPress={() => onSelect(context)}
-              style={{
-                backgroundColor: active ? ink.optionSelectedBg : ink.optionBg,
-                borderColor: active ? ink.optionSelectedBorder : ink.cardBorder,
-              }}
-              className="min-h-[72px] flex-row items-center gap-x-2.5 rounded-panel border px-2.5 py-3 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
-              <MiniGlyph name={CONTEXT_GLYPHS[context]} tone={context === 'work' ? 'vee' : context === 'live' ? 'warm' : 'accent'} size={45} />
-              <View className="min-w-0 flex-1">
-                <Text style={{ color: ink.strong }} className="font-dm-bold text-section">{option.label}</Text>
-                <Text style={{ color: ink.muted }} className="mt-0.5 font-dm text-meta">{option.blurb}</Text>
-              </View>
-              <View
-                style={
-                  active
-                    ? { backgroundColor: ink.stateSelectedBg, borderWidth: 1, borderColor: ink.stateSelectedBorder }
-                    : undefined
-                }
-                className="h-[25px] w-[25px] items-center justify-center rounded-full border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
-                <Glyph
-                  name={active ? 'check' : 'arrow'}
-                  size={15}
-                  color={active ? colors.accent : ink.stateIdle}
-                  strokeWidth={active ? 2 : 1.5}
-                />
-              </View>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-    </Page>
-  );
-}
-
-// ── 03 · Interests ──────────────────────────────────────────────────────────
-
-function InterestsStep({ selected, onToggle }: { selected: string[]; onToggle: (id: string) => void }) {
-  const ink = useWashInk();
-  const colors = useThemeColors();
-
-  return (
-    <Page
-      helper="Pick what matters."
-      title={'What do you not\nwant to miss?'}
-      copy="Choose a few. Vee keeps your day balanced.">
-      <View className="mt-6 flex-row flex-wrap justify-between gap-y-2.5">
-        {INTEREST_TILES.map((tile) => {
-          const active = selected.includes(tile.id);
-          return (
-            <TouchableOpacity
-              key={tile.id}
-              accessibilityRole="checkbox"
-              accessibilityState={{ checked: active }}
-              accessibilityLabel={tile.label}
-              activeOpacity={0.82}
-              onPress={() => onToggle(tile.id)}
-              style={{
-                width: '48.5%',
-                backgroundColor: active ? (ink.interestSelectedBg ?? toneTint(tile.tone, colors)) : ink.optionBg,
-                borderColor: ink.cardBorder,
-              }}
-              className="min-h-[74px] flex-row items-center gap-x-1.5 rounded-panel border px-2 py-3 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
-              <MiniGlyph name={tile.glyph} tone={tile.tone} size={40} />
-              <Text style={{ color: ink.strong }} className="min-w-0 flex-1 font-dm-medium text-label">
-                {tile.label}
-              </Text>
-              {active ? (
-                <View
-                  style={{ backgroundColor: toneHex(tile.tone, colors) }}
-                  className="h-[19px] w-[19px] items-center justify-center rounded-full border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
-                  <Glyph name="check" size={11} color={checkInkFor(tile.tone, colors)} strokeWidth={2.2} />
-                </View>
-              ) : (
-                <Text style={{ color: ink.helper }} className="font-dm-medium text-section">+</Text>
-              )}
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-    </Page>
-  );
-}
-
-// ── 04 · Plan around ────────────────────────────────────────────────────────
-
-function ConfirmStep({
-  chips,
-  note,
-  walkBudget,
-  contextLabel,
-  interestSummary,
-  onToggleChip,
-  onChangeNote,
-  onWalkBudget,
-}: {
-  chips: string[];
-  note: string;
-  walkBudget: WalkBudget;
-  contextLabel: string;
-  interestSummary: string;
-  onToggleChip: (chip: string) => void;
-  onChangeNote: (value: string) => void;
-  onWalkBudget: (value: WalkBudget) => void;
-}) {
-  const ink = useWashInk();
-  const [expandedGroup, setExpandedGroup] = useState<'food' | 'comfort' | null>(null);
-  const otherSelected = chips.includes(OTHER_RESTRICTION);
-  const restrictionSummary = useMemo(() => planAroundSummary({ chips, note }), [chips, note]);
-  const walkCardLabel = walkBudget === null ? 'Any distance' : `${walkBudget} min`;
-  const preferenceGroups = [
-    {
-      id: 'food' as const,
-      label: 'Food & dietary',
-      chips: ['Vegetarian', 'Vegan', 'Gluten-free', 'Halal', 'Dairy-free', 'Nut allergy', 'No alcohol'],
-    },
-    {
-      id: 'comfort' as const,
-      label: 'Access & comfort',
-      chips: ['Wheelchair access', 'Low-noise', 'Limited standing'],
-    },
-  ];
-
-  return (
-    <Page helper="One last detail." title={'Anything Vee should\nplan around?'}>
-      <Text style={{ color: ink.helper }} className="mb-2.5 mt-5 font-dm-bold text-body">Plan around</Text>
-      <View className="flex-row flex-wrap gap-2">
-        <TouchableOpacity
-          accessibilityRole="checkbox"
-          accessibilityState={{ checked: chips.includes(NO_RESTRICTIONS) }}
-          accessibilityLabel={NO_RESTRICTIONS}
-          activeOpacity={0.78}
-          onPress={() => {
-            setExpandedGroup(null);
-            onToggleChip(NO_RESTRICTIONS);
-          }}
-          style={{
-            backgroundColor: chips.includes(NO_RESTRICTIONS) ? ink.chipSelectedBg : ink.chipBg,
-            borderColor: chips.includes(NO_RESTRICTIONS) ? ink.chipSelectedBorder : ink.chipBorder,
-          }}
-          className="min-h-[46px] justify-center rounded-full border px-3.5 py-2.5 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
-          <Text
-            style={{ color: chips.includes(NO_RESTRICTIONS) ? ink.strong : ink.body }}
-            className={chips.includes(NO_RESTRICTIONS) ? 'font-dm-medium text-body' : 'font-dm text-body'}>
-            {NO_RESTRICTIONS}
-          </Text>
-        </TouchableOpacity>
-
-        {preferenceGroups.map((group) => {
-          const selectedCount = group.chips.filter((chip) => chips.includes(chip)).length;
-          const expanded = expandedGroup === group.id;
-          return (
-            <TouchableOpacity
-              key={group.id}
-              accessibilityRole="button"
-              accessibilityState={{ expanded }}
-              accessibilityLabel={`${group.label}${selectedCount ? `, ${selectedCount} selected` : ''}`}
-              activeOpacity={0.78}
-              onPress={() => setExpandedGroup(expanded ? null : group.id)}
-              style={{
-                backgroundColor: selectedCount ? ink.chipSelectedBg : ink.chipBg,
-                borderColor: selectedCount || expanded ? ink.chipSelectedBorder : ink.chipBorder,
-              }}
-              className="min-h-[46px] flex-row items-center gap-x-2 rounded-full border px-3.5 py-2.5 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
-              <Text
-                style={{ color: selectedCount ? ink.strong : ink.body }}
-                className={selectedCount ? 'font-dm-medium text-body' : 'font-dm text-body'}>
-                {group.label}
-              </Text>
-              <Text style={{ color: ink.helper }} className="font-dm-medium text-body">
-                {selectedCount || (expanded ? '−' : '+')}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-
-        <TouchableOpacity
-          accessibilityRole="checkbox"
-          accessibilityState={{ checked: otherSelected }}
-          accessibilityLabel={OTHER_RESTRICTION}
-          activeOpacity={0.78}
-          onPress={() => onToggleChip(OTHER_RESTRICTION)}
-          style={{
-            backgroundColor: otherSelected ? ink.chipSelectedBg : ink.chipBg,
-            borderColor: otherSelected ? ink.chipSelectedBorder : ink.chipBorder,
-          }}
-          className="min-h-[46px] justify-center rounded-full border px-3.5 py-2.5 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
-          <Text
-            style={{ color: otherSelected ? ink.strong : ink.body }}
-            className={otherSelected ? 'font-dm-medium text-body' : 'font-dm text-body'}>
-            {OTHER_RESTRICTION}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {preferenceGroups.map((group) =>
-        expandedGroup === group.id ? (
-          <View key={group.id} className="mt-2.5 flex-row flex-wrap gap-2">
-            {group.chips.map((chip) => {
-              const active = chips.includes(chip);
-              return (
-                <TouchableOpacity
-                  key={chip}
-                  accessibilityRole="checkbox"
-                  accessibilityState={{ checked: active }}
-                  accessibilityLabel={chip}
-                  activeOpacity={0.78}
-                  onPress={() => onToggleChip(chip)}
-                  style={{
-                    backgroundColor: active ? ink.chipSelectedBg : ink.chipBg,
-                    borderColor: active ? ink.chipSelectedBorder : ink.chipBorder,
-                  }}
-                  className="min-h-[44px] justify-center rounded-full border px-3.5 py-2.5 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
-                  <Text
-                    style={{ color: active ? ink.strong : ink.body }}
-                    className={active ? 'font-dm-medium text-body' : 'font-dm text-body'}>
-                    {chip}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        ) : null)
-      }
-
-      {otherSelected ? (
-        <>
-          <View
-            style={{ backgroundColor: ink.fieldActiveBg, borderColor: ink.fieldActiveBorder }}
-            className="mt-2.5 h-[50px] flex-row items-center gap-x-2 rounded-full border pl-4 pr-3 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
-            <TextInput
-              accessibilityLabel="Other restriction for Vee"
-              maxLength={PLAN_AROUND_NOTE_MAX}
-              onChangeText={onChangeNote}
-              placeholder="Tell Vee in your own words"
-              placeholderTextColor={ink.placeholder}
-              returnKeyType="done"
-              value={note}
-              style={{ color: ink.strong }}
-              className="h-[50px] flex-1 py-0 font-dm text-body"
-            />
-            <VeeMark size={20} gradient />
-          </View>
-          <Text style={{ color: ink.hint }} className="mt-1.5 pl-1 font-dm text-meta">
-            Vee uses this to rank. Confirm allergies with venues.
-          </Text>
-        </>
-      ) : null}
-
-      <Text style={{ color: ink.helper }} className="mb-2.5 mt-8 font-dm-bold text-body">Comfortable walk</Text>
-      <View className="flex-row gap-x-2">
-        {WALK_OPTIONS.map((option) => {
-          const active = walkBudget === option.value;
-          return (
-            <TouchableOpacity
-              key={option.label}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: active }}
-              accessibilityLabel={option.label}
-              activeOpacity={0.78}
-              onPress={() => onWalkBudget(option.value)}
-              style={{
-                backgroundColor: active ? ink.walkSelectedBg : ink.chipBg,
-                borderColor: active ? ink.walkSelectedBorder : ink.chipBorder,
-              }}
-              className="min-h-[48px] flex-1 items-center justify-center rounded-full border px-2 py-2.5 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
-              <Text
-                style={{ color: active ? ink.walkSelectedText : ink.body }}
-                className={active ? 'font-dm-medium text-body' : 'font-dm text-body'}>
-                {option.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-
-      <Text style={{ color: ink.helper }} className="mb-2.5 mt-6 font-dm-bold text-body">Your plan</Text>
-      <View
-        style={{ backgroundColor: ink.cardBg, borderColor: ink.cardBorder }}
-        className="mx-1 rounded-card border px-4 pb-3 pt-2.5 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
-          <View className="flex-row items-center gap-x-3">
-            <VeeMark size={25} gradient />
-            <View className="min-w-0 flex-1">
-              <View className="flex-row items-baseline gap-x-2">
-                <Text style={{ color: ink.strong }} className="font-dm-bold text-section">Vee has it</Text>
-              </View>
-              <Text numberOfLines={1} style={{ color: ink.muted }} className="mt-1 font-dm text-label">
-                {interestSummary}
-              </Text>
-            </View>
-            <View className="h-[56px] w-[56px] items-center justify-center overflow-hidden">
-              <RouteThumbnail />
-            </View>
-          </View>
-
-          <View className="mt-2.5 flex-row flex-wrap items-center gap-x-4 gap-y-2">
-            <View className="flex-row items-center gap-x-1.5">
-              <Glyph name="luggage" size={14} color={ink.helper} strokeWidth={1.8} />
-              <Text style={{ color: ink.strong }} className="font-dm-medium text-meta">{contextLabel}</Text>
-            </View>
-            <View className="flex-row items-center gap-x-1.5">
-              <Glyph name="walk" size={14} color={ink.helper} strokeWidth={1.8} />
-              <Text style={{ color: ink.strong }} className="font-dm-medium text-meta">{walkCardLabel}</Text>
-            </View>
-            <View className="min-w-0 flex-row items-center gap-x-1.5">
-              <Glyph name="check" size={14} color={ink.diet} strokeWidth={2} />
-              <Text numberOfLines={1} style={{ color: ink.strong }} className="font-dm-medium text-meta">
-                {restrictionSummary}
-              </Text>
-            </View>
-          </View>
-      </View>
-
-    </Page>
-  );
-}
-
-/** Abstract street blocks and a dashed route between two real-looking points. */
-function RouteThumbnail() {
-  const colors = useThemeColors();
-  const ink = useWashInk();
-  return (
-    <View style={{ backgroundColor: colors.bg }} className="h-[55px] w-[55px] overflow-hidden rounded-control border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark">
-      <View style={{ backgroundColor: colors['warm-tint'] }} className="absolute left-[5px] top-[6px] h-[19px] w-[28px] rounded-md border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark" />
-      <View style={{ backgroundColor: colors['vee-tint'] }} className="absolute bottom-[5px] right-[5px] h-[27px] w-[22px] rounded-md border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark" />
-      <View style={{ backgroundColor: colors['accent-tint'] }} className="absolute bottom-[7px] left-[6px] h-[17px] w-[18px] rounded border border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark" />
-      <View
-        style={{ borderColor: ink.strong, transform: [{ rotate: '-18deg' }] }}
-        className="absolute left-[17px] top-[28px] h-[17px] w-[31px] border-r border-t border-dashed"
-      />
-      <View style={{ backgroundColor: colors.accent, borderColor: colors.bg }} className="absolute bottom-[11px] left-[10px] h-[9px] w-[9px] rounded-full border-2 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark" />
-      <View style={{ backgroundColor: colors.vee, borderColor: colors.bg }} className="absolute right-[10px] top-[10px] h-[9px] w-[9px] rounded-full border-2 border-edge-card border-b-edge-card-bottom shadow-soft-light dark:shadow-soft-dark" />
+      </Animated.View>
     </View>
   );
 }
