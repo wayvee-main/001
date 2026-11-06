@@ -3,8 +3,9 @@ import React from 'react';
 import renderer, { act } from 'react-test-renderer';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { cssInterop } from 'react-native-css-interop';
-import { CityDeskFamilyTabs, CityDeskFeature, CityDeskTicket, CityDeskWeather, cityDeskHomeHeadline } from '@/components/city-desk';
+import { CityDeskCalmPair, CityDeskFamilyTabs, CityDeskFeature, CityDeskTicket, CityDeskWeather, cityDeskHomeHeadline } from '@/components/city-desk';
 import { CitySearchBar } from '@/components/city-controls';
+import { Photo } from '@/components/photo';
 import { StubTicket } from '@/components/stub-cards';
 
 const mockPush = jest.fn(), mockSave = jest.fn(), mockAdd = jest.fn();
@@ -16,7 +17,7 @@ jest.mock('@/lib/theme', () => {
 jest.mock('@/components/glyph', () => ({ Glyph: () => null }));
 jest.mock('@/components/photo', () => ({ Photo: () => null }));
 jest.mock('@/lib/weather', () => ({ useWeatherNow: () => null, weatherLine: () => '' }));
-jest.mock('@/lib/home-index-photos', () => ({ homeIndexPhotos: () => [] }));
+jest.mock('@/lib/home-index-photos', () => ({ homeIndexPhotos: entry => [{ source: `https://venue.example/${entry.id}.jpg` }] }));
 jest.mock('@/lib/use-entry-actions', () => ({ useEntryActions: () => ({ saved: false, canSave: true, save: mockSave, added: false, add: mockAdd }) }));
 for (const component of [Pressable, Text, View]) cssInterop(component, { className: 'style' });
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -67,6 +68,28 @@ describe('City Desk on Android', () => {
     expect(tree.root.findByType(StubTicket).props.lead.kind).toBe('thumb');
     act(() => control(tree, 'ticket').props.onPress());
     expect(mockPush).toHaveBeenCalledWith('/home/detail?kind=event&id=undated-event');
+  });
+
+  it('opens both real Calm pair destinations and keeps each photo tied to its own venue', () => {
+    const event = { ...entry, kind: 'event', id: 'local-show', name: 'A Long Local Show Title With Extra Words', caption: 'Fox Theater', facts: [{ glyph: 'calendar', value: 'Nov 14' }, { glyph: 'clock', value: '8 PM' }] };
+    const tree = mount(<CityDeskCalmPair entries={[entry, event]} catalog={catalog} now={new Date('2026-11-06T12:00:00Z')} />);
+    const rows = tree.root.findAll(node => node.props.testID === 'daybreak-home-row' && typeof node.props.onPress === 'function');
+    act(() => rows.find(node => node.props.accessibilityLabel.startsWith(entry.name)).props.onPress());
+    expect(mockPush).toHaveBeenLastCalledWith('/home/detail?kind=place&id=local-table');
+    act(() => rows.find(node => node.props.accessibilityLabel.startsWith(event.name)).props.onPress());
+    expect(mockPush).toHaveBeenLastCalledWith('/home/detail?kind=event&id=local-show');
+    const photos = tree.root.findAllByType(Photo);
+    expect(photos.map(photo => photo.props.candidates[0].source)).toEqual(['https://venue.example/local-table.jpg', 'https://venue.example/local-show.jpg']);
+    expect(photos.every(photo => photo.props.retryable === false)).toBe(true);
+    expect(tree.root.findAllByType(StubTicket)).toHaveLength(0);
+  });
+
+  it('keeps a single available Calm pair pick usable without an empty second slot', () => {
+    const tree = mount(<CityDeskCalmPair entries={[entry]} catalog={catalog} now={new Date('2026-11-06T12:00:00Z')} />);
+    expect(tree.root.findAllByType(Photo)).toHaveLength(1);
+    expect(tree.root.findAllByProps({ testID: 'calm-pair-divider' })).toHaveLength(0);
+    act(() => control(tree, 'daybreak-home-row').props.onPress());
+    expect(mockPush).toHaveBeenCalledWith('/home/detail?kind=place&id=local-table');
   });
 
   it('retains the feature’s separate detail, save and evening actions', () => {

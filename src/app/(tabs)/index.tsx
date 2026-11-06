@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Text, View } from 'react-native';
 import { CitySearchBar } from '@/components/city-controls';
 import { AuroraEntryRow, AuroraLinkRow, AuroraList, SectionRule } from '@/components/aurora';
-import { CityDeskHomeIntro, CityDeskPoster, CityDeskPosterGrid, CityDeskSection, CityDeskTicket, CityDeskWeather } from '@/components/city-desk';
+import { CityDeskCalmPair, CityDeskHomeIntro, CityDeskPoster, CityDeskPosterGrid, CityDeskSection, CityDeskWeather } from '@/components/city-desk';
 import { DaybreakPeriodPicker, type DaybreakPeriod } from '@/components/daybreak';
 import { QuietHomeOffers, QuietHomeVee } from '@/components/quiet-home';
 import { Screen, ScreenScroll } from '@/components/layout';
@@ -46,9 +46,11 @@ export default function HomeScreen() {
     <View testID="quiet-home-feed" style={{ gap: 24 }}>
       <View style={{ gap: 13 }}>
         <SectionRule spacing={0} testID="home-period-rule" />
-        <Text accessibilityRole="header" className="font-dm-medium" style={{ fontSize: 11, lineHeight: 16, letterSpacing: 1.3, color: colors['fg-muted'] }}>YOUR NEXT STOP</Text>
-        <DaybreakPeriodPicker appearance="citydesk" value={period} onChange={setPeriodOverride} />
-        {picks.length ? <View testID="citydesk-home-picks" style={{ gap: 10 }}>{picks.map(entry => <CityDeskTicket key={homeGuideKey(entry.kind, entry.id)} testID="daybreak-home-row" entry={entry} catalog={catalog} now={now} />)}</View>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+          <Text accessibilityRole="header" className="font-dm-medium" style={{ fontSize: 11, lineHeight: 16, letterSpacing: 1, color: colors['fg-muted'] }}>YOUR NEXT STOP</Text>
+          <DaybreakPeriodPicker compact appearance="citydesk" value={period} onChange={setPeriodOverride} />
+        </View>
+        {picks.length ? <CityDeskCalmPair entries={picks} catalog={catalog} now={now} />
           : <EmptyState compact title="Your next good stop is on the way" message="Try another category or check back as local listings arrive." />}
         <QuietHomeOffers appearance="citydesk" />
       </View>

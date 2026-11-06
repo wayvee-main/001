@@ -129,6 +129,16 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     expect(pressable(tree, 'daybreak-period-evening').props['aria-selected']).toBe(true);
     expect(pressable(tree, 'daybreak-period-day').props.accessibilityState.selected).toBe(false);
   });
+  it('keeps the compact Calm pair switch operable with a 44px touch area', () => {
+    const changed = jest.fn(), tree = mount(<DaybreakPeriodPicker compact appearance="citydesk" value="day" onChange={changed} />);
+    expect(style(tree, 'daybreak-periods').minHeight).toBeGreaterThanOrEqual(44);
+    const tab = pressable(tree, 'daybreak-period-evening'), tabStyle = style(tree, 'daybreak-period-evening');
+    expect(tabStyle.minHeight + tab.props.hitSlop.top + tab.props.hitSlop.bottom).toBeGreaterThanOrEqual(44);
+    act(() => tab.props.onPress());
+    expect(changed).toHaveBeenCalledWith('evening');
+    act(() => tree.update(<DaybreakPeriodPicker compact appearance="citydesk" value="evening" onChange={changed} />));
+    expect(pressable(tree, 'daybreak-period-evening').props.accessibilityState.selected).toBe(true);
+  });
   it('retains round action sizing', () => {
     const tree = mount(<PerksRoundButton testID="round" label="Offers" glyph="tag" onPress={() => {}} />);
     expect(style(tree, 'round')).toMatchObject({ width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' });

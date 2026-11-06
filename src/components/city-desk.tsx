@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useState, type ReactNode } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View, useWindowDimensions } from 'react-native';
 
 import { GradientText, useAuroraCard } from '@/components/aurora';
 import { Glyph } from '@/components/glyph';
@@ -78,6 +78,33 @@ export function CityDeskTicket({ entry, catalog, now, testID }: { entry: HomeGui
     title={shortCardTitle(entry.name)} caption={compactCardText(entry.caption)} pills={facts.map(fact => ({ text: fact.text, glyph: fact.glyph }))}
     photo={{ candidates: homeIndexPhotos(entry, catalog), glyph: entry.glyph, label: `${entry.name} photo unavailable` }}
     onPress={() => router.push(homeGuideHref(entry) as never)} accessibilityLabel={[entry.name, entry.caption, ...facts.map(fact => fact.label)].filter(Boolean).join('. ')} />;
+}
+
+/** Home's Calm pair: two real picks share one quiet card, with own-venue photos
+ * at the right. Each whole row opens its existing detail route. */
+export function CityDeskCalmPair({ entries, catalog, now }: { entries: readonly HomeGuideEntry[]; catalog: HomeGuideCatalog; now: Date }) {
+  const router = useRouter(), colors = useThemeColors(), card = useAuroraCard('citydesk'), { width } = useWindowDimensions();
+  const photoSize = width <= 360 ? 66 : 76;
+  if (!entries.length) return null;
+  return <View testID="citydesk-home-picks" style={[card, { borderRadius: 18, paddingHorizontal: 14, overflow: 'hidden' }]}>
+    {entries.map((entry, index) => {
+      const facts = homeCardMetadata(entry, now);
+      return <View key={`${entry.kind}:${entry.id}`}>
+        {index > 0 ? <View testID="calm-pair-divider" accessible={false} style={{ height: 1, backgroundColor: colors['control-edge'] }} /> : null}
+        <Pressable testID="daybreak-home-row" accessibilityRole="button" accessibilityLabel={[entry.name, entry.caption, ...facts.map(fact => fact.label)].filter(Boolean).join('. ')}
+          onPress={() => router.push(homeGuideHref(entry) as never)}
+          style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 14, opacity: pressed ? .72 : 1 })}>
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <Text numberOfLines={1} ellipsizeMode="tail" className="font-dm-medium text-ink" style={{ fontSize: 17, lineHeight: 22, letterSpacing: -.35 }}>{shortCardTitle(entry.name)}</Text>
+            <Text numberOfLines={1} ellipsizeMode="tail" className="font-dm" style={{ marginTop: 3, fontSize: 12, lineHeight: 17, color: colors['fg-muted'] }}>{compactCardText(entry.caption)}</Text>
+            {facts.length ? <View style={{ marginTop: 9 }}><MetadataLine items={facts} /></View> : null}
+          </View>
+          <Photo candidates={homeIndexPhotos(entry, catalog)} radius={12} retryable={false} stripedPlaceholder={false} fallbackGlyph={entry.glyph as never}
+            fallbackLabel={`${entry.name} photo unavailable`} style={{ width: photoSize, height: photoSize, flexShrink: 0, backgroundColor: colors['surface-sunk'] }} />
+        </Pressable>
+      </View>;
+    })}
+  </View>;
 }
 
 /** Discover's compact, solid card: an inset photograph, two facts and real actions. */

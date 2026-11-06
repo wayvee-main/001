@@ -23,9 +23,14 @@ Shared City Desk compositions live in `src/components/city-desk.tsx`.
   screen. Existing secondary search inputs keep their current behavior.
 - **Home:** one short, time-of-day headline on a single line, actual weather
   when available under the wordmark; search; Fresh
-  source-backed recommendations. A ruled “Your next stop” section has the
-  By day / After hours control, up to two full-width tickets, then the slim
-  Local perks ribbon. For you and For later use compact calm lists.
+  source-backed recommendations. “Your next stop” uses the approved **Calm pair**:
+  its small uppercase heading and compact By day / After hours control share
+  one row. Up to two real picks sit in one 18px rounded opaque card, with 14px
+  inset/padding, a faint solid divider, one-line titles/captions, up to two
+  metadata pills and 76px right-hand photos (66px on narrow phones). No ticket
+  stubs, perforations or calendar side panels on Home. Each whole row opens its
+  existing detail route; missing photos retain the own-venue fallback. The slim
+  Local perks ribbon follows. For you and For later use compact calm lists.
   Collections use two equal-width inset-photo posters per row (up to four,
   with See all for the complete set). The Vee ribbon closes the feed.
 - **Discover:** “Find your next good thing.”, search, then Eat / Go out /
