@@ -2,9 +2,11 @@ import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { Text, View } from 'react-native';
 
-import { FoodHubRow, type HubFact } from '@/components/featured';
+import { type HubFact } from '@/components/featured';
+import { StubStack, StubTicket } from '@/components/stub-cards';
+import { dateLead } from '@/lib/stub-cards';
 import { Glyph } from '@/components/glyph';
-import { RaisedTouchable, RaisedView } from '@/components/raised-surface';
+import { RaisedTouchable } from '@/components/raised-surface';
 import { SeeAllScreen } from '@/components/see-all';
 import { ChevronRight, EmptyState } from '@/components/ui';
 import { useNow } from '@/lib/clock';
@@ -44,20 +46,24 @@ export default function TonightScreen() {
   if (tonight.length) facts.push({ glyph: 'ticket', label: `${tonight.length} tonight`, tone: 'accent' });
   if (later.length) facts.push({ glyph: 'calendar', label: `${later.length} still ahead` });
 
-  const row = (event: ScoperEvent, index: number, all: ScoperEvent[], dated: boolean) => (
-    <FoodHubRow
+  // Each show as a date ticket: the calendar tile carries the day, so the
+  // words only need the venue, the doors and the price.
+  const row = (event: ScoperEvent) => (
+    <StubTicket
       key={event.id}
-      name={event.name}
-      image={event.image}
-      cue={event.priceLabel}
-      meta={[dated ? eventDayGroupLabel(event) : null, event.time, event.venue].filter(Boolean).join(' · ')}
-      last={index === all.length - 1}
+      testID="tonight-event"
+      lead={dateLead(event.startsAt) || { kind: 'thumb' }}
+      title={event.name}
+      caption={[event.venue, ...event.date.split('·').slice(1).map(part => part.trim())].filter(Boolean).join(' · ') || event.time}
+      accent={event.priceLabel}
+      photo={{ uri: event.image, glyph: 'ticket', label: `No photo for ${event.name}` }}
+      width="full"
       onPress={() => router.push(`/event/${event.id}`)}
+      accessibilityLabel={[event.name, eventDayGroupLabel(event), event.time, event.venue, event.priceLabel].filter(Boolean).join('. ')}
     />
   );
 
   const shown = tonight.length ? tonight : later;
-  const dated = tonight.length === 0;
 
   return (
     <SeeAllScreen
@@ -65,9 +71,7 @@ export default function TonightScreen() {
       glyph="ticket"
       facts={facts}>
       {shown.length ? (
-        <RaisedView className="overflow-hidden rounded-card">
-          {shown.map((event, index) => row(event, index, shown, dated))}
-        </RaisedView>
+        <StubStack testID="tonight-events">{shown.map(row)}</StubStack>
       ) : (
         <EmptyState
           title="Nothing dated is on right now"

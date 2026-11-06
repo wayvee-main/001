@@ -18,6 +18,7 @@ import { streetAddress, ticketLink } from '@/lib/links';
 import { useControlSurface, useRaisedSurface } from '@/lib/shadows';
 import { useScoper } from '@/lib/store';
 import { useThemeColors } from '@/lib/theme';
+import { StubPoster, StubRail, StubTicket } from '@/components/stub-cards';
 import { headingStyle } from '@/lib/typography';
 
 function useJournalLink() {
@@ -194,7 +195,9 @@ export function EventJournal({event}: {event:ScoperEvent}) {
   return <View testID="event-journal" style={{gap:20}}>
     {artists.length>0?<View style={{gap:11}}>
       <JournalHeading title="On the bill" action="Explore" onAction={()=>open(event.sourceUrl)} />
-      <View style={{flexDirection:'row',gap:10,flexWrap:'wrap'}}>{artists.map(person=><ArtistCard key={person.name} artist={person} onPress={()=>setArtist(person)} />)}</View>
+      <StubRail testID="journal-artists">{artists.map(person=><StubPoster key={person.name} testID="journal-artist" width={172} title={shortCardTitle(person.name)} caption={person.description?.split('. ')[0]}
+        pills={[{text:person.role||'On the bill',glyph:'music'}]} photo={{uri:person.image,glyph:'music',label:`No artist photo for ${person.name}`}}
+        onPress={()=>setArtist(person)} accessibilityLabel={[person.name,person.role].filter(Boolean).join('. ')} />)}</StubRail>
     </View>:null}
     <RaisedTouchable testID="journal-tickets" accessibilityRole="link" accessibilityLabel={hasTickets?'Official tickets':'Official event listing'} onPress={()=>open(url)} activeOpacity={.76}
       style={{backgroundColor:colors['home-tile'],padding:13,borderRadius:13,flexDirection:'row',alignItems:'center',gap:11}}>
@@ -206,14 +209,8 @@ export function EventJournal({event}: {event:ScoperEvent}) {
     {details.upgrade?<JournalSpecialCard special={details.upgrade} glyph="seat" />:null}
     <View style={{gap:11}}>
       <JournalHeading title="The room" action="Venue details" onAction={venueAction} />
-      <RaisedTouchable testID="journal-venue" accessibilityRole="button" accessibilityLabel={`Explore ${event.venue}`} onPress={venueAction} activeOpacity={.76}
-        style={{backgroundColor:colors['home-tile'],padding:7,borderRadius:13,flexDirection:'row',alignItems:'center',gap:12}}>
-        <Photo uri={venueImage} radius={8} stripedPlaceholder={false} fallbackGlyph="landmark" fallbackLabel={`No venue photo for ${event.venue}`} style={{width:86,height:91}} />
-        <View style={{flex:1,minWidth:0,gap:5,paddingVertical:4,paddingRight:4}}><Text numberOfLines={2} className="font-fraunces text-ink" style={{fontSize:18,lineHeight:23}}>{event.venue}</Text>
-          {event.addr?<Text numberOfLines={2} className="font-dm text-fine text-taupe" style={{lineHeight:17}}>{streetAddress(event.addr)}</Text>:null}
-          <Text className="font-dm text-fine text-peach">Get to know the venue →</Text>
-        </View>
-      </RaisedTouchable>
+      <StubTicket testID="journal-venue" lead={{kind:'thumb'}} title={event.venue} caption={event.addr?streetAddress(event.addr):undefined} accent="Get to know the venue"
+        photo={{uri:venueImage,glyph:'landmark',label:`No venue photo for ${event.venue}`}} width="full" onPress={venueAction} accessibilityLabel={`Explore ${event.venue}`} />
     </View>
     <DetailGoods content={event.detailContent} />
     <View style={{gap:5}}><JournalHeading title="Make an evening of it" />
@@ -228,17 +225,6 @@ export function EventJournal({event}: {event:ScoperEvent}) {
       </>:null}
     </JournalSheet>
   </View>;
-}
-
-function ArtistCard({artist,onPress}: {artist:JournalArtist;onPress:()=>void}) {
-  const colors=useThemeColors();
-  return <RaisedTouchable testID="journal-artist" accessibilityRole="button" accessibilityLabel={[artist.name,artist.role].filter(Boolean).join('. ')} onPress={onPress} activeOpacity={.76}
-    style={{flexGrow:1,flexBasis:'45%',minWidth:0,borderRadius:13,padding:6,backgroundColor:colors['home-tile']}}>
-    <Photo uri={artist.image} radius={8} stripedPlaceholder={false} fallbackGlyph="music" fallbackLabel={`No artist photo for ${artist.name}`} style={{width:'100%',height:104}} />
-    <View style={{paddingHorizontal:3,paddingTop:8,paddingBottom:4,gap:6}}><Text numberOfLines={2} className="font-fraunces text-ink" style={{fontSize:17,lineHeight:21,minHeight:21}}>{shortCardTitle(artist.name)}</Text>
-      <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:5}}><MetadataPill text={artist.role||'On the bill'} /><Glyph name="arrow" size={12} color={colors['surface-accent']} /></View>
-    </View>
-  </RaisedTouchable>;
 }
 
 function EventPlanRow({label,glyph,onPress}: {label:string;glyph:string;onPress:()=>void}) {
