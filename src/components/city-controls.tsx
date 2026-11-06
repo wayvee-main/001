@@ -25,12 +25,12 @@ export function CitySearchBar({city,testID,labelTestID,inputTestID,inputLabel,pl
   if((variant==='aurora'||variant==='citydesk')&&onPress){
     const desk=variant==='citydesk';
     const daypart=currentDaypart(now),area=`Anywhere in ${city} · ${daypart==='evening'||daypart==='lateNight'?'Tonight':'Today'}`;
-    return <TouchableOpacity testID={testID} accessibilityRole="button" accessibilityLabel={`${inputLabel || label}. ${area}. Filters on the next screen`} onPress={onPress} activeOpacity={.78}
+    return <TouchableOpacity testID={testID} accessibilityRole="button" accessibilityLabel={desk ? `${inputLabel || label}. Filters on the next screen` : `${inputLabel || label}. ${area}. Filters on the next screen`} onPress={onPress} activeOpacity={.78}
       style={[card,{height:AURORA_SEARCH_HEIGHT,width:'100%',borderRadius:desk?17:999,flexDirection:'row',alignItems:'center',gap:desk?10:14,paddingLeft:desk?16:22,paddingRight:10}]}>
       <Glyph name="search" size={desk?19:21} color={colors.fg} strokeWidth={1.8} />
       <View style={{flex:1,minWidth:0}}>
         <Text testID={labelTestID} numberOfLines={1} className="font-dm-medium text-ink" style={{fontSize:desk?15:16,lineHeight:21}}>{value || label}</Text>
-        <Text testID={`${testID}-area`} numberOfLines={1} className="font-dm" style={{fontSize:desk?11:13,lineHeight:18,color:colors['fg-muted']}}>{area}</Text>
+        {!desk ? <Text testID={`${testID}-area`} numberOfLines={1} className="font-dm" style={{fontSize:13,lineHeight:18,color:colors['fg-muted']}}>{area}</Text> : null}
       </View>
       <View testID={`${testID}-filters`} style={{width:desk?36:44,height:desk?36:44,borderRadius:22,borderWidth:desk?0:1,borderColor:colors['control-edge'],backgroundColor:desk?colors['surface-sunk']:undefined,alignItems:'center',justifyContent:'center'}}>
         <Glyph name="filter" size={desk?16:19} color={colors.fg} strokeWidth={1.8} />

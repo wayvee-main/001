@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Text, View } from 'react-native';
 import { CitySearchBar } from '@/components/city-controls';
 import { AuroraEntryRow, AuroraLinkRow, AuroraList, SectionRule } from '@/components/aurora';
-import { CityDeskHomeIntro, CityDeskPoster, CityDeskPosterGrid, CityDeskSection, CityDeskTicket } from '@/components/city-desk';
+import { CityDeskHomeIntro, CityDeskPoster, CityDeskPosterGrid, CityDeskSection, CityDeskTicket, CityDeskWeather } from '@/components/city-desk';
 import { DaybreakPeriodPicker, type DaybreakPeriod } from '@/components/daybreak';
 import { QuietHomeOffers, QuietHomeVee } from '@/components/quiet-home';
 import { Screen, ScreenScroll } from '@/components/layout';
@@ -39,8 +39,8 @@ export default function HomeScreen() {
     finally { setRefreshing(false); }
   };
   return <Screen><ScreenScroll gap={18} clearsTabBar refreshing={refreshing} onRefresh={onRefresh}>
-    <LocalPerksHeader appearance="citydesk" />
-    <CityDeskHomeIntro city={displayCity} now={now} />
+    <LocalPerksHeader appearance="citydesk" location={false} subline={<CityDeskWeather city={displayCity} />} />
+    <CityDeskHomeIntro now={now} />
     <CitySearchBar variant="citydesk" testID="home-search" labelTestID="home-search-label" city={displayCity} onPress={() => router.push('/search')} />
     <LocalCategoryShelf appearance="citydesk" catalog={catalog} />
     <HomeTimelyRecommendations compact catalog={catalog} now={now} />

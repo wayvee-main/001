@@ -11,6 +11,7 @@ import { StubTicket } from '@/components/stub-cards';
 import { useAurora } from '@/lib/aurora';
 import { compactCardText, shortCardTitle } from '@/lib/card-presentation';
 import { homeCardMetadata } from '@/lib/card-metadata';
+import { currentDaypart } from '@/lib/daypart';
 import type { DiscoverCategory, DiscoverFamily } from '@/lib/discover-categories';
 import { homeGuideHref, type HomeGuideCatalog, type HomeGuideEntry } from '@/lib/home-guide';
 import { homeIndexPhotos } from '@/lib/home-index-photos';
@@ -28,19 +29,31 @@ export function CityDeskHeadline({ children, accent }: { children: ReactNode; ac
   </Text>;
 }
 
-export function CityDeskHomeIntro({ city, now }: { city: string; now: Date }) {
+export function CityDeskWeather({ city }: { city: string }) {
   const colors = useThemeColors(), weather = useWeatherNow();
-  const date = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'America/Los_Angeles' });
-  return <View testID="daybreak-intro" style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 12 }}>
-    <View style={{ flex: 1, minWidth: 0, gap: 7 }}>
-      <Text className="font-dm-medium" style={{ fontSize: 11, lineHeight: 15, letterSpacing: 1.2, textTransform: 'uppercase', color: colors['fg-muted'] }}>{date}</Text>
-      <CityDeskHeadline accent="on hand.">{city},</CityDeskHeadline>
-    </View>
-    {weather ? <View testID="home-weather" accessible accessibilityLabel={`${city} weather. ${weatherLine(weather)}`} style={{ maxWidth: '44%', flexDirection: 'row', alignItems: 'center', gap: 5, paddingBottom: 3 }}>
-      <Glyph name="cloud" size={15} color={colors['fg-muted']} />
-      <Text numberOfLines={2} className="font-dm" style={{ flexShrink: 1, fontSize: 12, lineHeight: 17, color: colors['fg-muted'] }}>{weatherLine(weather)}</Text>
-    </View> : null}
+  const summary = weather ? weatherLine(weather) : 'Weather unavailable';
+  return <View testID="home-weather" accessible accessibilityLabel={`${city} weather. ${summary}`} style={{ minHeight: 28, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+    <Glyph name="cloud" size={15} color={colors['fg-muted']} />
+    <Text numberOfLines={1} className="font-dm" style={{ flexShrink: 1, fontSize: 12, lineHeight: 17, color: colors['fg-muted'] }}>{summary}</Text>
   </View>;
+}
+
+export function cityDeskHomeHeadline(now: Date): [string, string] {
+  switch (currentDaypart(now)) {
+    case 'morning': return ['Coffee looks ', 'promising.'];
+    case 'midday': return ['Lunch has ', 'plans.'];
+    case 'afternoon': return ['A little ', 'detour?'];
+    case 'evening': return ['Make tonight ', 'yours.'];
+    case 'lateNight': return ['One more ', 'stop?'];
+  }
+}
+
+export function CityDeskHomeIntro({ now }: { now: Date }) {
+  const [lead, accent] = cityDeskHomeHeadline(now);
+  return <Text testID="daybreak-intro" accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={.8}
+    className="font-dm-bold text-ink" style={{ fontSize: 28, lineHeight: 36, letterSpacing: -.8 }}>
+    {lead}<Text style={headingStyle(28)}><GradientText text={accent} /></Text>
+  </Text>;
 }
 
 export function CityDeskSection({ title, action = 'See all', onMore, children, testID }: { title: string; action?: string; onMore?: () => void; children: ReactNode; testID?: string }) {

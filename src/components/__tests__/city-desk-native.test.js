@@ -3,7 +3,8 @@ import React from 'react';
 import renderer, { act } from 'react-test-renderer';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { cssInterop } from 'react-native-css-interop';
-import { CityDeskFamilyTabs, CityDeskFeature, CityDeskTicket } from '@/components/city-desk';
+import { CityDeskFamilyTabs, CityDeskFeature, CityDeskTicket, CityDeskWeather, cityDeskHomeHeadline } from '@/components/city-desk';
+import { CitySearchBar } from '@/components/city-controls';
 import { StubTicket } from '@/components/stub-cards';
 
 const mockPush = jest.fn(), mockSave = jest.fn(), mockAdd = jest.fn();
@@ -28,6 +29,24 @@ const control = (tree, id) => tree.root.findAll(node => node.props.testID === id
 afterEach(() => { act(() => trees.forEach(tree => tree.unmount())); trees = []; jest.clearAllMocks(); });
 
 describe('City Desk on Android', () => {
+  it('uses a short, different single-line greeting for each part of the day', () => {
+    const hours = [8, 12, 15, 19, 23];
+    const headlines = hours.map(hour => cityDeskHomeHeadline(new Date(2026, 10, 6, hour)).join(''));
+    expect(new Set(headlines).size).toBe(5);
+    expect(headlines.every(headline => headline.length < 27 && !headline.includes('\n'))).toBe(true);
+  });
+
+  it('keeps the City Desk search label local without a redundant day or area line', () => {
+    const tree = mount(<CitySearchBar variant="citydesk" testID="home-search" city="Oakland" onPress={jest.fn()} />);
+    expect(tree.root.findAllByProps({ testID: 'home-search-area' })).toHaveLength(0);
+    expect(tree.root.findAll(node => node.props.accessibilityLabel?.includes('Search Oakland'))).not.toHaveLength(0);
+  });
+
+  it('shows an honest weather status beneath the home logo while the forecast is unavailable', () => {
+    const tree = mount(<CityDeskWeather city="Oakland" />);
+    expect(tree.root.findByProps({ testID: 'home-weather' }).props.accessibilityLabel).toBe('Oakland weather. Weather unavailable');
+  });
+
   it('keeps chapter tabs operable and exposes the selected family through native interop', () => {
     const onSelect = jest.fn();
     const families = [{ id: 'eat', title: 'Eat' }, { id: 'go-out', title: 'Go out' }];

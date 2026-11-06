@@ -43,7 +43,7 @@ export function PerksRoundButton({ glyph, label, onPress, children, selected = f
   </Pressable>;
 }
 
-export function LocalPerksHeader({ title, assistant = false, location = true, appearance }: { title?: string; profile?: boolean; assistant?: boolean; location?: boolean; appearance?: 'citydesk' }) {
+export function LocalPerksHeader({ title, assistant = false, location = true, appearance, subline }: { title?: string; profile?: boolean; assistant?: boolean; location?: boolean; appearance?: 'citydesk'; subline?: ReactNode }) {
   const router = useRouter(), colors = useThemeColors(), activeCity = useActiveCityName(), glass = useGlass();
   const { colorScheme } = useColorScheme();
   const device = useScoper(s => s.deviceLocation), city = isRegionalPoint(device) ? device.label?.split(',')[0]?.trim() || activeCity : activeCity;
@@ -68,11 +68,11 @@ export function LocalPerksHeader({ title, assistant = false, location = true, ap
         <PerksRoundButton glass glyph={colorScheme === 'dark' ? 'sun' : 'moon'} label={`Switch to ${colorScheme === 'dark' ? 'light' : 'dark'} theme`} onPress={() => void saveAppearance(colorScheme === 'dark' ? 'light' : 'dark')} />
       </View>
     </View>
-    {!assistant && location ? <Pressable testID={title ? 'discover-city' : 'home-city'} accessibilityRole="button" accessibilityLabel={`Your starting point. ${city}`} onPress={openStay} hitSlop={6}
+    {subline || (!assistant && location ? <Pressable testID={title ? 'discover-city' : 'home-city'} accessibilityRole="button" accessibilityLabel={`Your starting point. ${city}`} onPress={openStay} hitSlop={6}
       style={({ pressed }) => ({ ...(desk ? undefined : glass), alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 5, minHeight: desk ? 28 : 34, paddingLeft: desk ? 0 : 10, paddingRight: 12, borderRadius: 17, opacity: pressed ? .72 : 1 })}>
       {!desk ? <Glyph name="pin" size={15} color={colors['fg-muted']} /> : null}<Text numberOfLines={1} className="font-dm text-taupe" style={{ flexShrink: 1, fontSize: desk ? 12 : 14, lineHeight: 19 }}>{city}</Text>
       <View style={{ transform: [{ rotate: '90deg' }] }}><Glyph name="chevron" size={13} color={colors['fg-muted']} /></View>
-    </Pressable> : null}
+    </Pressable> : null)}
   </View>;
 }
 

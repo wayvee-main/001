@@ -13,14 +13,16 @@ headings with one Fraunces italic gradient phrase, 22px Fraunces section
 headings, and quieter controls. Palette values remain in `src/lib/tokens.ts`.
 Shared City Desk compositions live in `src/components/city-desk.tsx`.
 
-- **Header:** 24–25px wordmark/page name, plain city underneath, local offers
-  and appearance controls at the right. The Home mark's existing Easter egg
-  remains. Vee has only the appearance control in its top row.
+- **Header:** 24–25px wordmark/page name, local offers and appearance controls
+  at the right. Home shows live weather beneath the wordmark, or an unavailable
+  status until a current forecast arrives;
+  Discover and You keep the plain city underneath. The Home mark's existing
+  Easter egg remains. Vee has only the appearance control in its top row.
 - **Search:** Home and Discover share `CitySearchBar variant="citydesk"`:
-  64px, 17px corners, two lines, an inset filter well. Both open the real Search
+  64px, 17px corners, a single location-specific label and an inset filter well. Both open the real Search
   screen. Existing secondary search inputs keep their current behavior.
-- **Home:** current Pacific date, the guest's city with “on hand.”, actual
-  weather when available; search; four compact glyph/category pills; Fresh
+- **Home:** one short, time-of-day headline on a single line, actual weather
+  when available under the wordmark; search; four compact glyph/category pills; Fresh
   source-backed recommendations. A ruled “Your next stop” section has the
   By day / After hours control, up to two full-width tickets, then the slim
   Local perks ribbon. For you and For later use compact calm lists.
