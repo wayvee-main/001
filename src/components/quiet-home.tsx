@@ -22,22 +22,24 @@ export function QuietHomeHeading({ title, meta, onMore }: { title: string; meta?
   </View>;
 }
 
-export function QuietHomeOffers() {
+export function QuietHomeOffers({ appearance }: { appearance?: 'citydesk' } = {}) {
   const colors = useThemeColors(), router = useRouter();
   return <Pressable testID="quiet-home-offers" accessibilityRole="button" accessibilityLabel="Local perks. View offers near you" onPress={() => router.push('/offers')}
-    style={({ pressed }) => ({ minHeight: 44, paddingHorizontal: 12, paddingVertical: 11, borderRadius: 13, overflow: 'hidden', flexDirection: 'row', alignItems: 'center', gap: 9, opacity: pressed ? .8 : 1 })}>
-    <GradientFill radius={13} soft />
+    style={({ pressed }) => ({ minHeight: 44, paddingHorizontal: 12, paddingVertical: 11, borderRadius: appearance ? 11 : 13, overflow: 'hidden', flexDirection: 'row', alignItems: 'center', gap: 9,
+      ...(appearance ? { backgroundColor: colors['surface-ribbon'], borderWidth: 1, borderColor: colors['edge-card'] } : null), opacity: pressed ? .8 : 1 })}>
+    {!appearance ? <GradientFill radius={13} soft /> : null}
     <Glyph name="tag" size={16} color={colors['fg-accent']} />
     <Text className="font-dm text-ink" style={{ flex: 1, fontSize: 12, lineHeight: 18 }}>Local perks · offers near you</Text>
     <Glyph name="chevron" size={13} color={colors['fg-muted']} />
   </Pressable>;
 }
 
-export function QuietHomeVee() {
+export function QuietHomeVee({ appearance }: { appearance?: 'citydesk' } = {}) {
   const colors = useThemeColors(), router = useRouter();
   return <Pressable testID="home-evening-ribbon" accessibilityRole="button" accessibilityLabel="Still deciding? Let Vee connect the dots. Plan your evening" onPress={() => router.push('/create')}
-    style={({ pressed }) => ({ minHeight: 44, paddingHorizontal: 12, paddingVertical: 11, borderRadius: 13, overflow: 'hidden', flexDirection: 'row', alignItems: 'center', gap: 9, opacity: pressed ? .8 : 1 })}>
-    <GradientFill radius={13} soft />
+    style={({ pressed }) => ({ minHeight: 44, paddingHorizontal: 12, paddingVertical: 11, borderRadius: appearance ? 11 : 13, overflow: 'hidden', flexDirection: 'row', alignItems: 'center', gap: 9,
+      ...(appearance ? { backgroundColor: colors['surface-ribbon'], borderWidth: 1, borderColor: colors['edge-card'] } : null), opacity: pressed ? .8 : 1 })}>
+    {!appearance ? <GradientFill radius={13} soft /> : null}
     <VeeMark size={20} />
     <Text className="font-dm text-ink" style={{ flex: 1, fontSize: 12, lineHeight: 18 }}>Still deciding? Let Vee connect the dots.</Text>
     <Glyph name="chevron" size={13} color={colors['fg-muted']} />

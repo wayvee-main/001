@@ -1,10 +1,55 @@
 # Wayvee design system
 
-The approved **Aurora** system is the current UI contract, refined by the
-**Mist / Stub cards** round below, which takes precedence wherever the older
-sections differ. Earlier iteration notes, including Daybreak, are historical.
+The approved **City Desk** main screens are the current UI contract, using
+the existing **Mist / Nightfall** palette and stub-card language. This section
+takes precedence over earlier Aurora, Mist and Daybreak layout notes.
 Wayvee covers San Francisco and the whole Bay, not one city: copy says "the Bay"
 unless it names the guest's own city.
+
+## Current approval — City Desk main screens
+
+Home, Discover, Vee and You use an opaque Mist/Nightfall ground, Outfit page
+headings with one Fraunces italic gradient phrase, 22px Fraunces section
+headings, and quieter controls. Palette values remain in `src/lib/tokens.ts`.
+Shared City Desk compositions live in `src/components/city-desk.tsx`.
+
+- **Header:** 24–25px wordmark/page name, plain city underneath, local offers
+  and appearance controls at the right. The Home mark's existing Easter egg
+  remains. Vee has only the appearance control in its top row.
+- **Search:** Home and Discover share `CitySearchBar variant="citydesk"`:
+  64px, 17px corners, two lines, an inset filter well. Both open the real Search
+  screen. Existing secondary search inputs keep their current behavior.
+- **Home:** current Pacific date, the guest's city with “on hand.”, actual
+  weather when available; search; four compact glyph/category pills; Fresh
+  source-backed recommendations. A ruled “Your next stop” section has the
+  By day / After hours control, up to two full-width tickets, then the slim
+  Local perks ribbon. For you and For later use compact calm lists.
+  Collections use two equal-width inset-photo posters per row (up to four,
+  with See all for the complete set). The Vee ribbon closes the feed.
+- **Discover:** “Find your next good thing.”, search, then Eat / Go out /
+  Drink / Wander chapter tabs. Show only non-empty chapters; the active
+  chapter falls back to an available one when the catalog changes. A compact
+  inset-photo feature and calm rows lead each ordinary chapter. Go out keeps
+  real dated shows and published weekly series in full-width tickets, plus
+  Rooms worth knowing. Deals follow the selected chapter; the two-column
+  glyph browse index and All categories remain available below.
+- **Vee:** small spinning mark beside the left-aligned “An evening, figured
+  out.”, an opaque rounded composer with a 132px field, and its existing
+  Details and Send actions inside. Start from a shape is expanded initially,
+  with open rows, tinted glyph wells, concise computed facts and chevrons.
+  The actual planner, live matches, refinement and failure states are retained.
+- **You:** “All yours. All in one place.”, compact identity and a separate
+  guest sign-in row. Saved places, evening, offers, stay, taste and plans are
+  short ledger rows; preferences keep their real values and existing actions.
+- **Navigation:** anchored, opaque full-width bar, a faint top rule and
+  rounded 10px active tint, with `pill-ink` labels. No active-tab gradient.
+  The existing evening tray and safe-area clearance remain.
+
+Dates, menus, distances, images, offers and account state come from the existing
+catalog and stores. Mockup fixture names, dates and weather must never replace
+live data. Missing photos keep the established own-venue candidate/fallback
+pipeline. Full source records and accessible labels remain available while
+visible card titles/descriptions use the existing universal limits.
 
 ## Current approval — Mist, stub cards and the Bay onboarding
 

@@ -183,8 +183,9 @@ describe.each(['light', 'dark'])('Local Perks native layout in %s', theme => {
     const items = ['index', 'discover', 'create', 'profile'].map(key => ({ key, label: key, glyph: 'home', selected: key === 'index', onPress: () => {} }));
     const tree = mount(<EditorialNav items={items} />), tabs = nodes(tree).filter(node => node.props.accessibilityRole === 'tab');
     expect(tabs).toHaveLength(4);
-    tabs.forEach(tab => expect(StyleSheet.flatten(tab.props.style)).toMatchObject({ flex: 1, minHeight: 50, alignItems: 'center', borderRadius: 999 }));
-    expect(nodes(tree).filter(node => node.props.testID === 'nav-active-fill')).toHaveLength(1);
+    tabs.forEach(tab => expect(StyleSheet.flatten(tab.props.style)).toMatchObject({ flex: 1, minHeight: 50, alignItems: 'center', borderRadius: 10 }));
+    expect(StyleSheet.flatten(tabs.find(tab => tab.props.accessibilityState.selected).props.style).backgroundColor).toBe(ROLES['accent-tint'][theme]);
+    expect(tabs.filter(tab => tab.props.accessibilityState.selected)).toHaveLength(1);
   });
   it('keeps the category row touch targets and each separate category destination', () => {
     const tree = mount(<LocalCategoryShelf catalog={empty} />);

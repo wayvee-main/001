@@ -27,10 +27,10 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  useWindowDimensions,
   View,
 } from 'react-native';
-import { GradientFill, GradientText, IconBadge, SectionRule, useAuroraCard, useGlass } from '@/components/aurora';
+import { GradientFill, useAuroraCard } from '@/components/aurora';
+import { CityDeskHeadline } from '@/components/city-desk';
 import { useConstraintPicker } from '@/components/constraint-picker';
 import { Glyph } from '@/components/glyph';
 import { LocalPerksHeader } from '@/components/local-perks';
@@ -245,11 +245,12 @@ function ShapeTile({
       accessibilityLabel={`Use ${title}. ${route}${startsAt ? `. Starts at ${startsAt}` : ''}. ${stops}`}
       activeOpacity={0.78}
       onPress={() => onPress(title)}
-      style={{ minHeight: 60, borderTopWidth: divider ? 1 : 0, borderTopColor: aurora.glassEdge, flexDirection: 'row', alignItems: 'center' }}>
-      <View className="min-w-0 flex-1 flex-row items-center" style={{ gap: 12, paddingVertical: 11, paddingLeft: 12 }}>
-        <IconBadge glyph={first === 'event' ? 'music' : first === 'dinner' ? 'food' : 'drink'} size={38} iconSize={18} />
+      style={{ minHeight: 72, borderTopWidth: divider ? 1 : 0, borderTopColor: aurora.glassEdge, flexDirection: 'row', alignItems: 'center' }}>
+      <View className="min-w-0 flex-1 flex-row items-center" style={{ gap: 12, paddingVertical: 12 }}>
+        <View style={{ width: 35, height: 35, borderRadius: 11, backgroundColor: colors['accent-tint'], alignItems: 'center', justifyContent: 'center' }}><Glyph name={first === 'event' ? 'music' : first === 'dinner' ? 'food' : 'drink'} size={17} color={colors['pill-ink']} /></View>
         <View className="min-w-0 flex-1">
-          <Text testID="vee-shape-title" numberOfLines={2} className="font-dm-medium text-ink" style={{ fontSize: 15, lineHeight: 20 }}>{label}</Text>
+          <Text testID="vee-shape-title" numberOfLines={1} className="font-dm-medium text-ink" style={{ fontSize: 14, lineHeight: 19 }}>{label}</Text>
+          <Text numberOfLines={1} className="font-dm" style={{ marginTop: 3, fontSize: 12, lineHeight: 17, color: colors['fg-muted'] }}>{[startsAt, stops].filter(Boolean).join(' · ')}</Text>
         </View>
       </View>
       <View testID="vee-shape-chevron" className="items-center justify-center" style={{ width: 44 }}>
@@ -260,7 +261,6 @@ function ShapeTile({
 }
 
 export default function CreateScreen() {
-  const { width: screenWidth } = useWindowDimensions();
   const router = useRouter();
   const params = useLocalSearchParams<{
     q?: string;
@@ -286,7 +286,7 @@ export default function CreateScreen() {
     savedPlaceKeys,
   } = useScoper();
   const colors = useThemeColors();
-  const raisedSurface = useRaisedSurface(1), control = useControlSurface(), glass = useGlass(), auroraCard = useAuroraCard(), aurora = useAurora();
+  const raisedSurface = useRaisedSurface(1), control = useControlSurface(), auroraCard = useAuroraCard('citydesk'), aurora = useAurora();
   const curatedCoords = useCuratedCoords();
   const curatedHours = useCuratedHours();
   const weatherNow = useWeatherNow();
@@ -767,14 +767,14 @@ export default function CreateScreen() {
 
 
   return (
-    <Screen aurora="tall">
+    <Screen>
         <ScreenScroll
           gap={0}
           clearsTabBar
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
           automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}>
-          <LocalPerksHeader assistant />
+          <LocalPerksHeader assistant appearance="citydesk" />
           {/* The plan being refined, kept on the screen you refine it from.
             * Refine used to land here with nothing on it, so a guest described
             * a change to something they could no longer see — and the merge
@@ -827,14 +827,11 @@ export default function CreateScreen() {
             * controls restating defaults made the assumptions look like the
             * point of the screen. */}
           {!showingLiveMatches ? (
-            // With no plan above it, the mark rises level with the appearance
-            // toggle (it sits centred, clear of the toggle). box-none keeps the
-            // overlapping strip from swallowing taps meant for the toggle.
-            <View testID="vee-open-letter" pointerEvents="box-none" style={{marginTop:askPlan?18:-20,alignItems:'center',gap:10}}>
-              <WorkingVee size={68} animate={screenFocused} label="Vee" />
-              <Text accessibilityRole="header" className="font-dm-bold text-ink" style={{fontSize:screenWidth<=360?30:32,lineHeight:screenWidth<=360?35:37,letterSpacing:-1.1,textAlign:'center'}}>
-                {askPlan ? 'What should change?' : <>What’s your kind{'\n'}of <GradientText text="evening?" /></>}
-              </Text>
+            // City Desk keeps the mark beside the question and clear of the
+            // appearance control, including when an existing plan is refined.
+            <View testID="vee-open-letter" style={{marginTop:18,flexDirection:'row',alignItems:'center',gap:12}}>
+              <WorkingVee size={40} animate={screenFocused} label="Vee" />
+              <View style={{flex:1,minWidth:0}}>{askPlan ? <Text accessibilityRole="header" className="font-dm-bold text-ink" style={{fontSize:28,lineHeight:33,letterSpacing:-.8}}>What should change?</Text> : <CityDeskHeadline accent="figured out.">An evening,</CityDeskHeadline>}</View>
             </View>
           ) : null}
 
@@ -842,10 +839,10 @@ export default function CreateScreen() {
             testID="vee-letter-composer"
             style={{
                 opacity: asking ? 0.72 : 1,
-                marginTop: showingLiveMatches ? 20 : 25,
+                marginTop: 20,
               }}>
-            <View testID="vee-composer-box" style={[glass,{
-              borderRadius:26,paddingTop:18,paddingBottom:16,paddingLeft:20,paddingRight:16,
+            <View testID="vee-composer-box" style={[auroraCard,{
+              borderRadius:19,paddingTop:16,paddingBottom:14,paddingLeft:16,paddingRight:14,
             }]}>
             <TextInput
               testID="vee-text-input"
@@ -864,13 +861,13 @@ export default function CreateScreen() {
               returnKeyType="send"
               onSubmitEditing={() => void submitAsk(promptReady ? promptText : askExampleLabel)}
               className="min-w-0 font-dm text-ink"
-              style={{ height:105,fontSize:16,lineHeight:24,padding:0,
+              style={{ height:132,fontSize:16,lineHeight:24,padding:0,
                 backgroundColor:'transparent',borderWidth:0,textAlignVertical:'top',
                 ...(Platform.OS === 'web' ? { outlineWidth:0,caretColor:colors['accent-fill'] } as any : {}) }}
             />
             <View testID="vee-composer-actions" className="flex-row items-center justify-between" style={{marginTop:16}}>
               <TouchableOpacity testID="vee-composer-details" accessibilityRole="button" accessibilityLabel="Add a preference" onPress={() => useScoper.getState().openSheet('addConstraint')} hitSlop={4}
-                style={{minHeight:39,paddingHorizontal:12,paddingVertical:9,backgroundColor:colors['surface-sunk']}} className="flex-row items-center gap-x-1.5 rounded-full">
+                style={{minHeight:40,paddingHorizontal:12,paddingVertical:9,borderWidth:1,borderColor:colors['control-edge']}} className="flex-row items-center gap-x-1.5 rounded-full">
                 <Glyph name="filter" size={14} color={colors['fg-muted']} /><Text className="font-dm text-fine text-taupe">Details</Text>
               </TouchableOpacity>
               <View className="flex-row items-center" style={{gap:9}}>
@@ -981,12 +978,13 @@ export default function CreateScreen() {
           {/* All three solved shapes, not one card and a reroll: they are already
            * computed on every render, and three comparable options read as a
            * choice rather than a verdict. */}
-          <SectionRule spacing={26} />
+          <View style={{height:28}} />
           <View>
             <TouchableOpacity testID="vee-shapes-toggle" accessibilityRole="button" accessibilityLabel="Start from a shape" accessibilityState={{expanded:showShapes}} aria-expanded={showShapes}
               onPress={()=>setShowShapes(value=>!value)} activeOpacity={.78}
-              className="min-h-11 flex-row items-center justify-start">
+              className="min-h-11 flex-row items-center justify-between">
               <Text className="font-dm-medium text-taupe" style={{fontSize:11,lineHeight:16,letterSpacing:1}}>START FROM A SHAPE</Text>
+              <View style={{transform:[{rotate:showShapes?'-90deg':'90deg'}]}}><Glyph name="chevron" size={14} color={colors['fg-muted']} /></View>
             </TouchableOpacity>
             {showShapes?<View className="mt-2">
             {isSolving ? (
@@ -1000,7 +998,7 @@ export default function CreateScreen() {
                   opacity: planMotion,
                   transform: [{ translateY: planMotion.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) }],
                 }}>
-                <View testID="vee-shapes-list" style={[auroraCard,{ borderRadius:22, overflow:'hidden' }]}>
+                <View testID="vee-shapes-list">
                   {readyMadeCards.map((card, index) => (
                     <ShapeTile
                       key={`${card.theme}-${card.solved.restaurant?.id ?? ''}-${card.solved.event?.id ?? ''}`}

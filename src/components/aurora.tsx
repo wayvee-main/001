@@ -15,6 +15,7 @@ import { homeCardMetadata } from '@/lib/card-metadata';
 import { homeGuideHref, type HomeGuideCatalog, type HomeGuideEntry } from '@/lib/home-guide';
 import { homeIndexPhotos } from '@/lib/home-index-photos';
 import { useThemeColors } from '@/lib/theme';
+import { CITY_DESK } from '@/lib/tokens';
 import { useEntryActions } from '@/lib/use-entry-actions';
 
 /* Aurora — the Vee spiral's gold → ember → violet as the light source. Glow,
@@ -66,9 +67,9 @@ export function useGlass(): ViewStyle {
 }
 
 /** Opaque card surface with Aurora's hairline and lift. */
-export function useAuroraCard(): ViewStyle {
+export function useAuroraCard(appearance?: 'citydesk'): ViewStyle {
   const colors = useThemeColors(), aurora = useAurora();
-  return { backgroundColor: colors['surface-raised'], borderWidth: 1, borderColor: aurora.glassEdge, boxShadow: aurora.shadow } as ViewStyle;
+  return { backgroundColor: colors['surface-raised'], borderWidth: 1, borderColor: aurora.glassEdge, boxShadow: appearance ? CITY_DESK[aurora.scheme].shadow : aurora.shadow } as ViewStyle;
 }
 
 /** Gradient-tinted circle around an accent glyph. */
@@ -185,23 +186,23 @@ export function AuroraPoster({ entry, catalog, now, photoHeight = 168, chip, sub
 }
 
 /** Grouped list card; children are AuroraRow elements. */
-export function AuroraList({ children, testID }: { children: ReactNode; testID?: string }) {
-  const card = useAuroraCard();
+export function AuroraList({ children, testID, compact = false }: { children: ReactNode; testID?: string; compact?: boolean }) {
+  const card = useAuroraCard(compact ? 'citydesk' : undefined);
   return <View testID={testID} style={[card, { borderRadius: 22, overflow: 'hidden' }]}>{children}</View>;
 }
 
 /** One row of a grouped list. `divider` draws the hairline above every row but the first. */
-export function AuroraRow({ leading, title, subtitle, metadata, trailing, chevron = true, divider = false, onPress, testID, accessibilityLabel }: {
-  leading?: ReactNode; title: string; subtitle?: string; metadata?: string; trailing?: string; chevron?: boolean; divider?: boolean; onPress: () => void; testID?: string; accessibilityLabel?: string;
+export function AuroraRow({ leading, title, subtitle, metadata, trailing, chevron = true, divider = false, compact = false, onPress, testID, accessibilityLabel }: {
+  leading?: ReactNode; title: string; subtitle?: string; metadata?: string; trailing?: string; chevron?: boolean; divider?: boolean; compact?: boolean; onPress: () => void; testID?: string; accessibilityLabel?: string;
 }) {
   const colors = useThemeColors(), aurora = useAurora();
   return <Pressable testID={testID} accessibilityRole="button" accessibilityLabel={accessibilityLabel || [title, subtitle, trailing].filter(Boolean).join('. ')} onPress={onPress}
-    style={({ pressed }) => ({ minHeight: 64, flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 12, paddingLeft: 12, paddingRight: 16,
+    style={({ pressed }) => ({ minHeight: compact ? 72 : 64, flexDirection: 'row', alignItems: 'center', gap: compact ? 12 : 14, paddingVertical: compact ? 10 : 12, paddingLeft: 12, paddingRight: compact ? 12 : 16,
       borderTopWidth: divider ? 1 : 0, borderTopColor: aurora.glassEdge, opacity: pressed ? 0.72 : 1 })}>
     {leading}
     <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
-      <Text numberOfLines={2} className="font-dm-medium text-ink" style={{ fontSize: 16, lineHeight: 21, letterSpacing: -0.2 }}>{shortCardTitle(title)}</Text>
-      {metadata ? <MetadataLine text={metadata} /> : subtitle ? <Text numberOfLines={1} className="font-dm" style={{ fontSize: 13, lineHeight: 18, color: colors['fg-muted'] }}>{compactCardText(subtitle)}</Text> : null}
+      <Text numberOfLines={compact ? 1 : 2} className="font-dm-medium text-ink" style={{ fontSize: compact ? 14 : 16, lineHeight: compact ? 19 : 21, letterSpacing: -0.2 }}>{shortCardTitle(title)}</Text>
+      {metadata ? <MetadataLine text={metadata} /> : subtitle ? <Text numberOfLines={1} className="font-dm" style={{ fontSize: compact ? 12 : 13, lineHeight: compact ? 17 : 18, color: colors['fg-muted'] }}>{compactCardText(subtitle)}</Text> : null}
     </View>
     {trailing ? <View style={{ maxWidth: '40%' }}><MetadataPill text={trailing} tone="distance" /></View> : null}
     {chevron ? <Glyph name="chevron" size={16} color={colors['fg-muted']} strokeWidth={1.8} /> : null}
@@ -209,12 +210,12 @@ export function AuroraRow({ leading, title, subtitle, metadata, trailing, chevro
 }
 
 /** Calm-list row: a 56px photo, the name, one muted line of facts and a chevron. */
-export function AuroraLinkRow({ title, meta, image, photos, glyph = 'compass', divider, onPress, testID, accessibilityLabel }: {
-  title: string; meta?: string; image?: string; photos?: readonly PhotoCandidate[]; glyph?: string; divider?: boolean; onPress: () => void; testID?: string; accessibilityLabel?: string;
+export function AuroraLinkRow({ title, meta, image, photos, glyph = 'compass', divider, compact, onPress, testID, accessibilityLabel }: {
+  title: string; meta?: string; image?: string; photos?: readonly PhotoCandidate[]; glyph?: string; divider?: boolean; compact?: boolean; onPress: () => void; testID?: string; accessibilityLabel?: string;
 }) {
-  return <AuroraRow testID={testID} divider={divider} title={title} subtitle={meta} onPress={onPress} accessibilityLabel={accessibilityLabel || [title, meta].filter(Boolean).join('. ')}
-    leading={<Photo uri={image} candidates={photos} radius={16} stripedPlaceholder={false} retryable={false} fallbackGlyph={glyph as never}
-      fallbackLabel={`Photo unavailable for ${title}`} style={{ width: 56, height: 56 }} />} />;
+  return <AuroraRow testID={testID} divider={divider} compact={compact} title={title} subtitle={meta} onPress={onPress} accessibilityLabel={accessibilityLabel || [title, meta].filter(Boolean).join('. ')}
+    leading={<Photo uri={image} candidates={photos} radius={compact ? 10 : 16} stripedPlaceholder={false} retryable={false} fallbackGlyph={glyph as never}
+      fallbackLabel={`Photo unavailable for ${title}`} style={{ width: compact ? 46 : 56, height: compact ? 46 : 56 }} />} />;
 }
 
 /** Up to two facts as one quiet line: what it is, then its distance when measured. */
@@ -226,12 +227,12 @@ export function calmMeta(caption: string, distance?: string): string {
 }
 
 /** A listing as a calm-list row. */
-export function AuroraEntryRow({ entry, catalog, now, divider, trailing, testID = 'aurora-entry-row' }: {
-  entry: HomeGuideEntry; catalog: HomeGuideCatalog; now: Date; divider?: boolean; trailing?: string; testID?: string;
+export function AuroraEntryRow({ entry, catalog, now, divider, trailing, compact, testID = 'aurora-entry-row' }: {
+  entry: HomeGuideEntry; catalog: HomeGuideCatalog; now: Date; divider?: boolean; trailing?: string; compact?: boolean; testID?: string;
 }) {
   const router = useRouter(), price = entry.facts.find(fact => fact.glyph === 'wallet')?.value;
   const distance = trailing ?? homeCardMetadata(entry, now).find(item => item.tone === 'distance')?.text ?? price;
   const meta = calmMeta(entry.caption, distance);
-  return <AuroraLinkRow testID={testID} divider={divider} title={entry.name} meta={meta} photos={homeIndexPhotos(entry, catalog)} glyph={entry.glyph}
+  return <AuroraLinkRow testID={testID} divider={divider} compact={compact} title={entry.name} meta={meta} photos={homeIndexPhotos(entry, catalog)} glyph={entry.glyph}
     accessibilityLabel={`Explore ${entry.name}. ${meta}`} onPress={() => router.push(homeGuideHref(entry) as never)} />;
 }

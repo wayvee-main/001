@@ -27,17 +27,18 @@ export function DaybreakIntro({ city }: { city: string }) {
 }
 
 /** By day / After hours as a two-pill toggle: the selected one filled with the Aurora gradient. */
-export function DaybreakPeriodPicker({ value, onChange }: { value: DaybreakPeriod; onChange: (period: DaybreakPeriod) => void }) {
+export function DaybreakPeriodPicker({ value, onChange, appearance }: { value: DaybreakPeriod; onChange: (period: DaybreakPeriod) => void; appearance?: 'citydesk' }) {
   const colors = useThemeColors(), aurora = useAurora();
-  return <View testID="daybreak-periods" accessibilityRole="tablist" style={{ flexDirection: 'row', gap: 8 }}>
+  const desk = appearance === 'citydesk';
+  return <View testID="daybreak-periods" accessibilityRole="tablist" style={{ flexDirection: 'row', gap: desk ? 4 : 8, alignSelf: 'flex-start', ...(desk ? { padding: 3, backgroundColor: colors['surface-sunk'], borderRadius: 999 } : null) }}>
     {([{ key: 'day', label: 'By day', glyph: 'sun' }, { key: 'evening', label: 'After hours', glyph: 'moon' }] as const).map(item => {
       const selected = item.key === value;
       return <Pressable key={item.key} testID={`daybreak-period-${item.key}`} accessibilityRole="tab" accessibilityState={{ selected }} aria-selected={selected} onPress={() => onChange(item.key)} hitSlop={{ top: 4, bottom: 4 }}
         style={({ pressed }) => ({ minHeight: 40, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 15, borderRadius: 999,
-          overflow: 'hidden', borderWidth: selected ? 0 : 1, borderColor: aurora.glassEdge, backgroundColor: selected ? undefined : colors['surface-raised'], opacity: pressed ? .7 : 1 })}>
-        {selected ? <GradientFill /> : null}
-        <View><Glyph name={item.glyph} size={16} color={selected ? aurora.onFill : colors['fg-muted']} strokeWidth={1.7} /></View>
-        <Text className="font-dm-medium" style={{ fontSize: 14, lineHeight: 19, color: selected ? aurora.onFill : colors['fg-muted'] }}>{item.label}</Text>
+          overflow: 'hidden', borderWidth: desk || selected ? 0 : 1, borderColor: aurora.glassEdge, backgroundColor: desk ? selected ? colors['surface-raised'] : 'transparent' : selected ? undefined : colors['surface-raised'], opacity: pressed ? .7 : 1 })}>
+        {selected && !desk ? <GradientFill /> : null}
+        <View><Glyph name={item.glyph} size={desk ? 14 : 16} color={desk ? selected ? colors.fg : colors['fg-muted'] : selected ? aurora.onFill : colors['fg-muted']} strokeWidth={1.7} /></View>
+        <Text className="font-dm-medium" style={{ fontSize: desk ? 12 : 14, lineHeight: 19, color: desk ? selected ? colors.fg : colors['fg-muted'] : selected ? aurora.onFill : colors['fg-muted'] }}>{item.label}</Text>
       </Pressable>;
     })}
   </View>;

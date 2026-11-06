@@ -139,6 +139,12 @@ export const AURORA: Record<'light' | 'dark', {
     navigation: 'rgba(32, 26, 35, 0.95)', shadow: '0 18px 36px -20px rgba(0, 0, 0, 0.92)',
   },
 };
+/** City Desk's smaller lift; legacy/detail surfaces keep the Aurora shadow. */
+export const CITY_DESK = {
+  light: { shadow: '0 4px 16px rgba(46, 42, 94, 0.045)' },
+  dark: { shadow: '0 4px 16px rgba(0, 0, 0, 0.16)' },
+} as const;
+
 /** Photo scrim under overlay text and the avatar ring, identical in both themes. */
 export const AURORA_FIXED = {
   scrim: ['rgba(14, 8, 16, 0.10)', 'rgba(14, 8, 16, 0)', 'rgba(14, 8, 16, 0.88)'] as const,

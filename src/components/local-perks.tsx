@@ -43,7 +43,7 @@ export function PerksRoundButton({ glyph, label, onPress, children, selected = f
   </Pressable>;
 }
 
-export function LocalPerksHeader({ title, assistant = false, location = true }: { title?: string; profile?: boolean; assistant?: boolean; location?: boolean }) {
+export function LocalPerksHeader({ title, assistant = false, location = true, appearance }: { title?: string; profile?: boolean; assistant?: boolean; location?: boolean; appearance?: 'citydesk' }) {
   const router = useRouter(), colors = useThemeColors(), activeCity = useActiveCityName(), glass = useGlass();
   const { colorScheme } = useColorScheme();
   const device = useScoper(s => s.deviceLocation), city = isRegionalPoint(device) ? device.label?.split(',')[0]?.trim() || activeCity : activeCity;
@@ -54,13 +54,14 @@ export function LocalPerksHeader({ title, assistant = false, location = true }: 
     if (now - lastTap.current < 1200) { lastTap.current = 0; openEgg(); }
     else { lastTap.current = now; showToast('Vee noticed. One more little tap?'); }
   };
-  return <View testID={assistant ? 'vee-header' : title ? 'discover-header' : 'home-header'} style={{ paddingTop: 6, gap: 10 }}>
+  const desk = appearance === 'citydesk';
+  return <View testID={assistant ? 'vee-header' : title ? 'discover-header' : 'home-header'} style={{ paddingTop: 6, gap: desk ? 1 : 10 }}>
     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, minHeight: 44 }}>
       <View style={{ flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
         {!assistant && !title ? <Pressable testID="perks-vee-egg" accessibilityRole="button" accessibilityLabel="Vee. Tap twice for a little extra." onPress={tapVee} hitSlop={5}
           style={{ width: 34, height: 38, marginLeft: -4, alignItems: 'center', justifyContent: 'center' }}><VeeMark size={30} /></Pressable> : null}
         {!assistant ? <Text testID={title ? 'discover-title' : undefined} accessibilityRole="header" numberOfLines={1} className="font-dm-bold text-ink"
-          style={title ? { fontSize: 32, lineHeight: 38, letterSpacing: -1.1 } : { fontSize: 24, lineHeight: 30, letterSpacing: -.6 }}>{title || 'Wayvee'}</Text> : null}
+          style={title ? { fontSize: desk ? 25 : 32, lineHeight: desk ? 31 : 38, letterSpacing: -.7 } : { fontSize: 24, lineHeight: 30, letterSpacing: -.6 }}>{title || 'Wayvee'}</Text> : null}
       </View>
       <View style={{ flexDirection: 'row', gap: 8 }}>
         {!assistant ? <PerksRoundButton glass glyph="ticket" label="Local offers" onPress={() => router.push('/offers')} /> : null}
@@ -68,8 +69,8 @@ export function LocalPerksHeader({ title, assistant = false, location = true }: 
       </View>
     </View>
     {!assistant && location ? <Pressable testID={title ? 'discover-city' : 'home-city'} accessibilityRole="button" accessibilityLabel={`Your starting point. ${city}`} onPress={openStay} hitSlop={6}
-      style={({ pressed }) => ({ alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 5, minHeight: 34, paddingLeft: 10, paddingRight: 12, borderRadius: 17, opacity: pressed ? .72 : 1, ...glass })}>
-      <Glyph name="pin" size={15} color={colors['fg-muted']} /><Text numberOfLines={1} className="font-dm text-taupe" style={{ flexShrink: 1, fontSize: 14, lineHeight: 19 }}>{city}</Text>
+      style={({ pressed }) => ({ ...(desk ? undefined : glass), alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 5, minHeight: desk ? 28 : 34, paddingLeft: desk ? 0 : 10, paddingRight: 12, borderRadius: 17, opacity: pressed ? .72 : 1 })}>
+      {!desk ? <Glyph name="pin" size={15} color={colors['fg-muted']} /> : null}<Text numberOfLines={1} className="font-dm text-taupe" style={{ flexShrink: 1, fontSize: desk ? 12 : 14, lineHeight: 19 }}>{city}</Text>
       <View style={{ transform: [{ rotate: '90deg' }] }}><Glyph name="chevron" size={13} color={colors['fg-muted']} /></View>
     </Pressable> : null}
   </View>;
@@ -85,19 +86,21 @@ export function PerksPhoto({ entry, catalog, photos: provided, radius = 12, heig
 
 /** The four categories as a quiet row: outline glyph over label, no container. A
  * selected Discover filter takes the accent with a short gradient underline. */
-export function LocalCategoryShelf({ catalog, active, onSelect, tone = 'home' }: { catalog: HomeGuideCatalog; active?: HomeGuideCategory; onSelect?: (category: HomeGuideCategory) => void; tone?: 'home' | 'browse' }) {
+export function LocalCategoryShelf({ catalog, active, onSelect, tone = 'home', appearance }: { catalog: HomeGuideCatalog; active?: HomeGuideCategory; onSelect?: (category: HomeGuideCategory) => void; tone?: 'home' | 'browse'; appearance?: 'citydesk' }) {
   const router = useRouter(), colors = useThemeColors(), aurora = useAurora();
-  return <View testID="home-category-shelf" style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+  const desk = appearance === 'citydesk';
+  return <View testID="home-category-shelf" style={{ flexDirection: 'row', justifyContent: 'space-between', gap: desk ? 7 : 0 }}>
     {(['eat', 'bars', 'routes', 'events'] as const).map(category => {
       const pool = catalog.categories[category], selected = active === category;
       return <Pressable key={category} testID={`${tone === 'browse' ? 'discover-chip' : 'home-category'}-${category}`} accessibilityRole="button" accessibilityLabel={`${HOME_LEDGERS[category].title}. ${pool.length} local options`}
         accessibilityState={{ selected }} onPress={() => onSelect ? onSelect(category) : router.push(HOME_LEDGERS[category].href)}
-        style={({ pressed }) => ({ flex: 1, minWidth: 0, minHeight: 64, alignItems: 'center', gap: 8, paddingVertical: 4, opacity: pressed ? .6 : 1 })}>
-        <View style={{ width: 65, height: 65, borderRadius: 22, overflow: 'hidden', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: selected ? colors['fg-accent'] : aurora.glassEdge }}>
-          <GradientFill radius={22} soft />
-          <View><Glyph name={{ eat: 'food', bars: 'drink', routes: 'route', events: 'ticket' }[category]} size={26} color={colors['fg-accent']} strokeWidth={1.6} /></View>
+        style={({ pressed }) => ({ flex: 1, minWidth: 0, minHeight: desk ? 44 : 64, flexDirection: desk ? 'row' : 'column', justifyContent: 'center', alignItems: 'center', gap: desk ? 5 : 8, paddingVertical: 4,
+          ...(desk ? { borderRadius: 999, borderWidth: 1, borderColor: colors['control-edge'], backgroundColor: colors['surface-raised'] } : null), opacity: pressed ? .6 : 1 })}>
+        <View style={desk ? undefined : { width: 65, height: 65, borderRadius: 22, overflow: 'hidden', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: selected ? colors['fg-accent'] : aurora.glassEdge }}>
+          {!desk ? <GradientFill radius={22} soft /> : null}
+          <View><Glyph name={{ eat: 'food', bars: 'drink', routes: 'route', events: 'ticket' }[category]} size={desk ? 15 : 26} color={desk ? colors['pill-ink'] : colors['fg-accent']} strokeWidth={1.6} /></View>
         </View>
-        <Text numberOfLines={1} className="font-dm-medium" style={{ fontSize: 13, lineHeight: 17, color: selected ? colors.fg : colors['fg-muted'] }}>{HOME_LEDGERS[category].title}</Text>
+        <Text numberOfLines={1} className="font-dm-medium" style={{ fontSize: desk ? 12 : 13, lineHeight: 17, color: desk || selected ? colors.fg : colors['fg-muted'] }}>{HOME_LEDGERS[category].title}</Text>
         {selected ? <View testID={`category-selected-${category}`} style={{ position: 'absolute', bottom: 0, width: 22, height: 3, borderRadius: 2, overflow: 'hidden' }}><GradientFill radius={2} /></View> : null}
       </Pressable>;
     })}
@@ -105,13 +108,13 @@ export function LocalCategoryShelf({ catalog, active, onSelect, tone = 'home' }:
 }
 
 /** Named, source-backed picks as plain text, each led by a pulsing bolt. Only the bolts move. */
-export function HomeTimelyRecommendations({ catalog, now }: { catalog: HomeGuideCatalog; now: Date }) {
+export function HomeTimelyRecommendations({ catalog, now, compact = false }: { catalog: HomeGuideCatalog; now: Date; compact?: boolean }) {
   const router = useRouter(), colors = useThemeColors(), aurora = useAurora(), gutter = useAppGutter(), reduced = useReducedMotionPreference();
   const openOffer = useLocalPerks(s => s.openOffer), recommendations = homeRecommendations(catalog, now);
   const hasPicks = recommendations.length > 0;
   const [pulse] = useState(() => new Animated.Value(0));
   const [appActive, setAppActive] = useState(AppState.currentState !== 'background' && AppState.currentState !== 'inactive');
-  const animating = hasPicks && !reduced && appActive;
+  const animating = hasPicks && !compact && !reduced && appActive;
   useEffect(() => {
     const subscription = AppState.addEventListener('change', state => setAppActive(state === 'active'));
     return () => subscription.remove();
@@ -126,10 +129,10 @@ export function HomeTimelyRecommendations({ catalog, now }: { catalog: HomeGuide
     animation.start();
     return () => { animation.stop(); pulse.setValue(0); };
   }, [animating, pulse]));
-  return <View testID="home-timely-recommendations" style={{ minHeight: 44, marginHorizontal: -gutter, flexDirection: 'row', alignItems: 'center', borderTopWidth: 1, borderBottomWidth: 1, borderColor: aurora.rule }}>
-    <Text accessible={false} className="font-dm-bold" style={{ paddingLeft: gutter, paddingRight: 14, fontSize: 10, lineHeight: 14, letterSpacing: 1.6, color: colors['fg-accent'] }}>FRESH</Text>
+  return <View testID="home-timely-recommendations" style={{ minHeight: compact ? 32 : 44, marginHorizontal: compact ? 0 : -gutter, flexDirection: 'row', alignItems: 'center', borderTopWidth: compact ? 0 : 1, borderBottomWidth: compact ? 0 : 1, borderColor: aurora.rule }}>
+    <Text accessible={false} className="font-dm-medium" style={{ paddingLeft: compact ? 0 : gutter, paddingRight: compact ? 9 : 14, fontSize: compact ? 11 : 10, lineHeight: 14, letterSpacing: compact ? .7 : 1.6, color: colors['fg-accent'] }}>FRESH</Text>
     {hasPicks ? <ScrollView horizontal showsHorizontalScrollIndicator={false} nestedScrollEnabled directionalLockEnabled style={{ flex: 1 }}
-      contentContainerStyle={{ alignItems: 'center', gap: 18, paddingRight: gutter }}>
+      contentContainerStyle={{ alignItems: 'center', gap: compact ? 10 : 18, paddingRight: compact ? 0 : gutter }}>
       {recommendations.map((suggestion, index) => {
         const phase = (index * 0.125) % 1, venuePrefix = suggestion.label.startsWith(suggestion.venue + ' · ') ? suggestion.venue : suggestion.label === suggestion.venue ? suggestion.venue : '';
         const rest = venuePrefix ? suggestion.label.slice(venuePrefix.length) : suggestion.label;
@@ -137,10 +140,10 @@ export function HomeTimelyRecommendations({ catalog, now }: { catalog: HomeGuide
           accessibilityLabel={`${suggestion.label}. ${suggestion.basis === 'source-popular' ? 'Popular on the published menu' : 'Recently verified nearby'}`}
           onPress={() => suggestion.offer ? openOffer(suggestion.offer) : router.push(suggestion.href as never)}
           style={({ pressed }) => ({ minHeight: 44, maxWidth: 280, flexDirection: 'row', alignItems: 'center', gap: 7, opacity: pressed ? .6 : 1 })}>
-          <Animated.View testID="home-recommendation-pulse" accessible={false} style={animating ? {
+          {compact ? index > 0 ? <View accessible={false} style={{ width: 3, height: 3, borderRadius: 2, backgroundColor: colors['surface-ribbon'] }} /> : null : <Animated.View testID="home-recommendation-pulse" accessible={false} style={animating ? {
             opacity: pulse.interpolate(pulseRanges(phase, .35)), transform: [{ scale: pulse.interpolate(pulseRanges(phase, .8)) }] } : undefined}>
             <Glyph name="boltFilled" size={12} color={colors['fg-accent']} />
-          </Animated.View>
+          </Animated.View>}
           <Text numberOfLines={1} className="font-dm" style={{ flexShrink: 1, fontSize: 12, lineHeight: 17, color: colors['fg-muted'] }}>
             {venuePrefix ? <Text className="font-dm-medium" style={{ color: colors.fg }}>{venuePrefix}</Text> : null}{rest}
           </Text>

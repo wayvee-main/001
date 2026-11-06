@@ -1,16 +1,17 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 import { CitySearchBar } from '@/components/city-controls';
-import { AuroraLinkRow, AuroraList, SectionRule } from '@/components/aurora';
-import { StubPoster, StubRail, StubTicket } from '@/components/stub-cards';
-import { DaybreakFeature, DaybreakIntro, DaybreakPeriodPicker, type DaybreakPeriod } from '@/components/daybreak';
-import { QuietHomeHeading, QuietHomeOffers, QuietHomeVee } from '@/components/quiet-home';
+import { AuroraEntryRow, AuroraLinkRow, AuroraList, SectionRule } from '@/components/aurora';
+import { CityDeskHomeIntro, CityDeskPoster, CityDeskPosterGrid, CityDeskSection, CityDeskTicket } from '@/components/city-desk';
+import { DaybreakPeriodPicker, type DaybreakPeriod } from '@/components/daybreak';
+import { QuietHomeOffers, QuietHomeVee } from '@/components/quiet-home';
 import { Screen, ScreenScroll } from '@/components/layout';
 import { HomeTimelyRecommendations, LocalCategoryShelf, LocalPerksHeader } from '@/components/local-perks';
+import { EmptyState } from '@/components/ui';
 import { homeCollectionGlyph, homeDiscoveryIdeas } from '@/lib/home-discovery';
 import { metadataParts } from '@/lib/card-presentation';
-import { homeGuideHref, homeIdeaPhoto } from '@/lib/home-guide';
+import { homeGuideKey, homeIdeaPhoto } from '@/lib/home-guide';
 import { homeCollectionPhotos, homeIdeaPhotos, homeIndexPhotos } from '@/lib/home-index-photos';
 import { HOME_LEDGERS } from '@/lib/home-ledger';
 import { eventsLeadNow } from '@/lib/daypart';
@@ -19,72 +20,53 @@ import { hydrateEventsFromBackend } from '@/lib/events-remote';
 import { hydratePlacesFromBackend } from '@/lib/places';
 import { useScoper } from '@/lib/store';
 import { useHomeGuide } from '@/lib/use-home-guide';
+import { useThemeColors } from '@/lib/theme';
 import { hydrateWeatherFromBackend } from '@/lib/weather';
 
 export default function HomeScreen() {
-  const router = useRouter(), { catalog, now, displayCity, refreshRegional } = useHomeGuide();
+  const router = useRouter(), colors = useThemeColors(), { catalog, now, displayCity, refreshRegional } = useHomeGuide();
   const refreshLocation = useScoper(s => s.refreshLocation), [refreshing, setRefreshing] = useState(false);
   const [periodOverride, setPeriodOverride] = useState<DaybreakPeriod | null>(null);
   const period = periodOverride || (eventsLeadNow(now) ? 'evening' : 'day');
   const ideas = homeDiscoveryIdeas(now), tables = perksFeaturedEntries(catalog, 'eat'), bars = perksEntries(catalog, 'bars'), events = perksEntries(catalog, 'events');
   const table = tables.find(entry => homeIndexPhotos(entry, catalog).length && (entry.detailContent?.menu?.items.length || entry.detailContent?.menuDocuments?.length)) || tables.find(entry => homeIndexPhotos(entry, catalog).length) || tables[0];
   const feature = period === 'evening' ? events.find(entry => entry.image) || table || bars[0] : table || perksEntries(catalog, 'routes')[0];
+  const second = (period === 'evening' ? bars : tables).find(entry => !feature || homeGuideKey(entry.kind, entry.id) !== homeGuideKey(feature.kind, feature.id));
+  const picks = [feature, second].filter((entry): entry is NonNullable<typeof entry> => Boolean(entry));
   const onRefresh = async () => {
     setRefreshing(true);
     try { await Promise.all([hydrateEventsFromBackend(true), hydratePlacesFromBackend(true), hydrateWeatherFromBackend(true), refreshLocation(), refreshRegional()]); }
     finally { setRefreshing(false); }
   };
-  return <Screen aurora><ScreenScroll gap={18} clearsTabBar refreshing={refreshing} onRefresh={onRefresh}>
-    <LocalPerksHeader location={false} />
-    <DaybreakIntro city={displayCity} />
-    <View style={{ gap: 14, marginTop: -4 }}>
-      <HomeTimelyRecommendations catalog={catalog} now={now} />
-      <CitySearchBar variant="aurora" testID="home-search" labelTestID="home-search-label" city={displayCity} onPress={() => router.push('/search')} />
-    </View>
-    <LocalCategoryShelf catalog={catalog} />
-    {/* Three ruled zones: now (the period, its pick, the perks it could
-      * sweeten), yours (later tonight, ideas), and browse (collections, then
-      * Vee to close the page for anyone still deciding). */}
-    <View testID="quiet-home-feed" style={{ gap: 30 }}>
-      <View style={{ gap: 16 }}>
+  return <Screen><ScreenScroll gap={18} clearsTabBar refreshing={refreshing} onRefresh={onRefresh}>
+    <LocalPerksHeader appearance="citydesk" />
+    <CityDeskHomeIntro city={displayCity} now={now} />
+    <CitySearchBar variant="citydesk" testID="home-search" labelTestID="home-search-label" city={displayCity} onPress={() => router.push('/search')} />
+    <LocalCategoryShelf appearance="citydesk" catalog={catalog} />
+    <HomeTimelyRecommendations compact catalog={catalog} now={now} />
+    <View testID="quiet-home-feed" style={{ gap: 24 }}>
+      <View style={{ gap: 13 }}>
         <SectionRule spacing={0} testID="home-period-rule" />
-        <DaybreakPeriodPicker value={period} onChange={setPeriodOverride} />
-        {feature ? <View style={{ marginTop: 6 }}><QuietHomeHeading title="Start here" meta={period === 'evening' ? 'Picked for after hours' : 'Picked for the day'} />
-          <DaybreakFeature entry={feature} catalog={catalog} now={now} />
-        </View> : null}
-        <QuietHomeOffers />
+        <Text accessibilityRole="header" className="font-dm-medium" style={{ fontSize: 11, lineHeight: 16, letterSpacing: 1.3, color: colors['fg-muted'] }}>YOUR NEXT STOP</Text>
+        <DaybreakPeriodPicker appearance="citydesk" value={period} onChange={setPeriodOverride} />
+        {picks.length ? <View testID="citydesk-home-picks" style={{ gap: 10 }}>{picks.map(entry => <CityDeskTicket key={homeGuideKey(entry.kind, entry.id)} testID="daybreak-home-row" entry={entry} catalog={catalog} now={now} />)}</View>
+          : <EmptyState compact title="Your next good stop is on the way" message="Try another category or check back as local listings arrive." />}
+        <QuietHomeOffers appearance="citydesk" />
       </View>
-      <View style={{ gap: 28 }}>
-        <SectionRule spacing={0} testID="home-yours-rule" />
-        {bars.length ? <View><QuietHomeHeading title="For later" meta={`${bars.length} ${bars.length === 1 ? 'bar' : 'bars'}`} onMore={() => router.push(HOME_LEDGERS.bars.href)} />
-          <StubRail testID="home-later-list">{bars.slice(0, 6).map(entry => {
-            const kind = entry.caption.split(' · ')[0], place = entry.facts.find(fact => fact.glyph === 'pin')?.value, hours = entry.facts.find(fact => fact.glyph === 'clock')?.value;
-            return <StubTicket key={entry.kind + ':' + entry.id} testID="daybreak-home-row" lead={{ kind: 'thumb' }} title={entry.name} caption={hours || kind}
-              pills={[{ text: kind, glyph: 'drink' }, ...(place ? [{ text: place, glyph: 'pin' }] : [])]}
-              photo={{ candidates: homeIndexPhotos(entry, catalog), glyph: entry.glyph, label: `${entry.name} photo unavailable` }}
-              onPress={() => router.push(homeGuideHref(entry) as never)} accessibilityLabel={[entry.name, entry.caption, hours].filter(Boolean).join('. ')} />;
-          })}</StubRail>
-        </View> : null}
-        <View><QuietHomeHeading title="For you" meta={`${ideas.length} ${ideas.length === 1 ? 'idea' : 'ideas'}`} onMore={() => router.push('/home/ideas')} />
-          <AuroraList testID="quiet-home-ideas">{ideas.map((idea, index) => <AuroraLinkRow key={idea.id} testID={`home-idea-${idea.id}`} divider={index > 0} title={idea.title} glyph={idea.glyph}
-            image={homeIdeaPhoto(idea, catalog)} photos={homeIdeaPhotos(idea, catalog)} meta={metadataParts(idea.detail).slice(0, 2).join(' · ')}
-            accessibilityLabel={`${idea.title}. ${idea.detail}`} onPress={() => router.push(idea.href as never)} />)}</AuroraList>
-        </View>
-      </View>
-      <View style={{ gap: 24 }}>
-        <SectionRule spacing={0} testID="home-browse-rule" />
-        {catalog.collections.length ? <View><QuietHomeHeading title="Collections" meta={`${catalog.collections.length} to browse`} onMore={() => router.push('/home/collections')} />
-          <StubRail testID="quiet-home-collections">{catalog.collections.map(collection => {
-            const glyph = homeCollectionGlyph(collection.id), count = collection.items.length;
-            return <StubPoster key={collection.id} testID={`home-collection-${collection.id}`} title={collection.title} caption={collection.description}
-              pills={[{ text: `${count} ${count === 1 ? 'pick' : 'picks'}`, glyph }, ...(collection.eyebrow ? [{ text: collection.eyebrow.charAt(0) + collection.eyebrow.slice(1).toLowerCase() }] : [])]}
-              photo={{ uri: collection.coverImage || undefined, candidates: homeCollectionPhotos(collection.id, catalog), glyph, label: `${collection.title} photo unavailable` }}
-              accessibilityLabel={`${collection.title}. ${count} picks. ${collection.subtitle}`}
-              onPress={() => router.push(`/home/collection?id=${encodeURIComponent(collection.id)}` as never)} />;
-          })}</StubRail>
-        </View> : null}
-        <QuietHomeVee />
-      </View>
+      <CityDeskSection title="For you" onMore={() => router.push('/home/ideas')}>
+        <AuroraList compact testID="quiet-home-ideas">{ideas.map((idea, index) => <AuroraLinkRow compact key={idea.id} testID={`home-idea-${idea.id}`} divider={index > 0} title={idea.title} glyph={idea.glyph}
+          image={homeIdeaPhoto(idea, catalog)} photos={homeIdeaPhotos(idea, catalog)} meta={metadataParts(idea.detail).slice(0, 2).join(' · ')}
+          accessibilityLabel={`${idea.title}. ${idea.detail}`} onPress={() => router.push(idea.href as never)} />)}</AuroraList>
+      </CityDeskSection>
+      {bars.length ? <CityDeskSection title="For later" onMore={() => router.push(HOME_LEDGERS.bars.href)}>
+        <AuroraList compact testID="home-later-list">{bars.slice(0, 3).map((entry, index) => <AuroraEntryRow compact key={homeGuideKey(entry.kind, entry.id)} testID="home-later-row" entry={entry} divider={index > 0} catalog={catalog} now={now} />)}</AuroraList>
+      </CityDeskSection> : null}
+      {catalog.collections.length ? <CityDeskSection title="Collections" onMore={() => router.push('/home/collections')}>
+        <CityDeskPosterGrid>{width => catalog.collections.slice(0, 4).map(collection => <CityDeskPoster key={collection.id} width={width} title={collection.title} caption={collection.description}
+          count={collection.items.length} glyph={homeCollectionGlyph(collection.id)} photos={homeCollectionPhotos(collection.id, catalog)}
+          onPress={() => router.push(`/home/collection?id=${encodeURIComponent(collection.id)}` as never)} />)}</CityDeskPosterGrid>
+      </CityDeskSection> : null}
+      <QuietHomeVee appearance="citydesk" />
     </View>
   </ScreenScroll></Screen>;
 }

@@ -162,9 +162,9 @@ export function DiscoverChapter({ family, label, children }: { family: DiscoverF
   </View>;
 }
 
-export function DiscoverRows({ entries, catalog, now, meta, testID = 'discover-row' }: { entries: HomeGuideEntry[]; catalog: HomeGuideCatalog; now: Date; meta?: Record<string, string>; testID?: string }) {
+export function DiscoverRows({ entries, catalog, now, meta, compact, testID = 'discover-row' }: { entries: HomeGuideEntry[]; catalog: HomeGuideCatalog; now: Date; meta?: Record<string, string>; compact?: boolean; testID?: string }) {
   if (!entries.length) return null;
-  return <AuroraList testID={`${testID}-list`}>{entries.map((entry, index) => <AuroraEntryRow key={entry.kind + ':' + entry.id} testID={testID} divider={index > 0} entry={entry} catalog={catalog} now={now} trailing={meta?.[entry.id]} />)}</AuroraList>;
+  return <AuroraList compact={compact} testID={`${testID}-list`}>{entries.map((entry, index) => <AuroraEntryRow key={entry.kind + ':' + entry.id} testID={testID} divider={index > 0} compact={compact} entry={entry} catalog={catalog} now={now} trailing={meta?.[entry.id]} />)}</AuroraList>;
 }
 
 /** Discover's lead category per family; falls back to the family's largest. */

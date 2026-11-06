@@ -97,15 +97,16 @@ function Pills({ pills }: { pills?: readonly StubPill[] }) {
 }
 
 /** Short and wide: stub, perforation, words — and the photo on the right when the stub is a date or a value. */
-export function StubTicket({ lead, title, tags, caption, accent, pills, photo, width = 292, onPress, accessibilityLabel, testID }: {
+export function StubTicket({ lead, title, tags, caption, accent, pills, photo, width = 292, appearance, onPress, accessibilityLabel, testID }: {
   lead: StubLead; title: string; tags?: readonly StubTag[]; caption?: string; accent?: string; pills?: readonly StubPill[]; photo?: StubPhoto;
-  width?: number | 'full'; onPress: () => void; accessibilityLabel: string; testID?: string;
+  width?: number | 'full'; appearance?: 'citydesk'; onPress: () => void; accessibilityLabel: string; testID?: string;
 }) {
-  const colors = useThemeColors(), card = useAuroraCard();
-  const sidePhoto = lead.kind !== 'thumb' && photo && (photo.uri || photo.candidates?.length);
+  const colors = useThemeColors(), card = useAuroraCard(appearance);
+  const desk = appearance === 'citydesk';
+  const sidePhoto = !desk && lead.kind !== 'thumb' && photo && (photo.uri || photo.candidates?.length);
   return <Pressable testID={testID} accessibilityRole="button" accessibilityLabel={accessibilityLabel} onPress={onPress}
     style={({ pressed }) => ({ ...card, width: width === 'full' ? undefined : width, alignSelf: width === 'full' ? 'stretch' : undefined, minHeight: 84, borderRadius: 18, overflow: 'hidden', flexDirection: 'row', alignItems: 'stretch', opacity: pressed ? .86 : 1 } as ViewStyle)}>
-    <View accessible={false} style={{ width: lead.kind === 'thumb' ? 76 : 72, alignItems: 'center', justifyContent: 'center', paddingVertical: 10 }}><Lead lead={lead} photo={photo} /></View>
+    <View accessible={false} style={{ width: lead.kind === 'thumb' ? 76 : 72, alignItems: 'center', justifyContent: 'center', paddingVertical: 10, backgroundColor: desk ? colors['surface-poster'] : undefined }}><Lead lead={lead} photo={photo} /></View>
     <Perforation vertical />
     <View style={{ flex: 1, minWidth: 0, paddingLeft: 13, paddingRight: 10, paddingVertical: 10, justifyContent: 'center', gap: 2 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>

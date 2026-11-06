@@ -14,25 +14,26 @@ export const SEARCH_BAR_HEIGHT = 49;
 /** Home and Discover share the two-line launcher. */
 export const AURORA_SEARCH_HEIGHT = 64;
 export function CitySearchBar({city,testID,labelTestID,inputTestID,inputLabel,placeholder,value='',onChangeText,onPress,onSubmit,autoFocus=false,inputRef,variant='default'}: {
-  city:string;testID:string;labelTestID?:string;inputLabel?:string;value?:string;variant?:'default'|'aurora';
+  city:string;testID:string;labelTestID?:string;inputLabel?:string;value?:string;variant?:'default'|'aurora'|'citydesk';
   inputTestID?:string;placeholder?:string;autoFocus?:boolean;inputRef?:Ref<TextInput>;
   onChangeText?:(text:string)=>void;onPress?:()=>void;onSubmit?:(query:string)=>void;
 }) {
-  const colors=useThemeColors(),control=useControlSurface(),card=useAuroraCard(),now=useNow();
+  const colors=useThemeColors(),control=useControlSurface(),card=useAuroraCard(variant==='citydesk'?'citydesk':undefined),now=useNow();
   const label=placeholder || `Search ${/^san francisco$/i.test(city)?'SF':city}`;
   // Home and Discover launcher: a two-line white pill that opens Search, where the
   // scope filters live, so the filter circle belongs to the same control.
-  if(variant==='aurora'&&onPress){
+  if((variant==='aurora'||variant==='citydesk')&&onPress){
+    const desk=variant==='citydesk';
     const daypart=currentDaypart(now),area=`Anywhere in ${city} · ${daypart==='evening'||daypart==='lateNight'?'Tonight':'Today'}`;
     return <TouchableOpacity testID={testID} accessibilityRole="button" accessibilityLabel={`${inputLabel || label}. ${area}. Filters on the next screen`} onPress={onPress} activeOpacity={.78}
-      style={[card,{height:AURORA_SEARCH_HEIGHT,width:'100%',borderRadius:999,flexDirection:'row',alignItems:'center',gap:14,paddingLeft:22,paddingRight:10}]}>
-      <Glyph name="search" size={21} color={colors.fg} strokeWidth={2} />
+      style={[card,{height:AURORA_SEARCH_HEIGHT,width:'100%',borderRadius:desk?17:999,flexDirection:'row',alignItems:'center',gap:desk?10:14,paddingLeft:desk?16:22,paddingRight:10}]}>
+      <Glyph name="search" size={desk?19:21} color={colors.fg} strokeWidth={1.8} />
       <View style={{flex:1,minWidth:0}}>
-        <Text testID={labelTestID} numberOfLines={1} className="font-dm-medium text-ink" style={{fontSize:16,lineHeight:21}}>{value || label}</Text>
-        <Text testID={`${testID}-area`} numberOfLines={1} className="font-dm" style={{fontSize:13,lineHeight:18,color:colors['fg-muted']}}>{area}</Text>
+        <Text testID={labelTestID} numberOfLines={1} className="font-dm-medium text-ink" style={{fontSize:desk?15:16,lineHeight:21}}>{value || label}</Text>
+        <Text testID={`${testID}-area`} numberOfLines={1} className="font-dm" style={{fontSize:desk?11:13,lineHeight:18,color:colors['fg-muted']}}>{area}</Text>
       </View>
-      <View testID={`${testID}-filters`} style={{width:44,height:44,borderRadius:22,borderWidth:1,borderColor:colors['control-edge'],alignItems:'center',justifyContent:'center'}}>
-        <Glyph name="filter" size={19} color={colors.fg} strokeWidth={1.8} />
+      <View testID={`${testID}-filters`} style={{width:desk?36:44,height:desk?36:44,borderRadius:22,borderWidth:desk?0:1,borderColor:colors['control-edge'],backgroundColor:desk?colors['surface-sunk']:undefined,alignItems:'center',justifyContent:'center'}}>
+        <Glyph name="filter" size={desk?16:19} color={colors.fg} strokeWidth={1.8} />
       </View>
     </TouchableOpacity>;
   }
