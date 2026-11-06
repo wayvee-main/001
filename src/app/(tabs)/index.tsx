@@ -7,7 +7,7 @@ import { CityDeskHomeIntro, CityDeskPoster, CityDeskPosterGrid, CityDeskSection,
 import { DaybreakPeriodPicker, type DaybreakPeriod } from '@/components/daybreak';
 import { QuietHomeOffers, QuietHomeVee } from '@/components/quiet-home';
 import { Screen, ScreenScroll } from '@/components/layout';
-import { HomeTimelyRecommendations, LocalCategoryShelf, LocalPerksHeader } from '@/components/local-perks';
+import { HomeTimelyRecommendations, LocalPerksHeader } from '@/components/local-perks';
 import { EmptyState } from '@/components/ui';
 import { homeCollectionGlyph, homeDiscoveryIdeas } from '@/lib/home-discovery';
 import { metadataParts } from '@/lib/card-presentation';
@@ -42,7 +42,6 @@ export default function HomeScreen() {
     <LocalPerksHeader appearance="citydesk" location={false} subline={<CityDeskWeather city={displayCity} />} />
     <CityDeskHomeIntro now={now} />
     <CitySearchBar variant="citydesk" testID="home-search" labelTestID="home-search-label" city={displayCity} onPress={() => router.push('/search')} />
-    <LocalCategoryShelf appearance="citydesk" catalog={catalog} />
     <HomeTimelyRecommendations compact catalog={catalog} now={now} />
     <View testID="quiet-home-feed" style={{ gap: 24 }}>
       <View style={{ gap: 13 }}>

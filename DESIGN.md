@@ -22,7 +22,7 @@ Shared City Desk compositions live in `src/components/city-desk.tsx`.
   64px, 17px corners, a single location-specific label and an inset filter well. Both open the real Search
   screen. Existing secondary search inputs keep their current behavior.
 - **Home:** one short, time-of-day headline on a single line, actual weather
-  when available under the wordmark; search; four compact glyph/category pills; Fresh
+  when available under the wordmark; search; Fresh
   source-backed recommendations. A ruled “Your next stop” section has the
   By day / After hours control, up to two full-width tickets, then the slim
   Local perks ribbon. For you and For later use compact calm lists.
