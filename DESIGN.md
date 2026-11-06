@@ -1,10 +1,90 @@
 # Wayvee design system
 
-The approved **Aurora** system is the current UI contract for the four tab
-screens and the tab bar. Earlier iteration notes, including Daybreak, are
-historical; this section takes precedence wherever they differ. Screens not yet
-restyled (detail pages, sheets, Offers, Evening, Search) inherit Aurora's palette
-from the tokens and keep their Daybreak layouts until they are revisited.
+The approved **Aurora** system is the current UI contract, refined by the
+**Mist / Stub cards** round below, which takes precedence wherever the older
+sections differ. Earlier iteration notes, including Daybreak, are historical.
+Wayvee covers San Francisco and the whole Bay, not one city: copy says "the Bay"
+unless it names the guest's own city.
+
+## Current approval — Mist, stub cards and the Bay onboarding
+
+**Mist light theme.** Light mode is cool lavender-white, not warm paper: `bg`
+`#F8F8FD`, ink `#1B1A26`, muted ink `#56556F`, sunk wells `#EEEEF7`, tints
+`#EEEBFA`, and a fainter, cooler glow (gold, periwinkle, violet). Dark is
+unchanged. Metadata pills use the `pill-ink` role (violet on Mist, the readable
+orange in dark). All values live in `src/lib/tokens.ts`; `npm run tokens:contrast`
+checks them, including `pill-ink on accent-tint`.
+
+**Section headings** are Fraunces Medium Italic (`HEADING_FONT`,
+`headingStyle()` in `src/lib/typography.ts`): 21–23px on Home, Discover, You and
+detail pages, 29px SemiBold Italic for Discover chapters. Page titles and
+headlines stay Outfit bold; a headline's one accent word may be Fraunces italic in
+the `text` gradient ("The whole *Bay.*", "Welcome *back.*"). Never italic inside
+illustrations.
+
+**Stub cards** (`src/components/stub-cards.tsx`) are the one card family for
+scrolling rows and lists:
+- **Ticket** (`StubTicket`, 84px tall, 292px in a rail or full width in a stack):
+  a stub, a dashed perforation with notches, then name, one caption and up to two
+  pills. The stub (`src/lib/stub-cards.ts`) is a **calendar tile only for a real
+  date** (`dateLead`, read in Pacific time) or a **published weekly series**
+  (`weeklyLead`: EVERY / Mon / WEEKLY, never a guessed date). Deals, happy hours
+  and route stops get a **value** stub instead ($2 OYSTERS, 3–6 PM, All DAY only
+  on the day an all-day happy hour names, % OFF, 1 START … FINISH); everything else
+  shows its own photo, or its icon. Today / Partner tags follow the deal rules.
+- **Poster** (`StubPoster`, 196px wide): an 88px photo, name and caption, a dashed
+  seam, then Framed-style pills. Used for Collections, Rooms worth knowing, On the
+  bill, Before the show and More routes.
+- `StubRail` scrolls horizontally to the screen edge; `StubStack` lists vertically
+  with 10px gaps. Smaller photos elsewhere: Discover category posters 120px
+  (110 narrow), browse tiles 84px, Home's Start here photo 136px.
+
+**Home** order: header → Fresh row → search → category tiles → three ruled
+zones. *Now*: By day / After hours (the selected pill gradient-filled), Start
+here, the offers ribbon. *Yours*: For later as a ticket rail, For you as a calm
+list. *Browse*: Collections as a poster rail, then the Vee ribbon ("Still
+deciding? Let Vee connect the dots.") to close the page. Headings carry a count
+("4 bars") and *See all*. The **Fresh row** is a full-bleed hairline row with a
+FRESH label and 12px non-italic picks; the four **category tiles** are 65px soft
+gradient wells with a 26px accent glyph and a hairline below them. No spiral.
+
+**Detail and secondary pages** use the same cards: Go out (*On stage* date
+tickets, *Rooms worth knowing* posters), Deals grouped Today / Happy hours &
+offers / Partner offers, a venue's *Coming up* tickets and *Before the show*
+posters, an event's *On the bill* posters and *The room*, collections (places by
+walk time, then *Then the show* for a venue's collection), crawl stops numbered
+start to finish with *More routes*, and Tonight.
+
+**Onboarding** (`src/components/arrival-sequence.tsx`, art in
+`src/components/onboarding-art.tsx`):
+1. Splash: the Vee mark, "Wayvee", "The Bay, minus the guesswork."
+2. Four story cards, swipeable, each a bold headline with one italic gradient
+   word, one line under it, and line art in the Bay map's language (dotted
+   gradient lines, haloed dots, plain Outfit labels, soft orb light): *The whole
+   Bay* (eight cities at their real positions), *Every date, checked* (a week
+   line: Eli's Blue Mondays, Bonobo at the Fox Sat, Nov 14), *Deals that are
+   actually on* (Bocanova's $2 oysters, 3–6 PM, daily), *Then, let Vee* (Dinner
+   Calavera → The show Fox Theater → Nightcap Night Heron). Every name in the art
+   is catalog data. *Sign in* sits top right on the first three.
+3. The way in, on the Vee card: Continue with Google, Sign up with email, or
+   Explore first. Auth is Google and email/password only.
+4. Location, asked in context before the system prompt ("Mind if Vee *tags
+   along?*"; Share location / Not now). Foreground only.
+5. **Quick setup** rises as a sheet over the real Home, which is blurred (Android
+   and web, via the style `filter`; iOS gets the veil alone) and inert: "Using your
+   location · {nearest launched city}" — or *Where in the Bay?* city chips when
+   location was declined — then *Here for* (A visit / Work / I live here), *Into*
+   (six interests), and *Preferences*: a **Walk up to** slider (5, 10, 15, 20, 30
+   min or Any; the value rides above the thumb) and *Plan around* chips. *Show me
+   the Bay* stores every answer shown; *Skip* stores none.
+The walk budget only sorts; it never hides a place.
+
+**Account screens** share `AuthForm`: Create your *account.*, Welcome *back.*
+(with *Forgot password?*), Forgot your *password?* → Check your *inbox.* (Back to
+sign in / Resend link). The reset email opens **Set a new *password.*** at
+`/auth/reset` (`wayvee://auth/reset` on a phone), which waits for the link's
+session and shows an expired-link state otherwise. Supabase's redirect allow-list
+must include both reset URLs.
 
 ## Discover — Category posters
 
