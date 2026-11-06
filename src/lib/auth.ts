@@ -72,6 +72,7 @@ function authMessage(message: string): string {
   if (normalized.includes('user already registered')) return 'An account already exists for that email.';
   if (normalized.includes('anonymous sign-ins are disabled')) return 'Guest access has not been enabled in the Wayvee backend.';
   if (normalized.includes('rate limit')) return 'Too many attempts. Wait a moment and try again.';
+  if (normalized.includes('should be different from the old password')) return 'Choose a password you haven’t used here before.';
   return message || 'We could not complete that request. Please try again.';
 }
 
@@ -146,6 +147,27 @@ export async function createAccount(name: string, email: string, password: strin
   if (!data.session) return { session: null, needsEmailVerification: true };
   await deleteStoredItem(LOCAL_GUEST_KEY);
   return { session: sessionFor(data.session), needsEmailVerification: false };
+}
+
+/** Where a password-reset email sends the guest back: the Set a new password screen. */
+function resetRedirectUrl(): string {
+  if (Platform.OS === 'web' && typeof window !== 'undefined') return new URL('/auth/reset', window.location.origin).toString();
+  return Linking.createURL('auth/reset');
+}
+
+/** Emails a reset link. Supabase answers the same whether or not the address
+ * has an account, so this never reveals who is signed up. */
+export async function requestPasswordReset(email: string): Promise<void> {
+  if (!isSupabaseConfigured) throw new AuthConfigurationError();
+  const { error } = await requireSupabase().auth.resetPasswordForEmail(email.trim().toLowerCase(), { redirectTo: resetRedirectUrl() });
+  if (error) throw new Error(authMessage(error.message));
+}
+
+/** Sets a new password for the session the reset link opened. */
+export async function updatePassword(password: string): Promise<void> {
+  if (!isSupabaseConfigured) throw new AuthConfigurationError();
+  const { error } = await requireSupabase().auth.updateUser({ password });
+  if (error) throw new Error(authMessage(error.message));
 }
 
 export async function signInWithGoogle(): Promise<WayveeSession | null> {

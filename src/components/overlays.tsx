@@ -22,10 +22,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Calendar, type DateData } from 'react-native-calendars';
 
 import { Field } from '@/components/onboarding';
-import { WayveeWordmark } from '@/components/wayvee-wordmark';
 import { RaisedTouchable, RaisedView } from '@/components/raised-surface';
 import { ChevronRight, GoogleLogo, OptionPill } from '@/components/ui';
-import { isAccountAuthConfigured } from '@/lib/auth';
+import { isAccountAuthConfigured, requestPasswordReset } from '@/lib/auth';
+import { GradientFill, GradientText, IconBadge } from '@/components/aurora';
+import { VeeMark } from '@/components/vee-mark';
+import { useAurora } from '@/lib/aurora';
+import { HEADING_FONT } from '@/lib/typography';
 import { buildPlan, mergeRefineRequest, resolveAskNow } from '@/lib/concierge/adapter';
 import { requestConciergeRequest } from '@/lib/concierge/client';
 import { applyFreshness, readSyncStatus } from '@/lib/concierge/freshness';
@@ -412,27 +415,69 @@ function AuthSheet() {
   );
 }
 
+type AuthMode = 'sign-in' | 'create' | 'forgot' | 'sent';
+
+const AUTH_TITLES: Record<AuthMode, { main: string; accent: string; sub: string }> = {
+  'sign-in': { main: 'Welcome ', accent: 'back.', sub: 'Your saves, plans and taste, on every device.' },
+  create: { main: 'Create your ', accent: 'account.', sub: 'Keep your saves, plans and taste profile synced.' },
+  forgot: { main: 'Forgot your ', accent: 'password?', sub: 'We’ll email you a link to reset it.' },
+  sent: { main: 'Check your ', accent: 'inbox.', sub: '' },
+};
+
+/** Bold Outfit with one italic Fraunces word in the gradient — the onboarding headline style. */
+export function AuthHeadline({ main, accent, sub, page = false }: { main: string; accent: string; sub?: string; page?: boolean }) {
+  return (
+    <View>
+      {page ? <View style={{ marginBottom: 16 }}><VeeMark size={40} /></View> : null}
+      <Text accessibilityRole="header" className="font-dm-bold text-ink" style={{ fontSize: page ? 34 : 27, lineHeight: page ? 39 : 32, letterSpacing: -1 }}>
+        {main}<Text style={{ fontFamily: HEADING_FONT }}><GradientText text={accent} /></Text>
+      </Text>
+      {sub ? <Text className="mt-1.5 font-dm text-label text-taupe">{sub}</Text> : null}
+    </View>
+  );
+}
+
+function AuthTitle({ mode, email, page }: { mode: AuthMode; email: string; page: boolean }) {
+  const title = AUTH_TITLES[mode];
+  return <AuthHeadline main={title.main} accent={title.accent} page={page}
+    sub={mode === 'sent' ? `We sent a reset link to ${email.trim().toLowerCase()}.` : title.sub} />;
+}
+
+/** The gradient call to action shared by every auth step. */
+export function AuthPrimary({ label, busy, disabled, onPress }: { label: string; busy: boolean; disabled: boolean; onPress: () => void }) {
+  const aurora = useAurora();
+  return (
+    <TouchableOpacity accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ disabled }} disabled={disabled} activeOpacity={0.82} onPress={onPress}
+      style={{ marginTop: 18, height: 52, borderRadius: 26, overflow: 'hidden', alignItems: 'center', justifyContent: 'center', opacity: disabled ? 0.6 : 1 }}>
+      <GradientFill radius={26} />
+      {busy ? <ActivityIndicator color={aurora.onFill} /> : <Text className="font-dm-bold" style={{ fontSize: 15, lineHeight: 20, color: aurora.onFill }}>{label}</Text>}
+    </TouchableOpacity>
+  );
+}
+
 /** The actual sign-in/create-account form — everything AuthSheet renders
- * except the modal chrome, so a full-screen context (the arrival sequence)
- * can reuse the exact same fields, copy and validation instead of
- * duplicating them. `onAuthenticated` fires once a session lands, however
- * the caller wants to react (close a sheet, advance a screen). */
+ * except the modal chrome, so a full-screen context (onboarding) can reuse the
+ * exact same fields, copy and validation instead of duplicating them.
+ * `onAuthenticated` fires once a session lands, however the caller wants to
+ * react (close a sheet, advance a screen). Forgot password stays inside the
+ * form: request a link, then "Check your inbox"; the link opens /auth/reset. */
 export function AuthForm({
   onAuthenticated,
   titleVariant = 'sheet',
+  initialMode = 'sign-in',
 }: {
   onAuthenticated?: () => void;
-  /** 'page' matches the arrival sequence's larger step-title treatment (Fraunces-medium
-   * 21px + a short one-line description) instead of the compact bottom-sheet title. */
+  /** 'page' is the full-screen treatment (onboarding): the Vee mark and a larger headline. */
   titleVariant?: 'sheet' | 'page';
+  initialMode?: 'sign-in' | 'create';
 }) {
   const { authError, clearAuthError, register, session, signIn, signInWithGoogle } = useScoper();
   const colors = useThemeColors();
-  const [mode, setMode] = useState<'sign-in' | 'create'>('sign-in');
+  const [mode, setMode] = useState<AuthMode>(initialMode);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [busyAction, setBusyAction] = useState<'email' | 'google' | null>(null);
+  const [busyAction, setBusyAction] = useState<'email' | 'google' | 'reset' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -442,14 +487,13 @@ export function AuthForm({
   }, [session]);
 
   const busy = busyAction !== null;
-  const submitLabel = mode === 'sign-in' ? 'Sign in' : 'Create account';
-
-  const switchMode = () => {
-    setMode((current) => (current === 'sign-in' ? 'create' : 'sign-in'));
+  const goTo = (next: AuthMode) => {
+    setMode(next);
     setError(null);
     clearAuthError();
-    setSuccess(null);
+    if (next !== 'sign-in') setSuccess(null);
   };
+  const emailValid = () => /^\S+@\S+\.\S+$/.test(email.trim());
 
   const submit = async () => {
     setError(null);
@@ -463,7 +507,7 @@ export function AuthForm({
       setError('Keep your name to 80 characters or fewer.');
       return;
     }
-    if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
+    if (!emailValid()) {
       setError('Enter a valid email address.');
       return;
     }
@@ -489,6 +533,24 @@ export function AuthForm({
     }
   };
 
+  const sendReset = async () => {
+    setError(null);
+    clearAuthError();
+    if (!emailValid()) {
+      setError('Enter the email you signed up with.');
+      return;
+    }
+    setBusyAction('reset');
+    try {
+      await requestPasswordReset(email);
+      setMode('sent');
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'The reset link could not be sent. Please try again.');
+    } finally {
+      setBusyAction(null);
+    }
+  };
+
   const googleAccess = async () => {
     setError(null);
     clearAuthError();
@@ -503,90 +565,89 @@ export function AuthForm({
     }
   };
 
+  const link = (question: string, action: string, onPress: () => void) => (
+    <TouchableOpacity accessibilityRole="button" accessibilityState={{ disabled: busy }} disabled={busy} activeOpacity={0.7} onPress={onPress} className="mt-2 items-center py-2">
+      <Text className="font-dm text-label text-taupe">{question ? `${question} ` : ''}<Text className="font-dm-bold text-peach">{action}</Text></Text>
+    </TouchableOpacity>
+  );
+
+  const message = error || authError ? (
+    <View className="mt-3 rounded-control border border-edge-card border-b-edge-card-bottom bg-coral-50 px-3.5 py-2.5">
+      <Text accessibilityLiveRegion="polite" className="font-dm text-[12px] leading-[17px] text-peach">{error || authError}</Text>
+    </View>
+  ) : success ? (
+    <View className="mt-3 rounded-control border border-edge-card border-b-edge-card-bottom bg-sage px-3.5 py-2.5">
+      <Text accessibilityLiveRegion="polite" className="font-dm text-[12px] leading-[17px] text-pine">{success}</Text>
+    </View>
+  ) : null;
+
   return (
     <>
-      {titleVariant === 'page' ? (
-        <View className="mb-4">
-          <WayveeWordmark size={26} />
-          <Text className="mt-6 font-fraunces-medium text-[21px] text-rust">
-            {mode === 'sign-in' ? 'Sign in' : 'Create account'}
-          </Text>
-          <Text className="mt-1 font-dm text-[13px] text-taupe">Syncs your saves and plans everywhere.</Text>
-        </View>
+      <AuthTitle mode={mode} email={email} page={titleVariant === 'page'} />
+
+      {mode === 'sent' ? (
+        <>
+          <View accessible={false} style={{ marginTop: 22, alignSelf: 'center' }}><IconBadge glyph="mail" size={72} iconSize={30} /></View>
+          <TouchableOpacity accessibilityRole="button" activeOpacity={0.8} onPress={() => goTo('sign-in')}
+            className="mt-6 h-[52px] items-center justify-center rounded-full border border-edge-card bg-surface">
+            <Text className="font-dm-medium text-[15px] text-ink">Back to sign in</Text>
+          </TouchableOpacity>
+          {link('', 'Resend link', sendReset)}
+        </>
+      ) : mode === 'forgot' ? (
+        <>
+          <View className="mt-5"><Field label="Email" value={email} onChangeText={setEmail} placeholder="you@example.com" autoComplete="email" maxLength={254} /></View>
+          {message}
+          <AuthPrimary label="Send reset link" busy={busyAction === 'reset'} disabled={busy} onPress={sendReset} />
+          {link('Remembered it?', 'Sign in', () => goTo('sign-in'))}
+        </>
       ) : (
-        <SheetTitle
-          title={mode === 'sign-in' ? 'Sign in to Wayvee' : 'Create your Wayvee'}
-          sub="Keep your saves, plans, and taste profile synced to your account."
-        />
+        <>
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityState={{ disabled: busy }}
+            disabled={busy}
+            activeOpacity={0.75}
+            onPress={googleAccess}
+            className={`mt-5 h-[52px] flex-row items-center justify-center gap-x-2.5 rounded-full border border-edge-card border-b-edge-card-bottom bg-surface ${busy ? 'opacity-60' : ''}`}>
+            {busyAction === 'google' ? <ActivityIndicator color={colors.fg} /> : <GoogleLogo size={17} />}
+            <Text className="font-dm-medium text-[14.5px] text-ink">Continue with Google</Text>
+          </TouchableOpacity>
+
+          <View className="my-3.5 flex-row items-center gap-x-3">
+            <View className="h-px flex-1 bg-sand" />
+            <Text className="font-dm text-meta text-taupe">or use email</Text>
+            <View className="h-px flex-1 bg-sand" />
+          </View>
+
+          <View className="gap-y-3">
+            {mode === 'create' ? (
+              <Field label="Name" value={name} onChangeText={setName} placeholder="Your name" autoCapitalize="words" autoComplete="name" maxLength={80} />
+            ) : null}
+            <Field label="Email" value={email} onChangeText={setEmail} placeholder="you@example.com" autoComplete="email" maxLength={254} />
+            <Field
+              label="Password"
+              value={password}
+              onChangeText={setPassword}
+              placeholder="8+ characters"
+              secureTextEntry
+              autoComplete={mode === 'create' ? 'new-password' : 'password'}
+              maxLength={128}
+            />
+          </View>
+          {mode === 'sign-in' ? (
+            <TouchableOpacity testID="auth-forgot-password" accessibilityRole="button" disabled={busy} activeOpacity={0.7} onPress={() => goTo('forgot')} hitSlop={8} className="mt-2 self-end py-1">
+              <Text className="font-dm-bold text-[13px] text-peach">Forgot password?</Text>
+            </TouchableOpacity>
+          ) : null}
+
+          {message}
+
+          <AuthPrimary label={mode === 'sign-in' ? 'Sign in' : 'Create account'} busy={busyAction === 'email'} disabled={busy} onPress={submit} />
+
+          {mode === 'sign-in' ? link('New here?', 'Create account', () => goTo('create')) : link('Already have an account?', 'Sign in', () => goTo('sign-in'))}
+        </>
       )}
-
-      <TouchableOpacity
-        accessibilityRole="button"
-        accessibilityState={{ disabled: busy }}
-        disabled={busy}
-        activeOpacity={0.75}
-        onPress={googleAccess}
-        className={`mt-4 h-[48px] flex-row items-center justify-center gap-x-2.5 rounded-full border border-edge-card border-b-edge-card-bottom bg-cream ${busy ? 'opacity-60' : ''} shadow-soft-light dark:shadow-soft-dark`}>
-        {busyAction === 'google' ? <ActivityIndicator color={colors.fg} /> : <GoogleLogo size={17} />}
-        <Text className="font-dm-medium text-[13.5px] text-ink">Continue with Google</Text>
-      </TouchableOpacity>
-
-      <View className="my-3.5 flex-row items-center gap-x-3">
-        <View className="h-px flex-1 bg-sand" />
-        <Text className="font-dm text-meta text-taupe">or use email</Text>
-        <View className="h-px flex-1 bg-sand" />
-      </View>
-
-      <View className="gap-y-3">
-        {mode === 'create' ? (
-          <Field label="Name" value={name} onChangeText={setName} placeholder="Your name" autoCapitalize="words" autoComplete="name" maxLength={80} />
-        ) : null}
-        <Field label="Email" value={email} onChangeText={setEmail} placeholder="you@example.com" autoComplete="email" maxLength={254} />
-        <Field
-          label="Password"
-          value={password}
-          onChangeText={setPassword}
-          placeholder="8+ characters"
-          secureTextEntry
-          autoComplete={mode === 'create' ? 'new-password' : 'password'}
-          maxLength={128}
-        />
-      </View>
-
-      {error || authError ? (
-        <View className="mt-3 rounded-control border border-edge-card border-b-edge-card-bottom bg-coral-50 px-3.5 py-2.5 shadow-soft-light dark:shadow-soft-dark">
-          <Text accessibilityLiveRegion="polite" className="font-dm text-[12px] leading-[17px] text-peach">{error || authError}</Text>
-        </View>
-      ) : null}
-
-      {success ? (
-        <View className="mt-3 rounded-control border border-edge-card border-b-edge-card-bottom bg-sage px-3.5 py-2.5">
-          <Text accessibilityLiveRegion="polite" className="font-dm text-[12px] leading-[17px] text-pine">{success}</Text>
-        </View>
-      ) : null}
-
-      <TouchableOpacity
-        accessibilityRole="button"
-        accessibilityState={{ disabled: busy }}
-        disabled={busy}
-        activeOpacity={0.82}
-        onPress={submit}
-        className={`mt-4 h-[48px] items-center justify-center rounded-full bg-ember shadow-soft-light dark:shadow-soft-dark ${busy ? 'opacity-60' : ''} border border-edge-card border-b-edge-card-bottom`}>
-        {busyAction === 'email' ? <ActivityIndicator color={colors['on-accent']} /> : <Text className="font-dm-bold text-[14px] text-on-accent">{submitLabel}</Text>}
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        accessibilityRole="button"
-        accessibilityState={{ disabled: busy }}
-        disabled={busy}
-        activeOpacity={0.7}
-        onPress={switchMode}
-        className="mt-2 items-center py-2">
-        <Text className="font-dm text-label text-taupe">
-          {mode === 'sign-in' ? 'New here? ' : 'Already have an account? '}
-          <Text className="font-dm-bold text-peach">{mode === 'sign-in' ? 'Create account' : 'Sign in'}</Text>
-        </Text>
-      </TouchableOpacity>
 
       {!isAccountAuthConfigured ? (
         <Text className="mb-2 text-center font-dm text-[11.5px] leading-[16px] text-taupe">

@@ -1,4 +1,5 @@
 import {
+  IconMail,
   IconAdjustmentsHorizontal,
   IconArrowLeft,
   IconArrowRight,
@@ -101,6 +102,7 @@ const GLYPHS: Record<string, TablerIcon> = {
   calendar: IconCalendar,
   car: IconCar,
   check: IconCheck,
+  mail: IconMail,
   chevron: IconChevronRight,
   chevronLeft: IconChevronLeft,
   clock: IconClock,
